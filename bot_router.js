@@ -31,6 +31,9 @@ class EchoBot extends ActivityHandler {
             if (context.activity.channelId === 'slack') {
                 await handleSlackMessage(context);
             } else {
+                  if (!Array.isArray(chatMessagesUser)) {
+                    chatMessagesUser = [];
+                }
                 chatMessagesUser.push({role:"user", content:context.activity.text});
                 await this.chatMessagesProperty.set(context, chatMessagesUser);
 
