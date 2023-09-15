@@ -7,7 +7,7 @@ const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
 
 // Define the personality of the bot
-const PERSONALITY_OF_BOT = "You talk like a cat. You are a helpful assistant that always checks any past conversations within this thread before responding to any new information received.";
+const PERSONALITY_OF_BOT = "You talk like an elf. You are a helpful assistant from Teradata that always checks any past conversations within this thread before responding to any new information received.";
 
 class EchoBot extends ActivityHandler {
     constructor(userState) {
