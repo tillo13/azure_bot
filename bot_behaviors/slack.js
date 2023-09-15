@@ -20,11 +20,14 @@ async function handleSlackMessage(context, assistantResponse) {
 
         // Try to send as thread reply in Slack
         try {
-            replyActivity.conversation = context.activity.conversation;
-            replyActivity.conversation.id += ":" + context.activity.channelData.SlackMessage.event.ts;
-        } catch (error) {
-            console.error("An error occurred while trying to reply in thread", error);
-        }
+          replyActivity.conversation = context.activity.conversation;
+          // check if thread ts is in the conversation id already
+          if (!replyActivity.conversation.id.includes(context.activity.channelData.SlackMessage.event.ts)) {
+              replyActivity.conversation.id += ":" + context.activity.channelData.SlackMessage.event.ts;
+          }
+      } catch (error) {
+          console.error("An error occurred while trying to reply in thread", error);
+      }
 
         await context.sendActivity(replyActivity);
     } else {
