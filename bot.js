@@ -14,7 +14,7 @@ async function chatCompletion(chatText){
     { role: "system", content: "You are a helpful assistant. You will talk like a skeptic." },
     { role: "user", content: chatText }
   ];
-
+  
   console.log(`Sending request to OpenAI API with the following parameters:
     Endpoint: ${endpoint}
     Deployment Id: ${deploymentId}
@@ -38,9 +38,16 @@ class EchoBot extends ActivityHandler {
         super();
         // See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
         this.onMessage(async (context, next) => {
-            const response = await chatCompletion(context.activity.text);
-            const replyText = `GPT 3.5: ${response}`;
-            await context.sendActivity(MessageFactory.text(replyText, replyText));
+            try {
+                if (context.activity.channelId === "slack") {
+                    context.activity.conversation.id = context.activity.conversation.id + context.activity.id;
+                }
+                const response = await chatCompletion(context.activity.text);
+                const replyText = `GPT 3.5: ${response}`;
+                await context.sendActivity(MessageFactory.text(replyText, replyText));
+            } catch (error) {
+                console.error(`Error when determining channel and modifying conversation ID: ${error}`);
+            }
             // By calling next() you ensure that the next BotHandler is run.
             await next();
         });
