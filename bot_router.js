@@ -26,25 +26,35 @@ class EchoBot extends ActivityHandler {
         });
         
         this.onMessage(async (context, next) => {
-            // Retrieve the conversation
-            let chatMessagesUser = await this.chatMessagesProperty.get(context, []);
-    
-            chatMessagesUser.push({role:"user", content:context.activity.text});
-            await this.chatMessagesProperty.set(context, chatMessagesUser);
-    
-            // Check the channel Id to differentiate between Slack and other platforms.
-            if (context.activity.channelId === 'slack') {
-                await handleSlackMessage(context);
-            } else {
-                // Run the bot's normal logic for other platforms.
-                const response = await chatCompletion(chatMessagesUser, "You are a helpful assistant. You will talk like a child.");
-                await context.sendActivity(MessageFactory.text(`default_router: ${response}`));
-                chatMessagesUser.push({role:"assistant", content:response});
-                await this.chatMessagesProperty.set(context, chatMessagesUser);
-            }
-    
-            await next();
-        });
+          // Retrieve the conversation
+          let chatMessagesUser = await this.chatMessagesProperty.get(context, []);
+          chatMessagesUser.push({role:"user", content:context.activity.text});
+          
+          // Get chat response
+          let chatResponse = await chatCompletion(chatMessagesUser, "You are a helpful assistant. You will talk like a child.");
+          
+          // Check requery
+          if(chatResponse.requery){
+              const requeryNotice = "Let me check our past conversations, one moment...";
+              // Notify the user that the bot is checking past conversation before sending the response of requery
+              await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
+              // Re-fetch the response after requery
+              chatResponse = await chatCompletion(chatMessagesUser, "You are a helpful assistant. You will talk like a child.");
+          }
+          
+          // Save bot's response
+          chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
+          await this.chatMessagesProperty.set(context, chatMessagesUser);
+          
+          // Check the channel Id to differentiate between Slack and other platforms.
+          if (context.activity.channelId === 'slack') {
+              await handleSlackMessage(context);
+          } else {
+              await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
+          }
+          
+          await next();
+      });
     }
 
     //Override the ActivityHandler.run() method to save state changes after the bot logic completes.
