@@ -34,11 +34,11 @@ async function chatCompletion(chatTexts, roleMessage) {
    `);
 
    try {
-      let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
-      
-      // Check if requery is necessary
+    let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
 
-    if (shouldRequery(result.choices[0].message.content)) {
+    let requeryStatus = shouldRequery(result.choices[0].message.content);
+
+    if (requeryStatus) {
         // Replace the last assistant message with a new system message
         for (let i = chatMessages.length - 1; i >= 0; i--) {
             if (chatMessages[i].role === "assistant") {
@@ -46,18 +46,21 @@ async function chatCompletion(chatTexts, roleMessage) {
                 break;
             }
         }
-        // Retry the request
         result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
     }
-   
-      console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);  
+ 
+    console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);  
+  
+    return {
+      'assistantResponse': result.choices[0].message.content,
+      'requery': requeryStatus
+    };
 
-      return result.choices[0].message.content;
-   } 
-   catch (error) {
-      console.error("An error occurred while interacting with OpenAI API", error);
-      throw error;
-   }
+ } 
+ catch (error) {
+    console.error("An error occurred while interacting with OpenAI API", error);
+    throw error;
+ }
 }
 
 module.exports = chatCompletion;
