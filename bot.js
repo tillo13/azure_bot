@@ -4,72 +4,77 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 
-const CONVERSATION_STATE = 'conversationStateProperty';
+async function chatCompletion(chatText){
+  const endpoint = process.env.OPENAI_API_BASE_URL;
+  const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
 
-async function chatCompletion(chatText) {
-    const endpoint = process.env.OPENAI_API_BASE_URL;
-    const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
+  const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
 
-    const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
-
-    const messages = chatText;
-
-    console.log(`Sending request to OpenAI API with the following parameters: Endpoint: ${endpoint} Deployment Id: ${deploymentId} Messages: ${JSON.stringify(messages)}`);
-
-    try {
-        const result = await client.getChatCompletions(deploymentId, messages, { maxTokens: 128 });
-
-        console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);
-
-        return result.choices[0].message.content;
-    } catch (error) {
-        console.error("An error occurred while interacting with OpenAI API", error);
-        throw error;
-    }
-}
-
-class EchoBot extends ActivityHandler {
+  const messages = [
+    { role: "system", content: "You are a helpful assistant. You will talk like a skeptic." },
+    { role: "user", content: chatText }
+  ];
+  
+  class EchoBot extends ActivityHandler {
     constructor(userState) {
         super();
-        // Create a new state property accessor.
+        // Create two new state property accessors.
+        this.welcomedUserProperty = userState.createProperty(WELCOMED_USER);
         this.conversationStateProperty = userState.createProperty(CONVERSATION_STATE);
-
-        this.userState = userState;
 
         this.onMessage(async (context, next) => {
             let conversationState = await this.conversationStateProperty.get(context, []);
-            if (context.activity.channelId === "slack") {
+            if(context.activity.channelId === "slack") {
                 conversationState.push({ role: "user", content: context.activity.text });
-                const response = await chatCompletion(conversationState);
+                const chatText = MessageFactory.text(conversationState.map(msg => msg.content).join('. '));
+                const response = await chatCompletion(chatText);
                 conversationState.push({ role: "bot", content: response });
+  console.log(`Sending request to OpenAI API with the following parameters:
+    Endpoint: ${endpoint}
+    Deployment Id: ${deploymentId}
+    Messages: ${JSON.stringify(messages)}
+  `);
 
-                // Create the reply
-                const replyActivity = MessageFactory.text(`GPT 3.5: ${response}`);
+  try {
+    const result = await client.getChatCompletions(deploymentId, messages, { maxTokens: 128 });
 
-                // Try to send as thread reply if message comes from Slack
-                try {
-                    // Copy the conversation object from original message
-                    replyActivity.conversation = context.activity.conversation;
+    console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);
+  
+    return result.choices[0].message.content;
+  } catch (error) {
+    console.error("An error occurred while interacting with OpenAI API", error);
+    throw error;
+  }
+}
 
-                    // Append the ID of the parent message to post our message as reply. This makes the reply appear
-                    // as a thread reply in Slack, but only has effect in a Slack environment.
-                    replyActivity.conversation.id += ":" + context.activity.channelData.SlackMessage.event.ts;
-                } catch (error) {
-                    console.error("An error occurred while trying to reply in thread", error);
-                }
-
-                await context.sendActivity(replyActivity);
-            } else {
-                const response = await chatCompletion([{ role: "system", content: "You are a helpful assistant."}, { role: "user", content: context.activity.text }]);
-                await context.sendActivity(MessageFactory.text(`GPT 3.5: ${response}`, `GPT 3.5: ${response}`));
-            }
-
-            await this.conversationStateProperty.set(context, conversationState);
-            await this.userState.saveChanges(context);
-
-            // By calling next() you ensure that the next BotHandler is run.
-            await next();
-        });
+class EchoBot extends ActivityHandler {
+    constructor() {
+        super();
+        // See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
+        this.onMessage(async (context, next) => {
+          const response = await chatCompletion(context.activity.text);
+      
+          // Create the reply
+          const replyActivity = MessageFactory.text(`GPT 3.5: ${response}`);
+      
+          // Try to send as thread reply if message comes from Slack
+          try {
+              if (context.activity.channelId === "slack") {
+                  // Copy the conversation object from original message
+                  replyActivity.conversation = context.activity.conversation;
+      
+                  // Append the ID of the parent message to post our message as reply. This makes the reply appear
+                  // as a thread reply in Slack, but only has effect in a Slack environment.
+                  replyActivity.conversation.id += ":" + context.activity.channelData.SlackMessage.event.ts;
+              }
+          } catch (error) {
+              console.error("An error occurred while trying to reply in thread", error);
+          }
+      
+          await context.sendActivity(replyActivity);
+          // By calling next() you ensure that the next BotHandler is run.
+          await next();
+      });
 
         this.onMembersAdded(async (context, next) => {
             const membersAdded = context.activity.membersAdded;
