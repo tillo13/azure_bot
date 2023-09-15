@@ -11,7 +11,7 @@ async function chatCompletion(chatText){
   const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
 
   const messages = [
-    { role: "system", content: "You are a helpful assistant. You will talk like a cat." },
+    { role: "system", content: "You are a helpful assistant. You will talk like a banjo." },
     { role: "user", content: chatText }
   ];
   
