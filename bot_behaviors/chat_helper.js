@@ -1,6 +1,6 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 
-function shouldRequery(responseContent) {
+function shouldRequery(response) {
     let patterns = [
         "as an ai",
         "access to personal information",
@@ -11,9 +11,10 @@ function shouldRequery(responseContent) {
         // More patterns...
     ];
 
+    let shouldRequery = patterns.some(pattern => response.toLowerCase().includes(pattern));
     return {
         'assistantContent': responseContent,
-        'requery': patterns.some(pattern => responseContent.toLowerCase().includes(pattern))
+        'requery': patterns.some(pattern => messageContent.toLowerCase().includes(pattern))
     };
 }
 
@@ -26,6 +27,16 @@ async function chatCompletion(chatTexts, roleMessage) {
     // Ensure chatMessages is an array
     let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
 
+    //check if requery necessary
+    if (response.requery) {
+        // Remove system message from the start of the conversation
+        chatMessages.shift();
+        // Add last message from assistant instead of original system message
+        chatMessages.unshift({ role: "system", content: "Let me check our past conversations, one moment..."});
+        // Retry the request
+        result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 400 });
+    }
+    }
     // Check if the system message has already been added
     if(chatMessages.length === 0 || (chatMessages[0] && chatMessages[0].role !== "system")){
     // Add system message as the first message in the conversation
@@ -40,19 +51,23 @@ async function chatCompletion(chatTexts, roleMessage) {
 
    try {
       let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 400 });
-      
-      let response = shouldRequery(result.choices[0].message.content);
-      
-      if(response.requery) {
+   
+      let requery;  // Create a flag to record if requery is necessary
+      if(shouldRequery(result.choices[0].message.content)) {
+         requery = true;
          // Remove system message from the start of the conversation
          chatMessages.shift();
-         // Add last message from assistant instead of original system message
-         chatMessages.unshift({ role: "system", content: response.assistantContent});
+         // Add system message as the first message in the conversation
+         chatMessages.unshift({ role: "system", content: roleMessage });
          // Retry the request
-         result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
+         result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 400 });
+      }
+      else {
+         requery = false;
       }
    
-      console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);
+      console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);  
+
       return { 'assistantResponse': result.choices[0].message.content, 'requery': response.requery };
 
    } 
