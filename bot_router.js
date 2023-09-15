@@ -2,18 +2,19 @@ const { ActivityHandler, MessageFactory } = require('botbuilder');
 const handleSlackMessage = require('./bot_behaviors/slack');
 const chatCompletion = require('./bot_behaviors/chat_helper');
 
+// Welcomed User property name
 const WELCOMED_USER = 'welcomedUserProperty';
-const SLACK_CHAT_MESSAGES = 'slackChatMessagesProperty';
-const SLACK_CHAT_THREAD_HISTORY = 'slackChatThreadHistoryProperty';  // New thread history property
+const CHAT_MESSAGES = 'chatMessagesProperty';
 
-const SLACK_PERSONALITY_OF_BOT = "You talk like an elf. You are a helpful assistant from Teradata that always checks any past conversations within this thread before responding to any new information received.";
+// Define the personality of the bot
+const PERSONALITY_OF_BOT = "You talk like an elf. You are a helpful assistant from Teradata that always checks any past conversations within this thread before responding to any new information received.";
 
 class EchoBot extends ActivityHandler {
     constructor(userState) {
         super();
+        // Creates a new user property accessor.
         this.welcomedUserProperty = userState.createProperty(WELCOMED_USER);
-        this.slackChatMessagesProperty = userState.createProperty(SLACK_CHAT_MESSAGES);
-        this.slackChatThreadHistory = userState.createProperty(SLACK_CHAT_THREAD_HISTORY);
+        this.chatMessagesProperty = userState.createProperty(CHAT_MESSAGES);
         this.userState = userState;
 
         this.onMembersAdded(async (context, next) => {
@@ -28,29 +29,24 @@ class EchoBot extends ActivityHandler {
         });
         
         this.onMessage(async (context, next) => {
-          let slackChatMessagesUser = await this.slackChatMessagesProperty.get(context, []);
-          let slackThreadId = context.activity.conversation.id + (context.activity.channelData.thread_ts ? ':' + context.activity.channelData.thread_ts : '');
-          let slackThreadHistory = await this.slackChatThreadHistory.get(context, {id: slackThreadId, messages: []});
-      
-          slackChatMessagesUser.push({role:"user", content:context.activity.text});
-          slackThreadHistory.messages.push({role:"user", content:context.activity.text});
-      
-          let slackChatResponse = await chatCompletion(slackChatMessagesUser, SLACK_PERSONALITY_OF_BOT);
-      
-          if(slackChatResponse.requery){
+          let chatMessagesUser = await this.chatMessagesProperty.get(context, []);
+          chatMessagesUser.push({role:"user", content:context.activity.text});
+
+          let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+
+          if(chatResponse.requery){
               const requeryNotice = "Let me check our past conversations, one moment...";
               await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-              slackChatResponse = await chatCompletion(slackThreadHistory.messages, SLACK_PERSONALITY_OF_BOT);
+              chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
           }
-      
+
+          chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
+          await this.chatMessagesProperty.set(context, chatMessagesUser);
+
           if (context.activity.channelId === 'slack') {
-              // Check if 'thread_ts' exists. If so, this is a reply to a thread. 
-              const thread_ts = context.activity.channelData.thread_ts;
-              await handleSlackMessage(context, this.slackChatMessagesProperty, this.slackChatThreadHistory, slackChatResponse.assistantResponse, thread_ts);
+              await handleSlackMessage(context);
           } else {
-              await context.sendActivity(MessageFactory.text(`default_router: ${slackChatResponse.assistantResponse}`));
-              slackChatMessagesUser.push({role:"assistant", content: slackChatResponse.assistantResponse});
-              await this.slackChatMessagesProperty.set(context, slackChatMessagesUser);
+              await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
           }
           
           await next();
