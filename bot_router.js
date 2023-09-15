@@ -1,5 +1,5 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
-const handleSlackMessage = require('./bot_behaviors/slack');
+const { handleSlackMessage, handleRequeryNotice } = require('./bot_behaviors/slack');
 const chatCompletion = require('./bot_behaviors/chat_helper');
 
 // Welcomed User property name
@@ -35,9 +35,13 @@ class EchoBot extends ActivityHandler {
           let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
 
           if(chatResponse.requery){
+            if (context.activity.channelId === 'slack') {
+              await handleRequeryNotice(context);
+            } else {
               const requeryNotice = "Let me check our past conversations, one moment...";
               await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-              chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+            }
+            chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
           }
 
           chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
