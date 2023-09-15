@@ -4,17 +4,17 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 
-async function chatCompletion(chatText){
+async function chatCompletion(chatText) {
   const endpoint = process.env.OPENAI_API_BASE_URL;
   const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
 
   const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
 
   const messages = [
-    { role: "system", content: "You are a helpful assistant. You will talk like a fancy lad." },
+    { role: "system", content: "You are a helpful assistant. You will talk like a skeptic." },
     { role: "user", content: chatText }
   ];
-  
+
   console.log(`Sending request to OpenAI API with the following parameters:
     Endpoint: ${endpoint}
     Deployment Id: ${deploymentId}
@@ -36,33 +36,25 @@ async function chatCompletion(chatText){
 class EchoBot extends ActivityHandler {
     constructor() {
         super();
-        // See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
         this.onMessage(async (context, next) => {
-          try { 
-              const response = await chatCompletion(context.activity.text);
-              const replyText = `GPT 3.5: ${response}`;
-              
-              if (context.activity.channelId  === 'slack') {
-                  // The 'replyToId' property corresponds to the thread TS value
-                  const threadTs = context.activity.replyToId;
-                  const activity = MessageFactory.text(replyText, replyText);
-      
-                  activity.channelData = {
-                      slack: {
-                          thread_ts: threadTs
-                      }
-                  };
-                  
-                  await context.sendActivity(activity);
-              } else {
-                  await context.sendActivity(MessageFactory.text(replyText, replyText));
-              }        
-          } catch (error) {
-              console.error(`Failed to send a threaded message: ${error}`);
-          }
-          // By calling next() you ensure that the next BotHandler is run.
-          await next();
-      });
+            try {
+                const response = await chatCompletion(context.activity.text);
+                
+                if (context.activity.channelId  === 'slack') {
+                    // Create the reply, copy the conversation and append for threading
+                    const replyActivity = MessageFactory.text(`GPT 3.5: ${response}`);
+                    replyActivity.conversation = context.activity.conversation;
+                    replyActivity.conversation.id += ':' + context.activity.channelData.SlackMessage.ts;
+                    
+                    await context.sendActivity(replyActivity);
+                } else {
+                    await context.sendActivity(`GPT 3.5: ${response}`);
+                }        
+            } catch (error) {
+                console.error(`Failed to send a threaded message: ${error}`);
+            }
+            await next();
+        });
 
         this.onMembersAdded(async (context, next) => {
             const membersAdded = context.activity.membersAdded;
@@ -72,7 +64,6 @@ class EchoBot extends ActivityHandler {
                     await context.sendActivity(MessageFactory.text(welcomeText, welcomeText));
                 }
             }
-            // By calling next() you ensure that the next BotHandler is run.
             await next();
         });
     }
