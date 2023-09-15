@@ -9,8 +9,8 @@ async function handleSlackMessage(context, slackChatMessagesProperty, slackChatT
   const slackReplyActivity = MessageFactory.text(`slack_chat_path: ${slackChatResponse.assistantResponse}`);
   slackReplyActivity.conversation = context.activity.conversation;
   if (context.activity.replyToId) {
-      slackReplyActivity.conversation.id += ":" + context.activity.channelData.SlackMessage.ts;
-  }
+    slackReplyActivity.conversation.id += ":" + context.activity.channelData.ts;
+}
 
   await context.sendActivity(slackReplyActivity);
 
