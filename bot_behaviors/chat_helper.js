@@ -37,17 +37,18 @@ async function chatCompletion(chatTexts, roleMessage) {
       let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
       
       // Check if requery is necessary
-      if (shouldRequery(result.choices[0].message.content)) {
-          // Replace the last assistant message with a system message
-          for (let i = chatMessages.length - 1; i >= 0; i--) {
-              if (chatMessages[i].role === "assistant") {
+
+    if (shouldRequery(result.choices[0].message.content)) {
+        // Replace the last assistant message with a new system message
+        for (let i = chatMessages.length - 1; i >= 0; i--) {
+            if (chatMessages[i].role === "assistant") {
                 chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..." };
                 break;
-              }
-          }
-          // Retry the request
-          result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
-      }
+            }
+        }
+        // Retry the request
+        result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
+    }
    
       console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);  
 
