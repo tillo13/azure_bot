@@ -29,14 +29,20 @@ async function chatCompletion(chatTexts, roleMessage) {
         response = shouldRequery(chatMessages[chatMessages.length - 2].content)
     }
     //check if requery necessary
+
     if (response.requery) {
-        // Remove system message from the start of the conversation
-        chatMessages.shift();
-        // Add a generic system message
-        chatMessages.unshift({ role: "system", content: "Let me check our past conversations, one moment..."});
+        // Find the last assistant message in the conversation
+        for(let i = chatMessages.length - 1; i >= 0; i--) {
+            if(chatMessages[i].role === 'assistant') {
+                // Replace the assistant's message with a generic system message
+                chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..."};
+                break;
+            }
+        }
         // Retry the request
         let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
         return { 'assistantResponse': result.choices[0].message.content, 'requery': response.requery };
+    }
     }
 
     // Check if the system message has already been added
