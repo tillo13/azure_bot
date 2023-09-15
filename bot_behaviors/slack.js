@@ -12,32 +12,47 @@ function processSlackResponseMessage(assistantResponse) {
 }
 
 async function handleSlackMessage(context, assistantResponse) {
-    // check if the channelId in context is Slack
-    if (context.activity.channelId === 'slack') {
-        // process the assistant response message for Slack
-        let slackMessageResponse = processSlackResponseMessage(assistantResponse);
-        const replyActivity = MessageFactory.text(slackMessageResponse);
+    
+  // check if a thread_ts exists
+  let thread_ts = "";
+  if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
+      thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+  }
 
-        // Try to send as thread reply in Slack
-        try {
+  if(thread_ts === "" && !context.activity.conversation.id.includes(thread_ts)) {
+      // If thread_ts doesn't exist, it means it's the first message to bot.
+      const welcomeMessage = ":wave: You found @bot!  Let us chat.";
+      const welcomeActivity = MessageFactory.text(welcomeMessage);
+
+      await context.sendActivity(welcomeActivity);
+
+      // Now there should be thread_ts in context.activity 
+      thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+  }
+  
+  if (context.activity.channelId === 'slack') {
+      // process the assistant response message for Slack
+
+      let slackMessageResponse = processSlackResponseMessage(assistantResponse);
+      const replyActivity = MessageFactory.text(slackMessageResponse);
+
+      // Try to send as thread reply in Slack
+      try {
           replyActivity.conversation = context.activity.conversation;
-          // check if a thread_ts exists
-          const thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
           
           // verify if thread_ts is already in the conversation id
           if (!replyActivity.conversation.id.includes(thread_ts)) {
               replyActivity.conversation.id += ":" + thread_ts;
-          }
+          }    
       } catch (error) {
-          console.error("An error occurred while trying to reply in thread", error);
+          console.error("An error occured while trying to reply in thread", error);
       }
-
-        await context.sendActivity(replyActivity);
-    } else {
-        // for other channelIds, send the message as it was received
-        const replyActivity = MessageFactory.text(`default_router: ${assistantResponse}`);
-        await context.sendActivity(replyActivity);
-    }
+      await context.sendActivity(replyActivity);
+  } else {
+      // for other channelIds, send the message as it was received
+      const replyActivity = MessageFactory.text(`default_router: ${assistantResponse}`);
+      await context.sendActivity(replyActivity);
+  }
 };
 
 module.exports = { handleSlackMessage, isFromSlack };
