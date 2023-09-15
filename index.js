@@ -1,5 +1,5 @@
-// Import UserState class
 const { UserState } = require('botbuilder');
+const { MemoryStorage } = require('botbuilder');
 const path = require('path');
 const restify = require('restify');
 const dotenv = require('dotenv');
