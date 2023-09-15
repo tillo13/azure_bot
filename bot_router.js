@@ -1,8 +1,6 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+const handleSlackMessage = require('./bot_behaviors/slack');
 
 async function chatCompletion(chatText){
   const endpoint = process.env.OPENAI_API_BASE_URL;
@@ -11,7 +9,7 @@ async function chatCompletion(chatText){
   const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
 
   const messages = [
-    { role: "system", content: "You are a helpful assistant. You will talk like a banjo." },
+    { role: "system", content: "You are a helpful assistant. You will talk like a car salesman." },
     { role: "user", content: chatText }
   ];
   
@@ -38,29 +36,14 @@ class EchoBot extends ActivityHandler {
         super();
         // See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
         this.onMessage(async (context, next) => {
-          const response = await chatCompletion(context.activity.text);
-      
-          // Create the reply
-          const replyActivity = MessageFactory.text(`GPT 3.5: ${response}`);
-      
-          // Try to send as thread reply if message comes from Slack
-          try {
-              if (context.activity.channelId === "slack") {
-                  // Copy the conversation object from original message
-                  replyActivity.conversation = context.activity.conversation;
-      
-                  // Append the ID of the parent message to post our message as reply. This makes the reply appear
-                  // as a thread reply in Slack, but only has effect in a Slack environment.
-                  replyActivity.conversation.id += ":" + context.activity.channelData.SlackMessage.event.ts;
-              }
-          } catch (error) {
-              console.error("An error occurred while trying to reply in thread", error);
+          if (context.activity.channelId === 'slack') {
+            await handleSlackMessage(context);
+          } else {
+            const response = await chatCompletion(context.activity.text);
+            await context.sendActivity(MessageFactory.text(`default_router: ${response}`));
           }
-      
-          await context.sendActivity(replyActivity);
-          // By calling next() you ensure that the next BotHandler is run.
           await next();
-      });
+        });
 
         this.onMembersAdded(async (context, next) => {
             const membersAdded = context.activity.membersAdded;
