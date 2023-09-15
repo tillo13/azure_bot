@@ -4,14 +4,14 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 
-async function chatCompletion(chatText) {
+async function chatCompletion(chatText){
   const endpoint = process.env.OPENAI_API_BASE_URL;
   const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
 
   const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
 
   const messages = [
-    { role: "system", content: "You are a helpful assistant. You will talk like a skeptic." },
+    { role: "system", content: "You are a helpful assistant. You will talk like a mouse." },
     { role: "user", content: chatText }
   ];
 
@@ -36,23 +36,12 @@ async function chatCompletion(chatText) {
 class EchoBot extends ActivityHandler {
     constructor() {
         super();
+        // See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
         this.onMessage(async (context, next) => {
-            try {
-                const response = await chatCompletion(context.activity.text);
-                
-                if (context.activity.channelId  === 'slack') {
-                    // Create the reply, copy the conversation and append for threading
-                    const replyActivity = MessageFactory.text(`GPT 3.5: ${response}`);
-                    replyActivity.conversation = context.activity.conversation;
-                    replyActivity.conversation.id += ':' + context.activity.channelData.SlackMessage.ts;
-                    
-                    await context.sendActivity(replyActivity);
-                } else {
-                    await context.sendActivity(`GPT 3.5: ${response}`);
-                }        
-            } catch (error) {
-                console.error(`Failed to send a threaded message: ${error}`);
-            }
+            const response = await chatCompletion(context.activity.text);
+            const replyText = `GPT 3.5: ${response}`;
+            await context.sendActivity(MessageFactory.text(replyText, replyText));
+            // By calling next() you ensure that the next BotHandler is run.
             await next();
         });
 
@@ -64,6 +53,7 @@ class EchoBot extends ActivityHandler {
                     await context.sendActivity(MessageFactory.text(welcomeText, welcomeText));
                 }
             }
+            // By calling next() you ensure that the next BotHandler is run.
             await next();
         });
     }
