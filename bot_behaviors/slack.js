@@ -6,8 +6,6 @@ function isFromSlack(context) {
   return context.activity.channelId === 'slack';
 }
 
-module.exports.isFromSlack = isFromSlack;
-
 // Function for processing the assistant response message specific to Slack
 function processSlackResponseMessage(assistantResponse) {
     return `slack_chat_path: ${assistantResponse}`;
@@ -20,7 +18,7 @@ async function handleSlackMessage(context, assistantResponse) {
         let slackMessageResponse = processSlackResponseMessage(assistantResponse);
         const replyActivity = MessageFactory.text(slackMessageResponse);
 
-        // try sending the message as a thread reply
+        // Try to send as thread reply in Slack
         try {
             replyActivity.conversation = context.activity.conversation;
             replyActivity.conversation.id += ":" + context.activity.channelData.SlackMessage.event.ts;
@@ -36,4 +34,4 @@ async function handleSlackMessage(context, assistantResponse) {
     }
 };
 
-module.exports = handleSlackMessage;
+module.exports = { handleSlackMessage, isFromSlack };
