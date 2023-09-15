@@ -29,7 +29,7 @@ class EchoBot extends ActivityHandler {
         
         this.onMessage(async (context, next) => {
           let slackChatMessagesUser = await this.slackChatMessagesProperty.get(context, []);
-          let slackThreadId = context.activity.conversation.id + (context.activity.replyToId ? ':' + context.activity.replyToId : '');
+          let slackThreadId = context.activity.conversation.id + (context.activity.channelData.thread_ts ? ':' + context.activity.channelData.thread_ts : '');
           let slackThreadHistory = await this.slackChatThreadHistory.get(context, {id: slackThreadId, messages: []});
       
           slackChatMessagesUser.push({role:"user", content:context.activity.text});
@@ -44,7 +44,9 @@ class EchoBot extends ActivityHandler {
           }
       
           if (context.activity.channelId === 'slack') {
-              await handleSlackMessage(context, this.slackChatMessagesProperty, this.slackChatThreadHistory, slackChatResponse);
+              // Check if 'thread_ts' exists. If so, this is a reply to a thread. 
+              const thread_ts = context.activity.channelData.thread_ts;
+              await handleSlackMessage(context, this.slackChatMessagesProperty, this.slackChatThreadHistory, slackChatResponse.assistantResponse, thread_ts);
           } else {
               await context.sendActivity(MessageFactory.text(`default_router: ${slackChatResponse.assistantResponse}`));
               slackChatMessagesUser.push({role:"assistant", content: slackChatResponse.assistantResponse});
