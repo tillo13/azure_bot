@@ -31,7 +31,7 @@ class EchoBot extends ActivityHandler {
           chatMessagesUser.push({role:"user", content:context.activity.text});
           
           // Get chat response
-          let chatResponse = await chatCompletion(chatMessagesUser, "You are a helpful assistant. You will talk like a child.");
+          let chatResponse = await chatCompletion(chatMessagesUser, "You talk like a cat. You are a helpful assistant that always checks any past conversations within this thread before responding to any new information received.");
           
           // Check requery
           if(chatResponse.requery){
@@ -39,7 +39,7 @@ class EchoBot extends ActivityHandler {
               // Notify the user that the bot is checking past conversation before sending the response of requery
               await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
               // Re-fetch the response after requery
-              chatResponse = await chatCompletion(chatMessagesUser, "You are a helpful assistant. You will talk like a child.");
+              chatResponse = await chatCompletion(chatMessagesUser, "You talk like a cat. You are a helpful assistant that always checks any past conversations within this thread before responding to any new information received..");
           }
           
           // Save bot's response
