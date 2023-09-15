@@ -8,9 +8,12 @@ async function chatCompletion(chatTexts, roleMessage) {
  
     // Ensure chatMessages is an array
     let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
- 
+
+    // Check if the system message has already been added
+    if(chatMessages.length === 0 || (chatMessages[0] && chatMessages[0].role !== "system")){
     // Add system message as the first message in the conversation
     chatMessages.unshift({ role: "system", content: roleMessage });
+    }
 
    console.log(`Sending request to OpenAI API with the following parameters:
       Endpoint: ${endpoint}
