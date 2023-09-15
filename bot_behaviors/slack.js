@@ -1,7 +1,8 @@
 const { MessageFactory } = require('botbuilder');
+const chatCompletion = require('./chat_helper');
 
-async function handleSlackMessage(context){
-  const response = await chatCompletion(context.activity.text);
+async function handleSlackMessage(context) {
+   const response = await chatCompletion(context.activity.text, "You are a helpful assistant. You will talk like a horse.");
 
   // Create the reply
   const replyActivity = MessageFactory.text(`slack_chat_path: ${response}`);

@@ -1,49 +1,23 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
-const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 const handleSlackMessage = require('./bot_behaviors/slack');
-
-async function chatCompletion(chatText){
-  const endpoint = process.env.OPENAI_API_BASE_URL;
-  const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
-
-  const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
-
-  const messages = [
-    { role: "system", content: "You are a helpful assistant. You will talk like a car salesman." },
-    { role: "user", content: chatText }
-  ];
-  
-  console.log(`Sending request to OpenAI API with the following parameters:
-    Endpoint: ${endpoint}
-    Deployment Id: ${deploymentId}
-    Messages: ${JSON.stringify(messages)}
-  `);
-
-  try {
-    const result = await client.getChatCompletions(deploymentId, messages, { maxTokens: 128 });
-
-    console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);
-  
-    return result.choices[0].message.content;
-  } catch (error) {
-    console.error("An error occurred while interacting with OpenAI API", error);
-    throw error;
-  }
-}
+const chatCompletion = require('./bot_behaviors/chat_helper');
 
 class EchoBot extends ActivityHandler {
-    constructor() {
-        super();
-        // See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
-        this.onMessage(async (context, next) => {
-          if (context.activity.channelId === 'slack') {
+   constructor() {
+      super();
+
+      this.onMessage(async (context, next) => {
+         if (context.activity.channelId === 'slack') {
             await handleSlackMessage(context);
-          } else {
-            const response = await chatCompletion(context.activity.text);
+         } 
+         else {
+            // This line calls the chatCompletion function with the text of the
+            // current activity and a standard roleMessage for non-Slack channels
+            const response = await chatCompletion(context.activity.text, "You are a helpful assistant. You will talk like a banjo.");
             await context.sendActivity(MessageFactory.text(`default_router: ${response}`));
-          }
-          await next();
-        });
+         }
+         await next();
+      });
 
         this.onMembersAdded(async (context, next) => {
             const membersAdded = context.activity.membersAdded;
