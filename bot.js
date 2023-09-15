@@ -11,7 +11,7 @@ async function chatCompletion(chatText){
   const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
 
   const messages = [
-    { role: "system", content: "You are a helpful assistant. You will talk like a horse." },
+    { role: "system", content: "You are a helpful assistant. You will talk like a fancy lad." },
     { role: "user", content: chatText }
   ];
   
@@ -38,19 +38,31 @@ class EchoBot extends ActivityHandler {
         super();
         // See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
         this.onMessage(async (context, next) => {
-            try {
-                if (context.activity.channelId === "slack") {
-                    context.activity.conversation.id = context.activity.conversation.id + context.activity.id;
-                }
-                const response = await chatCompletion(context.activity.text);
-                const replyText = `GPT 3.5: ${response}`;
-                await context.sendActivity(MessageFactory.text(replyText, replyText));
-            } catch (error) {
-                console.error(`Error when determining channel and modifying conversation ID: ${error}`);
-            }
-            // By calling next() you ensure that the next BotHandler is run.
-            await next();
-        });
+          try { 
+              const response = await chatCompletion(context.activity.text);
+              const replyText = `GPT 3.5: ${response}`;
+              
+              if (context.activity.channelId  === 'slack') {
+                  // The 'replyToId' property corresponds to the thread TS value
+                  const threadTs = context.activity.replyToId;
+                  const activity = MessageFactory.text(replyText, replyText);
+      
+                  activity.channelData = {
+                      slack: {
+                          thread_ts: threadTs
+                      }
+                  };
+                  
+                  await context.sendActivity(activity);
+              } else {
+                  await context.sendActivity(MessageFactory.text(replyText, replyText));
+              }        
+          } catch (error) {
+              console.error(`Failed to send a threaded message: ${error}`);
+          }
+          // By calling next() you ensure that the next BotHandler is run.
+          await next();
+      });
 
         this.onMembersAdded(async (context, next) => {
             const membersAdded = context.activity.membersAdded;
