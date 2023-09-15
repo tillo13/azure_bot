@@ -1,6 +1,13 @@
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
 
+// check if the message is indeed from slack
+function isFromSlack(context) {
+  return context.activity.channelId === 'slack';
+}
+
+module.exports.isFromSlack = isFromSlack;
+
 // Function for processing the assistant response message specific to Slack
 function processSlackResponseMessage(assistantResponse) {
     return `slack_chat_path: ${assistantResponse}`;

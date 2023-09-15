@@ -1,5 +1,6 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const handleSlackMessage = require('./bot_behaviors/slack');
+const { isFromSlack } = require('./bot_behaviors/slack');
 const chatCompletion = require('./bot_behaviors/chat_helper');
 
 const WELCOMED_USER = 'welcomedUserProperty';
@@ -26,25 +27,28 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
-            let chatMessagesUser = await this.chatMessagesProperty.get(context, []);
-            chatMessagesUser.push({role:"user", content:context.activity.text});
-
-            let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
-
-            if(chatResponse.requery){
-                const requeryNotice = "Let me check our past conversations, one moment...";
-                await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-                chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
-            }
-
-            chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
-            await this.chatMessagesProperty.set(context, chatMessagesUser);
-
-            // pass the chat response to the function handleSlackMessage
-            await handleSlackMessage(context, chatResponse.assistantResponse);
-            
-            await next();
-        });
+          let chatMessagesUser = await this.chatMessagesProperty.get(context, []);
+          chatMessagesUser.push({role:"user", content:context.activity.text});
+      
+          let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+      
+          if(chatResponse.requery){
+              const requeryNotice = "Let me check our past conversations, one moment...";
+              await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
+              chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+          }
+      
+          chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
+          await this.chatMessagesProperty.set(context, chatMessagesUser);
+      
+          if (isFromSlack(context)) {
+              await handleSlackMessage(context, chatResponse.assistantResponse);
+          } else {
+              await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
+          }
+      
+          await next();
+      });
     }
 
     async run(context) {
