@@ -13,6 +13,7 @@ class EchoBot extends ActivityHandler {
          else {
             // This line calls the chatCompletion function with the text of the
             // current activity and a standard roleMessage for non-Slack channels
+            //this is a single-use conversation though, we will add memory next...
             const response = await chatCompletion(context.activity.text, "You are a helpful assistant. You will talk like a banjo.");
             await context.sendActivity(MessageFactory.text(`default_router: ${response}`));
          }
