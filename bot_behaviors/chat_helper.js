@@ -1,6 +1,6 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 
-function shouldRequery(response) {
+function shouldRequery(responseContent) {
     let patterns = [
         "as an ai",
         "access to personal information",
@@ -11,8 +11,10 @@ function shouldRequery(response) {
         // More patterns...
     ];
 
-    let shouldRequery = patterns.some(pattern => response.toLowerCase().includes(pattern));
-    return shouldRequery;
+    return {
+        'assistantContent': responseContent,
+        'requery': patterns.some(pattern => responseContent.toLowerCase().includes(pattern))
+    };
 }
 
 async function chatCompletion(chatTexts, roleMessage) {
@@ -37,25 +39,22 @@ async function chatCompletion(chatTexts, roleMessage) {
    `);
 
    try {
-      let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
-   
-      let requery;  // Create a flag to record if requery is necessary
-      if(shouldRequery(result.choices[0].message.content)) {
-         requery = true;
+      let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 400 });
+      
+      let response = shouldRequery(result.choices[0].message.content);
+      
+      if(response.requery) {
          // Remove system message from the start of the conversation
          chatMessages.shift();
-         // Add system message as the first message in the conversation
-         chatMessages.unshift({ role: "system", content: roleMessage });
+         // Add last message from assistant instead of original system message
+         chatMessages.unshift({ role: "system", content: response.assistantContent});
          // Retry the request
          result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
       }
-      else {
-         requery = false;
-      }
    
       console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);
-  
-      return { assistantResponse: result.choices[0].message.content, requery: requery }; // return both the assistant's message and the requery flag
+      return { 'assistantResponse': result.choices[0].message.content, 'requery': response.requery };
+
    } 
    catch (error) {
       console.error("An error occurred while interacting with OpenAI API", error);
