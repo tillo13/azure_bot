@@ -1,5 +1,18 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 
+// Define the maximum tokens to be used for OpenAI
+const MAX_OPENAI_TOKENS = 400;
+
+function validateOpenAITokens(tokens) {
+    if (tokens <= 0 || tokens > 4096) {
+        console.error('Invalid setting for MAX_OPENAI_TOKENS. It should be between 1 and 4096.');
+        return;
+    }
+    else {
+        return tokens;
+    }
+}
+
 function shouldRequery(responseContent) {
     let patterns = [
         "as an ai",
@@ -18,12 +31,15 @@ async function chatCompletion(chatTexts, roleMessage) {
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
     const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
 
+    // Validate the maximum tokens to be used
+    const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
+    if (!validatedTokens) return;
+
     // Ensure chatMessages is an array
     let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
 
-    // Check if the system message has already been added
+    // Add system message as the first message in the conversation, if not present
     if (chatMessages.length === 0 || (chatMessages[0] && chatMessages[0].role !== "system")) {
-        // Add system message as the first message in the conversation
         chatMessages.unshift({ role: "system", content: roleMessage });
     }
 
@@ -31,22 +47,23 @@ async function chatCompletion(chatTexts, roleMessage) {
       Endpoint: ${endpoint}
       Deployment Id: ${deploymentId}
       Messages: ${JSON.stringify(chatMessages)}
+      Maximum Tokens: ${validatedTokens}
    `);
 
    try {
-    let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
+    let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
 
     let requeryStatus = shouldRequery(result.choices[0].message.content);
 
     if (requeryStatus) {
-        // Replace the last assistant message with a new system message
+        // If required, re-query the API
         for (let i = chatMessages.length - 1; i >= 0; i--) {
             if (chatMessages[i].role === "assistant") {
                 chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..." };
                 break;
             }
         }
-        result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
+        result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
     }
  
     console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);  
@@ -56,11 +73,11 @@ async function chatCompletion(chatTexts, roleMessage) {
       'requery': requeryStatus
     };
 
- } 
- catch (error) {
+  } 
+  catch (error) {
     console.error("An error occurred while interacting with OpenAI API", error);
     throw error;
- }
+  }
 }
 
 module.exports = chatCompletion;
