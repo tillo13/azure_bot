@@ -1,19 +1,6 @@
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
 
-async function handleRequeryNotice(context) {
-  const replyActivity = MessageFactory.text("Let me check our past conversations, one moment...");
-  replyActivity.conversation = context.activity.conversation;
-  
-  try {
-    replyActivity.conversation.id += ":" + context.activity.channelData.SlackMessage.event.ts;
-  } catch (error) {
-    console.error("An error occurred while trying to reply in thread", error);
-  }
-
-  await context.sendActivity(replyActivity);
-};
-
 async function handleSlackMessage(context) {
   const response = await chatCompletion(context.activity.text, "You are a helpful assistant. You will talk like a potato.");
 
@@ -35,7 +22,4 @@ async function handleSlackMessage(context) {
  await context.sendActivity(replyActivity);
 };
 
-module.exports = {
-  handleSlackMessage,
-  handleRequeryNotice
-};
+module.exports = handleSlackMessage;
