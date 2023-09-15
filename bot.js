@@ -11,24 +11,10 @@ async function chatCompletion(chatText){
   const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
 
   const messages = [
-    { role: "system", content: "You are a helpful assistant. You will talk like a skeptic." },
+    { role: "system", content: "You are a helpful assistant. You will talk like a cat." },
     { role: "user", content: chatText }
   ];
   
-  class EchoBot extends ActivityHandler {
-    constructor(userState) {
-        super();
-        // Create two new state property accessors.
-        this.welcomedUserProperty = userState.createProperty(WELCOMED_USER);
-        this.conversationStateProperty = userState.createProperty(CONVERSATION_STATE);
-
-        this.onMessage(async (context, next) => {
-            let conversationState = await this.conversationStateProperty.get(context, []);
-            if(context.activity.channelId === "slack") {
-                conversationState.push({ role: "user", content: context.activity.text });
-                const chatText = MessageFactory.text(conversationState.map(msg => msg.content).join('. '));
-                const response = await chatCompletion(chatText);
-                conversationState.push({ role: "bot", content: response });
   console.log(`Sending request to OpenAI API with the following parameters:
     Endpoint: ${endpoint}
     Deployment Id: ${deploymentId}
