@@ -12,7 +12,7 @@ async function handleSlackMessage(context, responseText) {
     replyActivity.conversation = context.activity.conversation;
    
     // Append the ID of the parent message to post our message as reply.
-    replyActivity.conversation.id += ":" + context.activity.channelData.SlackMessage.event.ts;
+    replyActivity.conversation.id += ":" + context.activity.channelData.SlackMessage.event.thread_ts;
    
   } catch (error) {
     console.error("An error occurred while trying to reply in thread", error);

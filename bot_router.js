@@ -36,13 +36,13 @@ class EchoBot extends ActivityHandler {
         
           if(chatResponse.requery){
               const requeryNotice = "Let me check our past conversations, one moment...";
-              chatMessagesUser.push({role:"assistant", content:requeryNotice});
-              await this.chatMessagesProperty.set(context, chatMessagesUser);
-        
-              // Handle re-query response on Slack
               if (context.activity.channelId === 'slack') {
                   await handleSlackMessage(context, requeryNotice);
+                  chatMessagesUser.push({role:"assistant", content:requeryNotice});
+                  await this.chatMessagesProperty.set(context, chatMessagesUser);
               } else {
+                  chatMessagesUser.push({role:"assistant", content:requeryNotice});
+                  await this.chatMessagesProperty.set(context, chatMessagesUser);
                   await context.sendActivity(MessageFactory.text(requeryNotice));
               }
         
@@ -57,6 +57,7 @@ class EchoBot extends ActivityHandler {
           } else {
               await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
           }
+          
           await next();
         });
     }
