@@ -27,6 +27,9 @@ class EchoBot extends ActivityHandler {
 
         this.onMessage(async (context, next) => {
           let chatMessagesUser = await this.chatMessagesProperty.get(context, []);
+          //print to app log
+          console.log('onMessage - chat messages before update:', chatMessagesUser);
+
           chatMessagesUser.push({role:"user", content:context.activity.text});
       
           let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
@@ -38,21 +41,30 @@ class EchoBot extends ActivityHandler {
           }
       
           chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
+          console.log("chatMessages before saving:", chatMessagesUser);
           await this.chatMessagesProperty.set(context, chatMessagesUser);
+          console.log("chatMessages after saving:", chatMessagesUser);
+
       
           if (isFromSlack(context)) {
               await handleSlackMessage(context, chatResponse.assistantResponse);
           } else {
               await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
           }
-      
+          //print to app log
+          console.log('onMessage - chat messages after update:', chatMessagesUser);
+
           await next();
       });
     }
 
     async run(context) {
         await super.run(context);
+        console.log('Saving state changes');
+
         await this.userState.saveChanges(context);
+        console.log('Saved state changes');
+
     }
 }
 

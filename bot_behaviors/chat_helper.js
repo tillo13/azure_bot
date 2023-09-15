@@ -27,6 +27,9 @@ function shouldRequery(responseContent) {
 }
 
 async function chatCompletion(chatTexts, roleMessage) {
+    //print to app log
+    console.log('chatCompletion', chatTexts);
+
     const endpoint = process.env.OPENAI_API_BASE_URL;
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
     const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
@@ -52,6 +55,8 @@ async function chatCompletion(chatTexts, roleMessage) {
 
    try {
     let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
+    //print to app log
+    console.log('response from OpenAI API:', result);
 
     let requeryStatus = shouldRequery(result.choices[0].message.content);
 
