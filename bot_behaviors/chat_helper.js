@@ -27,18 +27,24 @@ async function chatCompletion(chatTexts, roleMessage) {
     // Ensure chatMessages is an array
     let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
 
+    let response = {'assistantContent': "", 'requery': false};
+    
+    // Check if requery is possible
+    if(chatMessages.length >= 2){
+        response = shouldRequery(chatMessages[chatMessages.length - 2].content)
+    }
+
     //check if requery necessary
-    let response = shouldRequery(chatMessages[chatMessages.length - 2]?.content)
-  
     if (response.requery) {
         // Remove system message from the start of the conversation
         chatMessages.shift();
         // Add a generic system message
         chatMessages.unshift({ role: "system", content: "Let me check our past conversations, one moment..."});
         // Retry the request
-        let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });
+        let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 400 });
       
         return { 'assistantResponse': result.choices[0].message.content, 'requery': response.requery };
+    }
     }
 
     // Check if the system message has already been added
@@ -54,7 +60,7 @@ async function chatCompletion(chatTexts, roleMessage) {
               `);
 
    try {
-      let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 128 });    
+      let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: 400 });    
       console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);  
       return { 'assistantResponse': result.choices[0].message.content, 'requery': response.requery };
    } 
