@@ -31,26 +31,34 @@ class EchoBot extends ActivityHandler {
         this.onMessage(async (context, next) => {
           let chatMessagesUser = await this.chatMessagesProperty.get(context, []);
           chatMessagesUser.push({role:"user", content:context.activity.text});
-
+        
           let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
-
+        
           if(chatResponse.requery){
               const requeryNotice = "Let me check our past conversations, one moment...";
-              await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
+              chatMessagesUser.push({role:"assistant", content:requeryNotice});
+              await this.chatMessagesProperty.set(context, chatMessagesUser);
+        
+              // Handle re-query response on Slack
+              if (context.activity.channelId === 'slack') {
+                  await handleSlackMessage(context, requeryNotice);
+              } else {
+                  await context.sendActivity(MessageFactory.text(requeryNotice));
+              }
+        
               chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
           }
-
+        
           chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
           await this.chatMessagesProperty.set(context, chatMessagesUser);
-
+        
           if (context.activity.channelId === 'slack') {
-              await handleSlackMessage(context);
+              await handleSlackMessage(context, chatResponse.assistantResponse);
           } else {
               await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
           }
-          
           await next();
-      });
+        });
     }
 
     async run(context) {
