@@ -6,6 +6,9 @@ const chatCompletion = require('./bot_behaviors/chat_helper');
 const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
 
+// Define the personality of the bot
+const PERSONALITY_OF_BOT = "You talk like a cat. You are a helpful assistant that always checks any past conversations within this thread before responding to any new information received.";
+
 class EchoBot extends ActivityHandler {
     constructor(userState) {
         super();
@@ -26,27 +29,20 @@ class EchoBot extends ActivityHandler {
         });
         
         this.onMessage(async (context, next) => {
-          // Retrieve the conversation
           let chatMessagesUser = await this.chatMessagesProperty.get(context, []);
           chatMessagesUser.push({role:"user", content:context.activity.text});
-          
-          // Get chat response
-          let chatResponse = await chatCompletion(chatMessagesUser, "You talk like a cat. You are a helpful assistant that always checks any past conversations within this thread before responding to any new information received.");
-          
-          // Check requery
+
+          let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+
           if(chatResponse.requery){
               const requeryNotice = "Let me check our past conversations, one moment...";
-              // Notify the user that the bot is checking past conversation before sending the response of requery
               await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-              // Re-fetch the response after requery
-              chatResponse = await chatCompletion(chatMessagesUser, "You talk like a cat. You are a helpful assistant that always checks any past conversations within this thread before responding to any new information received..");
+              chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
           }
-          
-          // Save bot's response
+
           chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
           await this.chatMessagesProperty.set(context, chatMessagesUser);
-          
-          // Check the channel Id to differentiate between Slack and other platforms.
+
           if (context.activity.channelId === 'slack') {
               await handleSlackMessage(context);
           } else {
@@ -57,10 +53,8 @@ class EchoBot extends ActivityHandler {
       });
     }
 
-    //Override the ActivityHandler.run() method to save state changes after the bot logic completes.
     async run(context) {
         await super.run(context);
-        // Save state changes
         await this.userState.saveChanges(context);
     }
 }
