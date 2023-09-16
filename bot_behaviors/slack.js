@@ -13,31 +13,24 @@ function processSlackResponseMessage(assistantResponse) {
 
 async function handleSlackMessage(context, assistantResponse) {
   if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
-      // Check if a thread_ts exists
       let thread_ts = "";
       if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
           thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
       }
 
-      if(thread_ts === "" && !context.activity.conversation.id.includes(thread_ts)) {
-          // If thread_ts doesn't exist, it means it's the first message to bot.
+      if (context.activity.channelId === 'slack') {
+          // Send welcome message
           const welcomeMessage = "Welcome! Let's start a new thread for our conversation.";
           const welcomeActivity = MessageFactory.text(welcomeMessage);
 
-          await context.sendActivity(welcomeActivity);
+          // Add thread_ts to conversation id
+          welcomeActivity.conversation = context.activity.conversation;
+          if (!welcomeActivity.conversation.id.includes(thread_ts)) {
+              welcomeActivity.conversation.id += ":" + thread_ts;
+          }
 
-          // Now there should be thread_ts in context.activity 
-          thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-      }
-
-        if (context.activity.channelId === 'slack') {
-          // We remove the condition of having no thread or conversation id.
-          const welcomeMessage = "Welcome! Let's start a new thread for our conversation.";
-          const welcomeActivity = MessageFactory.text(welcomeMessage);
-
-          await context.sendActivity(welcomeActivity);
-
-          thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+          // Send welcome message to the thread
+          await context.sendActivity(welcomeActivity); 
 
           // process the assistant response message for Slack
           let slackMessageResponse = processSlackResponseMessage(assistantResponse);
@@ -61,6 +54,6 @@ async function handleSlackMessage(context, assistantResponse) {
       // Log a message
       console.log("\n\n***SLACK.JS: Message is not invoking the bot, ignore for now!***\n\n");
   }
-  };
+};
 
 module.exports = { handleSlackMessage, isFromSlack };
