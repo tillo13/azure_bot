@@ -10,6 +10,41 @@ function processSlackResponseMessage(assistantResponse) {
     return `slack_chat_path: ${assistantResponse}`;
 }
 
+function getBotId(apiToken) {
+  const options = {
+      hostname: 'slack.com',
+      path: '/api/auth.test',
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${apiToken}`
+      }
+  };
+
+  let userId = '';
+
+  return new Promise((resolve, reject) => {
+      const req = https.request(options, res => {
+          res.setEncoding('utf8');
+          res.on('data', chunk => {
+              userId += chunk;
+          });
+
+          res.on('end', () => {
+              userId = JSON.parse(userId).user_id; 
+              resolve(userId);
+          });
+      });
+
+      req.on('error', (e) => {
+          console.error(`problem with request: ${e.message}`);
+          reject(e);
+      });
+
+      req.end();
+  });
+}
+
 async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
   const options = {
     hostname: 'slack.com',
