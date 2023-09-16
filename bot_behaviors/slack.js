@@ -46,6 +46,11 @@ function getBotId(apiToken) {
 }
 
 async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
+  res.on('end', () => {
+    let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
+    let chronologicUserConversation = messages.map(msg => `${msg.ts} ${msg.text}`).join("\n");
+    resolve(chronologicUserConversation);
+  });
   const options = {
     hostname: 'slack.com',
     path: `/api/conversations.replies?channel=${channel_id}&ts=${thread_ts}`,
@@ -87,43 +92,29 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
 let activeThreads = {};
 let botId = ''; // Defined at the top level in the script
 
-async function handleSlackMessage(context, chatMessagesUser, chatResponse, PERSONALITY_OF_BOT, apiToken, channel_id) {
-  // Extract Bot Token from context
-    let apiToken = context.activity.channelData ? context.activity.channelData.ApiToken : "";
+async function handleSlackMessage(context, chatMessagesUser, chatResponse, PERSONALITY_OF_BOT) {
+  if (context.activity.channelData) {
+    // Extract Bot Token, thread timestamp (thread_ts) and channel id from context
+    let apiToken = context.activity.channelData.ApiToken;
+    let thread_ts = context.activity.channelData.SlackMessage.event.thread_ts ||
+                    context.activity.channelData.SlackMessage.event.ts;
+    let channel_id = context.activity.channelData.SlackMessage.event.channel;
+
     // Get botId using the bot token
-    if (apiToken && !botId) { // If apiToken exists and botId doesn't already exist... 
-        botId = await getBotId(apiToken); //... then get botId
-    }
-    console.log('\n\n***SLACK.JS: EXTRACTED BOTID: ', botId);
-
-    let thread_ts = "";
-    if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-        thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+    if (!botId) {
+      botId = await getBotId(apiToken);
     }
 
-    if(context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-        let apiToken = context.activity.channelData.ApiToken;  
-        let channel_id = context.activity.channelData.SlackMessage.event.channel;  
-        await logUserConversation(channel_id, thread_ts, apiToken, botId);
-    }
+    // Log user conversation
+    let loggedUserConversation = await logUserConversation(channel_id, thread_ts, apiToken, botId);
 
-    let isThreadReply = thread_ts && (context.activity.channelData.SlackMessage.event.thread_ts === thread_ts);
-    if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
-        activeThreads[thread_ts] = true;
-    }
-
-    if (!activeThreads[thread_ts]) {
-        console.log("\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT --IGNORING!\n\n", context.activity.text);
-        return;
-    }
-    if (chatResponse.requery){
-      let loggedUserConversation = await logUserConversation(channel_id, thread_ts, apiToken, botId);
-
+    if (chatResponse.requery) {
+      // In case of requery, adjust the conversation history and recall the chat helper function
       chatMessagesUser.push(
         {role: "assistant", content: "What are the data points you've shared with me so far as I cannot answer your question of " + context.activity.text + "?"},
         {role: "user", content: loggedUserConversation}
-      );
-
+      );}
+  
       chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
       let replyActivity = MessageFactory.text(`slack_chat_path: ${chatResponse.assistantResponse}`);
       
