@@ -190,10 +190,9 @@ async function handleSlackMessage(context, assistantResponse) {
             console.log("***SLACK.JS: 'Let me check our past conversations, one moment...' string path found");
           }
 
-          console.log("***SLACK.JS: Does assistantResponse include 'Let me check our past conversations, one moment...'? ", assistantResponse.includes('Let me check our past conversations, one moment...'));
-
-          await logUserConversation(channel_id, thread_ts, apiToken, botId, assistantResponse.toLowerCase().trim().includes('let me check our past conversations, one moment...'));
-
+          console.log("***SLACK.JS: Does assistantResponse.requery signify 'Let me check our past conversations, one moment...' being sent? ", assistantResponse.requery);
+          await logUserConversation(channel_id, thread_ts, apiToken, botId, assistantResponse.requery);
+          
           // try to send as thread reply in Slack
           try {     
               replyActivity.conversation = context.activity.conversation;
