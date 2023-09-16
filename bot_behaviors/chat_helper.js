@@ -53,7 +53,6 @@ async function chatCompletion(chatTexts, roleMessage) {
 
    try {
     let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
-    console.log('response from OpenAI API:', result);
 
     // Only proceed if result and result.choices[0] and result.choices[0].message and result.choices[0].message.content exist 
     if (result && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
