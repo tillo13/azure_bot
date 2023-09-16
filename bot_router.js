@@ -4,15 +4,18 @@ const chatCompletion = require('./bot_behaviors/chat_helper');
 
 const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
+const WELCOME_MESSAGE_SENT = 'welcomeMessageSentProperty';
 
 const PERSONALITY_OF_BOT = "You talk like an old cowboy. You are a helpful assistant from Teradata that always checks any past conversations within this thread before responding to any new information received.";
 
 class EchoBot extends ActivityHandler {
-    constructor(userState) {
-        super();
-        this.welcomedUserProperty = userState.createProperty(WELCOMED_USER);
-        this.chatMessagesProperty = userState.createProperty(CHAT_MESSAGES);
-        this.userState = userState;
+  constructor(userState) {
+      super();
+      this.welcomedUserProperty = userState.createProperty(WELCOMED_USER);
+      this.chatMessagesProperty = userState.createProperty(CHAT_MESSAGES);
+      // added line for handling welcome message state
+      this.welcomeMessageSentProperty = userState.createProperty(WELCOME_MESSAGE_SENT);
+      this.userState = userState;
 
         this.onMembersAdded(async (context, next) => {
             const membersAdded = context.activity.membersAdded;
@@ -27,24 +30,32 @@ class EchoBot extends ActivityHandler {
 
         this.onMessage(async (context, next) => {
           let chatMessagesUser = await this.chatMessagesProperty.get(context, []);
+          let welcomeMessageSent = await this.welcomeMessageSentProperty.get(context, false);
           //print to app log
           console.log('onMessage - chat messages before update:', chatMessagesUser);
-
-          chatMessagesUser.push({role:"user", content:context.activity.text});
       
+          chatMessagesUser.push({role:"user", content:context.activity.text});
+          
           let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+          
+          // Show welcome message before checking for requery message.
+          if (isFromSlack(context) && welcomeMessageSent === false) {
+              // Add logic to send the welcome message here, you can use same logic as in the handleSlackMessage.
+              const welcomeMessage = "Welcome! Let's start a new thread for our conversation.";
+              await context.sendActivity(MessageFactory.text(welcomeMessage, welcomeMessage));
+              await this.welcomeMessageSentProperty.set(context, true);
+          }
       
           if(chatResponse.requery){
               const requeryNotice = "Let me check our past conversations, one moment...";
               await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
               chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
           }
-      
+          
           chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
           console.log("chatMessages before saving:", chatMessagesUser);
           await this.chatMessagesProperty.set(context, chatMessagesUser);
           console.log("chatMessages after saving:", chatMessagesUser);
-
       
           if (isFromSlack(context)) {
               await handleSlackMessage(context, chatResponse.assistantResponse);
@@ -54,7 +65,7 @@ class EchoBot extends ActivityHandler {
           //print to app log
           console.log('onMessage - chat messages after update:', chatMessagesUser);
           console.log("/n/n****channelData: ", JSON.stringify(context.activity.channelData, null, 2));
-
+      
           await next();
       });
     }
