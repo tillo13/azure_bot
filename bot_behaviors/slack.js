@@ -1,4 +1,4 @@
-//2023sept16 1135am working GOLDEN VERSION//
+//2023sept16 442pm testing GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
@@ -61,83 +61,59 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 
   return new Promise((resolve, reject) => {
     const req = https.request(options, res => {
-      // existing logic here
+      res.on('data', d => {
+        responsePayload += d;
+      });
+
+      res.on('end', () => {
+        // Extract the messages from the response
+        let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
+
+        // Format the messages
+        let formattedMessages = "\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***";
+        messages.forEach((msg, idx) => {
+          formattedMessages += `\n${idx + 1}. [${msg.ts}] ${msg.text}`;
+        });
+        formattedMessages += "\n***END OF EXTRAPOLATION***";
+
+        // Call chat.postMessage API
+        let postOptions = {
+          hostname: 'slack.com',
+          path: '/api/chat.postMessage',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Authorization': `Bearer ${apiToken}`
+          }
+        };
+
+        let postReq = https.request(postOptions, res => {
+          res.on('end', () => {
+            console.log('\n****SLACK.JS: Successful postChatHistoryToSlack()');
+            resolve();
+          });
+        });
+
+        postReq.on('error', error => {
+          console.error('\n****SLACK.JS: Error during postChatHistoryToSlack() post request:', error);
+          reject(error);
+        });
+
+        postReq.write(JSON.stringify({
+          channel: channel_id,
+          text: formattedMessages,
+          thread_ts: thread_ts,
+        }));
+
+        postReq.end();
+      });
     });
+
     req.on('error', error => {
       console.error("\n****SLACK.JS: Error in postChatHistoryToSlack(): ", error);
       reject(error);
     });
-    req.end();
-  });
-};
 
-async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
-  const options = {
-    hostname: 'slack.com',
-    path: `/api/conversations.replies?channel=${channel_id}&ts=${thread_ts}`,
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${apiToken}`
-    }
-  };
-
-  let responsePayload = '';
-
-  return new Promise((resolve, reject) => {
-    const req = https.request(options, res => {
-      res.on('data', d => {
-        responsePayload += d;
-    });
-    
-    res.on('end', () => {
-      // Call chat.postMessage API
-      let postOptions = {
-        hostname: 'slack.com',
-        path: '/api/chat.postMessage',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          'Authorization': `Bearer ${apiToken}`
-        }
-      };
-
-      let postReq = https.request(postOptions, res => {
-        res.on('end', () => {
-          console.log('\n****SLACK.JS: Successful postChatHistoryToSlack()');
-          resolve();
-        });
-      });
-
-      postReq.on('error', error => {
-        console.error('\n****SLACK.JS: Error during postChatHistoryToSlack() post request:', error);
-        reject(error);
-      });
-
-      postReq.write(JSON.stringify({
-        channel: channel_id,
-        text: formattedMessages,
-        thread_ts: thread_ts,
-      }));
-
-      postReq.end();
-      // Extract the messages from the response
-      let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
-    
-      console.log("\n****SLACK.JS: Extracted User Messages In postChatHistoryToSlack(): ", messages);
-    
-      // Format the messages
-      let formattedMessages = "\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***";
-      messages.forEach((msg, idx) => {
-        formattedMessages += `\n${idx + 1}. [${msg.ts}] ${msg.text}`;
-      });
-      formattedMessages += "\n***END OF EXTRAPOLATION***";
-        resolve();
-      });
-    });
-    req.on('error', error => {
-      console.error(error);
-      reject(error);
-    });
     req.end();
   });
 };
@@ -172,7 +148,7 @@ async function handleSlackMessage(context, assistantResponse) {
         console.log("\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT --IGNORING!\n\n", context.activity.text);
         return;
     }
-    
+
     if (assistantResponse === 'Let me check our past conversations, one moment...') {
       console.log('\n****SLACK.JS: Detected specific message, posting chat history to slack');
       await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
