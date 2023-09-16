@@ -53,6 +53,7 @@ class EchoBot extends ActivityHandler {
           }
           //print to app log
           console.log('onMessage - chat messages after update:', chatMessagesUser);
+          console.log("/n/n****channelData: ", JSON.stringify(context.activity.channelData, null, 2));
 
           await next();
       });
