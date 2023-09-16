@@ -161,60 +161,61 @@ async function handleSlackMessage(context, chatCompletionRes) {
   let channel_id;
   
   if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-      thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-      channel_id = context.activity.channelData.SlackMessage.event.channel;
+    thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+    channel_id = context.activity.channelData.SlackMessage.event.channel;
   }
-  
-  let shouldPostToSlack = chatCompletionRes.assistantResponse.includes("Let me check our past conversations, one moment...");
+
+  let assistantResponse = chatCompletionRes && chatCompletionRes.assistantResponse ? chatCompletionRes.assistantResponse : "";
+
+  let shouldPostToSlack = assistantResponse.includes("Let me check our past conversations, one moment...");
 
   await logUserConversation(channel_id, thread_ts, apiToken, botId, shouldPostToSlack);
 
   let isThreadReply = thread_ts && (context.activity.channelData.SlackMessage.event.thread_ts === thread_ts);
   if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
-      activeThreads[thread_ts] = true;
+    activeThreads[thread_ts] = true;
   }
 
   if (!activeThreads[thread_ts]) {
-      console.log("\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT --IGNORING!\n\n");
-      return;
+    console.log("\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT --IGNORING!\n\n");
+    return;
   }
 
   console.log(context.activity.text);
   if (context.activity.text && activeThreads[thread_ts]) {
-      if (context.activity.channelId === 'slack' && thread_ts != "") {
-          // process the assistant response message for Slack
-          let slackMessageResponse = processSlackResponseMessage(assistantResponse);
-          const replyActivity = MessageFactory.text(slackMessageResponse);
+    if (context.activity.channelId === 'slack' && thread_ts != "") {
+    // process the assistant response message for Slack
+    let slackMessageResponse = processSlackResponseMessage(assistantResponse);
+    const replyActivity = MessageFactory.text(slackMessageResponse);
 
-          console.log('***SLACK.JS: assistantResponse', assistantResponse);
+    console.log('***SLACK.JS: assistantResponse', assistantResponse);
 
-          if(assistantResponse.includes('Let me check our past conversations, one moment...')) {
-            console.log("\n\n***SLACK.JS: Assistant response received: " + assistantResponse);
+    if(assistantResponse.includes('Let me check our past conversations, one moment...')) {
+        console.log("\n\n***SLACK.JS: Assistant response received: " + assistantResponse);
 
-            console.log("***SLACK.JS: 'Let me check our past conversations, one moment...' string path found");
-          }
-
-          console.log("***SLACK.JS: Does assistantResponse.requery signify 'Let me check our past conversations, one moment...' being sent? ", assistantResponse.requery);
-          await logUserConversation(channel_id, thread_ts, apiToken, botId, assistantResponse.requery);    
-          
-
-          // try to send as thread reply in Slack
-          try {     
-              replyActivity.conversation = context.activity.conversation;
-              // verify if thread_ts is already in the conversation id
-              if (!replyActivity.conversation.id.includes(thread_ts)) {
-                  replyActivity.conversation.id += ":" + thread_ts;
-              }
-              await context.sendActivity(replyActivity);
-          } catch (error) {
-              console.error("An error occurred while trying to reply in thread: ", error);
-          }
-      } else if (thread_ts == "") {
-          console.log("\n\n***SLACK.JS: Can't identify thread, not posting anything.***\n\n");
-      } else {
-          // log a message
-          console.log("\n\n***SLACK.JS: Message is not invoking the bot, ignore for now!***\n\n");
+        console.log("***SLACK.JS: 'Let me check our past conversations, one moment...' string path found");
       }
+
+    console.log("***SLACK.JS: Does assistantResponse.requery signify 'Let me check our past conversations, one moment...' being sent? ", assistantResponse.requery);
+    await logUserConversation(channel_id, thread_ts, apiToken, botId, assistantResponse.requery);    
+
+    // try to send as thread reply in Slack
+    try {     
+        replyActivity.conversation = context.activity.conversation;
+        // verify if thread_ts is already in the conversation id
+        if (!replyActivity.conversation.id.includes(thread_ts)) {
+          replyActivity.conversation.id += ":" + thread_ts;
+        }
+        await context.sendActivity(replyActivity);
+      } catch (error) {
+        console.error("An error occurred while trying to reply in thread: ", error);
+      }
+    } else if (thread_ts == "") {
+      console.log("\n\n***SLACK.JS: Can't identify thread, not posting anything.***\n\n");
+    } else {
+      // log a message
+      console.log("\n\n***SLACK.JS: Message is not invoking the bot, ignore for now!***\n\n");
+    }
   }
 };
 
