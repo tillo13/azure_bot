@@ -59,7 +59,6 @@ class EchoBot extends ActivityHandler {
               await context.sendActivity(replyActivity);
           }
 
-          console.log('\n\n***BOT_ROUTER.JS onMessage - chat messages after update:', chatMessagesUser);
           console.log("/n/n****BOT_ROUTER.JS channelData: ", JSON.stringify(context.activity.channelData, null, 2));
           await next();
         });
