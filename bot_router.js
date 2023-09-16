@@ -65,11 +65,7 @@ class EchoBot extends ActivityHandler {
 
     async run(context) {
       await super.run(context);
-      console.log('\n\n***BOT_ROUTER.JS: Saving state changes|');
-
       await this.userState.saveChanges(context);
-      console.log('\n\n***BOT_ROUTER.JS: Saved state changes|');
-
   }
 }
 
