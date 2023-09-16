@@ -151,8 +151,8 @@ async function handleSlackMessage(context, assistantResponse) {
   let channel_id;  
 
   if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-    thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-    channel_id = context.activity.channelData.SlackMessage.event.channel;
+      thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+      channel_id = context.activity.channelData.SlackMessage.event.channel;
   }
 
   let isThreadReply = thread_ts && (context.activity.channelData.SlackMessage.event.thread_ts === thread_ts);
@@ -161,20 +161,18 @@ async function handleSlackMessage(context, assistantResponse) {
   }
 
   if (!activeThreads[thread_ts]) {
-      console.log("\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT --IGNORING!\n\n", context.activity.text);
+      console.log("\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT --IGNORING!\n\n");
       return;
   }
 
+  console.log(context.activity.text);
   if (context.activity.text && activeThreads[thread_ts]) {
       if (context.activity.channelId === 'slack' && thread_ts != "") {
           // process the assistant response message for Slack
           let slackMessageResponse = processSlackResponseMessage(assistantResponse);
           const replyActivity = MessageFactory.text(slackMessageResponse);
 
-          // if assistantResponse contains the 'Let me check' string then log the user conversation to Slack
-          if(assistantResponse.includes('Let me check our past conversations, one moment...')) {
-            await logUserConversation(channel_id, thread_ts, apiToken, botId, true);
-        }
+          await logUserConversation(channel_id, thread_ts, apiToken, botId, assistantResponse.includes('Let me check our past conversations, one moment...'));
 
           // try to send as thread reply in Slack
           try {     
@@ -182,7 +180,7 @@ async function handleSlackMessage(context, assistantResponse) {
               // verify if thread_ts is already in the conversation id
               if (!replyActivity.conversation.id.includes(thread_ts)) {
                   replyActivity.conversation.id += ":" + thread_ts;
-              }   
+              }
               await context.sendActivity(replyActivity);
           } catch (error) {
               console.error("An error occurred while trying to reply in thread: ", error);
