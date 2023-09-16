@@ -1,5 +1,3 @@
-//2023sept16 1135am working GOLDEN VERSION//
-
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
 const https = require('https');
@@ -69,14 +67,23 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
 
         let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
 
-
-        console.log('\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n');
+        console.log('\n\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n');
         messages.forEach((msg, idx) => {
-          console.log(`\n${idx + 1}. [${msg.ts}] ${msg.text}\n`);
+            console.log(`\n${idx + 1}. [${msg.ts}] ${msg.text}\n`);
         });
-        console.log('\n***END OF EXTRAPOLATION***\n');
-        resolve();
-      });
+        console.log('\n***END OF EXTRAPOLATION***');
+    
+        // New code to construct a string and return it
+        let messageLog = '\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n';
+    
+        messages.forEach((msg, idx) => {
+            messageLog += `\n${idx + 1}. [${msg.ts}] ${msg.text}\n`;
+        });
+    
+        messageLog += '\n***END OF EXTRAPOLATION***';
+    
+        resolve(messageLog);
+    });
     });
     req.on('error', error => {
       console.error(error);
@@ -102,11 +109,27 @@ async function handleSlackMessage(context, assistantResponse) {
     }
 
     if(context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-        let apiToken = context.activity.channelData.ApiToken;  
-        let channel_id = context.activity.channelData.SlackMessage.event.channel;  
-        await logUserConversation(channel_id, thread_ts, apiToken, botId);
-    }
+      let apiToken = context.activity.channelData.ApiToken;  
+      let channel_id = context.activity.channelData.SlackMessage.event.channel;  
 
+      // If the assistant's response contains "Let me check"
+
+      if (assistantResponse.includes("Let me check")) {
+        let pastConversations = await logUserConversation(channel_id, thread_ts, apiToken, botId);
+
+        const pastConvActivity = MessageFactory.text(pastConversations);
+        pastConvActivity.conversation = context.activity.conversation;
+        if (!pastConvActivity.conversation.id.includes(thread_ts)) {
+            pastConvActivity.conversation.id += ":" + thread_ts;
+        }
+
+        try {
+            await context.sendActivity(pastConvActivity);
+            console.log('\n\n***SLACK.JS: POSTED PAST CONVO TO SLACK, VALIDATE...');
+        } catch (error) {
+            console.error("\n\n***SLACK.JS: An error occurred while trying to post past convo to Slack: ", error);
+        }
+    }
     let isThreadReply = thread_ts && (context.activity.channelData.SlackMessage.event.thread_ts === thread_ts);
     if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
         activeThreads[thread_ts] = true;
