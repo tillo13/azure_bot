@@ -33,9 +33,9 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
         let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
 
 
-        console.log('***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***');
+        console.log('\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***');
         messages.forEach((msg, idx) => {
-          console.log(`${idx + 1}. [${msg.ts}] ${msg.text}\n`);
+          console.log(`\n${idx + 1}. [${msg.ts}] ${msg.text}\n`);
         });
         console.log('***END OF EXTRAPOLATION***');
         resolve();
