@@ -1,125 +1,138 @@
- //2023sept16 1142am testing GOLDEN VERSION//
- const { MessageFactory } = require('botbuilder');
- const chatCompletion = require('./chat_helper');
- const https = require('https');
- 
- function isFromSlack(context) {
-   return context.activity.channelId === 'slack';
- }
- 
- function processSlackResponseMessage(assistantResponse) {
-     return `slack_chat_path: ${assistantResponse}`;
- }
- 
- function getBotId(apiToken) {
-   const options = {
-     hostname: 'slack.com',
-     path: '/api/auth.test',
-     method: 'POST',
-     headers: {
-       'Content-Type': 'application/x-www-form-urlencoded',
-       'Authorization': `Bearer ${apiToken}`
-     }
-   };
- 
-   let userId = '';
- 
-   return new Promise((resolve, reject) => {
-     const req = https.request(options, res => {
-       res.setEncoding('utf8');
-       res.on('data', chunk => {
-         userId += chunk;
-       });
- 
-       res.on('end', () => {
-         userId = JSON.parse(userId).user_id; 
-         resolve(userId);
-       });
-     });
- 
-     req.on('error', (e) => {
-       console.error(`problem with request: ${e.message}`);
-       reject(e);
-     });
- 
-     req.end();
-   }); // Here was a missing closing bracket
- }
- 
- async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
-   const options = {
-     hostname: 'slack.com',
-     path: `/api/conversations.replies?channel=${channel_id}&ts=${thread_ts}`,
-     method: 'GET',
-     headers: {
-       'Authorization': `Bearer ${apiToken}`
-     }
-   };
- 
-   let responsePayload = '';
- 
-   return new Promise((resolve, reject) => {
-     const req = https.request(options, res => {
-       res.on('data', d => {
-         responsePayload += d;
-       });
- 
-       res.on('end', () => {
-         let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
- 
-         // New code to construct a string
-         let messageLog = '\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n';
-     
-         messages.forEach((msg, idx) => {
-           messageLog += `\n${idx + 1}. [${msg.ts}] ${msg.text}\n`;
-         });
-     
-         messageLog += '\n***END OF EXTRAPOLATION***';
-     
-         resolve(messageLog);
-       });
-     });
- 
-     req.on('error', error => {
-       console.error(`problem with request: ${e.message}`);
-       reject(error);
-     });
- 
-     req.end();
-   });
- };
- 
- let activeThreads = {};
- 
- async function handleSlackMessage(context, assistantResponse) {
-   // Extract Bot Token from context
-   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
- 
-   let botId = await getBotId(apiToken);
- 
-   let thread_ts = "";
-   if(context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-     thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-   }
- 
-   if(context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-     let apiToken = context.activity.channelData.ApiToken;  
-     let channel_id = context.activity.channelData.SlackMessage.event.channel;  
-     if (assistantResponse.includes("Let me check")) {
-       let pastConversations = await logUserConversation(channel_id, thread_ts, apiToken, botId);
-       const pastConvActivity = MessageFactory.text(pastConversations);
-       pastConvActivity.conversation = context.activity.conversation;
-       if(!pastConvActivity.conversation.id.includes(thread_ts)) {
-         pastConvActivity.conversation.id += ":" + thread_ts;
-       }
-       try {
-         await context.sendActivity(pastConvActivity);
-         console.log('\n\n***SLACK.JS: POSTED PAST CONVO TO SLACK...');
-       } catch (error) {
-         console.error("An error occurred while trying to post past convo to Slack");
-       }
-     }
-   }
+//2023sept16 1159am testing//
+
+const { MessageFactory } = require('botbuilder');
+const chatCompletion = require('./chat_helper');
+const https = require('https');
+
+function isFromSlack(context) {
+  return context.activity.channelId === 'slack';
+}
+
+function processSlackResponseMessage(assistantResponse) {
+    return `slack_chat_path: ${assistantResponse}`;
+}
+
+async function postMessageToSlack(channel_id, message, apiToken) {
+  const options = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiToken}` },
+    body: JSON.stringify({
+      channel: channel_id,
+      text: message
+    })
+  };
+
+  https.get('https://slack.com/api/chat.postMessage', options, (res) => {
+    let data = '';
+
+    res.on('data', (d) => {
+      data += d;
+    });
+
+    res.on('end', () => {
+      const result = JSON.parse(data);
+      console.log(result);
+    });
+
+  }).on('error', (error) => {
+    console.error("Failed to post message to Slack: ", error);
+  });
+}
+
+function getBotId(apiToken) {
+  const options = {
+    hostname: 'slack.com',
+    path: '/api/auth.test',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Bearer ${apiToken}`
+    }
+  };
+
+  let userId = '';
+
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, res => {
+      res.setEncoding('utf8');
+      res.on('data', chunk => {
+        userId += chunk;
+      });
+
+      res.on('end', () => {
+        userId = JSON.parse(userId).user_id; 
+        resolve(userId);
+      });
+    });
+
+    req.on('error', (e) => {
+      console.error(`problem with request: ${e.message}`);
+      reject(e);
+    });
+
+    req.end();
+  });
+}
+
+async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
+  const options = {
+    hostname: 'slack.com',
+    path: `/api/conversations.replies?channel=${channel_id}&ts=${thread_ts}`,
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${apiToken}`
+    }
+  };
+
+  let responsePayload = '';
+
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, res => {
+      res.on('data', d => {
+        responsePayload += d;
+      });
+
+      res.on('end', async () => {
+        let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
+
+        const messageLog = messages.map((msg, idx) => `\n${idx + 1}. [${msg.ts}] ${msg.text}\n`).join('\n');
+        console.log('\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n', messageLog, '\n***END OF EXTRAPOLATION***\n');
+
+        await postMessageToSlack(channel_id, `***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n${messageLog}\n***END OF EXTRAPOLATION***`, apiToken);
+
+        resolve();
+      });
+    });
+
+    req.on('error', error => {
+      console.error(error);
+      reject(error);
+    });
+    req.end();
+  });
+};
+
+let activeThreads = {};
+async function handleSlackMessage(context, assistantResponse) {
+  // Extract Bot Token from context
+  let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
+
+  // Get bot id
+  let botId = await getBotId(apiToken);
+
+  console.log('\n\n***SLACK.JS: EXTRACTED BOTID: ', botId);
+
+    let thread_ts = "";
+    if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
+        thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+    }
+
+    if(context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+        let apiToken = context.activity.channelData.ApiToken;  
+        let channel_id = context.activity.channelData.SlackMessage.event.channel;  
+        await logUserConversation(channel_id, thread_ts, apiToken, botId);
+    }
+
     let isThreadReply = thread_ts && (context.activity.channelData.SlackMessage.event.thread_ts === thread_ts);
     if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
         activeThreads[thread_ts] = true;
