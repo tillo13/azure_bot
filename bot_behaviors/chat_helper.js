@@ -31,7 +31,7 @@ function shouldRequery(responseContent) {
 }
 
 async function chatCompletion(chatTexts, roleMessage) {
-    console.log('chatCompletion', chatTexts);
+    console.log('\n***CHAT_HELPER.JS: chatCompletion', chatTexts);
 
     const endpoint = process.env.OPENAI_API_BASE_URL;
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
@@ -44,7 +44,7 @@ async function chatCompletion(chatTexts, roleMessage) {
         chatMessages.unshift({ role: "system", content: roleMessage });
     }
 
-    console.log(`Sending request to OpenAI API with the following parameters:
+    console.log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:
       Endpoint: ${endpoint}
       Deployment Id: ${deploymentId}
       Messages: ${JSON.stringify(chatMessages)}

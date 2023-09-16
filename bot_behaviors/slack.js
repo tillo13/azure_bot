@@ -72,7 +72,7 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
         messages.forEach((msg, idx) => {
           console.log(`\n${idx + 1}. [${msg.ts}] ${msg.text}\n`);
         });
-        console.log('***END OF EXTRAPOLATION***');
+        console.log('\n***END OF EXTRAPOLATION***\n');
         resolve();
       });
     });

@@ -57,7 +57,7 @@ const myBot = new EchoBot(userState);
 
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
-    console.log("Incoming request to /api/messages endpoint");
+    console.log("***\nINDEX.JS: Incoming request to /api/messages endpoint");
     await adapter.process(req, res, (context) => myBot.run(context));
     console.log("Finished processing request");
 });
