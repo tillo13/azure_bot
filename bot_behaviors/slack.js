@@ -12,9 +12,10 @@ function processSlackResponseMessage(assistantResponse) {
     return `slack_chat_path: ${assistantResponse}`;
 }
 
-async function postMessageToSlack(channel_id, message, apiToken) {
+async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
   const data = JSON.stringify({
     channel: channel_id,
+    thread_ts: thread_ts,
     text: message
   });
 
@@ -23,20 +24,27 @@ async function postMessageToSlack(channel_id, message, apiToken) {
     path: '/api/chat.postMessage',
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
       'Authorization': `Bearer ${apiToken}`,
       'Content-Length': data.length
     }
   };
 
   const req = https.request(options, (res) => {
-    res.on('data', (d) => {
-      process.stdout.write(d);
+    let data = '';
+
+    res.on('data', (chunk) => {
+      data += chunk;
     });
+
+    res.on('end', () => {
+      console.log("Response from Slack: ", JSON.parse(data));
+    });
+
   });
 
   req.on('error', (error) => {
-    console.error(error);
+    console.error("Failed to post message to Slack: ", error);
   });
 
   req.write(data);
@@ -103,7 +111,7 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
         console.log('\n***SLACK.JS: Current Slack channel ID: ', channel_id); 
         console.log('\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n', messageLog, '\n***END OF EXTRAPOLATION***\n');
 
-        await postMessageToSlack(channel_id, `***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n${messageLog}\n***END OF EXTRAPOLATION***`, apiToken);
+        await postMessageToSlack(channel_id, thread_ts, `***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n${messageLog}\n***END OF EXTRAPOLATION***`, apiToken);
 
         resolve();
       });
