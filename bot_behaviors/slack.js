@@ -120,7 +120,9 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId, shoul
           messageLog += `\n${idx + 1}. [${msg.ts}] ${msg.text}\n`;
         });
         messageLog += '\n***END OF EXTRAPOLATION***\n';
-      
+
+        console.log('***SLACK.JS: shouldPostToSlack=', shouldPostToSlack); // Log the shouldPostToSlack boolean
+     
         if(shouldPostToSlack) {
 
           console.log("\n\n***SLACK.JS: Let me check path invoked, trying to post to slack!!\n\n");
