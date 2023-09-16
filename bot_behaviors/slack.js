@@ -12,7 +12,10 @@ function processSlackResponseMessage(assistantResponse) {
     return `slack_chat_path: ${assistantResponse}`;
 }
 
+console.log("\n\n***SLACK.JS: Attempting to post message to Slack.\n\n");
 async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
+  console.log("\n\n***SLACK.JS: postMessageToSlack triggered: ", data);
+
   const data = JSON.stringify({
     channel: channel_id,
     thread_ts: thread_ts,
@@ -119,6 +122,7 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId, shoul
         messageLog += '\n***END OF EXTRAPOLATION***\n';
       
         if(shouldPostToSlack) {
+
           console.log("\n\n***SLACK.JS: Let me check path invoked, trying to post to slack!!\n\n");
           await postMessageToSlack(channel_id, thread_ts, messageLog, apiToken);
         }
@@ -140,6 +144,8 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId, shoul
 
 let activeThreads = {};
 async function handleSlackMessage(context, assistantResponse) {
+  console.log("\n\n***SLACK.JS: handleSlackMessage triggered. Processing message: " + context.activity.text);
+
   // Extract Bot Token from context
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
 
@@ -177,6 +183,8 @@ async function handleSlackMessage(context, assistantResponse) {
           console.log('***SLACK.JS: assistantResponse', assistantResponse);
 
           if(assistantResponse.includes('Let me check our past conversations, one moment...')) {
+            console.log("\n\n***SLACK.JS: Assistant response received: " + assistantResponse);
+
             console.log("***SLACK.JS: 'Let me check our past conversations, one moment...' string path found");
           }
 
