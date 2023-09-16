@@ -5,7 +5,7 @@ const chatCompletion = require('./bot_behaviors/chat_helper');
 const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
 
-const PERSONALITY_OF_BOT = "You talk like an elf. You are a helpful assistant from Teradata that always checks any past conversations within this thread before responding to any new information received.";
+const PERSONALITY_OF_BOT = "You talk like an old cowboy. You are a helpful assistant from Teradata that always checks any past conversations within this thread before responding to any new information received.";
 
 class EchoBot extends ActivityHandler {
     constructor(userState) {
