@@ -27,7 +27,6 @@ class EchoBot extends ActivityHandler {
 
         this.onMessage(async (context, next) => {
           let chatMessagesUser = await this.chatMessagesProperty.get(context, []);
-          //print to app log
           console.log('onMessage - chat messages before update:', chatMessagesUser);
 
           chatMessagesUser.push({role:"user", content:context.activity.text});
@@ -49,14 +48,14 @@ class EchoBot extends ActivityHandler {
           if (isFromSlack(context)) {
               await handleSlackMessage(context, chatResponse.assistantResponse);
           } else {
-              await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
+              const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
+              await context.sendActivity(replyActivity);
           }
-          //print to app log
           console.log('onMessage - chat messages after update:', chatMessagesUser);
           console.log("/n/n****channelData: ", JSON.stringify(context.activity.channelData, null, 2));
 
           await next();
-      });
+        });
     }
 
     async run(context) {
