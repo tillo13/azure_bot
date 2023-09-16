@@ -35,7 +35,6 @@ class EchoBot extends ActivityHandler {
                chatMessagesUser = await this.chatMessagesProperty.get(context, []);
           }
           this.thread_ts = current_thread_ts;
-          //...
 
           chatMessagesUser.push({role:"user", content:context.activity.text});
 
@@ -66,10 +65,10 @@ class EchoBot extends ActivityHandler {
 
     async run(context) {
       await super.run(context);
-      console.log('Saving state changes|');
+      console.log('\n\n***BOT_ROUTER.JS: Saving state changes|');
 
       await this.userState.saveChanges(context);
-      console.log('Saved state changes|');
+      console.log('\n\n***BOT_ROUTER.JS: Saved state changes|');
 
   }
 }
