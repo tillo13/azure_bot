@@ -1,4 +1,4 @@
-//2023sept16 1159am testing//
+//2023sept16 1135am working GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
@@ -10,54 +10,6 @@ function isFromSlack(context) {
 
 function processSlackResponseMessage(assistantResponse) {
     return `slack_chat_path: ${assistantResponse}`;
-}
-
-console.log("\n\n***SLACK.JS: Attempting to post message to Slack.\n\n");
-async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
-  console.log("\n\n***SLACK.JS: postMessageToSlack triggered: ", data);
-
-  const data = JSON.stringify({
-    channel: channel_id,
-    thread_ts: thread_ts,
-    text: message
-});
-
-console.log("\n\n***SLACK.JS: postMessageToSlack triggered: ", data);
-
-  const options = {
-    hostname: 'slack.com',
-    path: '/api/chat.postMessage',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Authorization': `Bearer ${apiToken}`,
-      'Content-Length': data.length
-    }
-  };
-
-  return new Promise((resolve, reject) => {
-    const req = https.request(options, (res) => {
-      let data = '';
-
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-
-      res.on('end', () => {
-        console.log("\n\n***SLACK.JS: RESPONSE message payload from Slack:\n", JSON.parse(data)); // Log the response from Slack
-        resolve(data);
-      });
-
-    });
-
-    req.on('error', (error) => {
-      console.error("Failed to post message to Slack: ", error);
-      reject(error);
-    });
-
-    req.write(data);
-    req.end();
-  });
 }
 
 function getBotId(apiToken) {
@@ -95,7 +47,31 @@ function getBotId(apiToken) {
   });
 }
 
-async function logUserConversation(channel_id, thread_ts, apiToken, botId, shouldPostToSlack) {
+async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
+  const options = {
+    hostname: 'slack.com',
+    path: `/api/conversations.replies?channel=${channel_id}&ts=${thread_ts}`,
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${apiToken}`
+    }
+  };
+
+  let responsePayload = '';
+
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, res => {
+      // existing logic here
+    });
+    req.on('error', error => {
+      console.error("\n****SLACK.JS: Error in postChatHistoryToSlack(): ", error);
+      reject(error);
+    });
+    req.end();
+  });
+};
+
+async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
   const options = {
     hostname: 'slack.com',
     path: `/api/conversations.replies?channel=${channel_id}&ts=${thread_ts}`,
@@ -111,43 +87,63 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId, shoul
     const req = https.request(options, res => {
       res.on('data', d => {
         responsePayload += d;
+    });
+    
+    res.on('end', () => {
+      // Call chat.postMessage API
+      let postOptions = {
+        hostname: 'slack.com',
+        path: '/api/chat.postMessage',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': `Bearer ${apiToken}`
+        }
+      };
+
+      let postReq = https.request(postOptions, res => {
+        res.on('end', () => {
+          console.log('\n****SLACK.JS: Successful postChatHistoryToSlack()');
+          resolve();
+        });
       });
 
-      res.on('end', async () => {
-        let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
-        let messageLog = "\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n";
-        messages.forEach((msg, idx) => {
-          messageLog += `\n${idx + 1}. [${msg.ts}] ${msg.text}\n`;
-        });
-        messageLog += '\n***END OF EXTRAPOLATION***\n';
+      postReq.on('error', error => {
+        console.error('\n****SLACK.JS: Error during postChatHistoryToSlack() post request:', error);
+        reject(error);
+      });
 
-        console.log('***SLACK.JS: shouldPostToSlack=', shouldPostToSlack); // Log the shouldPostToSlack boolean
-     
-        if(shouldPostToSlack) {
+      postReq.write(JSON.stringify({
+        channel: channel_id,
+        text: formattedMessages,
+        thread_ts: thread_ts,
+      }));
 
-          console.log("\n\n***SLACK.JS: Let me check path invoked, trying to post to slack!!\n\n");
-          await postMessageToSlack(channel_id, thread_ts, messageLog, apiToken);
-        }
-      
-        console.log('\n***SLACK.JS: Current Slack channel ID: ', channel_id); 
-        console.log(messageLog);
-        resolve(messageLog); // Return the messageLog here
+      postReq.end();
+      // Extract the messages from the response
+      let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
+    
+      console.log("\n****SLACK.JS: Extracted User Messages In postChatHistoryToSlack(): ", messages);
+    
+      // Format the messages
+      let formattedMessages = "\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***";
+      messages.forEach((msg, idx) => {
+        formattedMessages += `\n${idx + 1}. [${msg.ts}] ${msg.text}`;
+      });
+      formattedMessages += "\n***END OF EXTRAPOLATION***";
+        resolve();
       });
     });
-
     req.on('error', error => {
       console.error(error);
       reject(error);
     });
-
     req.end();
   });
-}
+};
 
 let activeThreads = {};
-async function handleSlackMessage(context, chatCompletionRes) {
-  console.log("\n\n***SLACK.JS: handleSlackMessage triggered. Processing message: " + context.activity.text);
-
+async function handleSlackMessage(context, assistantResponse) {
   // Extract Bot Token from context
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
 
@@ -156,66 +152,57 @@ async function handleSlackMessage(context, chatCompletionRes) {
 
   console.log('\n\n***SLACK.JS: EXTRACTED BOTID: ', botId);
 
-  //get thread from slack
-  let thread_ts = "";
-  let channel_id;
-  
-  if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-    thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-    channel_id = context.activity.channelData.SlackMessage.event.channel;
-  }
-
-  let assistantResponse = chatCompletionRes && chatCompletionRes.assistantResponse ? chatCompletionRes.assistantResponse : "";
-
-  let shouldPostToSlack = assistantResponse.includes("Let me check our past conversations, one moment...");
-
-  await logUserConversation(channel_id, thread_ts, apiToken, botId, shouldPostToSlack);
-
-  let isThreadReply = thread_ts && (context.activity.channelData.SlackMessage.event.thread_ts === thread_ts);
-  if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
-    activeThreads[thread_ts] = true;
-  }
-
-  if (!activeThreads[thread_ts]) {
-    console.log("\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT --IGNORING!\n\n");
-    return;
-  }
-
-  console.log(context.activity.text);
-  if (context.activity.text && activeThreads[thread_ts]) {
-    if (context.activity.channelId === 'slack' && thread_ts != "") {
-    // process the assistant response message for Slack
-    let slackMessageResponse = processSlackResponseMessage(assistantResponse);
-    const replyActivity = MessageFactory.text(slackMessageResponse);
-
-    console.log('***SLACK.JS: assistantResponse', assistantResponse);
-
-    if(assistantResponse.includes('Let me check our past conversations, one moment...')) {
-        console.log("\n\n***SLACK.JS: Assistant response received: " + assistantResponse);
-
-        console.log("***SLACK.JS: 'Let me check our past conversations, one moment...' string path found");
-      }
-
-    console.log("***SLACK.JS: Does assistantResponse.requery signify 'Let me check our past conversations, one moment...' being sent? ", assistantResponse.requery);
-    await logUserConversation(channel_id, thread_ts, apiToken, botId, assistantResponse.requery);    
-
-    // try to send as thread reply in Slack
-    try {     
-        replyActivity.conversation = context.activity.conversation;
-        // verify if thread_ts is already in the conversation id
-        if (!replyActivity.conversation.id.includes(thread_ts)) {
-          replyActivity.conversation.id += ":" + thread_ts;
-        }
-        await context.sendActivity(replyActivity);
-      } catch (error) {
-        console.error("An error occurred while trying to reply in thread: ", error);
-      }
-    } else if (thread_ts == "") {
-      console.log("\n\n***SLACK.JS: Can't identify thread, not posting anything.***\n\n");
-    } else {
-      // log a message
-      console.log("\n\n***SLACK.JS: Message is not invoking the bot, ignore for now!***\n\n");
+    let thread_ts = "";
+    if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
+        thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
     }
+
+    if(context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+        let apiToken = context.activity.channelData.ApiToken;  
+        let channel_id = context.activity.channelData.SlackMessage.event.channel;  
+        await logUserConversation(channel_id, thread_ts, apiToken, botId);
+    }
+
+    let isThreadReply = thread_ts && (context.activity.channelData.SlackMessage.event.thread_ts === thread_ts);
+    if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
+        activeThreads[thread_ts] = true;
+    }
+
+    if (!activeThreads[thread_ts]) {
+        console.log("\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT --IGNORING!\n\n", context.activity.text);
+        return;
+    }
+    
+    if (assistantResponse === 'Let me check our past conversations, one moment...') {
+      console.log('\n****SLACK.JS: Detected specific message, posting chat history to slack');
+      await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+      console.log('\n****SLACK.JS: Chat history posted to slack');
+    }
+
+    if (context.activity.text && activeThreads[thread_ts]) {
+
+      if (context.activity.channelId === 'slack' && thread_ts != "") {
+          // process the assistant response message for Slack
+          let slackMessageResponse = processSlackResponseMessage(assistantResponse);
+          const replyActivity = MessageFactory.text(slackMessageResponse);
+
+          // try to send as thread reply in Slack
+          try {     
+              replyActivity.conversation = context.activity.conversation;
+              // verify if thread_ts is already in the conversation id
+              if (!replyActivity.conversation.id.includes(thread_ts)) {
+                  replyActivity.conversation.id += ":" + thread_ts;
+              }   
+              await context.sendActivity(replyActivity);
+          } catch (error) {
+              console.error("An error occurred while trying to reply in thread: ", error);
+          }
+      } else if (thread_ts == "") {
+          console.log("\n\n***SLACK.JS: Can't identify thread, not posting anything.***\n\n");
+      } else {
+          // log a message
+          console.log("\n\n***SLACK.JS: Message is not invoking the bot, ignore for now!***\n\n");
+      }
   }
 };
 
