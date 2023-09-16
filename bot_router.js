@@ -26,12 +26,6 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
-          if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-              var thread_ts = context.activity.channelData.SlackMessage.thread_ts;
-      
-              // Check for @bot/@atbot in message or whether the context is from a thread where the bot was involved
-              if ((context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) || thread_ts) {
-          
           let chatMessagesUser = await this.chatMessagesProperty.get(context, []);
           console.log('onMessage - chat messages before update:', chatMessagesUser);
 
@@ -52,15 +46,16 @@ class EchoBot extends ActivityHandler {
 
       
           if (isFromSlack(context)) {
-            await handleSlackMessage(context, chatResponse.assistantResponse);
-        } else {
-            const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
-            await context.sendActivity(replyActivity);
-        }
-    }
-}
-await next();
-});
+              await handleSlackMessage(context, chatResponse.assistantResponse);
+          } else {
+              const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
+              await context.sendActivity(replyActivity);
+          }
+          console.log('onMessage - chat messages after update:', chatMessagesUser);
+          console.log("/n/n****channelData: ", JSON.stringify(context.activity.channelData, null, 2));
+
+          await next();
+        });
     }
 
     async run(context) {
