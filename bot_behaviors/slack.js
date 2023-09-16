@@ -21,11 +21,12 @@ async function handleSlackMessage(context, assistantResponse) {
       thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
   }
 
-  // Check if the message includes "@bot" or "@atbot" or message is part of a thread
-  if ((receivedMessage.includes('@bot') || receivedMessage.includes('@atbot')) || thread_ts) {
+  // Check if the message includes "@bot" or "@atbot" or if a thread is already started
+  // If the message is in thread (thread_ts exists), the bot needs to respond without @bot or @atbot
+  if ((receivedMessage.includes('@bot') || receivedMessage.includes('@atbot')) || (thread_ts)) {
       if(thread_ts === "" && !context.activity.conversation.id.includes(thread_ts)) {
           // If thread_ts doesn't exist, it means it's the first message to bot.
-          const welcomeMessage = "Welcome! Let's start a new thread for our conversation.";
+          const welcomeMessage = "Welcome! I am starting a new thread for our conversation.";
           const welcomeActivity = MessageFactory.text(welcomeMessage);
 
           await context.sendActivity(welcomeActivity);
@@ -38,7 +39,7 @@ async function handleSlackMessage(context, assistantResponse) {
           // process the assistant response message for Slack
           let slackMessageResponse = processSlackResponseMessage(assistantResponse);
           const replyActivity = MessageFactory.text(slackMessageResponse);
-  
+
           // Try to send as thread reply in Slack
           try {
               replyActivity.conversation = context.activity.conversation;
