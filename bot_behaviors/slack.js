@@ -49,6 +49,7 @@ let activeThreads = {};
 async function handleSlackMessage(context, assistantResponse) {
     // Extract Bot ID from context
     let botId = context.activity.channelData && context.activity.channelData.authorizations ? context.activity.channelData.authorizations[0].user_id : "";
+    console.log('\n\n***SLACK.JS: EXTRACTED BOTID: ', botId);
 
     let thread_ts = "";
     if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
