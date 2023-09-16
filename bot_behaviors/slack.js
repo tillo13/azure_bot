@@ -20,9 +20,9 @@ async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
     channel: channel_id,
     thread_ts: thread_ts,
     text: message
-  });
+});
 
-  console.log('\n\n***SLACK.JS: REQUEST Slack message payload:\n', data); // Log the payload being sent to Slack
+console.log("\n\n***SLACK.JS: postMessageToSlack triggered: ", data);
 
   const options = {
     hostname: 'slack.com',
@@ -145,7 +145,7 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId, shoul
 }
 
 let activeThreads = {};
-async function handleSlackMessage(context, assistantResponse) {
+async function handleSlackMessage(context, chatCompletionRes) {
   console.log("\n\n***SLACK.JS: handleSlackMessage triggered. Processing message: " + context.activity.text);
 
   // Extract Bot Token from context
@@ -158,12 +158,16 @@ async function handleSlackMessage(context, assistantResponse) {
 
   //get thread from slack
   let thread_ts = "";
-  let channel_id;  
-
+  let channel_id;
+  
   if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
       thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
       channel_id = context.activity.channelData.SlackMessage.event.channel;
   }
+  
+  let shouldPostToSlack = chatCompletionRes.assistantResponse.includes("Let me check our past conversations, one moment...");
+
+  await logUserConversation(channel_id, thread_ts, apiToken, botId, shouldPostToSlack);
 
   let isThreadReply = thread_ts && (context.activity.channelData.SlackMessage.event.thread_ts === thread_ts);
   if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
@@ -191,14 +195,7 @@ async function handleSlackMessage(context, assistantResponse) {
           }
 
           console.log("***SLACK.JS: Does assistantResponse.requery signify 'Let me check our past conversations, one moment...' being sent? ", assistantResponse.requery);
-
-          slackMessageResponse = processSlackResponseMessage(assistantResponse.assistantResponse); //use the assistantResponse property from the object
-      
-          await logUserConversation(channel_id, thread_ts, apiToken, botId, assistantResponse.requery);
-          
-          replyActivity = MessageFactory.text(slackMessageResponse); 
-
-          
+          await logUserConversation(channel_id, thread_ts, apiToken, botId, assistantResponse.requery);    
           
 
           // try to send as thread reply in Slack
