@@ -19,6 +19,8 @@ async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
     text: message
   });
 
+  console.log('\n\n***SLACK.JS: REQUEST Slack message payload:\n', data); // Log the payload being sent to Slack
+
   const options = {
     hostname: 'slack.com',
     path: '/api/chat.postMessage',
@@ -39,7 +41,7 @@ async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
       });
 
       res.on('end', () => {
-        console.log("Response from Slack: ", JSON.parse(data));
+        console.log("\n\n***SLACK.JS: RESPONSE message payload from Slack:\n", JSON.parse(data)); // Log the response from Slack
         resolve(data);
       });
 
