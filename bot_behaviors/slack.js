@@ -26,6 +26,12 @@ async function handleSlackMessage(context, assistantResponse) {
   if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
     activeThreads[thread_ts] = true;
   }
+  
+  // If the message doesn't invoke the bot, log and return immediately without further processing
+  if (!activeThreads[thread_ts]) {
+    console.log("\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT --IGNORING!\n\n", context.activity.text);
+    return;
+  }
 
   if (context.activity.text && activeThreads[thread_ts]) {
 
