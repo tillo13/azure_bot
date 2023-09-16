@@ -117,12 +117,9 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId, shoul
         messageLog += '\n***END OF EXTRAPOLATION***\n';
       
         if(shouldPostToSlack) {
-          try {
-              await postMessageToSlack(channel_id, thread_ts, messageLog, apiToken);
-          } catch (error) {
-              console.error("Error posting to Slack: ", error);
-          }
-      }
+          console.log("\n\n***SLACK.JS: Let me check path invoked, trying to post to slack!!\n\n");
+          await postMessageToSlack(channel_id, thread_ts, messageLog, apiToken);
+        }
       
         console.log('\n***SLACK.JS: Current Slack channel ID: ', channel_id); 
         console.log(messageLog);
@@ -146,24 +143,23 @@ async function handleSlackMessage(context, assistantResponse) {
 
   // Get bot id
   let botId = await getBotId(apiToken);
-
-  // get message log
-  let messageLog = await logUserConversation(channel_id, thread_ts, apiToken, botId, shouldPostToSlack);
-
   console.log('\n\n***SLACK.JS: EXTRACTED BOTID: ', botId);
+
+
+  //get channel id
+  let channel_id;  
+
   
-
+  //get thread from slack
   let thread_ts = "";
-  if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-      thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-  }
 
-  let shouldPostToSlack = assistantResponse.includes('Let me check our past conversations, one moment...');
-  if(context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-      let apiToken = context.activity.channelData.ApiToken;  
-      let channel_id = context.activity.channelData.SlackMessage.event.channel;  
-      await logUserConversation(channel_id, thread_ts, apiToken, botId, shouldPostToSlack);
-  }
+  if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
+    thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+    channel_id = context.activity.channelData.SlackMessage.event.channel;
+}
+
+let shouldPostToSlack = assistantResponse.includes('Let me check our past conversations, one moment...');
+let messageLog = await logUserConversation(channel_id, thread_ts, apiToken, botId, shouldPostToSlack);
 
     let isThreadReply = thread_ts && (context.activity.channelData.SlackMessage.event.thread_ts === thread_ts);
     if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
@@ -189,6 +185,7 @@ async function handleSlackMessage(context, assistantResponse) {
                 let thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
                 // log conversation
                 console.log("\n\n***SLACK.JS: Let me check path invoked, trying to post to slack!!\n\n");
+                let messageLog = await logUserConversation(channel_id, thread_ts, apiToken, botId, true);
                 await postMessageToSlack(channel_id, thread_ts, messageLog, apiToken); // Use messageLog here instead of assistantResponse
             }
 
