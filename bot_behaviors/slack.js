@@ -30,25 +30,29 @@ async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
     }
   };
 
-  const req = https.request(options, (res) => {
-    let data = '';
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      let data = '';
 
-    res.on('data', (chunk) => {
-      data += chunk;
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      res.on('end', () => {
+        console.log("Response from Slack: ", JSON.parse(data));
+        resolve(data);
+      });
+
     });
 
-    res.on('end', () => {
-      console.log("Response from Slack: ", JSON.parse(data));
+    req.on('error', (error) => {
+      console.error("Failed to post message to Slack: ", error);
+      reject(error);
     });
 
+    req.write(data);
+    req.end();
   });
-
-  req.on('error', (error) => {
-    console.error("Failed to post message to Slack: ", error);
-  });
-
-  req.write(data);
-  req.end();
 }
 
 function getBotId(apiToken) {
@@ -106,14 +110,22 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId, shoul
 
       res.on('end', async () => {
         let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
-        const messageLog = messages.map((msg, idx) => `\n${idx + 1}. [${msg.ts}] ${msg.text}\n`).join('\n');
-        
+        let messageLog = "\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n";
+        messages.forEach((msg, idx) => {
+          messageLog += `\n${idx + 1}. [${msg.ts}] ${msg.text}\n`;
+        });
+        messageLog += '\n***END OF EXTRAPOLATION***\n';
+      
         if(shouldPostToSlack) {
-          await postMessageToSlack(channel_id, thread_ts, `***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n${messageLog}\n***END OF EXTRAPOLATION***`, apiToken);
-        }
-
+          try {
+              await postMessageToSlack(channel_id, thread_ts, messageLog, apiToken);
+          } catch (error) {
+              console.error("Error posting to Slack: ", error);
+          }
+      }
+      
         console.log('\n***SLACK.JS: Current Slack channel ID: ', channel_id); 
-        console.log('\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n', messageLog, '\n***END OF EXTRAPOLATION***\n');
+        console.log(messageLog);
         resolve();
       });
     });
@@ -172,6 +184,7 @@ async function handleSlackMessage(context, assistantResponse) {
                 // get the thread_ts
                 let thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
                 // log conversation
+                console.log("\n\n***SLACK.JS: Let me check path invoked, trying to post to slack!!\n\n");
                 await postMessageToSlack(channel_id, thread_ts, `***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n${assistantResponse}\n***END OF EXTRAPOLATION***`, apiToken);
             }
 
