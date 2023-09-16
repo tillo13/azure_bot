@@ -1,6 +1,5 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 
-// Define the maximum tokens to be used for OpenAI
 const MAX_OPENAI_TOKENS = 400;
 
 function validateOpenAITokens(tokens) {
@@ -14,6 +13,11 @@ function validateOpenAITokens(tokens) {
 }
 
 function shouldRequery(responseContent) {
+    // if responseContent is not defined, return false
+    if (!responseContent) {
+        return false;
+    }
+
     let patterns = [
         "as an ai",
         "access to personal information",
@@ -27,21 +31,15 @@ function shouldRequery(responseContent) {
 }
 
 async function chatCompletion(chatTexts, roleMessage) {
-    //print to app log
     console.log('chatCompletion', chatTexts);
 
     const endpoint = process.env.OPENAI_API_BASE_URL;
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
     const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
-
-    // Validate the maximum tokens to be used
     const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
     if (!validatedTokens) return;
-
-    // Ensure chatMessages is an array
     let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
 
-    // Add system message as the first message in the conversation, if not present
     if (chatMessages.length === 0 || (chatMessages[0] && chatMessages[0].role !== "system")) {
         chatMessages.unshift({ role: "system", content: roleMessage });
     }
@@ -55,37 +53,40 @@ async function chatCompletion(chatTexts, roleMessage) {
 
    try {
     let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
-    //print to app log
-    console.log('\n\n***CHAT_HELPER.JS: response from OpenAI API:', result);
+    console.log('response from OpenAI API:', result);
 
-    // After the request to the OpenAI, log the response
-    console.log('\n***CHAT_HELPER.JS: Received response from OpenAI API:', JSON.stringify(result, null, 2));
+    // Only proceed if result and result.choices[0] and result.choices[0].message and result.choices[0].message.content exist
+    if (result && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
+        let requeryStatus = shouldRequery(result.choices[0].message.content);
 
-    let requeryStatus = shouldRequery(result.choices[0].message.content);
-
-    if (requeryStatus) {
-        // If required, re-query the API
-        for (let i = chatMessages.length - 1; i >= 0; i--) {
-            if (chatMessages[i].role === "assistant") {
-                chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..." };
-                break;
+        if (requeryStatus) {
+            for (let i = chatMessages.length - 1; i >= 0; i--) {
+                if (chatMessages[i].role === "assistant") {
+                    chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..." };
+                    break;
+                }
             }
+            result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
         }
-        result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
-    }
- 
-    console.log(`\n\n***CHAT_HELPER.JS: Received response from OpenAI API: ${JSON.stringify(result)}`);  
-  
-    return {
-      'assistantResponse': result.choices[0].message.content,
-      'requery': requeryStatus
-    };
 
-  } 
-  catch (error) {
-    console.error("\n\n****CHAT_HELPER.JS: An error occurred while interacting with OpenAI API", error);
-    throw error;
-  }
+        console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);
+
+return {
+  'assistantResponse': result.choices[0].message.content,
+  'requery': requeryStatus
+};
+} else {
+console.log("No content in API response");
+return {
+  'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
+  'requery': false
+};
+}
+} 
+catch (error) {
+console.error("An error occurred while interacting with OpenAI API", error);
+throw error;
+}
 }
 
 module.exports = chatCompletion;
