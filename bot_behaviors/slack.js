@@ -1,3 +1,5 @@
+//2023sept16 1135am working GOLDEN VERSION//
+
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
 const https = require('https');
