@@ -13,30 +13,34 @@ function processSlackResponseMessage(assistantResponse) {
 }
 
 async function postMessageToSlack(channel_id, message, apiToken) {
+  const data = JSON.stringify({
+    channel: channel_id,
+    text: message
+  });
+
   const options = {
+    hostname: 'slack.com',
+    path: '/api/chat.postMessage',
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiToken}` },
-    body: JSON.stringify({
-      channel: channel_id,
-      text: message
-    })
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiToken}`,
+      'Content-Length': data.length
+    }
   };
 
-  https.get('https://slack.com/api/chat.postMessage', options, (res) => {
-    let data = '';
-
+  const req = https.request(options, (res) => {
     res.on('data', (d) => {
-      data += d;
+      process.stdout.write(d);
     });
-
-    res.on('end', () => {
-      const result = JSON.parse(data);
-      console.log(result);
-    });
-
-  }).on('error', (error) => {
-    console.error("Failed to post message to Slack: ", error);
   });
+
+  req.on('error', (error) => {
+    console.error(error);
+  });
+
+  req.write(data);
+  req.end();
 }
 
 function getBotId(apiToken) {
