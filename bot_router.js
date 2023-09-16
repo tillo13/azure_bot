@@ -26,6 +26,12 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
+
+          let thread_ts = "";
+          if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
+              thread_ts = context.activity.channelData.SlackMessage.event.thread_ts;
+            }
+          
           let chatMessagesUser = await this.chatMessagesProperty.get(context, []);
           console.log('onMessage - chat messages before update:', chatMessagesUser);
 
