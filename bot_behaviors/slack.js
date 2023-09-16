@@ -12,7 +12,10 @@ function processSlackResponseMessage(assistantResponse) {
 }
 
 async function handleSlackMessage(context, assistantResponse) {
-  if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot') || context.activity.conversation.id.includes('thread_ts'))) {
+  // Add a new variable to check if the message is part of a thread
+  let isThreadReply = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event && (context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts);
+  
+  if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) || isThreadReply) {
       let thread_ts = "";
       if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
           thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
