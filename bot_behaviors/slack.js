@@ -30,7 +30,15 @@ async function handleSlackMessage(context, assistantResponse) {
           thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
       }
 
-      if (context.activity.channelId === 'slack') {
+        if (context.activity.channelId === 'slack') {
+          // We remove the condition of having no thread or conversation id.
+          const welcomeMessage = "Welcome! Let's start a new thread for our conversation.";
+          const welcomeActivity = MessageFactory.text(welcomeMessage);
+
+          await context.sendActivity(welcomeActivity);
+
+          thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+
           // process the assistant response message for Slack
           let slackMessageResponse = processSlackResponseMessage(assistantResponse);
           const replyActivity = MessageFactory.text(slackMessageResponse);
@@ -53,6 +61,6 @@ async function handleSlackMessage(context, assistantResponse) {
       // Log a message
       console.log("\n\n***SLACK.JS: Message is not invoking the bot, ignore for now!***\n\n");
   }
-};
+  };
 
 module.exports = { handleSlackMessage, isFromSlack };

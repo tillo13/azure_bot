@@ -56,7 +56,10 @@ async function chatCompletion(chatTexts, roleMessage) {
    try {
     let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
     //print to app log
-    console.log('response from OpenAI API:', result);
+    console.log('\n\n***CHAT_HELPER.JS: response from OpenAI API:', result);
+
+    // After the request to the OpenAI, log the response
+    console.log('\n***CHAT_HELPER.JS: Received response from OpenAI API:', JSON.stringify(result, null, 2));
 
     let requeryStatus = shouldRequery(result.choices[0].message.content);
 
@@ -71,7 +74,7 @@ async function chatCompletion(chatTexts, roleMessage) {
         result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
     }
  
-    console.log(`Received response from OpenAI API: ${JSON.stringify(result)}`);  
+    console.log(`\n\n***CHAT_HELPER.JS: Received response from OpenAI API: ${JSON.stringify(result)}`);  
   
     return {
       'assistantResponse': result.choices[0].message.content,
@@ -80,7 +83,7 @@ async function chatCompletion(chatTexts, roleMessage) {
 
   } 
   catch (error) {
-    console.error("An error occurred while interacting with OpenAI API", error);
+    console.error("\n\n****CHAT_HELPER.JS: An error occurred while interacting with OpenAI API", error);
     throw error;
   }
 }
