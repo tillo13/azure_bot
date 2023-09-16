@@ -191,8 +191,16 @@ async function handleSlackMessage(context, assistantResponse) {
           }
 
           console.log("***SLACK.JS: Does assistantResponse.requery signify 'Let me check our past conversations, one moment...' being sent? ", assistantResponse.requery);
+
+          slackMessageResponse = processSlackResponseMessage(assistantResponse.assistantResponse); //use the assistantResponse property from the object
+      
           await logUserConversation(channel_id, thread_ts, apiToken, botId, assistantResponse.requery);
           
+          replyActivity = MessageFactory.text(slackMessageResponse); 
+
+          
+          
+
           // try to send as thread reply in Slack
           try {     
               replyActivity.conversation = context.activity.conversation;
