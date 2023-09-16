@@ -10,6 +10,41 @@ function processSlackResponseMessage(assistantResponse) {
     return `slack_chat_path: ${assistantResponse}`;
 }
 
+function getBotId(apiToken) {
+  const options = {
+    hostname: 'slack.com',
+    path: '/api/auth.test',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Bearer ${apiToken}`
+    }
+  };
+
+  let userId = '';
+
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, res => {
+      res.setEncoding('utf8');
+      res.on('data', chunk => {
+        userId += chunk;
+      });
+
+      res.on('end', () => {
+        userId = JSON.parse(userId).user_id; 
+        resolve(userId);
+      });
+    });
+
+    req.on('error', (e) => {
+      console.error(`problem with request: ${e.message}`);
+      reject(e);
+    });
+
+    req.end();
+  });
+}
+
 async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
   const options = {
     hostname: 'slack.com',
@@ -33,7 +68,7 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
         let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
 
 
-        console.log('\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***');
+        console.log('\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n');
         messages.forEach((msg, idx) => {
           console.log(`\n${idx + 1}. [${msg.ts}] ${msg.text}\n`);
         });
@@ -51,9 +86,13 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
 
 let activeThreads = {};
 async function handleSlackMessage(context, assistantResponse) {
-    // Extract Bot ID from context
-    let botId = context.activity.channelData && context.activity.channelData.authorizations ? context.activity.channelData.authorizations[0].user_id : "";
-    console.log('\n\n***SLACK.JS: EXTRACTED BOTID: ', botId);
+  // Extract Bot Token from context
+  let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
+
+  // Get bot id
+  let botId = await getBotId(apiToken);
+
+  console.log('\n\n***SLACK.JS: EXTRACTED BOTID: ', botId);
 
     let thread_ts = "";
     if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
