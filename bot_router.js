@@ -48,6 +48,7 @@ class EchoBot extends ActivityHandler {
       
           if (isFromSlack(context)) {
             await handleSlackMessage(context, chatResponse.assistantResponse, this.welcomedUserProperty);
+
           } else {
               await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
           }

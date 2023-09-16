@@ -27,7 +27,7 @@ async function sendWelcomeMessage(context) {
   await context.sendActivity(welcomeActivity); 
 }
 
-async function handleSlackMessage(context, assistantResponse) {
+async function handleSlackMessage(context, assistantResponse, welcomedUserProperty) {
   let welcomedUser = await welcomedUserProperty.get(context, false);
   if (!welcomedUser) {
       await welcomedUserProperty.set(context, true);
