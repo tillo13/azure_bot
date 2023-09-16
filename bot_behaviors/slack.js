@@ -160,23 +160,23 @@ async function handleSlackMessage(context, assistantResponse) {
   
           // try to send as thread reply in Slack
           try {     
-              replyActivity.conversation = context.activity.conversation;
-              // verify if thread_ts is already in the conversation id
-              if (!replyActivity.conversation.id.includes(thread_ts)) {
-                  replyActivity.conversation.id += ":" + thread_ts;
-              }   
-              await context.sendActivity(replyActivity);
-  
-              // if assistantResponse is 'Let me check our past conversations, one moment...'
-              // postChatHistoryToSlack 
-              if (assistantResponse === 'Let me check our past conversations, one moment...') {
-                console.log('\n****SLACK.JS: Detected specific message, posting chat history to slack');
-                await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
-                console.log('\n****SLACK.JS: Chat history posted to slack');
-              }
-  
+            replyActivity.conversation = context.activity.conversation;
+            // verify if thread_ts is already in the conversation id
+            if (!replyActivity.conversation.id.includes(thread_ts)) {
+              replyActivity.conversation.id += ":" + thread_ts;
+            }   
+            await context.sendActivity(replyActivity);
+          
+            // if assistantResponse is 'Let me check our past conversations, one moment...'
+            // postChatHistoryToSlack 
+            if (assistantResponse === 'Let me check our past conversations, one moment...') {
+              console.log('\n****SLACK.JS: Detected specific message, posting chat history to slack');
+              await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+              console.log('\n****SLACK.JS: Chat history posted to slack');
+            }
+          
           } catch (error) {
-              console.error("An error occurred while trying to reply in thread: ", error);
+            console.error("An error occurred while trying to reply in thread: ", error);
           }
       } else if (thread_ts == "") {
           console.log("\n\n***SLACK.JS: Can't identify thread, not posting anything.***\n\n");
