@@ -30,8 +30,9 @@ async function sendWelcomeMessage(context) {
 async function handleSlackMessage(context, assistantResponse, welcomedUserProperty) {
   let welcomedUser = await welcomedUserProperty.get(context, false);
   if (!welcomedUser) {
-      await welcomedUserProperty.set(context, true);
-      await sendWelcomeMessage(context);
+    await welcomedUserProperty.set(context, true);
+    await sendWelcomeMessage(context);
+    return; // return here to stop the execution after sending the welcome message, we don't proceed to the business logic yet
   }
   if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
       let thread_ts = "";
