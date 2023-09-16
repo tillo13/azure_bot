@@ -174,6 +174,12 @@ async function handleSlackMessage(context, assistantResponse) {
           let slackMessageResponse = processSlackResponseMessage(assistantResponse);
           const replyActivity = MessageFactory.text(slackMessageResponse);
 
+          console.log('***SLACK.JS: assistantResponse', assistantResponse);
+
+          if(assistantResponse.includes('Let me check our past conversations, one moment...')) {
+            console.log("***SLACK.JS: 'Let me check our past conversations, one moment...' string path found");
+          }
+
           await logUserConversation(channel_id, thread_ts, apiToken, botId, assistantResponse.includes('Let me check our past conversations, one moment...'));
 
           // try to send as thread reply in Slack
