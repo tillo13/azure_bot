@@ -96,6 +96,7 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
         let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
 
         const messageLog = messages.map((msg, idx) => `\n${idx + 1}. [${msg.ts}] ${msg.text}\n`).join('\n');
+        console.log('\n***SLACK.JS: Current Slack channel ID: ', channel_id); 
         console.log('\n***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n', messageLog, '\n***END OF EXTRAPOLATION***\n');
 
         await postMessageToSlack(channel_id, `***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***\n${messageLog}\n***END OF EXTRAPOLATION***`, apiToken);
