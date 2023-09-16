@@ -111,7 +111,6 @@ async function handleSlackMessage(context, assistantResponse) {
     if(context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
         let apiToken = context.activity.channelData.ApiToken;  
         let channel_id = context.activity.channelData.SlackMessage.event.channel;  
-        await logUserConversation(channel_id, thread_ts, apiToken, botId);
         let pastConversations = await logUserConversation(channel_id, thread_ts, apiToken, botId);
 
         // If the assistant's response contains "Let me check"
