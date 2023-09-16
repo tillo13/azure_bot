@@ -51,9 +51,11 @@ class EchoBot extends ActivityHandler {
           await this.chatMessagesProperty.set(context, chatMessagesUser);
           console.log("\n\n***BOT_ROUTER.JS: chatMessages after saving:", chatMessagesUser);
 
-          if (isFromSlack(context)) {
-              await handleSlackMessage(context, chatResponse.assistantResponse);
-          } else {
+          if(isFromSlack(context)) {
+            let channel_id = context.activity.channelData.SlackMessage.event.channel;
+            let apiToken = context.activity.channelData.ApiToken;
+            await handleSlackMessage(context, chatMessagesUser, chatResponse, PERSONALITY_OF_BOT, apiToken, channel_id);
+        } else {
               const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
               await context.sendActivity(replyActivity);
           }
@@ -65,11 +67,7 @@ class EchoBot extends ActivityHandler {
 
     async run(context) {
       await super.run(context);
-      console.log('\n\n***BOT_ROUTER.JS: Saving state changes|');
-
       await this.userState.saveChanges(context);
-      console.log('\n\n***BOT_ROUTER.JS: Saved state changes|');
-
   }
 }
 

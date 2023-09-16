@@ -87,8 +87,8 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
 let activeThreads = {};
 let botId = ''; // Defined at the top level in the script
 
-async function handleSlackMessage(context, assistantResponse) {
-    // Extract Bot Token from context
+async function handleSlackMessage(context, chatMessagesUser, chatResponse, PERSONALITY_OF_BOT, apiToken, channel_id) {
+  // Extract Bot Token from context
     let apiToken = context.activity.channelData ? context.activity.channelData.ApiToken : "";
     // Get botId using the bot token
     if (apiToken && !botId) { // If apiToken exists and botId doesn't already exist... 
@@ -116,6 +116,23 @@ async function handleSlackMessage(context, assistantResponse) {
         console.log("\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT --IGNORING!\n\n", context.activity.text);
         return;
     }
+    if (chatResponse.requery){
+      let loggedUserConversation = await logUserConversation(channel_id, thread_ts, apiToken, botId);
+
+      chatMessagesUser.push(
+        {role: "assistant", content: "What are the data points you've shared with me so far as I cannot answer your question of " + context.activity.text + "?"},
+        {role: "user", content: loggedUserConversation}
+      );
+
+      chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+      let replyActivity = MessageFactory.text(`slack_chat_path: ${chatResponse.assistantResponse}`);
+      
+      replyActivity.conversation = context.activity.conversation;
+      if (!replyActivity.conversation.id.includes(thread_ts)) {
+          replyActivity.conversation.id += ":" + thread_ts;
+      }   
+      await context.sendActivity(replyActivity);
+  }
 
     if (context.activity.text && activeThreads[thread_ts]) {
 
