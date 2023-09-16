@@ -11,14 +11,23 @@ function processSlackResponseMessage(assistantResponse) {
     return `slack_chat_path: ${assistantResponse}`;
 }
 
+let activeThreads = {};
 async function handleSlackMessage(context, assistantResponse) {
   let thread_ts = "";
-  let isThreadReply = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event && context.activity.channelData.SlackMessage.event.thread_ts;
+  
+  if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
+      thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+  }
+  
+  // Check if the message is part of a thread
+  let isThreadReply = thread_ts && (context.activity.channelData.SlackMessage.event.thread_ts === thread_ts);
+  
+  // If the message includes '@bot' or '@atbot', add the thread to the activeThreads 
+  if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
+    activeThreads[thread_ts] = true;
+  }
 
-  if (context.activity.text && ((context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) || (isThreadReply && context.activity.channelData.SlackMessage.event.thread_ts === isThreadReply && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))))) {
-      if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-          thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-      }
+  if (context.activity.text && activeThreads[thread_ts]) {
 
       if (context.activity.channelId === 'slack' && thread_ts != "") {
           // process the assistant response message for Slack
