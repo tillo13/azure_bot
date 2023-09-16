@@ -127,6 +127,7 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId, shoul
   });
 }
 
+let activeThreads = {};
 async function handleSlackMessage(context, assistantResponse) {
   // Extract Bot Token from context
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
