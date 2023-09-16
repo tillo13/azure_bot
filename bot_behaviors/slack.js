@@ -179,15 +179,9 @@ let messageLog = await logUserConversation(channel_id, thread_ts, apiToken, botI
 
             // if assistantResponse contains the 'Let me check' string then log the user conversation to Slack
             if(assistantResponse.includes('Let me check our past conversations, one moment...')) {
-                // get the channel_id
-                let channel_id = context.activity.channelData.SlackMessage.event.channel;  
-                // get the thread_ts
-                let thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-                // log conversation
-                console.log("\n\n***SLACK.JS: Let me check path invoked, trying to post to slack!!\n\n");
-                let messageLog = await logUserConversation(channel_id, thread_ts, apiToken, botId, true);
-                await postMessageToSlack(channel_id, thread_ts, messageLog, apiToken); // Use messageLog here instead of assistantResponse
-            }
+              // log conversation
+              await logUserConversation(channel_id, thread_ts, apiToken, botId, true);
+          }
 
             // try to send as thread reply in Slack
             try {     
