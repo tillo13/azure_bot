@@ -50,6 +50,7 @@ class EchoBot extends ActivityHandler {
           chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
 
           await this.chatMessagesProperty.set(context, chatMessagesUser);
+          console.log("\n\n***BOT_ROUTER.JS: chatMessages after saving:", chatMessagesUser);
 
           if (isFromSlack(context)) {
               await handleSlackMessage(context, chatResponse.assistantResponse);
@@ -58,15 +59,20 @@ class EchoBot extends ActivityHandler {
               await context.sendActivity(replyActivity);
           }
 
+          console.log('\n\n***BOT_ROUTER.JS onMessage - chat messages after update:', chatMessagesUser);
+          console.log("/n/n****BOT_ROUTER.JS channelData: ", JSON.stringify(context.activity.channelData, null, 2));
           await next();
         });
     }
 
     async run(context) {
-        await super.run(context);
+      await super.run(context);
+      console.log('Saving state changes|');
 
-        await this.userState.saveChanges(context);
-    }
+      await this.userState.saveChanges(context);
+      console.log('Saved state changes|');
+
+  }
 }
 
 module.exports.EchoBot = EchoBot;
