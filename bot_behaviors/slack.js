@@ -12,9 +12,13 @@ function processSlackResponseMessage(assistantResponse) {
 }
 
 async function handleSlackMessage(context, assistantResponse) {
+  let thread_ts = "";
   let isThreadReply = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event && context.activity.channelData.SlackMessage.event.thread_ts;
 
   if (context.activity.text && ((context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) || (isThreadReply && context.activity.channelData.SlackMessage.event.thread_ts === isThreadReply && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))))) {
+      if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
+          thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+      }
 
       if (context.activity.channelId === 'slack' && thread_ts != "") {
           // process the assistant response message for Slack
