@@ -29,7 +29,9 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
       });
       res.on('end', () => {
 
-        let messages = JSON.parse(responsePayload).messages.filter(msg => msg['bot_id'] === undefined );
+
+        let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
+
 
         console.log('***EXTRAPOLATED CHRONOLOGICAL USER SUBMITS VIA CONVERSATIONS.REPLIES API FROM SLACK***');
         messages.forEach((msg, idx) => {
