@@ -53,6 +53,8 @@ class EchoBot extends ActivityHandler {
 
           if (isFromSlack(context)) {
             await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
+            console.log('\n***BOT_ROUTER.JS: letMeCheckFlag is: ', letMeCheckFlag);
+
           } else {
               const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
               await context.sendActivity(replyActivity);
