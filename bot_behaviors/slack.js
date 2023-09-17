@@ -227,11 +227,27 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
         }
 
         // Send slack payload to a thread only
-        await context.sendActivity({
-          text: slackMessageResponse,
-          thread_ts: thread_ts,
-          channelId: channel_id
-        })
+        try {
+
+          await context.sendActivity({
+            text: slackMessageResponse,
+            thread_ts: thread_ts, 
+            channelId: channel_id
+          });
+        
+        } catch (error) {
+        
+          // Log error
+          console.error('***\n\nSLACK.JS: Error sending Slack message: ', error);
+        
+          // Handle error in bot response
+          const errorMessage = {
+            text: 'Sorry, there was an error sending the message. Please try again.'  
+          }
+        
+          await context.sendActivity(errorMessage);
+        
+        }
 
       } catch (error) {
         console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
