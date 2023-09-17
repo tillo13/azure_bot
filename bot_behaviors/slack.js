@@ -116,7 +116,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
 
         // Format the messages
-        let formattedMessages = "\n***SLACK.JS: LET ME CHECK PATH INVOKED!!!\nUSER MESSAGES IN THIS THREAD**";
+        let formattedMessages = "\n***SLACK.JS: LET ME CHECK PATH INVOKED!!!\nUSER MESSAGES IN THIS THREAD**\n";
         messages.forEach((msg, idx) => {
           formattedMessages += `\n${idx + 1}. [${msg.ts}] ${msg.text}\n`;
         });
