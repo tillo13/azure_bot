@@ -170,7 +170,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   console.log('\n***SLACK.JS: handleSlackMessage called with assistantResponse: ', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag: ', letMeCheckFlag);
 
-  // Extract Bot Token from context
+  // Extract Bot Token from context.
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
 
   // Get bot id
