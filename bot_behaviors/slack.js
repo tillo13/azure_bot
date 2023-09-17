@@ -167,8 +167,8 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 
 let activeThreads = {};
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
-  console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
-  console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
+  console.log('***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
+  console.log('***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
   // Extract Bot Token from context
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
@@ -187,8 +187,14 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   }
   
   if (!activeThreads[thread_ts]) {
-    console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING!', context.activity.text);
+    console.log('***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING!', context.activity.text);
     return;
+  }
+  
+  if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+    let apiToken = context.activity.channelData.ApiToken;
+    let channel_id = context.activity.channelData.SlackMessage.event.channel;
+    await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
   }
   
   if (context.activity.text && activeThreads[thread_ts]) {
@@ -209,12 +215,12 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
         
         await context.sendActivity(replyActivity);
       } catch (error) {
-        console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
+        console.error('***SLACK.JS: An error occurred while trying to reply in the thread:', error);
       }
     } else if (thread_ts === "") {
-      console.log('\n\n***SLACK.JS: Can\'t identify thread, not posting anything.***');
+      console.log('***SLACK.JS: Can\'t identify thread, not posting anything.***');
     } else {
-      console.log('\n\n***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
+      console.log('***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
       }
     }
   };
