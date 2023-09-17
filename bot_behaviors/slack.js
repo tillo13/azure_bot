@@ -188,7 +188,9 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
 
 
 
-  if (!context.activity.conversation.isGroup && !context.activity.channelData.thread_ts) {
+
+  if (context.activity.conversation.isGroup && !activeThreads[thread_ts]) {
+
     console.log('\n\n***SLACK.JS: A Slack payload was received, but @bot was not mentioned, nor was it in an already established @bot thread -- IGNORING!  User said: ', context.activity.text);
     return;
   }
