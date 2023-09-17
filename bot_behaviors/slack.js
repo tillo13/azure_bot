@@ -167,7 +167,8 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 
 let activeThreads = {};
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
-  console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse: ', assistantResponse);
+  console.log('\n***SLACK.JS: handleSlackMessage called with assistantResponse: ', assistantResponse);
+  console.log('\n\n***SLACK.JS: letMeCheckFlag: ', letMeCheckFlag);
 
   // Extract Bot Token from context
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;

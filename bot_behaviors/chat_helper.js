@@ -70,9 +70,9 @@ async function chatCompletion(chatTexts, roleMessage) {
             }
             result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
         }
-
         console.log(`\n\n\n***CHAT_HELPER.JS: Response from OpenAI API: ${JSON.stringify(result)}`);
 
+        console.log('\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
         return {
             'assistantResponse': result.choices[0].message.content,
             'requery': requeryStatus,
