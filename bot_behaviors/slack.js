@@ -130,15 +130,11 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         try {
           cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:";
         
-          let regexStart = /\*\*\*SLACK\.JS: letMeCheckFlag invoked!USER MESSAGES IN THIS THREAD\*\*/i;
-          let regexEnd = /\*\*\*END OF USER MESSAGES\*\*\*/i;
+          let regex = /(\*\*\*SLACK\.JS: letMeCheckFlag invoked! USER MESSAGES IN THIS THREAD\*\*\*|^\d+\.\s|\*\*\*END OF USER MESSAGES\*\*\*)/g;
         
-          // Check if formattedMessages contains the beginning and end sections and remove them
-          if (regexStart.test(formattedMessages) && regexEnd.test(formattedMessages)) {
-            formattedMessages = formattedMessages.replace(regexStart, '').replace(regexEnd, '');
-          }
+          let cleanedData = formattedMessages.replace(regex, '');
         
-          let lines = formattedMessages.split('\n');
+          let lines = cleanedData.split('\n');
         
           // Loop through lines
           lines.forEach(line => {
@@ -148,7 +144,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
             }
         
             // Remove spacing & newlines
-            line = line.replace(/^\d\. /, '').replace(/\n/g, ' ');
+            line = line.replace(/\n/g, ' ');
         
             // Append to cleaned version
             cleanedFormattedMessages += ` ${line}`;
