@@ -1,4 +1,4 @@
-//2023sept17 1210pm TEST GOLDEN VERSION//
+slack.js: //2023sept17 1213pm TEST GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
@@ -190,19 +190,18 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     activeThreads[thread_ts] = true;
   }
 
-  // Check if letMeCheckFlag is true
-  if (letMeCheckFlag) {
-    if (!thread_ts) {
-      console.log('\n\n***SLACK.JS: letMeCheckFlag is true but there is no thread_ts. Skipping "Let me check..." message.');
-    } else {
-      console.log('\n\n***SLACK.JS: Sending "Let me check our past conversations, one moment..." message');
-      await postMessageToSlack(context.activity.channelId, thread_ts, 'Let me check our past conversations, one moment...', apiToken);
-    }
-  }
 
   if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
     console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING!  User said: ', context.activity.text);
     return;
+  }
+
+  if (letMeCheckFlag) {
+    if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+      let apiToken = context.activity.channelData.ApiToken;
+      let channel_id = context.activity.channelData.SlackMessage.event.channel;
+      await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+    }
   }
 
   if (context.activity.text && activeThreads[thread_ts]) {
@@ -230,8 +229,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       console.log('\n\n***SLACK.JS: Can\'t identify thread, not posting anything.***');
     } else {
       console.log('\n\n***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
+      }
     }
-  }
-};
+  };
 
 module.exports = { handleSlackMessage, isFromSlack };
