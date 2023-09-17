@@ -186,7 +186,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     activeThreads[thread_ts] = true;
   }
 
-  if (!activeThreads[thread_ts] && thread_ts === "") {
+
+  if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
     console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING!', context.activity.text);
     return;
   }
