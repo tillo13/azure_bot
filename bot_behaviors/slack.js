@@ -88,7 +88,7 @@ async function logUserConversation(channel_id, thread_ts, apiToken, botId) {
 
 let activeThreads = {};
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
-  console.log('***SLACK.JS: letMeCheckFlag is: ', letMeCheckFlag);
+  console.log('\n\n***SLACK.JS: letMeCheckFlag is: ', letMeCheckFlag);
 
   // Extract Bot Token from context
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;

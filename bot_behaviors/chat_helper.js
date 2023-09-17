@@ -19,7 +19,7 @@ function shouldRequery(responseContent) {
     }
 
     let patterns = [
-        "as an ai",
+        "as an AI",
         "access to personal information",
         "I do not have access to previous conversations",
         "I don't have access to information shared in previous conversations",
@@ -33,7 +33,15 @@ function shouldRequery(responseContent) {
 async function chatCompletion(chatTexts, roleMessage) {
     console.log('\n***CHAT_HELPER.JS: chatCompletion', chatTexts);
     
-    let letMeCheckFlag = false;
+    let letMeCheckFlag = false;    // initialize flag
+
+    // Check chat history for the specific message
+    for (let i = chatTexts.length - 1; i >= 0; i--) {
+        if (chatTexts[i].role === "assistant" && chatTexts[i].content === "Let me check our past conversations, one moment...") {
+            letMeCheckFlag = true;
+            break;
+        }
+    }
 
     const endpoint = process.env.OPENAI_API_BASE_URL;
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
@@ -56,7 +64,6 @@ async function chatCompletion(chatTexts, roleMessage) {
    try {
     let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
 
-    // Only proceed if result and result.choices[0] and result.choices[0].message and result.choices[0].message.content exist 
     if (result && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
         let requeryStatus = shouldRequery(result.choices[0].message.content);
 
@@ -64,7 +71,6 @@ async function chatCompletion(chatTexts, roleMessage) {
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
                     chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..." };
-                    letMeCheckFlag = true;  // Flag set here when assistant is crafting the 'Let me check our past conversations, one moment...' response
                     break;
                 }
             }
