@@ -202,33 +202,33 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   
   
     if (context.activity.text && activeThreads[thread_ts]) {
-  
       if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-        let apiToken = context.activity.channelData.ApiToken;  
-        let channel_id = context.activity.channelData.SlackMessage.event.channel;  
-        await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+        let apiToken = context.activity.channelData.ApiToken;
+        let channel_id = context.activity.channelData.SlackMessage.event.channel;
         
+        await logUserConversation(channel_id, thread_ts, apiToken, botId);
+    
         // process the assistant response message for Slack
         let slackMessageResponse = processSlackResponseMessage(assistantResponse);
         const replyActivity = MessageFactory.text(slackMessageResponse);
     
-        try {     
-            replyActivity.conversation = context.activity.conversation;
+        // try to send as thread reply in Slack
+        try {
+          replyActivity.conversation = context.activity.conversation;
     
-            // verify if thread_ts is already in the conversation id
-            if (!replyActivity.conversation.id.includes(thread_ts)) {
-                replyActivity.conversation.id += ":" + thread_ts;
-            }   
+          // verify if thread_ts is already in the conversation id
+          if (!replyActivity.conversation.id.includes(thread_ts)) {
+            replyActivity.conversation.id += ":" + thread_ts;
+          }
     
-            await context.sendActivity(replyActivity);
+          await context.sendActivity(replyActivity);
         } catch (error) {
-            console.error("An error occurred while trying to reply in thread: ", error);
+          console.error("An error occurred while trying to reply in the thread: ", error);
         }
-      } else if (thread_ts == "") {
-          console.log("\n\n***SLACK.JS: Can't identify thread, not posting anything.***\n\n");
+      } else if (thread_ts === "") {
+        console.log(" ***SLACK.JS: Can't identify thread, not posting anything.*** ");
       } else {
-          // log a message
-          console.log("\n\n***SLACK.JS: Message is not invoking the bot, ignore for now!***\n\n");
+        console.log(" ***SLACK.JS: Message is not invoking the bot, ignoring for now!*** ");
       }
     }
   };
