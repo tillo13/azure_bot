@@ -32,6 +32,8 @@ function shouldRequery(responseContent) {
 
 async function chatCompletion(chatTexts, roleMessage) {
     console.log('\n***CHAT_HELPER.JS: chatCompletion', chatTexts);
+    
+    let letMeCheckFlag = false;
 
     const endpoint = process.env.OPENAI_API_BASE_URL;
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
@@ -62,6 +64,7 @@ async function chatCompletion(chatTexts, roleMessage) {
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
                     chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..." };
+                    letMeCheckFlag = true;  // Flag set here when assistant is crafting the 'Let me check our past conversations, one moment...' response
                     break;
                 }
             }
@@ -70,21 +73,23 @@ async function chatCompletion(chatTexts, roleMessage) {
 
         console.log(`\n\n\n***CHAT_HELPER.JS: Response from OpenAI API: ${JSON.stringify(result)}`);
 
-return {
-  'assistantResponse': result.choices[0].message.content,
-  'requery': requeryStatus
-};
-} else {
-console.log("No content in API response");
-return {
-  'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
-  'requery': false
-};
-}
+        return {
+            'assistantResponse': result.choices[0].message.content,
+            'requery': requeryStatus,
+            'letMeCheckFlag': letMeCheckFlag
+        };
+    } else {
+        console.log("No content in API response");
+        return {
+            'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
+            'requery': false,
+            'letMeCheckFlag': letMeCheckFlag
+        };
+    }
 } 
 catch (error) {
-console.error("An error occurred while interacting with OpenAI API", error);
-throw error;
+   console.error("An error occurred while interacting with OpenAI API", error);
+   throw error;
 }
 }
 

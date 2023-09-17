@@ -166,7 +166,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 };
 
 let activeThreads = {};
-async function handleSlackMessage(context, assistantResponse) {
+async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse: ', assistantResponse);
 
   // Extract Bot Token from context
@@ -217,16 +217,12 @@ async function handleSlackMessage(context, assistantResponse) {
             await context.sendActivity(replyActivity);
           
             // if assistantResponse is 'Let me check our past conversations, one moment...'
-            if (assistantResponse.includes('Let me check our past conversations, one moment...')) {
+            if (assistantResponse.includes('Let me check our past conversations, one moment...') && letMeCheckFlag) {
               console.log("\n\n***SLACK.JS: Specific assistant message detected! Posting chat history to Slack.");
               let messageLog = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
               console.log('\n****SLACK.JS: Chat history fetched from Slack.');
-
-              // Here, you post the history message to Slack
-              console.log("\n\n***SLACK.JS: postChatHistoryToSlack will be called with the following parameters:\n");
-              console.log(`Channel Id: ${channel_id}\nThread Timestamp: ${thread_ts}\nAPI Token: ${apiToken}\nBotId: ${botId}`);
               await postMessageToSlack(channel_id, thread_ts, messageLog, apiToken);
-              console.log('\n\n***SLACK.JS: Successfully posted a message to Slack.');
+               console.log('\n\n***SLACK.JS: Successfully posted a message to Slack.');
             }
           
           } catch (error) {
