@@ -1,4 +1,4 @@
-//2023sept17 1138am WORKING GOLDEN VERSION//
+//2023sept17 1150am testing GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
@@ -121,7 +121,11 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
           formattedMessages += `\n${idx + 1}. [${msg.ts}] ${msg.text}`;
         });
         formattedMessages += "\n***END OF USER MESSAGES***";
-        resolve(formattedMessages);
+        //adding these 2 lines to print to the console, regardless
+        console.log(formattedMessages); 
+        resolve();
+        //uncomment this and remove the above lines to not print to console
+        //resolve(formattedMessages);
 
         // Call chat.postMessage API
         let postOptions = {
