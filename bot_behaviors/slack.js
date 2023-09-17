@@ -4,8 +4,6 @@ const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
 const https = require('https');
 
-//do this at the start to know where to post replies
-const thread_ts = context.activity.channelData.slackMessage.event.thread_ts;
 
 function isFromSlack(context) {
   return context.activity.channelId === 'slack';
@@ -177,6 +175,11 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
+  // Extract IDs from payload  
+  const thread_ts = context.activity.channelData.slackMessage.event.thread_ts;
+  const channel_id = context.activity.channelData.slackMessage.event.channel;
+  
+
   // Extract Bot Token from context
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
 
@@ -184,7 +187,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   let botId = await getBotId(apiToken);
   console.log('\n\n***SLACK.JS: EXTRACTED BOTID:', botId);
 
-  let thread_ts = "";
+
   if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
     thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
   }
@@ -224,7 +227,30 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
           replyActivity.conversation.id += ':' + thread_ts;
         }
 
-        await context.sendActivity(replyActivity);
+        // Try sending in thread 
+        try {
+
+          await context.sendActivity({
+            text: slackMessageResponse,
+            thread_ts: thread_ts,
+            channelId: channel_id
+          });
+
+        } catch (error) {
+
+          // Log error
+          console.error('Error sending message in thread:', error);
+
+          // Fallback to main channel
+          await context.sendActivity({
+            text: slackMessageResponse, 
+            channelId: channel_id
+          });
+          
+          // Log fallback  
+          console.log('Sent message in main channel instead');
+
+        }
       } catch (error) {
         console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
       }
