@@ -184,12 +184,12 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
 
   if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
     activeThreads[thread_ts] = true;
+    console.log('\n\n***SLACK.JS: Marked active thread:', thread_ts);
+
   }
 
-
-
-
   if (context.activity.conversation.isGroup && !activeThreads[thread_ts]) {
+
 
     console.log('\n\n***SLACK.JS: A Slack payload was received, but @bot was not mentioned, nor was it in an already established @bot thread -- IGNORING!  User said: ', context.activity.text);
     return;
@@ -203,7 +203,9 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     }
   }
 
-  if (context.activity.text && activeThreads[thread_ts]) {
+  //if (context.activity.text && activeThreads[thread_ts]) {
+  if (context.activity.conversation.isGroup && activeThreads[thread_ts]) {
+
     console.log('\n\n***SLACK.JS: Latest user posted message:', context.activity.text); // Always log user message in the console
 
     if (context.activity.channelId === 'slack' && thread_ts !== "") {
