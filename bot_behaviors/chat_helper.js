@@ -45,7 +45,7 @@ async function chatCompletion(chatTexts, roleMessage) {
         chatMessages.unshift({ role: "system", content: roleMessage });
     }
 
-    console.log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:\n\n
+    console.log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:\n
       Endpoint: ${endpoint}
       Deployment Id: ${deploymentId}
       Messages: ${JSON.stringify(chatMessages)}
@@ -71,7 +71,7 @@ async function chatCompletion(chatTexts, roleMessage) {
         
             result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
         }
-        console.log(`\n\n\n***CHAT_HELPER.JS: Response from OpenAI API: ${JSON.stringify(result)}`);
+        console.log(`\n\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n ${JSON.stringify(result)}`);
 
         console.log('\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
         return {

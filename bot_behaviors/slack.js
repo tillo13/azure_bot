@@ -172,47 +172,50 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
 
   // Extract Bot Token from context
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
-  
+
   // Get bot id
   let botId = await getBotId(apiToken);
   console.log('***SLACK.JS: EXTRACTED BOTID:', botId);
-  
+
   let thread_ts = "";
   if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
     thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
   }
-  
+
   if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
     activeThreads[thread_ts] = true;
   }
-  
+
   if (!activeThreads[thread_ts]) {
     console.log('***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING!', context.activity.text);
     return;
   }
-  
-  if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-    let apiToken = context.activity.channelData.ApiToken;
-    let channel_id = context.activity.channelData.SlackMessage.event.channel;
-    await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+
+  if (letMeCheckFlag) {
+    if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+      let apiToken = context.activity.channelData.ApiToken;
+      let channel_id = context.activity.channelData.SlackMessage.event.channel;
+      await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+    }
   }
-  
+
   if (context.activity.text && activeThreads[thread_ts]) {
+    console.log('User Message:', context.activity.text); // Always log user message in the console
+
     if (context.activity.channelId === 'slack' && thread_ts !== "") {
-    
       // Process the assistant response message for Slack
       let slackMessageResponse = processSlackResponseMessage(assistantResponse);
       const replyActivity = MessageFactory.text(slackMessageResponse);
-      
+
       // Try to send as thread reply in Slack
       try {
         replyActivity.conversation = context.activity.conversation;
-        
+
         // Verify if thread_ts is already in the conversation id
         if (!replyActivity.conversation.id.includes(thread_ts)) {
           replyActivity.conversation.id += ':' + thread_ts;
         }
-        
+
         await context.sendActivity(replyActivity);
       } catch (error) {
         console.error('***SLACK.JS: An error occurred while trying to reply in the thread:', error);
