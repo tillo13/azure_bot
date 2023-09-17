@@ -30,7 +30,7 @@ function shouldRequery(responseContent) {
 }
 
 async function chatCompletion(chatTexts, roleMessage) {
-    console.log('\n***CHAT_HELPER.JS: chatCompletion', chatTexts);
+    //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
     
     let letMeCheckFlag = false;
 
@@ -45,7 +45,7 @@ async function chatCompletion(chatTexts, roleMessage) {
         chatMessages.unshift({ role: "system", content: roleMessage });
     }
 
-    console.log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:
+    console.log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:\n\n
       Endpoint: ${endpoint}
       Deployment Id: ${deploymentId}
       Messages: ${JSON.stringify(chatMessages)}

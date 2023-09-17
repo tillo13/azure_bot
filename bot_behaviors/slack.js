@@ -136,13 +136,13 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 
         let postReq = https.request(postOptions, res => {
           res.on('end', () => {
-            console.log('\n****SLACK.JS: Successful postChatHistoryToSlack()');
+            console.log('\n\n****SLACK.JS: Successful postChatHistoryToSlack()');
             resolve();
           });
         });
 
         postReq.on('error', error => {
-          console.error('\n****SLACK.JS: Error during postChatHistoryToSlack() post request:', error);
+          console.error('\n\n****SLACK.JS: Error during postChatHistoryToSlack() post request:', error);
           reject(error);
         });
 
@@ -157,7 +157,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
     });
 
     req.on('error', error => {
-      console.error("\n****SLACK.JS: Error in postChatHistoryToSlack(): ", error);
+      console.error("\n\n****SLACK.JS: Error in postChatHistoryToSlack(): ", error);
       reject(error);
     });
 
@@ -167,8 +167,8 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 
 let activeThreads = {};
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
-  console.log('***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
-  console.log('***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
+  console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
+  console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
   // Extract Bot Token from context
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
@@ -187,7 +187,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   }
   
   if (!activeThreads[thread_ts]) {
-    console.log('***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING!', context.activity.text);
+    console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING!', context.activity.text);
     return;
   }
   
@@ -209,12 +209,12 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
         
         await context.sendActivity(replyActivity);
       } catch (error) {
-        console.error('***SLACK.JS: An error occurred while trying to reply in the thread:', error);
+        console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
       }
     } else if (thread_ts === "") {
-      console.log('***SLACK.JS: Can\'t identify thread, not posting anything.***');
+      console.log('\n\n***SLACK.JS: Can\'t identify thread, not posting anything.***');
     } else {
-      console.log('***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
+      console.log('\n\n***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
       }
     }
   };
