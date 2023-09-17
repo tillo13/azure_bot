@@ -136,13 +136,14 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
             .replace(/SLACK.JS: letMeCheckFlag invoked!/i, '')
             .replace(/USER MESSAGES IN THIS THREAD/i, '')
             .replace(/END OF USER MESSAGES/i, '')
+            .replace(/\n/g, ' ') // remove newline characters
             .trim();
         } catch (err) {
           console.error('Error while parsing the message: ', err);
           cleanedFormattedMessages = formattedMessages;
         }
         
-        console.log('\n\n****SLACK.JS: cleaned letMeCheckFlag', cleanedFormattedMessages);
+        console.log('\n\n****SLACK.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
         
         resolve();
 
