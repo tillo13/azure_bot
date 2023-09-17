@@ -197,14 +197,10 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       let channel_id = context.activity.channelData.SlackMessage.event.channel;
       await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
     }
-  } else {
-    console.log('***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
-    console.log('User Message:', context.activity.text); // Log the user message to console
-    return;
   }
 
   if (context.activity.text && activeThreads[thread_ts]) {
-    console.log('User Message:', context.activity.text); // Log the user message to console
+    console.log('User Message:', context.activity.text); // Always log user message in the console
 
     if (context.activity.channelId === 'slack' && thread_ts !== "") {
       // Process the assistant response message for Slack
