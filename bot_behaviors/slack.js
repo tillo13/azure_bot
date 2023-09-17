@@ -175,22 +175,19 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
-  // First check if channelData exists
+
+  // Extract IDs 
+  let thread_ts, channel_id;
+  
   if (context.activity.channelData) {
-
-    // Now it's safe to access channelData
-
+  
     const slackData = context.activity.channelData.slackMessage;
-
-    // Check if event exists on slackData
+  
     if (slackData && slackData.event) {
-
-      // Now safe to get thread_ts and channel_id
-      const thread_ts = slackData.event.thread_ts; 
-      const channel_id = slackData.event.channel;
-
+      thread_ts = slackData.event.thread_ts;
+      channel_id = slackData.event.channel; 
     }
-
+  
   }
   
 
