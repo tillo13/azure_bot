@@ -1,4 +1,4 @@
-//2023sept17 1150am testing GOLDEN VERSION//
+//2023sept17 1203pm PROD GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
@@ -116,7 +116,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
 
         // Format the messages
-        let formattedMessages = "\n***SLACK.JS: USER MESSAGES IN THIS THREAD**\n";
+        let formattedMessages = "\n***SLACK.JS: letMeCheckFlag invoked!\nUSER MESSAGES IN THIS THREAD**\n";
         messages.forEach((msg, idx) => {
           formattedMessages += `\n${idx + 1}. [${msg.ts}] ${msg.text}\n`;
         });
