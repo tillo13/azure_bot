@@ -27,7 +27,7 @@ function shouldRequery(responseContent) {
         // More patterns...
     ];
 
-    return patterns.some(pattern => responseContent.toLowerCase().includes(pattern));
+    return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
 async function chatCompletion(chatTexts, roleMessage) {
