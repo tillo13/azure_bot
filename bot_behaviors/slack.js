@@ -203,9 +203,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     }
   }
 
-  //if (context.activity.text && activeThreads[thread_ts]) {
-  if (context.activity.conversation.isGroup && activeThreads[thread_ts]) {
-
+  if (context.activity.text && activeThreads[thread_ts]) {
     console.log('\n\n***SLACK.JS: Latest user posted message:', context.activity.text); // Always log user message in the console
 
     if (context.activity.channelId === 'slack' && thread_ts !== "") {
