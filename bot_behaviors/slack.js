@@ -1,4 +1,4 @@
-slack.js: //2023sept17 1053m testing GOLDEN VERSION//
+//2023sept17 1053m testing GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
