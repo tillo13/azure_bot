@@ -128,26 +128,15 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         let cleanedFormattedMessages;
 
         try {
-          cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:";
+          // Define the regular expressions for the start and end flags
+          let regexStart = /\*\*\*\*SLACK\.JS: letMeCheckFlag invoked! USER MESSAGES IN THIS THREAD\*\*\*/igm;
+          let regexEnd = /\*\*\*\*END OF USER MESSAGES\*\*\*/igm;
         
-          // updated regex
-          let regex = /\*\*\*SLACK\.JS: letMeCheckFlag invoked! USER MESSAGES IN THIS THREAD\*\*\*(\s|\n)*/ig;
-        
-          let cleanedData = formattedMessages.replace(regex, '').trim();
-          // removing ***END OF USER Messages*** separately (if it exists)
-          cleanedData = cleanedData.replace(/\*\*\*END OF USER MESSAGES\*\*\*$/, '').trim();  
-          let lines = cleanedData.split('\n');
-        
-          // Loop through lines
-          lines.forEach(line => {
-            // Remove blank lines
-            if (line.trim() === '') {
-              return;
-            }
-        
-            // Append to cleaned version
-            cleanedFormattedMessages += ` ${line.trim()}`;
-          });
+          // Remove the start and end flags from the original string
+          cleanedFormattedMessages = formattedMessages
+            .replace(regexStart, '')
+            .replace(regexEnd, '')
+            .trim(); // Trims the white spaces at the start and the end
         
         } catch (err) {
           console.error('Error while parsing the message: ', err);
@@ -155,8 +144,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         }
         
         // Log cleaned version
-        console.error('\n\n****SLACK.JS: cleaned openai ready payload: ', cleanedFormattedMessages);
-        
+        console.error('\n\n****SLACK.JS: cleaned openai ready payload: ', cleanedFormattedMessages);        
         resolve();
 
         // Call chat.postMessage API
