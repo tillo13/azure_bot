@@ -130,10 +130,12 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         try {
           cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:";
         
-          // custom regex to match the given patterns and avoid striping intended white spaces
-          let regex = /(\*\*\*SLACK\.JS: letMeCheckFlag invoked!\s*USER MESSAGES IN THIS THREAD\*\*\*\s*|(\*\*\*END OF USER MESSAGES\*\*\*)$)/ig;
+          // updated regex
+          let regex = /\*\*\*SLACK\.JS: letMeCheckFlag invoked! USER MESSAGES IN THIS THREAD\*\*\*(\s|\n)*/ig;
         
           let cleanedData = formattedMessages.replace(regex, '').trim();
+          // removing ***END OF USER Messages*** separately (if it exists)
+          cleanedData = cleanedData.replace(/\*\*\*END OF USER MESSAGES\*\*\*$/, '').trim();  
           let lines = cleanedData.split('\n');
         
           // Loop through lines
