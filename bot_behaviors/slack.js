@@ -1,8 +1,13 @@
-//2023sept17 1213pm TEST GOLDEN VERSION//
+//2023sept17 1232pm TEST GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
 const https = require('https');
+
+//do this at the start to know where to post the message
+const thread_ts = context.activity.channelData.slackMessage.event.thread_ts;
+const channel_id = context.activity.channelData.slackMessage.event.channel;
+
 
 function isFromSlack(context) {
   return context.activity.channelId === 'slack';
@@ -221,7 +226,13 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
           replyActivity.conversation.id += ':' + thread_ts;
         }
 
-        await context.sendActivity(replyActivity);
+        // Send slack payload to a thread only
+        await context.sendActivity({
+          text: slackMessageResponse,
+          thread_ts: thread_ts,
+          channelId: channel_id
+        })
+
       } catch (error) {
         console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
       }
