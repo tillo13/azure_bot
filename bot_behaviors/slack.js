@@ -238,27 +238,29 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
           replyActivity.conversation.id += ':' + thread_ts;
         }
 
-        // Try sending in thread 
+        // Try sending in thread first
         if (thread_ts && channel_id) {
 
         try {
 
-          await context.sendActivity({
+          const response = await context.sendActivity({
             text: slackMessageResponse,
             thread_ts: thread_ts,
             channelId: channel_id
           });
+          console.log("\n\n***SLACK.JS: in-thread send response:", response);
 
         } catch (error) {
 
           // Log error
           console.error('Error sending message in thread:', error);
 
-          // Fallback to main channel
-          await context.sendActivity({
+          // Fallback to main channel if we cannot post to thread, not ideal, but should not hit if code works so /shrug
+          const response = await context.sendActivity({
             text: slackMessageResponse, 
             channelId: channel_id
           });
+          console.log("\n\n***SLACK.JS: in main channel, send response:", response);
           
           // Log fallback  
           console.log('Sent message in main channel instead');
