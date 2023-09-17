@@ -61,13 +61,15 @@ async function chatCompletion(chatTexts, roleMessage) {
         let requeryStatus = shouldRequery(result.choices[0].message.content);
 
         if (requeryStatus) {
+            letMeCheckFlag = true;  // this is set if anything from shouldRequery function is hit...
+        
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
                     chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..." };
-                    letMeCheckFlag = true;  // Flag set here when assistant is crafting the 'Let me check our past conversations, one moment...' response
                     break;
                 }
             }
+        
             result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
         }
         console.log(`\n\n\n***CHAT_HELPER.JS: Response from OpenAI API: ${JSON.stringify(result)}`);
