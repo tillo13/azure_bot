@@ -185,7 +185,7 @@ async function handleSlackMessage(context, assistantResponse) {
   let isThreadReply = thread_ts && (context.activity.channelData.SlackMessage.event.thread_ts === thread_ts);
   
   if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
-    activeThreads[thread_ts] =true;
+    activeThreads[thread_ts] = true;
   }
   
   if (!activeThreads[thread_ts]) {
@@ -210,10 +210,14 @@ async function handleSlackMessage(context, assistantResponse) {
         }
         
         await context.sendActivity(replyActivity);
+        
+        var postExtrapolatedToSlack = false;
       
         // if assistantResponse is 'Let me check our past conversations, one moment...'
         if (assistantResponse.includes('Let me check our past conversations, one moment...')) {
           console.log("\n\n***SLACK.JS: Specific assistant message detected! Preparing to post chat history to Slack.");
+          postExtrapolatedToSlack = true;
+
           // call postChatHistoryToSlack to get chat history
           let messageLog = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
           console.log('\n****SLACK.JS: Chat history fetched from Slack.');
@@ -224,6 +228,8 @@ async function handleSlackMessage(context, assistantResponse) {
           await postMessageToSlack(channel_id, thread_ts, messageLog, apiToken);
           console.log('\n\n***SLACK.JS: Successfully posted a message to Slack.');
         }
+
+        console.log("\n\n***SLACK.JS: Value of postExtrapolatedToSlack: ", postExtrapolatedToSlack);
             
       } catch (error) {
         console.error("An error occurred while trying to reply in thread: ", error);
