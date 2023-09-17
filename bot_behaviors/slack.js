@@ -1,4 +1,4 @@
-//2023sept17 219pm TEST GOLDEN VERSION//
+//2023sept17 1203pm PROD GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
@@ -125,45 +125,46 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         console.log(formattedMessages); 
 
         // Create cleaned version of the payload
+        let cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:"
+
         // Split into lines
-        const lines = formattedMessages.split('\n');
-
-        // Initialize cleaned string 
-        let cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:";
-
-        // Keep track if we are between header and footer
-        let inBody = false;
+        let lines = formattedMessages.split('\n');
 
         // Loop through lines
         lines.forEach(line => {
 
-          // Check if line contains header 
-          if (line.includes('***SLACK_JS: letMeCheckFlag invoked!')) {
-            inBody = true;
+          // Remove blank lines
+          if(line.trim() === '') {
             return;
           }
-          
-          // Check if line contains footer
-          if (line.includes('***END OF USER MESSAGES***')) {
-            inBody = false;
-            return; 
-          }
 
-          // If between header and footer
-          if (inBody) {  
-          
-            // Clean up line
-            line = line.replace(/^\d\. /, '').replace(/\n/g,' ');
+          // Remove spacing & newlines
+          line = line.replace(/^\d\. /, '').replace(/\n/g,' ');
 
-            // Append 
-            cleanedFormattedMessages += ` ${line}`;
+          // Append to cleaned version
+          cleanedFormattedMessages += ` ${line}`;
 
-          }
+
+          // Initial cleaned message with header/footer
+          let cleanedFormattedMessages2 = cleanedFormattedMessages;
+
+          // Regex to match header and footer
+          const regex = /^\*\*\*[^\*]+/g; 
+
+          // Trim those parts off
+          cleanedFormattedMessages2 = cleanedFormattedMessages2.replace(regex, '');
+
+          // Trim any remaining whitespace
+          cleanedFormattedMessages2 = cleanedFormattedMessage2s.trim();
+
+
+
+
 
         });
 
         // Log cleaned version
-        console.error('\n\n****SLACK.JS: cleaned letMeCheckFlag', cleanedFormattedMessages);
+        console.error('\n\n****SLACK.JS: cleaned letMeCheckFlag', cleanedFormattedMessages2);
         resolve();
 
         // Call chat.postMessage API
