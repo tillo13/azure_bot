@@ -175,9 +175,23 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
-  // Extract IDs from payload  
-  const thread_ts = context.activity.channelData.slackMessage.event.thread_ts;
-  const channel_id = context.activity.channelData.slackMessage.event.channel;
+  // First check if channelData exists
+  if (context.activity.channelData) {
+
+    // Now it's safe to access channelData
+
+    const slackData = context.activity.channelData.slackMessage;
+
+    // Check if event exists on slackData
+    if (slackData && slackData.event) {
+
+      // Now safe to get thread_ts and channel_id
+      const thread_ts = slackData.event.thread_ts; 
+      const channel_id = slackData.event.channel;
+
+    }
+
+  }
   
 
   // Extract Bot Token from context
@@ -228,6 +242,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
         }
 
         // Try sending in thread 
+        if (thread_ts && channel_id) {
+
         try {
 
           await context.sendActivity({
@@ -251,7 +267,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
           console.log('Sent message in main channel instead');
 
         }
-      } catch (error) {
+      }} catch (error) {
         console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
       }
     } else if (thread_ts === "") {
