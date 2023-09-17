@@ -52,7 +52,7 @@ class EchoBot extends ActivityHandler {
           console.log("\n\n***BOT_ROUTER.JS: chatMessages after saving:", chatMessagesUser);
 
           if (isFromSlack(context)) {
-              await handleSlackMessage(context, chatResponse.assistantResponse);
+            await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
           } else {
               const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
               await context.sendActivity(replyActivity);
