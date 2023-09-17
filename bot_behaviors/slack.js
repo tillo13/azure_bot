@@ -125,7 +125,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         console.log(formattedMessages); 
 
         //clean the message to add to openai later
-        let cleanedFormattedMessages;
+        let cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:";
 
         try {
           // Remove all stars
