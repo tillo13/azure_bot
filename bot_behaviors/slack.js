@@ -130,10 +130,10 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         try {
           cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:";
         
-          let regex = /(\*\*\*SLACK\.JS: letMeCheckFlag invoked! USER MESSAGES IN THIS THREAD\*\*\*|^\d+\.\s|\*\*\*END OF USER MESSAGES\*\*\*)/g;
+          // custom regex to match the given patterns and avoid striping intended white spaces
+          let regex = /(\*\*\*SLACK\.JS: letMeCheckFlag invoked!\s*USER MESSAGES IN THIS THREAD\*\*\*\s*|(\*\*\*END OF USER MESSAGES\*\*\*)$)/ig;
         
-          let cleanedData = formattedMessages.replace(regex, '');
-        
+          let cleanedData = formattedMessages.replace(regex, '').trim();
           let lines = cleanedData.split('\n');
         
           // Loop through lines
@@ -143,11 +143,8 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
               return;
             }
         
-            // Remove spacing & newlines
-            line = line.replace(/\n/g, ' ');
-        
             // Append to cleaned version
-            cleanedFormattedMessages += ` ${line}`;
+            cleanedFormattedMessages += ` ${line.trim()}`;
           });
         
         } catch (err) {
@@ -156,7 +153,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         }
         
         // Log cleaned version
-        console.error('\n\n****SLACK.JS: cleaned letMeCheckFlag', cleanedFormattedMessages);
+        console.error('\n\n****SLACK.JS: cleaned openai ready payload: ', cleanedFormattedMessages);
         
         resolve();
 
