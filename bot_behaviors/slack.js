@@ -124,32 +124,44 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         //adding these 2 lines to print to the console, regardless
         console.log(formattedMessages); 
 
-        // Start and End delimiters
-        let startKeyword = "***SLACK.JS: cleaned letMeCheckFlag ";
-        let endKeyword = " ***END OF USER MESSAGES***";
+        //clean the message to add to openai later
+        let cleanedFormattedMessages;
 
-        // Split into lines
-        let lines = formattedMessages.split(startKeyword)[1].split(endKeyword)[0].split('\n');
-
-        let cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:";
-
-        // Loop through lines
-        lines.forEach(line => {
-          // Remove blank lines
-          if(line.trim() === '') {
-            return;
+        try {
+          cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:";
+        
+          let regexStart = /\*\*\*SLACK\.JS: letMeCheckFlag invoked!USER MESSAGES IN THIS THREAD\*\*/i;
+          let regexEnd = /\*\*\*END OF USER MESSAGES\*\*\*/i;
+        
+          // Check if formattedMessages contains the beginning and end sections and remove them
+          if (regexStart.test(formattedMessages) && regexEnd.test(formattedMessages)) {
+            formattedMessages = formattedMessages.replace(regexStart, '').replace(regexEnd, '');
           }
-
-          // Remove spacing & newlines
-          line = line.replace(/^\d\. /, '').replace(/\n/g,' ');
-
-          // Append to cleaned version
-          cleanedFormattedMessages += ` ${line}`;
-        });
-
+        
+          let lines = formattedMessages.split('\n');
+        
+          // Loop through lines
+          lines.forEach(line => {
+            // Remove blank lines
+            if (line.trim() === '') {
+              return;
+            }
+        
+            // Remove spacing & newlines
+            line = line.replace(/^\d\. /, '').replace(/\n/g, ' ');
+        
+            // Append to cleaned version
+            cleanedFormattedMessages += ` ${line}`;
+          });
+        
+        } catch (err) {
+          console.error('Error while parsing the message: ', err);
+          cleanedFormattedMessages = formattedMessages;
+        }
+        
         // Log cleaned version
         console.error('\n\n****SLACK.JS: cleaned letMeCheckFlag', cleanedFormattedMessages);
-
+        
         resolve();
 
         // Call chat.postMessage API

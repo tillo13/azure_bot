@@ -22,6 +22,7 @@ function shouldRequery(responseContent) {
         "as an ai",
         "as an artificial intelligence",
         "as a digital assistant",
+        "as a computer program",
         "access to personal information",
         "access to previous conversations",
         "shared in previous conversations",
