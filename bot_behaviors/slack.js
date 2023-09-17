@@ -1,4 +1,4 @@
-//2023sept17 1203pm PROD GOLDEN VERSION//
+//2023sept17 205pm TEST GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
@@ -123,9 +123,34 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         formattedMessages += "\n***END OF USER MESSAGES***";
         //adding these 2 lines to print to the console, regardless
         console.log(formattedMessages); 
+
+        // Create cleaned version of the payload
+        let cleanedFormattedMessages = "Here is what the user has said so far in this thread, with timestamps:"
+
+        // Split into lines
+        let lines = formattedMessages.split('\n');
+
+        // Loop through lines
+        lines.forEach(line => {
+
+          // Remove blank lines
+          if(line.trim() === '') {
+            return;
+          }
+
+          // Remove spacing & newlines
+          line = line.replace(/^\d\. /, '').replace(/\n/g,' ');
+
+          // Append to cleaned version
+          cleanedFormattedMessages += ` ${line}`;
+
+        });
+
+        // Log cleaned version
+        console.log('\n\n****SLACK.JS: Cleaned payload of current convo:', (cleanedFormattedMessages);
+
+
         resolve();
-        //uncomment this and remove the above lines to not print to console
-        //resolve(formattedMessages);
 
         // Call chat.postMessage API
         let postOptions = {

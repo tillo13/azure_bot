@@ -21,8 +21,8 @@ function shouldRequery(responseContent) {
     let patterns = [
         "as an ai",
         "access to personal information",
-        "I do not have access to previous conversations",
-        "I don't have access to information shared in previous conversations",
+        "access to previous conversations",
+        "shared in previous conversations",
         // More patterns...
     ];
 
