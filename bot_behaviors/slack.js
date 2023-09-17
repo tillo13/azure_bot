@@ -116,16 +116,12 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
 
         // Format the messages
-        let formattedMessages = "\n***USER MESSAGES IN THIS THREAD**";
+        let formattedMessages = "\n***SLACK.JS: LET ME CHECK PATH INVOKED!!!\nUSER MESSAGES IN THIS THREAD**";
         messages.forEach((msg, idx) => {
-          formattedMessages += `\n${idx + 1}. [${msg.ts}] ${msg.text}`;
+          formattedMessages += `\n${idx + 1}. [${msg.ts}] ${msg.text}\n`;
         });
         formattedMessages += "\n***END OF USER MESSAGES***";
-        //adding these 2 lines to print to the console, regardless
-        console.log(formattedMessages); 
-        resolve();
-        //uncomment this and remove the above lines to not print to console
-        //resolve(formattedMessages);
+        resolve(formattedMessages);
 
         // Call chat.postMessage API
         let postOptions = {
