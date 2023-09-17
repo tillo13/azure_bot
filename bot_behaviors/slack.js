@@ -1,4 +1,4 @@
-//2023sept17 1203pm PROD GOLDEN VERSION//
+//2023sept17 219pm TEST GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
@@ -125,24 +125,40 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         console.log(formattedMessages); 
 
         // Create cleaned version of the payload
-        let cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:"
-
         // Split into lines
-        let lines = formattedMessages.split('\n');
+        const lines = formattedMessages.split('\n');
+
+        // Initialize cleaned string 
+        let cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:";
+
+        // Keep track if we are between header and footer
+        let inBody = false;
 
         // Loop through lines
         lines.forEach(line => {
 
-          // Remove blank lines
-          if(line.trim() === '') {
+          // Check if line contains header 
+          if (line.includes('***SLACK_JS: letMeCheckFlag invoked!')) {
+            inBody = true;
             return;
           }
+          
+          // Check if line contains footer
+          if (line.includes('***END OF USER MESSAGES***')) {
+            inBody = false;
+            return; 
+          }
 
-          // Remove spacing & newlines
-          line = line.replace(/^\d\. /, '').replace(/\n/g,' ');
+          // If between header and footer
+          if (inBody) {  
+          
+            // Clean up line
+            line = line.replace(/^\d\. /, '').replace(/\n/g,' ');
 
-          // Append to cleaned version
-          cleanedFormattedMessages += ` ${line}`;
+            // Append 
+            cleanedFormattedMessages += ` ${line}`;
+
+          }
 
         });
 
