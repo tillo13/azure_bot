@@ -128,23 +128,22 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         let cleanedFormattedMessages;
 
         try {
-          // Define the regular expressions for the start and end flags
-          let regexStart = /\*\*\*\*SLACK\.JS: letMeCheckFlag invoked! USER MESSAGES IN THIS THREAD\*\*\*/igm;
-          let regexEnd = /\*\*\*\*END OF USER MESSAGES\*\*\*/igm;
+          // Remove all stars
+          cleanedFormattedMessages = formattedMessages.replace(/\*/g, '');
         
-          // Remove the start and end flags from the original string
-          cleanedFormattedMessages = formattedMessages
-            .replace(regexStart, '')
-            .replace(regexEnd, '')
-            .trim(); // Trims the white spaces at the start and the end
-        
+          // Remove specific phrases
+          cleanedFormattedMessages = cleanedFormattedMessages
+            .replace(/SLACK.JS: letMeCheckFlag invoked!/i, '')
+            .replace(/USER MESSAGES IN THIS THREAD/i, '')
+            .replace(/END OF USER MESSAGES/i, '')
+            .trim();
         } catch (err) {
           console.error('Error while parsing the message: ', err);
           cleanedFormattedMessages = formattedMessages;
         }
         
-        // Log cleaned version
-        console.error('\n\n****SLACK.JS: cleaned openai ready payload: ', cleanedFormattedMessages);        
+        console.log('\n\n****SLACK.JS: cleaned letMeCheckFlag', cleanedFormattedMessages);
+        
         resolve();
 
         // Call chat.postMessage API
