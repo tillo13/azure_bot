@@ -38,18 +38,20 @@ class EchoBot extends ActivityHandler {
 
           chatMessagesUser.push({role:"user", content:context.activity.text});
 
-          let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+        // Get chatResponse without immediately adding assistant's message
+        let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
 
-          if(chatResponse.requery){
-              const requeryNotice = "Let me check our past conversations, one moment...";
-              await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-              chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
-          }
+        if(chatResponse.requery){
+            const requeryNotice = "Let me check our past conversations, one moment...";
+            await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
+            chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+        }
 
-          chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
+            // Now add the assistant's message to chatMessagesUser
+            chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
 
-          await this.chatMessagesProperty.set(context, chatMessagesUser);
-          console.log("\n\n***BOT_ROUTER.JS: chatMessages after saving:", chatMessagesUser);
+            await this.chatMessagesProperty.set(context, chatMessagesUser);
+            console.log("\n\n***BOT_ROUTER.JS: chatMessages after saving:", chatMessagesUser);
 
           if (isFromSlack(context)) {
             await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
