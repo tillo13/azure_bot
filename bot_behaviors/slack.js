@@ -124,15 +124,17 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         //adding these 2 lines to print to the console, regardless
         console.log(formattedMessages); 
 
-        // Create cleaned version of the payload
-        let cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:"
+        // Start and End delimiters
+        let startKeyword = "***SLACK.JS: cleaned letMeCheckFlag ";
+        let endKeyword = " ***END OF USER MESSAGES***";
 
         // Split into lines
-        let lines = formattedMessages.split('\n');
+        let lines = formattedMessages.split(startKeyword)[1].split(endKeyword)[0].split('\n');
+
+        let cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:";
 
         // Loop through lines
         lines.forEach(line => {
-
           // Remove blank lines
           if(line.trim() === '') {
             return;
@@ -143,12 +145,10 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 
           // Append to cleaned version
           cleanedFormattedMessages += ` ${line}`;
-
         });
 
         // Log cleaned version
         console.error('\n\n****SLACK.JS: cleaned letMeCheckFlag', cleanedFormattedMessages);
-
 
         resolve();
 

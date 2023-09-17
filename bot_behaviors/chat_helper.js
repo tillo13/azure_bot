@@ -20,6 +20,8 @@ function shouldRequery(responseContent) {
 
     let patterns = [
         "as an ai",
+        "as an artificial intelligence",
+        "as a digital assistant",
         "access to personal information",
         "access to previous conversations",
         "shared in previous conversations",
