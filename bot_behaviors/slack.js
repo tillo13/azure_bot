@@ -124,8 +124,8 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         //adding these 2 lines to print to the console, regardless
         console.log(formattedMessages); 
 
-        //clean the message to add to openai later
-        let cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps:";
+        //clean the payload and prepare it for openai
+        let cleanedFormattedMessages;
 
         try {
           // Remove all stars
@@ -138,9 +138,12 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
             .replace(/END OF USER MESSAGES/i, '')
             .replace(/\n/g, ' ') // remove newline characters
             .trim();
+        
+          cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps: " + cleanedFormattedMessages;
+        
         } catch (err) {
           console.error('Error while parsing the message: ', err);
-          cleanedFormattedMessages = formattedMessages;
+          cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps: " + formattedMessages;
         }
         
         console.log('\n\n****SLACK.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
