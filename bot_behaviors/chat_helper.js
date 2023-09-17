@@ -23,7 +23,6 @@ function shouldRequery(responseContent) {
         "access to personal information",
         "I do not have access to previous conversations",
         "I don't have access to information shared in previous conversations",
-        "I",
         // More patterns...
     ];
 
