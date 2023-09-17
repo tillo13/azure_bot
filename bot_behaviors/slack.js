@@ -1,4 +1,4 @@
-//2023sept17 1053m testing GOLDEN VERSION//
+//2023sept16 442pm testing GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
@@ -187,11 +187,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   }
 
 
-
-
-  if (context.activity.conversation.isGroup && !activeThreads[thread_ts]) {
-
-    console.log('\n\n***SLACK.JS: A Slack payload was received, but @bot was not mentioned, nor was it in an already established @bot thread -- IGNORING!  User said: ', context.activity.text);
+  if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
+    console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING!  User said: ', context.activity.text);
     return;
   }
 
