@@ -201,7 +201,7 @@ async function handleSlackMessage(context, assistantResponse) {
       let slackMessageResponse = processSlackResponseMessage(assistantResponse);
       const replyActivity = MessageFactory.text(slackMessageResponse);
       
-      //  try to send as thread reply in Slack
+      // try to send as thread reply in Slack
       try {     
         replyActivity.conversation = context.activity.conversation;
         // verify if thread_ts is already in the conversation id
@@ -210,35 +210,32 @@ async function handleSlackMessage(context, assistantResponse) {
         }
         
         await context.sendActivity(replyActivity);
-        
-        var postExtrapolatedToSlack = false;
       
         // if assistantResponse is 'Let me check our past conversations, one moment...'
         if (assistantResponse.includes('Let me check our past conversations, one moment...')) {
-          console.log("\n\n***SLACK.JS: Specific assistant message detected! Preparing to post chat history to Slack.");
-          postExtrapolatedToSlack = true;
+          console.log("\n\n***SLACK.JS: Specific assistant message detected!");
 
-          // call postChatHistoryToSlack to get chat history
-          let messageLog = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
-          console.log('\n****SLACK.JS: Chat history fetched from Slack.');
-            
-          // now post the history message to Slack
-          console.log("\n\n***SLACK.JS: postChatHistoryToSlack will be called with the following parameters:\n");
-          console.log(`Channel Id: ${channel_id}\nThread Timestamp: ${thread_ts}\nAPI Token: ${apiToken}\nBotId: ${botId}`);
-          await postMessageToSlack(channel_id, thread_ts, messageLog, apiToken);
-          console.log('\n\n***SLACK.JS: Successfully posted a message to Slack.');
+          if(context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+            let apiToken = context.activity.channelData.ApiToken;  
+            let channel_id = context.activity.channelData.SlackMessage.event.channel;  
+            console.log('\n***SLACK.JS: postChatHistoryToSlack About to Post Chat history to Slack');
+            let messageLog = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+            console.log('\n***SLACK.JS: Chat History fetched from Slack:\n', messageLog);
+
+            // now post the history message to Slack
+            await postMessageToSlack(channel_id, thread_ts, messageLog, apiToken);
+            console.log('\n***SLACK.JS: Successfully posted Chat History to Slack');
+          }
         }
-
-        console.log("\n\n***SLACK.JS: Value of postExtrapolatedToSlack: ", postExtrapolatedToSlack);
-            
+        
       } catch (error) {
-        console.error("An error occurred while trying to reply in thread: ", error);
+        console.error("An error occurred while trying to reply in a thread: ", error);
       }
     } else if (thread_ts == "") {
-        console.log("\n\n***SLACK.JS: Can't identify thread, not posting anything.***\n\n");
+        console.log("\n\n***SLACK.JS: Can't identify thread, not posting anything.\n");
     } else {
         // log a message
-        console.log("\n\n***SLACK.JS: Message is not invoking the bot, ignore for now!***\n\n");
+        console.log("\n\n***SLACK.JS: Message is not invoking the bot, ignoring for now.\n\n");
     }
   }
 };
