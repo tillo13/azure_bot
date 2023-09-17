@@ -144,27 +144,12 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
           // Append to cleaned version
           cleanedFormattedMessages += ` ${line}`;
 
-
-          // Initial cleaned message with header/footer
-          let cleanedFormattedMessages2 = cleanedFormattedMessages;
-
-          // Regex to match header and footer
-          const regex = /^\*\*\*[^\*]+/g; 
-
-          // Trim those parts off
-          cleanedFormattedMessages2 = cleanedFormattedMessages2.replace(regex, '');
-
-          // Trim any remaining whitespace
-          cleanedFormattedMessages2 = cleanedFormattedMessage2s.trim();
-
-
-
-
-
         });
 
         // Log cleaned version
-        console.error('\n\n****SLACK.JS: cleaned letMeCheckFlag', cleanedFormattedMessages2);
+        console.error('\n\n****SLACK.JS: cleaned letMeCheckFlag', cleanedFormattedMessages);
+
+
         resolve();
 
         // Call chat.postMessage API
