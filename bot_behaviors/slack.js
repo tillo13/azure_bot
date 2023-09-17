@@ -221,6 +221,8 @@ async function handleSlackMessage(context, assistantResponse) {
               console.log('\n****SLACK.JS: Chat history fetched from Slack.');
 
               // Here, you post the history message to Slack
+              console.log("\n\n***SLACK.JS: postChatHistoryToSlack will be called with the following parameters:\n");
+              console.log(`Channel Id: ${channel_id}\nThread Timestamp: ${thread_ts}\nAPI Token: ${apiToken}\nBotId: ${botId}`);
               await postMessageToSlack(channel_id, thread_ts, messageLog, apiToken);
               console.log('\n\n***SLACK.JS: Successfully posted a message to Slack.');
             }
