@@ -5,7 +5,7 @@ const chatCompletion = require('./chat_helper');
 const https = require('https');
 
 //do this at the start to know where to post replies
-const thread_ts = context.activity.channelData.slackMessage.event.thread_ts;
+//const thread_ts = context.activity.channelData.slackMessage.event.thread_ts;
 
 function isFromSlack(context) {
   return context.activity.channelId === 'slack';
