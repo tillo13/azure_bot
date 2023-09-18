@@ -192,6 +192,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
   });
 };
 
+
 let activeThreads = {};
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
@@ -256,4 +257,4 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     }
   };
 
-module.exports = { handleSlackMessage, isFromSlack };
+module.exports.postChatHistoryToSlack = postChatHistoryToSlack;

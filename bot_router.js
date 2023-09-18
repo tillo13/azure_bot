@@ -1,5 +1,8 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
-const { postChatHistoryToSlack, handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
+const slackFunctions = require('./bot_behaviors/slack');
+
+
+
 
 
 const chatCompletion = require('./bot_behaviors/chat_helper');
@@ -50,7 +53,7 @@ class EchoBot extends ActivityHandler {
             let thread_ts = context.activity.channelData.SlackMessage.event.thread_ts;
             let apiToken = context.activity.channelData.ApiToken;
             let botId = context.activity.channelData && context.activity.channelData.BotId;
-            let cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+            let cleanedFormattedMessages = await slackFunctions.postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
             chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages);
         }
 
