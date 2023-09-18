@@ -46,6 +46,7 @@ class EchoBot extends ActivityHandler {
             const requeryNotice = "Let me check our past conversations, one moment...";
             await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
             let channel_id = context.activity.channelData.SlackMessage.event.channel;
+            let thread_ts = context.activity.channelData.SlackMessage.event.thread_ts;
             let cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
             chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages);
         }
