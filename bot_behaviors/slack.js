@@ -260,3 +260,6 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
 module.exports.postChatHistoryToSlack = postChatHistoryToSlack;
 module.exports.handleSlackMessage = handleSlackMessage;
 module.exports.isFromSlack = isFromSlack;
+module.exports = {
+  postChatHistoryToSlack
+}
