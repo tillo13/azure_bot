@@ -1,10 +1,5 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
-const slackFunctions = require('./bot_behaviors/slack');
-
-
-
-
-
+const { postChatHistoryToSlack, handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
 const chatCompletion = require('./bot_behaviors/chat_helper');
 
 const WELCOMED_USER = 'welcomedUserProperty';
