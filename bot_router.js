@@ -44,7 +44,8 @@ class EchoBot extends ActivityHandler {
         if(chatResponse.requery){
             const requeryNotice = "Let me check our past conversations, one moment...";
             await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-            chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+            let cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+            chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages);
         }
 
             // Now add the assistant's message to chatMessagesUser

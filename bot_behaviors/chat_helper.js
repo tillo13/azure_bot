@@ -32,8 +32,11 @@ function shouldRequery(responseContent) {
     return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
-async function chatCompletion(chatTexts, roleMessage) {
-    //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
+async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages = '') {
+    if (letMeCheckFlag) {
+        if (cleanedFormattedMessages) {
+            chatMessages.push({ role: "system", content: cleanedFormattedMessages });
+        }
     
     let letMeCheckFlag = false;
 
