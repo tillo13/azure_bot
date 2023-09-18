@@ -1,16 +1,10 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
-const slack = require('./bot_behaviors/slack');
-
-const postChatHistoryToSlack = slack.postChatHistoryToSlack;
-const handleSlackMessage = slack.handleSlackMessage;
-const isFromSlack = slack.isFromSlack;
-
-const slackFunctions = require('./slack');
-
+const { handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
 const chatCompletion = require('./bot_behaviors/chat_helper');
 
 const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
+
 const PERSONALITY_OF_BOT = "You talk like an old cowboy. You are a helpful assistant from Teradata that always checks any past conversations within this thread before responding to any new information received.";
 
 class EchoBot extends ActivityHandler {
@@ -50,12 +44,7 @@ class EchoBot extends ActivityHandler {
         if(chatResponse.requery){
             const requeryNotice = "Let me check our past conversations, one moment...";
             await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-            let channel_id = context.activity.channelData.SlackMessage.event.channel;
-            let thread_ts = context.activity.channelData.SlackMessage.event.thread_ts;
-            let apiToken = context.activity.channelData.ApiToken;
-            let botId = context.activity.channelData && context.activity.channelData.BotId;
-            let cleanedFormattedMessages = await slackFunctions.postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
-            chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages);
+            chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
         }
 
             // Now add the assistant's message to chatMessagesUser

@@ -23,9 +23,6 @@ function shouldRequery(responseContent) {
         "as an artificial intelligence",
         "as a digital assistant",
         "as a computer program",
-        "just an AI assistant",
-        "as a virtual assistant",
-        "As a helpful assistant",
         "access to personal information",
         "access to previous conversations",
         "shared in previous conversations",
@@ -35,7 +32,9 @@ function shouldRequery(responseContent) {
     return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
-async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages = '') {
+async function chatCompletion(chatTexts, roleMessage) {
+    //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
+    
     let letMeCheckFlag = false;
 
     const endpoint = process.env.OPENAI_API_BASE_URL;
@@ -49,10 +48,6 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages =
         chatMessages.unshift({ role: "system", content: roleMessage });
     }
 
-    if (letMeCheckFlag && cleanedFormattedMessages) {
-        chatMessages.push({ role: "system", content: cleanedFormattedMessages });
-    }
-
     console.log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:\n
     Endpoint: ${endpoint}
     Deployment Id: ${deploymentId}
@@ -60,47 +55,49 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages =
     Maximum Tokens: ${validatedTokens}
     `);
 
-    try {
-        let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
+   try {
+    let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
 
-        if (result && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
-            let requeryStatus = shouldRequery(result.choices[0].message.content);
+    // Only proceed if result and result.choices[0] and result.choices[0].message and result.choices[0].message.content exist 
+    if (result && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
+        let requeryStatus = shouldRequery(result.choices[0].message.content);
 
-            if (requeryStatus) {
-                letMeCheckFlag = true;
-
-                for (let i = chatMessages.length - 1; i >= 0; i--) {
-                    if (chatMessages[i].role === "assistant") {
-                        chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..." };
-                        break;
-                    }
+        if (requeryStatus) {
+            letMeCheckFlag = true;  // this is set if anything from shouldRequery function is hit...
+        
+            for (let i = chatMessages.length - 1; i >= 0; i--) {
+                if (chatMessages[i].role === "assistant") {
+                    chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..." };
+                    break;
                 }
-            
-                result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
             }
-
-            console.log('\n\n\n' + '***CHAT_HELPER.JS: Response from OpenAI API:' + '\n');
-            console.log(JSON.stringify(result));
-
-            console.log('\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
-            return {
-                'assistantResponse': result.choices[0].message.content,
-                'requery': requeryStatus,
-                'letMeCheckFlag': letMeCheckFlag
-            };
-        } else {
-            console.log("No content in API response");
-            return {
-                'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
-                'requery': false,
-                'letMeCheckFlag': letMeCheckFlag
-            };
+        
+            result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
         }
-    } 
-    catch (error) {
-        console.error("An error occurred while interacting with OpenAI API", error);
-        throw error;
+        // split this into 2 lines: console.log(`\n\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n ${JSON.stringify(result)}`);
+        console.log('\n\n\n' + '***CHAT_HELPER.JS: Response from OpenAI API:' + '\n');
+        console.log(JSON.stringify(result));
+
+
+        console.log('\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
+        return {
+            'assistantResponse': result.choices[0].message.content,
+            'requery': requeryStatus,
+            'letMeCheckFlag': letMeCheckFlag
+        };
+    } else {
+        console.log("No content in API response");
+        return {
+            'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
+            'requery': false,
+            'letMeCheckFlag': letMeCheckFlag
+        };
     }
+} 
+catch (error) {
+   console.error("An error occurred while interacting with OpenAI API", error);
+   throw error;
+}
 }
 
 module.exports = chatCompletion;
