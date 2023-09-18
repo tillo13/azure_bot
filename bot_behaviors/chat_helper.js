@@ -1,6 +1,17 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+const moment = require('moment');
 
 const MAX_OPENAI_TOKENS = 400;
+
+function log(message) {
+    const timestamp = moment().format('YYYYMMDD-HHmmSS.SSS');
+    console.log(`[${timestamp}] ${message}`);
+  }
+
+  function logError(message, error) {
+    const timestamp = moment().format('YYYYMMDD-HHmmSS.SSS');
+    console.error(`[${timestamp}] ${message}`, error);
+  }
 
 function validateOpenAITokens(tokens) {
     if (tokens <= 0 || tokens > 4096) {
@@ -51,7 +62,7 @@ async function chatCompletion(chatTexts, roleMessage) {
         chatMessages.unshift({ role: "system", content: roleMessage });
     }
 
-    console.log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:\n
+    log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:\n
     Endpoint: ${endpoint}
     Deployment Id: ${deploymentId}
     Messages: ${JSON.stringify(chatMessages)}
@@ -78,18 +89,18 @@ async function chatCompletion(chatTexts, roleMessage) {
             result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
         }
         // split this into 2 lines: console.log(`\n\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n ${JSON.stringify(result)}`);
-        console.log('\n\n\n' + '***CHAT_HELPER.JS: Response from OpenAI API:' + '\n');
-        console.log(JSON.stringify(result));
+        log('\n\n\n' + '***CHAT_HELPER.JS: Response from OpenAI API:' + '\n');
+        log(JSON.stringify(result));
 
 
-        console.log('\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
+        log('\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
         return {
             'assistantResponse': result.choices[0].message.content,
             'requery': requeryStatus,
             'letMeCheckFlag': letMeCheckFlag
         };
     } else {
-        console.log("No content in API response");
+        log("No content in API response");
         return {
             'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
             'requery': false,
@@ -98,7 +109,7 @@ async function chatCompletion(chatTexts, roleMessage) {
     }
 } 
 catch (error) {
-   console.error("An error occurred while interacting with OpenAI API", error);
+   logError('An error occurred while interacting with OpenAI API', error);
    throw error;
 }
 }
