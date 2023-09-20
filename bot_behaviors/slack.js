@@ -221,6 +221,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, ch
     return;
   }
 
+  let chatHistory = '';  
   if (letMeCheckFlag) {
     if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
       let apiToken = context.activity.channelData.ApiToken;
