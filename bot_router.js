@@ -27,10 +27,10 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
-          //Reset chatMessagesUser if it's a new thread.
+          // Reset chatMessagesUser if it's a new thread.
           let cleanedFormattedMessages = "";
           let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
-                                        context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
+                                    context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
           let chatMessagesUser = [];
           if(current_thread_ts === this.thread_ts) {
               chatMessagesUser = await this.chatMessagesProperty.get(context, []);
@@ -38,18 +38,22 @@ class EchoBot extends ActivityHandler {
           this.thread_ts = current_thread_ts;
           
           chatMessagesUser.push({role:"user", content:context.activity.text});
-      
-          if (isFromSlack(context)) {
-            chatResponse = await handleSlackMessage(context, chatMessagesUser, PERSONALITY_OF_BOT);
-            console.log('\n***BOT_ROUTER.JS: letMeCheckFlag is: ', chatResponse.letMeCheckFlag);
         
+          // Get assistant response by calling the chatCompletion function
+          let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+        
+          if (isFromSlack(context)) {
+            // Pass the assistantResponse obtained above to handleSlackMessage function
+            chatResponse = await handleSlackMessage(context, chatResponse.assistantResponse, PERSONALITY_OF_BOT);
+            console.log('\n***BOT_ROUTER.JS: letMeCheckFlag is: ', chatResponse.letMeCheckFlag);
             if(chatResponse.letMeCheckFlag){
               const requeryNotice = "Let me check our past conversations, one moment...";
               await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
               cleanedFormattedMessages = chatResponse.cleanedFormattedMessages;
+              // Re-obtain the assistant response after requery
               chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages);
             }
-          } 
+          }
       
           // Now add the assistant's message to chatMessagesUser
           chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
