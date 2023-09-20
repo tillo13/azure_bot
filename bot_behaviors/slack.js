@@ -12,13 +12,6 @@ function getCleanedFormattedMessages() {
   return cleanedFormattedMessages;
 }
 
-// export getCleanedFormattedMessages
-module.exports = { 
-  handleSlackMessage, 
-  isFromSlack, 
-  getCleanedFormattedMessages  // here we are exporting function instead of variable
-};
-
 function isFromSlack(context) {
   return context.activity.channelId === 'slack';
 }
