@@ -228,7 +228,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, ch
       let chatHistory = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); // gets the chat history
       chatHistory && chatMessagesUser.push({role:"user", content:chatHistory}); // adds chat history to chatMessagesUser
     }
-    assistantResponse = 'Let me check our past conversations, un momento...'; // sets assistantResponse to 'Let me check our past conversations, one moment...'
+
+    assistantResponse = 'Let me check our past conversations, un momento... \n' + chatHistory; // sets assistantResponse to 'Let me check our past conversations, one moment...'
 }
 
   if (context.activity.text && activeThreads[thread_ts]) {
