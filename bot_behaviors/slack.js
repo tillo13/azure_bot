@@ -148,7 +148,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         
         console.log('\n\n****SLACK.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
         
-        resolve(cleanedFormattedMessages)
+        resolve(cleanedFormattedMessages);
 
         // Call chat.postMessage API
         let postOptions = {
@@ -164,7 +164,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         let postReq = https.request(postOptions, res => {
           res.on('end', () => {
             console.log('\n\n****SLACK.JS: Successful postChatHistoryToSlack()');
-            resolve();
+            // to pass cleanMessage payload resolve();
           });
         });
 
@@ -219,14 +219,14 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     return;
   }
 
-  let cleanedFormattedMessages;
-  
   if (letMeCheckFlag) {
-      if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-        let apiToken = context.activity.channelData.ApiToken;
-        let channel_id = context.activity.channelData.SlackMessage.event.channel;
-        cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
-      }
+    if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+      let apiToken = context.activity.channelData.ApiToken;
+      let channel_id = context.activity.channelData.SlackMessage.event.channel;
+      let cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+
+      await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+    }
   }
 
   if (context.activity.text && activeThreads[thread_ts]) {
@@ -247,8 +247,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
         }
 
         await context.sendActivity(replyActivity);
-        console.log('\n\n****SLACK.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
         return cleanedFormattedMessages;
+
       } catch (error) {
         console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
       }
