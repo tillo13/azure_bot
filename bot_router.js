@@ -54,7 +54,7 @@ class EchoBot extends ActivityHandler {
             console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
 
           if (isFromSlack(context)) {
-            await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
+            chatMessagesUser = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatMessagesUser);
             console.log('\n***BOT_ROUTER.JS: letMeCheckFlag is: ', chatResponse.letMeCheckFlag);
 
           } else {

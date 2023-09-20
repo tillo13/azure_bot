@@ -195,7 +195,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 };
 
 let activeThreads = {};
-async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
+async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, chatMessagesUser) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
@@ -228,6 +228,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       let chatHistory = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
       chatHistory && chatMessagesUser.push({role:"user", content:chatHistory});
     }
+    return chatMessagesUser;
   }
 
   if (context.activity.text && activeThreads[thread_ts]) {
