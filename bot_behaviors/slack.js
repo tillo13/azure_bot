@@ -268,7 +268,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     }
   };
 
-  module.exports = { 
+//export any modules so other .js files can use
+module.exports = { 
     handleSlackMessage, 
     isFromSlack, 
     getCleanedFormattedMessages
