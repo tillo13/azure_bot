@@ -226,10 +226,9 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, ch
       let apiToken = context.activity.channelData.ApiToken;
       let channel_id = context.activity.channelData.SlackMessage.event.channel;
       let chatHistory = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
-      if (chatHistory) {
-        chatMessagesUser.push({role:"user", content:chatHistory});
-      }
+      chatHistory && chatMessagesUser.push({role:"user", content:chatHistory});
     }
+    return chatMessagesUser;
   }
 
   if (context.activity.text && activeThreads[thread_ts]) {
@@ -259,7 +258,6 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, ch
       console.log('\n\n***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
       }
     }
-  return chatMessagesUser; 
   };
 
 module.exports = { handleSlackMessage, isFromSlack };

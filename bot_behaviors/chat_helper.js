@@ -32,6 +32,15 @@ function shouldRequery(responseContent) {
     return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
+async function buildChatPayload(context, current_thread_ts, chatMessagesProperty, thread_ts) {
+    let chatMessagesUser = [];
+    if(current_thread_ts === thread_ts) {
+      chatMessagesUser = await chatMessagesProperty.get(context, []);
+    }
+    chatMessagesUser.push({role:"user", content:context.activity.text});
+    return chatMessagesUser;
+  }
+
 async function chatCompletion(chatTexts, roleMessage) {
     //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
     
@@ -100,4 +109,4 @@ catch (error) {
 }
 }
 
-module.exports = chatCompletion;
+module.exports = { chatCompletion, buildChatPayload };
