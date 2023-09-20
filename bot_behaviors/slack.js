@@ -219,12 +219,14 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     return;
   }
 
+  let cleanedFormattedMessages;
+  
   if (letMeCheckFlag) {
-    if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-      let apiToken = context.activity.channelData.ApiToken;
-      let channel_id = context.activity.channelData.SlackMessage.event.channel;
-      let cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
-    }
+      if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+        let apiToken = context.activity.channelData.ApiToken;
+        let channel_id = context.activity.channelData.SlackMessage.event.channel;
+        cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+      }
   }
 
   if (context.activity.text && activeThreads[thread_ts]) {
