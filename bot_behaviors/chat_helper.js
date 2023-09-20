@@ -67,7 +67,7 @@ async function chatCompletion(chatTexts, roleMessage) {
         
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
-                    chatMessages[i] = { role: "asssitant", content: "Let me check our past conversations, one moment..." };
+                    chatMessages[i] = { role: "assitant", content: "Let me check our past conversations, one moment..." };
                     break;
                 }
             }
