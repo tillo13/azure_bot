@@ -225,11 +225,11 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, ch
     if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
       let apiToken = context.activity.channelData.ApiToken;
       let channel_id = context.activity.channelData.SlackMessage.event.channel;
-      let chatHistory = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
-      chatHistory && chatMessagesUser.push({role:"user", content:chatHistory});
+      let chatHistory = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); // gets the chat history
+      chatHistory && chatMessagesUser.push({role:"user", content:chatHistory}); // adds chat history to chatMessagesUser
     }
-    return chatMessagesUser;
-  }
+    assistantResponse = 'Let me check our past conversations, un momento...'; // sets assistantResponse to 'Let me check our past conversations, one moment...'
+}
 
   if (context.activity.text && activeThreads[thread_ts]) {
     console.log('\n\n***SLACK.JS: Latest user posted message:', context.activity.text); // Always log user message in the console
