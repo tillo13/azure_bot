@@ -184,7 +184,9 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
           thread_ts: thread_ts,
         }));
 
-        postReq.end();
+        postReq.end(() => {
+          resolve();
+        });
       });
     });
 
