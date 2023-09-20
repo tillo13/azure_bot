@@ -271,5 +271,5 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   module.exports = { 
     handleSlackMessage, 
     isFromSlack, 
-    cleanedFormattedMessages
+    getCleanedFormattedMessages
 };
