@@ -27,47 +27,35 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
-          // Reset chatMessagesUser if it's a new thread.
-          let cleanedFormattedMessages = "";
           let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
-                                    context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
+              context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
           let chatMessagesUser = [];
-          if(current_thread_ts === this.thread_ts) {
+          if (current_thread_ts === this.thread_ts) {
               chatMessagesUser = await this.chatMessagesProperty.get(context, []);
           }
           this.thread_ts = current_thread_ts;
-          
-          chatMessagesUser.push({role:"user", content:context.activity.text});
-        
-          // Get assistant response by calling the chatCompletion function
+          chatMessagesUser.push({ role: "user", content: context.activity.text });
+      
           let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
-        
-          if (isFromSlack(context)) {
-            // Pass the assistantResponse obtained above to handleSlackMessage function
-            chatResponse = await handleSlackMessage(context, chatResponse.assistantResponse, PERSONALITY_OF_BOT);
-            console.log('\n***BOT_ROUTER.JS: letMeCheckFlag is: ', chatResponse.letMeCheckFlag);
-            if(chatResponse.letMeCheckFlag){
+      
+          if(chatResponse.requery) {
               const requeryNotice = "Let me check our past conversations, one moment...";
               await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-              cleanedFormattedMessages = chatResponse.cleanedFormattedMessages;
-              // Re-obtain the assistant response after requery
+      
+              //enhance the conversation history with the payload
+              chatMessagesUser.push({role:"assistant", content: chatResponse.assistantResponse});
+              let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, PERSONALITY_OF_BOT);
+              
               chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages);
-            }
           }
       
-          // Now add the assistant's message to chatMessagesUser
           chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
-      
           await this.chatMessagesProperty.set(context, chatMessagesUser);
-          console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
       
           if (!isFromSlack(context)) {
               const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
               await context.sendActivity(replyActivity);
           }
-      
-          //console.log("\n\n\n****BOT_ROUTER.JS current channelData:\n\n", JSON.stringify(context.activity.channelData, null, 2));
-          console.log(`\n\n\n****BOT_ROUTER.JS current channelData:\n\n${JSON.stringify(context.activity.channelData, null, 2)}`);
       
           await next();
       });
