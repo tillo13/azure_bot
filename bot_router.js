@@ -1,5 +1,5 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
-const { handleSlackMessage, isFromSlack, getCleanedFormattedMessages } = require('./bot_behaviors/slack');
+const { handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
 const chatCompletion = require('./bot_behaviors/chat_helper');
 
 const WELCOMED_USER = 'welcomedUserProperty';
@@ -27,9 +27,6 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
-          //show the payload came throug from slack.js: 
-          console.log('\n\n****BOT_ROUTER.JS: cleaned payload ready for Openai: ', getCleanedFormattedMessages());
-
           //Reset chatMessagesUser if it's a new thread.
           let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
                                   context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";

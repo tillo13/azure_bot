@@ -1,16 +1,8 @@
-//2023sept20 105pm test GOLDEN VERSION//
+//2023sept17 408pm PROD GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
 const https = require('https');
-
-//define the chat message here to pass to other js files
-let cleanedFormattedMessages;
-
-//then set a value to pass it in after it is edited
-function getCleanedFormattedMessages() {
-  return cleanedFormattedMessages;
-}
 
 function isFromSlack(context) {
   return context.activity.channelId === 'slack';
@@ -132,6 +124,9 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         //adding these 2 lines to print to the console, regardless
         console.log(formattedMessages); 
 
+        //clean the payload and prepare it for openai
+        let cleanedFormattedMessages;
+
         try {
           // Remove all stars
           cleanedFormattedMessages = formattedMessages.replace(/\*/g, '');
@@ -184,9 +179,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
           thread_ts: thread_ts,
         }));
 
-        postReq.end(() => {
-          resolve();
-        });
+        postReq.end();
       });
     });
 
@@ -263,9 +256,4 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     }
   };
 
-//export any modules so other .js files can use
-module.exports = { 
-    handleSlackMessage, 
-    isFromSlack, 
-    getCleanedFormattedMessages
-};
+module.exports = { handleSlackMessage, isFromSlack };

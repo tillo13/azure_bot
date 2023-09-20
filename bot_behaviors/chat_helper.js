@@ -1,5 +1,4 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
-const {getCleanedFormattedMessages} = require('./slack');
 
 const MAX_OPENAI_TOKENS = 400;
 
@@ -34,9 +33,7 @@ function shouldRequery(responseContent) {
 }
 
 async function chatCompletion(chatTexts, roleMessage) {
-    //show the payload came through slack.js: 
-    console.log('\n\n****CHAT_HELPER.JS: cleaned payload ready for Openai: ', getCleanedFormattedMessages());
-
+    //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
     
     let letMeCheckFlag = false;
 
