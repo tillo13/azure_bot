@@ -1,5 +1,6 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
-const {getCleanedFormattedMessages} = require('./slack');
+const {getCleanedFormattedMessages} = require('./bot_behaviors/slack');
+
 
 const MAX_OPENAI_TOKENS = 400;
 
