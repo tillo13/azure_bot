@@ -148,7 +148,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         
         console.log('\n\n****SLACK.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
         
-        resolve();
+        resolve(cleanedFormattedMessages)
 
         // Call chat.postMessage API
         let postOptions = {
@@ -223,7 +223,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
       let apiToken = context.activity.channelData.ApiToken;
       let channel_id = context.activity.channelData.SlackMessage.event.channel;
-      await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+      let cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
     }
   }
 
@@ -244,6 +244,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
           replyActivity.conversation.id += ':' + thread_ts;
         }
 
+        console.log('\n\n****SLACK.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
+        return cleanedFormattedMessages;
         await context.sendActivity(replyActivity);
       } catch (error) {
         console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
