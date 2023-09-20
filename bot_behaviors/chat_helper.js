@@ -37,7 +37,10 @@ function shouldRequery(responseContent) {
     return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
-async function chatCompletion(chatTexts, roleMessage) {
+async function chatCompletion(chatTexts, roleMessage, userChatHistory = '') {
+    chatMessages.push({role: "user", content: userChatHistory});
+
+
     //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
     
     let letMeCheckFlag = false;
@@ -72,7 +75,7 @@ async function chatCompletion(chatTexts, roleMessage) {
         
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
-                    chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..." };
+                    chatMessages[i] = { role: "assistant", content: "Let me check our past conversations, one moment..." };
                     break;
                 }
             }
