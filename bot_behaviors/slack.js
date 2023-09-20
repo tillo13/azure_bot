@@ -225,6 +225,11 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       let apiToken = context.activity.channelData.ApiToken;
       let channel_id = context.activity.channelData.SlackMessage.event.channel;
       let cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+
+      return {
+        'assistantResponse': assistantResponse || "I'm sorry, I couldn't generate a response.",
+        'letMeCheckFlag': letMeCheckFlag || false,
+      };
     }
   }
 
