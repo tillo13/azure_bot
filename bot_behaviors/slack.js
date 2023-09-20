@@ -4,6 +4,9 @@ const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
 const https = require('https');
 
+//define the chat message here to pass to other js files
+let cleanedFormattedMessages;
+
 function isFromSlack(context) {
   return context.activity.channelId === 'slack';
 }
@@ -123,9 +126,6 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         formattedMessages += "\n***END OF USER MESSAGES***";
         //adding these 2 lines to print to the console, regardless
         console.log(formattedMessages); 
-
-        //clean the payload and prepare it for openai
-        let cleanedFormattedMessages;
 
         try {
           // Remove all stars
