@@ -40,15 +40,15 @@ class EchoBot extends ActivityHandler {
           chatMessagesUser.push({role:"user", content:context.activity.text});
       
           if (isFromSlack(context)) {
-              let chatResponse = await handleSlackMessage(context, chatMessagesUser, PERSONALITY_OF_BOT);
-              console.log('\n***BOT_ROUTER.JS: letMeCheckFlag is: ', chatResponse.letMeCheckFlag);
-      
-              if(chatResponse.letMeCheckFlag){
-                  const requeryNotice = "Let me check our past conversations, one moment...";
-                  await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-                  cleanedFormattedMessages = chatResponse.cleanedFormattedMessages; // assuming cleanedFormattedMessages is returned from handleSlackMessage
-                  chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages);
-              }
+            chatResponse = await handleSlackMessage(context, chatMessagesUser, PERSONALITY_OF_BOT);
+            console.log('\n***BOT_ROUTER.JS: letMeCheckFlag is: ', chatResponse.letMeCheckFlag);
+        
+            if(chatResponse.letMeCheckFlag){
+              const requeryNotice = "Let me check our past conversations, one moment...";
+              await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
+              cleanedFormattedMessages = chatResponse.cleanedFormattedMessages;
+              chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages);
+            }
           } 
       
           // Now add the assistant's message to chatMessagesUser
