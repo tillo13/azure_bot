@@ -180,6 +180,8 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         }));
 
         postReq.end();
+        return cleanedFormattedMessages;
+
       });
     });
 
@@ -223,7 +225,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
       let apiToken = context.activity.channelData.ApiToken;
       let channel_id = context.activity.channelData.SlackMessage.event.channel;
-      await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+      let chatHistory = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+      chatHistory && chatMessagesUser.push({role:"user", content:chatHistory});
     }
   }
 
