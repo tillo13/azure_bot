@@ -1,10 +1,8 @@
-//2023sept20 1246pm TEST GOLDEN VERSION//
+//2023sept20 105pm test GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
 const https = require('https');
-
-let cleanedFormattedMessages; 
 
 function isFromSlack(context) {
   return context.activity.channelId === 'slack';
@@ -127,7 +125,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         console.log(formattedMessages); 
 
         //clean the payload and prepare it for openai
-        //let cleanedFormattedMessages;
+        let cleanedFormattedMessages;
 
         try {
           // Remove all stars
@@ -141,11 +139,11 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
             .replace(/\n/g, ' ') // remove newline characters
             .trim();
         
-          module.exports.cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps: " + cleanedFormattedMessages;
+          cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps: " + cleanedFormattedMessages;
         
         } catch (err) {
           console.error('Error while parsing the message: ', err);
-          module.exports.cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps: " + cleanedFormattedMessages;
+          cleanedFormattedMessages = "Here is what the user said so far in this thread, with timestamps: " + formattedMessages;
         }
         
         console.log('\n\n****SLACK.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
@@ -258,4 +256,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     }
   };
 
-  module.exports = { handleSlackMessage, isFromSlack, cleanedFormattedMessages };
+  module.exports = { 
+    handleSlackMessage, 
+    isFromSlack, 
+    cleanedFormattedMessages
+};
