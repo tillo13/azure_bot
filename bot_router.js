@@ -28,7 +28,7 @@ class EchoBot extends ActivityHandler {
 
         this.onMessage(async (context, next) => {
           //show the payload came throug from slack.js: 
-          console.log('\n\n****BOT_ROUTER.JS: cleaned payload ready for Openai: ', getCleanedFormattedMessages);
+          console.log('\n\n****BOT_ROUTER.JS: cleaned payload ready for Openai: ', getCleanedFormattedMessages());
 
           //Reset chatMessagesUser if it's a new thread.
           let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?

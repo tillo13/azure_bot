@@ -35,7 +35,7 @@ function shouldRequery(responseContent) {
 
 async function chatCompletion(chatTexts, roleMessage) {
     //show the payload came through slack.js: 
-    console.log('\n\n****CHAT_HELPER.JS: cleaned payload ready for Openai: ', getCleanedFormattedMessages);
+    console.log('\n\n****CHAT_HELPER.JS: cleaned payload ready for Openai: ', getCleanedFormattedMessages());
 
     
     let letMeCheckFlag = false;
