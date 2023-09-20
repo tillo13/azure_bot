@@ -197,6 +197,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
+  let cleanedFormattedMessages; // Declare the variable here
+
   // Extract Bot Token from context
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
 
@@ -213,7 +215,6 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     activeThreads[thread_ts] = true;
   }
 
-
   if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
     console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING!  User said: ', context.activity.text);
     return;
@@ -223,7 +224,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
       let apiToken = context.activity.channelData.ApiToken;
       let channel_id = context.activity.channelData.SlackMessage.event.channel;
-      let cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+      cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); // Assign the value here
 
       await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
     }
