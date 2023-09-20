@@ -7,6 +7,18 @@ const https = require('https');
 //define the chat message here to pass to other js files
 let cleanedFormattedMessages;
 
+//then set a value to pass it in after it is edited
+function getCleanedFormattedMessages() {
+  return cleanedFormattedMessages;
+}
+
+// export getCleanedFormattedMessages
+module.exports = { 
+  handleSlackMessage, 
+  isFromSlack, 
+  getCleanedFormattedMessages  // here we are exporting function instead of variable
+};
+
 function isFromSlack(context) {
   return context.activity.channelId === 'slack';
 }
