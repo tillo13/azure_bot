@@ -180,8 +180,6 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         }));
 
         postReq.end();
-        return cleanedFormattedMessages;
-
       });
     });
 
@@ -195,7 +193,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 };
 
 let activeThreads = {};
-async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, chatMessagesUser) {
+async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
@@ -225,10 +223,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, ch
     if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
       let apiToken = context.activity.channelData.ApiToken;
       let channel_id = context.activity.channelData.SlackMessage.event.channel;
-      let chatHistory = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
-      chatHistory && chatMessagesUser.push({role:"user", content:chatHistory});
+      await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
     }
-    return chatMessagesUser;
   }
 
   if (context.activity.text && activeThreads[thread_ts]) {

@@ -1,6 +1,6 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const { handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
-const { chatCompletion, buildChatPayload } = require('./bot_behaviors/chat_helper');
+const chatCompletion = require('./bot_behaviors/chat_helper');
 
 const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
@@ -27,11 +27,15 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
+          //Reset chatMessagesUser if it's a new thread.
           let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
-                                      context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
-        
-          // Call the new function to build the payload
-          let chatMessagesUser = await buildChatPayload(context, current_thread_ts, this.chatMessagesProperty, this.thread_ts);
+                                  context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
+          let chatMessagesUser = [];
+          if(current_thread_ts === this.thread_ts) {
+               chatMessagesUser = await this.chatMessagesProperty.get(context, []);
+          }
+          this.thread_ts = current_thread_ts;
+
           chatMessagesUser.push({role:"user", content:context.activity.text});
 
         // Get chatResponse without immediately adding assistant's message
@@ -50,7 +54,7 @@ class EchoBot extends ActivityHandler {
             console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
 
           if (isFromSlack(context)) {
-            chatMessagesUser = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatMessagesUser);
+            await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
             console.log('\n***BOT_ROUTER.JS: letMeCheckFlag is: ', chatResponse.letMeCheckFlag);
 
           } else {
@@ -60,6 +64,7 @@ class EchoBot extends ActivityHandler {
 
           //console.log("\n\n\n****BOT_ROUTER.JS current channelData:\n\n", JSON.stringify(context.activity.channelData, null, 2));
           console.log(`\n\n\n****BOT_ROUTER.JS current channelData:\n\n${JSON.stringify(context.activity.channelData, null, 2)}`);
+
           await next();
         });
     }

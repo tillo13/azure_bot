@@ -32,15 +32,6 @@ function shouldRequery(responseContent) {
     return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
-async function buildChatPayload(context, current_thread_ts, chatMessagesProperty, thread_ts) {
-    let chatMessagesUser = [];
-    if(current_thread_ts === thread_ts) {
-      chatMessagesUser = await chatMessagesProperty.get(context, []);
-    }
-    chatMessagesUser.push({role:"user", content:context.activity.text});
-    return chatMessagesUser;
-  }
-
 async function chatCompletion(chatTexts, roleMessage) {
     //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
     
@@ -76,7 +67,7 @@ async function chatCompletion(chatTexts, roleMessage) {
         
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
-                    chatMessages[i] = { role: "assistant", content: "Let me check our past conversations, one moment..." };
+                    chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..." };
                     break;
                 }
             }
@@ -109,4 +100,4 @@ catch (error) {
 }
 }
 
-module.exports = { chatCompletion, buildChatPayload };
+module.exports = chatCompletion;
