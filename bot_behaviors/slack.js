@@ -244,9 +244,9 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
           replyActivity.conversation.id += ':' + thread_ts;
         }
 
+        await context.sendActivity(replyActivity);
         console.log('\n\n****SLACK.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
         return cleanedFormattedMessages;
-        await context.sendActivity(replyActivity);
       } catch (error) {
         console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
       }
