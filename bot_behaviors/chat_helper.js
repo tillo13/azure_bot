@@ -1,8 +1,6 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
-const moment = require('moment');
 
 const MAX_OPENAI_TOKENS = 400;
-
 
 function validateOpenAITokens(tokens) {
     if (tokens <= 0 || tokens > 4096) {
@@ -25,9 +23,6 @@ function shouldRequery(responseContent) {
         "as an artificial intelligence",
         "as a digital assistant",
         "as a computer program",
-        "just an AI assistant",
-        "as a virtual assistant",
-        "As a helpful assistant",
         "access to personal information",
         "access to previous conversations",
         "shared in previous conversations",
@@ -37,21 +32,21 @@ function shouldRequery(responseContent) {
     return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
-async function chatCompletion(chatTexts, roleMessage, userChatHistory = '') {
+async function chatCompletion(chatTexts, roleMessage) {
+    //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
+    
     let letMeCheckFlag = false;
- 
-     const endpoint = process.env.OPENAI_API_BASE_URL;
-     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
-     const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
-     const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
-     if (!validatedTokens) return;
-     let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
- 
-     if (chatMessages.length === 0 || (chatMessages[0] && chatMessages[0].role !== "system")) {
-         chatMessages.unshift({ role: "system", content: roleMessage });
-     }
- 
-    chatMessages.push({role: "user", content: userChatHistory});
+
+    const endpoint = process.env.OPENAI_API_BASE_URL;
+    const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
+    const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
+    const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
+    if (!validatedTokens) return;
+    let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
+
+    if (chatMessages.length === 0 || (chatMessages[0] && chatMessages[0].role !== "system")) {
+        chatMessages.unshift({ role: "system", content: roleMessage });
+    }
 
     console.log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:\n
     Endpoint: ${endpoint}
@@ -72,7 +67,7 @@ async function chatCompletion(chatTexts, roleMessage, userChatHistory = '') {
         
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
-                    chatMessages[i] = { role: "assistant", content: "Let me check our past conversations, one moment..." };
+                    chatMessages[i] = { role: "system", content: "Let me check our past conversations, one moment..." };
                     break;
                 }
             }

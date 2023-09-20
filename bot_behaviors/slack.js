@@ -1,4 +1,4 @@
-//2023sept19 502pm test GOLDEN VERSION//
+//2023sept17 408pm PROD GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
@@ -148,8 +148,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         
         console.log('\n\n****SLACK.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
         
-        // Resolve the promise here with the cleanedFormattedMessages
-        resolve(cleanedFormattedMessages);
+        resolve();
 
         // Call chat.postMessage API
         let postOptions = {
@@ -224,12 +223,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
       let apiToken = context.activity.channelData.ApiToken;
       let channel_id = context.activity.channelData.SlackMessage.event.channel;
-      let cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
-
-      return {
-        'assistantResponse': assistantResponse || "I'm sorry, I couldn't generate a response.",
-        'letMeCheckFlag': letMeCheckFlag || false,
-      };
+      await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
     }
   }
 
