@@ -39,7 +39,7 @@ class EchoBot extends ActivityHandler {
           chatMessagesUser.push({role:"user", content:context.activity.text});
 
         // Get chatResponse without immediately adding assistant's message and send the cleaned payload
-        let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages);
+        let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
 
         if(chatResponse.requery){
             const requeryNotice = "Let me check our past conversations, one moment...";
@@ -53,6 +53,8 @@ class EchoBot extends ActivityHandler {
         let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
     
         console.log('\n\n****BOT_ROUTER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
+          // now when chatCompletion is called the 3rd time, pass cleanedFormattedMessages in
+        await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages); // cleanedFormattedMessages is passed here
     
         await this.chatMessagesProperty.set(context, chatMessagesUser);
         console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
