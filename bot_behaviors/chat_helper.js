@@ -100,14 +100,17 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
         return {
             'assistantResponse': result.choices[0].message.content,
             'requery': requeryStatus,
-            'letMeCheckFlag': letMeCheckFlag
+            'letMeCheckFlag': letMeCheckFlag,
+            'cleanedFormattedMessages': cleanedFormattedMessages 
         };
     } else {
         console.log("No content in API response");
         return {
             'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
             'requery': false,
-            'letMeCheckFlag': letMeCheckFlag
+            'letMeCheckFlag': letMeCheckFlag,
+            'cleanedFormattedMessages': cleanedFormattedMessages 
+
         };
     }
 } 

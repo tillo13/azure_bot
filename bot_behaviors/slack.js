@@ -1,4 +1,4 @@
-//2023sep20 902pm PROD GOLDEN VERSION//
+//2023sept21 242pm test GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
@@ -193,7 +193,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 };
 
 let activeThreads = {};
-async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
+async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, cleanedFormattedMessages) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
