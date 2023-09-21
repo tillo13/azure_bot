@@ -34,7 +34,7 @@ function shouldRequery(responseContent) {
     return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
-async function chatCompletion(chatTexts, roleMessage) {
+async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) {
     //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
     
     let letMeCheckFlag = false;
@@ -50,6 +50,9 @@ async function chatCompletion(chatTexts, roleMessage) {
         chatMessages.unshift({ role: "system", content: roleMessage });
     }
 
+    //show the passed value to add to openai here: 
+    console.log('\n\n****CHAT_HELPER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
+    
     console.log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:\n
     Endpoint: ${endpoint}
     Deployment Id: ${deploymentId}
