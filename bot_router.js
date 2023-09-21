@@ -48,14 +48,13 @@ class EchoBot extends ActivityHandler {
           // Add 'Let me check...' message to the array
           chatMessagesUser.push({role:"assistant", content:requeryNotice});
         
-          chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT,cleanedFormattedMessages);
+          chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
       }
     
         // Now add the assistant's message to chatMessagesUser
         chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
     
-        //let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
-        let cleanedFormattedMessages = await handleSlackMessage(context, response.assistantResponse, response.letMeCheckFlag, cleanedFormattedMessages);
+        let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
 
         console.log(`cleanedFormattedMessages before calling chatCompletion: ${cleanedFormattedMessages}`);
     
