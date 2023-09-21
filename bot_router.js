@@ -40,20 +40,22 @@ class EchoBot extends ActivityHandler {
 
         // Get chatResponse without immediately adding assistant's message
         let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
-        let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
-        console.log('\n\n****BOT_ROUTER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
 
         if(chatResponse.requery){
             const requeryNotice = "Let me check our past conversations, one moment...";
             await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
             chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
         }
-
-            // Now add the assistant's message to chatMessagesUser
-            chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
-
-            await this.chatMessagesProperty.set(context, chatMessagesUser);
-            console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
+    
+        // Now add the assistant's message to chatMessagesUser
+        chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
+    
+        let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
+    
+        console.log('\n\n****BOT_ROUTER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
+    
+        await this.chatMessagesProperty.set(context, chatMessagesUser);
+        console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
 
           if (isFromSlack(context)) {
             //await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
