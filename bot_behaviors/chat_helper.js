@@ -13,7 +13,6 @@ function validateOpenAITokens(tokens) {
 }
 
 function shouldRequery(responseContent) {
-    // if responseContent is not defined, return false
     if (!responseContent) {
         return false;
     }
@@ -28,14 +27,12 @@ function shouldRequery(responseContent) {
         "access to personal information",
         "access to previous conversations",
         "shared in previous conversations",
-        // More patterns...
     ];
 
     return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
 async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) {
-    //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
     
     let letMeCheckFlag = false;
 
@@ -50,41 +47,17 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
         chatMessages.unshift({ role: "system", content: roleMessage });
     }
 
-    //show the passed value to add to openai here: 
-    console.log('\n\n****CHAT_HELPER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
-    
-    console.log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:\n
-    Endpoint: ${endpoint}
-    Deployment Id: ${deploymentId}
-    Messages: ${JSON.stringify(chatMessages)}
-    Maximum Tokens: ${validatedTokens}
-    `);
-
-   try {
     let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
 
-    // Only proceed if result and result.choices[0] and result.choices[0].message and result.choices[0].message.content exist 
     if (result && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
         let requeryStatus = shouldRequery(result.choices[0].message.content);
-
         if (requeryStatus) {
-            letMeCheckFlag = true;  // this is set if anything from shouldRequery function is hit...
-        
-            for (let i = chatMessages.length - 1; i >= 0; i--) {
-                if (chatMessages[i].role === "assistant") {
-                    chatMessages[i] = { role: "assistant", content: "Let me check our past conversations, one moment..." };
-                    break;
-                }
-            }
-        
+            letMeCheckFlag = true;
+            chatMessages.push({role:"assistant", content:"Let me check our past conversations, one moment..."});
+            chatMessages.push({role:"user", content:cleanedFormattedMessages});
+
             result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
         }
-        // split this into 2 lines: console.log(`\n\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n ${JSON.stringify(result)}`);
-        console.log('\n\n\n' + '***CHAT_HELPER.JS: Response from OpenAI API:' + '\n');
-        console.log(JSON.stringify(result));
-
-
-        console.log('\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
         return {
             'assistantResponse': result.choices[0].message.content,
             'requery': requeryStatus,
@@ -98,11 +71,6 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
             'letMeCheckFlag': letMeCheckFlag
         };
     }
-} 
-catch (error) {
-   console.error("An error occurred while interacting with OpenAI API", error);
-   throw error;
-}
 }
 
 module.exports = chatCompletion;
