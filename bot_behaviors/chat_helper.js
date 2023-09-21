@@ -25,6 +25,7 @@ function shouldRequery(responseContent) {
         "as a computer program",
         "as a helpful assistant",
         "as a virtual assistant",
+        "as a language model",
         "access to personal information",
         "access to previous conversations",
         "shared in previous conversations",
@@ -66,13 +67,17 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
     // Only proceed if result and result.choices[0] and result.choices[0].message and result.choices[0].message.content exist 
     if (result && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
         let requeryStatus = shouldRequery(result.choices[0].message.content);
+        let lastUserMessage = chatMessages[chatMessages.length - 1].content;
+
 
         if (requeryStatus) {
             letMeCheckFlag = true;  // this is set if anything from shouldRequery function is hit...
         
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
-                    chatMessages[i] = { role: "assistant", content: "Let me check our past conversations, one moment..." };
+                    // Construct a new message to send to the AI model
+                    let newMessage = `You could not find a suitable response to my last interaction of: ${lastUserMessage}. Respond back if that answer is in anything I have said previously. ${cleanedFormattedMessages}`;
+                    chatMessages[i] = { role: "assistant", content: newMessage };
                     break;
                 }
             }
