@@ -67,16 +67,13 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
     if (result && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
         let requeryStatus = shouldRequery(result.choices[0].message.content);
 
-        if (requeryStatus) {
-            letMeCheckFlag = true;  // this is set if anything from shouldRequery function is hit...
-        
-            for (let i = chatMessages.length - 1; i >= 0; i--) {
-                if (chatMessages[i].role === "assistant") {
-                    chatMessages[i] = { role: "assistant", content: "Let me check our past conversations, one moment..." };
-                    break;
-                }
-            }
-        
+        if(requeryStatus) {
+            letMeCheckFlag = true;
+            let customVerbiage = `You could not recall my request of "${chatMessages[chatMessages.length - 1].content}" and had to check our past conversations. See if you can deduce it, knowing this: ${cleanedFormattedMessages}`
+            chatMessages.push({role:"assistant", content:"Let me check our past conversations, one moment..."});
+            chatMessages.push({role:"user", content: customVerbiage});
+                
+            // Call the API again, now with the new assistant's message
             result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
         }
         // split this into 2 lines: console.log(`\n\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n ${JSON.stringify(result)}`);
