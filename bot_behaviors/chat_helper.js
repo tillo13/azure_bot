@@ -26,9 +26,11 @@ function shouldRequery(responseContent) {
         "as a helpful assistant",
         "as a virtual assistant",
         "as a language model",
+        "as a language-based AI assistant",
         "access to personal information",
         "access to previous conversations",
         "shared in previous conversations",
+        "since I'm an AI language model",
         // More patterns...
     ];
 
