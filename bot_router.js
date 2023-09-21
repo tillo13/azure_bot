@@ -40,7 +40,7 @@ class EchoBot extends ActivityHandler {
 
         // Get chatResponse without immediately adding assistant's message
         let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
-        let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
+        
         console.log('\n\n****BOT_ROUTER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
 
         if(chatResponse.requery){
@@ -48,6 +48,9 @@ class EchoBot extends ActivityHandler {
             await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
             chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
         }
+
+        //only post if it hits the requery path
+        let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
 
             // Now add the assistant's message to chatMessagesUser
             chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
