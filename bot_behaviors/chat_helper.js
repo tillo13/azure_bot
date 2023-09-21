@@ -72,10 +72,10 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
         let lastUserMessage = chatMessages[chatMessages.length - 1].content;
 
 
-        if (requeryStatus && cleanedFormattedMessages) {
-            letMeCheckFlag = true; 
+        if (requeryStatus) {
+            letMeCheckFlag = true;  // this is set if anything from shouldRequery function is hit...
             console.log('\n\n*****************CHAT_HELPER.JS: this is in the requeryStatus path after letmecheckflag=true.  Testing if the cleanmessage is here ', cleanedFormattedMessages);
-            
+        
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
                     // Construct a new message to send to the AI model
@@ -84,7 +84,7 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
                     break;
                 }
             }
-            
+        
             result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
         }
         // split this into 2 lines: console.log(`\n\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n ${JSON.stringify(result)}`);
