@@ -31,14 +31,17 @@ function shouldRequery(responseContent) {
         "access to previous conversations",
         "shared in previous conversations",
         "since I'm an AI language model",
+        "as a text-based",
         // More patterns...
     ];
 
     return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
-async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) {
-    //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
+let cleanedFormattedMessages = "";  // set this at a higher scope as it wasn't passing in the async
+async function chatCompletion(chatTexts, roleMessage, cleanedMessages) {
+
+    cleanedFormattedMessages = cleanedMessages || "";  
     
     let letMeCheckFlag = false;
 
@@ -73,12 +76,11 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
 
 
         if (requeryStatus) {
-            letMeCheckFlag = true;  // this is set if anything from shouldRequery function is hit...
+            letMeCheckFlag = true;  
             console.log('\n\n*****************CHAT_HELPER.JS: this is in the requeryStatus path after letmecheckflag=true.  Testing if the cleanmessage is here ', cleanedFormattedMessages);
-        
+            
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
-                    // Construct a new message to send to the AI model
                     let newMessage = `You could not find a suitable response to my last interaction of: ${lastUserMessage}. Respond back with confirmation and apology if that answer is in anything I have said previously, otherwise state I have not mentioned it based on what you know. ${cleanedFormattedMessages}`;
                     chatMessages[i] = { role: "assistant", content: newMessage };
                     break;
