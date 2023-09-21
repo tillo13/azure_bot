@@ -39,7 +39,9 @@ class EchoBot extends ActivityHandler {
           chatMessagesUser.push({role:"user", content:context.activity.text});
 
         // Get chatResponse without immediately adding assistant's message
-        let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+        //let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+        let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages);
+
 
         if(chatResponse.requery){
             const requeryNotice = "Let me check our past conversations, one moment...";
