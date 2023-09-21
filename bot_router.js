@@ -51,13 +51,8 @@ class EchoBot extends ActivityHandler {
       if(chatResponse.letMeCheckFlag) {
           cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
       }
-      
       chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
       chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages);
-
-      // Remove the line below as it's redundant
-      // await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages); // cleanedFormattedMessages is passed here
-
       await this.chatMessagesProperty.set(context, chatMessagesUser);
       console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
         
