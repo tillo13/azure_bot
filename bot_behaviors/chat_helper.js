@@ -73,22 +73,18 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
 
 
         if (requeryStatus) {
-            letMeCheckFlag = true; 
+            letMeCheckFlag = true;  // this is set if anything from shouldRequery function is hit...
             console.log('\n\n*****************CHAT_HELPER.JS: this is in the requeryStatus path after letmecheckflag=true.  Testing if the cleanmessage is here ', cleanedFormattedMessages);
-        
-            // Add context parameter to chatCompletion function and call handleSlackMessage function here before constructing newMessage
-            // Ensure that you pass context to the chatCompletion function from bot_router.js when you invoke it
-            cleanedFormattedMessages = await handleSlackMessage(context, result.choices[0].message.content, letMeCheckFlag);
         
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
-                    // Constructing a new message to send to the AI model
+                    // Construct a new message to send to the AI model
                     let newMessage = `You could not find a suitable response to my last interaction of: ${lastUserMessage}. Respond back with confirmation and apology if that answer is in anything I have said previously, otherwise state I have not mentioned it based on what you know. ${cleanedFormattedMessages}`;
                     chatMessages[i] = { role: "assistant", content: newMessage };
                     break;
                 }
             }
-                
+        
             result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
         }
         // split this into 2 lines: console.log(`\n\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n ${JSON.stringify(result)}`);
