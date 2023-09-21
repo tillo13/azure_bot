@@ -76,7 +76,7 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
                     // Construct a new message to send to the AI model
-                    let newMessage = `You could not find a suitable response to my last interaction of: ${lastUserMessage}. Respond back if that answer is in anything I have said previously. ${cleanedFormattedMessages}`;
+                    let newMessage = `You could not find a suitable response to my last interaction of: ${lastUserMessage}. Respond back with confirmation and apology if that answer is in anything I have said previously, otherwise state I have not mentioned it based on what you know. ${cleanedFormattedMessages}`;
                     chatMessages[i] = { role: "assistant", content: newMessage };
                     break;
                 }
