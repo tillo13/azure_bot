@@ -42,10 +42,14 @@ class EchoBot extends ActivityHandler {
         let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
 
         if(chatResponse.requery){
-            const requeryNotice = "Let me check our past conversations, one moment...";
-            await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-            chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
-        }
+          const requeryNotice = "Let me check our past conversations, one moment...";
+          await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));  
+            
+          // Add 'Let me check...' message to the array
+          chatMessagesUser.push({role:"assistant", content:requeryNotice});
+        
+          chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+      }
     
         // Now add the assistant's message to chatMessagesUser
         chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
