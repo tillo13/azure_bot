@@ -72,6 +72,7 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
 
         if (requeryStatus) {
             letMeCheckFlag = true;  // this is set if anything from shouldRequery function is hit...
+            console.log('\n\n*****************CHAT_HELPER.JS: this is in the requeryStatus path after letmecheckflag=true.  Testing if the cleanmessage is here ', cleanedFormattedMessages);
         
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
