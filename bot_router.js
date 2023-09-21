@@ -57,7 +57,7 @@ class EchoBot extends ActivityHandler {
       console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
         
         // now when chatCompletion is called the 3rd time, pass cleanedFormattedMessages in
-        await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages); // cleanedFormattedMessages is passed here
+        //await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages); // cleanedFormattedMessages is passed here
     
         await this.chatMessagesProperty.set(context, chatMessagesUser);
         console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
