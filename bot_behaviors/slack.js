@@ -226,7 +226,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       let channel_id = context.activity.channelData.SlackMessage.event.channel;
       cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); // Assign the value here
 
-      await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+      //await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
     }
   }
 
