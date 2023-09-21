@@ -55,6 +55,8 @@ class EchoBot extends ActivityHandler {
         chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
     
         let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
+
+        console.log(`cleanedFormattedMessages before calling chatCompletion: ${cleanedFormattedMessages}`);
     
         console.log('\n\n****BOT_ROUTER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
         
