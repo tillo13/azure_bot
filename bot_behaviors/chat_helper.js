@@ -37,8 +37,8 @@ function shouldRequery(responseContent) {
     return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
-async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) {
-    //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
+async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) { 
+    console.log('\n***CHAT_HELPER.JS: Inside chatCompletion, cleanedFormattedMessages is: ', cleanedFormattedMessages);
     
     let letMeCheckFlag = false;
 
@@ -50,7 +50,9 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
     let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
 
     if (chatMessages.length === 0 || (chatMessages[0] && chatMessages[0].role !== "system")) {
+        console.log('\n***CHAT_HELPER.JS: BEFORE unshifting chatMessages, cleanedFormattedMessages is: ', cleanedFormattedMessages);
         chatMessages.unshift({ role: "system", content: roleMessage });
+        console.log('\n***CHAT_HELPER.JS: AFTER unshifting chatMessages, cleanedFormattedMessages is: ', cleanedFormattedMessages);
     }
 
     //show the passed value to add to openai here: 
@@ -64,7 +66,9 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
     `);
 
    try {
+    console.log('\n\n****CHAT_HELPER.JS: BEFORE getChatCompletions call, cleanedFormattedMessages is: ', cleanedFormattedMessages);
     let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
+    console.log('\n\n****CHAT_HELPER.JS: AFTER getChatCompletions call, cleanedFormattedMessages is: ', cleanedFormattedMessages);
 
     // Only proceed if result and result.choices[0] and result.choices[0].message and result.choices[0].message.content exist 
     if (result && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
