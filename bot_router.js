@@ -58,15 +58,14 @@ class EchoBot extends ActivityHandler {
         // Now add the assistant's message to chatMessagesUser
         chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
     
-        let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
-        console.log('\n\n*****BOT_ROUTER.JS: cleanedFormattedMessages after handleSlackMessage call:', cleanedFormattedMessages);
-
-        console.log(`cleanedFormattedMessages before calling chatCompletion: ${cleanedFormattedMessages}`);
-    
-        console.log('\n\n****BOT_ROUTER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
-        
-        // now when chatCompletion is called the 3rd time, pass cleanedFormattedMessages in
-        await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages); // cleanedFormattedMessages is passed here
+        handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag)
+        .then(cleanedFormattedMessages => {
+          console.log('\n\n*****BOT_ROUTER.JS: cleanedFormattedMessages after handleSlackMessage call:', cleanedFormattedMessages);
+          return chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages);
+        })
+        .catch(error => {
+          console.error(error);
+        });
     
         await this.chatMessagesProperty.set(context, chatMessagesUser);
         console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
