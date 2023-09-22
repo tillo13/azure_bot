@@ -1,6 +1,12 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+const { cleanedFormattedMessages } = require('./slack.js')
 
 const MAX_OPENAI_TOKENS = 400;
+
+async function chatCompletion(chatTexts, roleMessage) { 
+    console.log('\n***CHAT_HELPER.JS: Inside chatCompletion, cleanedFormattedMessages is: ', cleanedFormattedMessages);
+    let letMeCheckFlag = false;
+}
 
 function validateOpenAITokens(tokens) {
     if (tokens <= 0 || tokens > 4096) {

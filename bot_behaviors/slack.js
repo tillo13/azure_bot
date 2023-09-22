@@ -194,41 +194,24 @@
  
  let activeThreads = {};
  async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
-   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
-   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
- 
-   let cleanedFormattedMessages; // Declare the variable here
- 
-   // Extract Bot Token from context
-   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
- 
-   // Get bot id
-   let botId = await getBotId(apiToken);
-   console.log('\n\n***SLACK.JS: EXTRACTED BOTID:', botId);
- 
-   let thread_ts = "";
-   if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-     thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-   }
- 
-   if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
-     activeThreads[thread_ts] = true;
-   }
- 
-   if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
-     console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING!  User said: ', context.activity.text);
-     return;
-   }
- 
-   if (letMeCheckFlag) {
-     if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-       let apiToken = context.activity.channelData.ApiToken;
-       let channel_id = context.activity.channelData.SlackMessage.event.channel;
-       cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
- 
-       //await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
-     }
-   }
+  let cleanedFormattedMessages; // Declare the variable here
+  // Extract Bot Token from context
+  let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
+  // Get bot id
+  let botId = await getBotId(apiToken);
+  let thread_ts = "";
+  if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
+    thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+  }
+
+  // If it's a group conversation or the bot is mentioned, call postChatHistoryToSlack
+  if (context.activity.conversation.isGroup || context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) {
+    if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+      let apiToken = context.activity.channelData.ApiToken;
+      let channel_id = context.activity.channelData.SlackMessage.event.channel;
+      cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
+    }
+  }
  
    if (context.activity.text && activeThreads[thread_ts]) {
      console.log('\n\n***SLACK.JS: Latest user posted message:', context.activity.text); // Always log user message in the console
