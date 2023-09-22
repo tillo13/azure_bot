@@ -209,7 +209,7 @@
     activeThreads[thread_ts] = true;
   }
   // end of new lines
-  
+
   let cleanedFormattedMessages;  // Declare it here
 
   if (letMeCheckFlag) {
@@ -224,13 +224,12 @@
 
   // Process the response message
   if (context.activity.text && activeThreads[thread_ts]) {
-    // Here, we re-include the "processSlackResponseMessage" function
-    assistantResponse = processSlackResponseMessage(assistantResponse);  
-      
-    if (context.activity.channelId === 'slack' && thread_ts !== "") {
-      await postMessageToSlack(context.activity.channelData.SlackMessage.event.channel, thread_ts, assistantResponse, context.activity.channelData.ApiToken);
-    }
+      if (context.activity.channelId === 'slack' && thread_ts !== "") {
+          await postMessageToSlack(context.activity.channelData.SlackMessage.event.channel, thread_ts, assistantResponse, context.activity.channelData.ApiToken);
+      }
   }
 
   return cleanedFormattedMessages;
 };
+
+module.exports = { handleSlackMessage, isFromSlack };
