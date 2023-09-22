@@ -214,14 +214,22 @@
       cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
   }
 
-  // Process the response message
-  if (context.activity.text && activeThreads[thread_ts]) {
-      if (context.activity.channelId === 'slack' && thread_ts !== "") {
-          await postMessageToSlack(context.activity.channelData.SlackMessage.event.channel, thread_ts, assistantResponse, context.activity.channelData.ApiToken);
-      }
+   // Process the response message
+   if (context.activity.text && activeThreads[thread_ts]) {
+    if (context.activity.channelId === 'slack' && thread_ts !== "") {
+       // Post the OpenAI response
+       await postMessageToSlack(context.activity.channelData.SlackMessage.event.channel, thread_ts, assistantResponse, context.activity.channelData.ApiToken);
+    }
   }
 
-  return cleanedFormattedMessages;
+  // Check conditions and query conversation history
+  if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+     let apiToken = context.activity.channelData.ApiToken;
+     let channel_id = context.activity.channelData.SlackMessage.event.channel;
+     cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
+  }
+
+ return cleanedFormattedMessages;
 };
 
 module.exports = { handleSlackMessage, isFromSlack };
