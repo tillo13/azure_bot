@@ -113,9 +113,7 @@
  
        res.on('end', () => {
          // Extract the messages from the response
-         if (JSON.parse(responsePayload).messages) {
-          let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
-        }
+         let messages = JSON.parse(responsePayload).messages.filter(msg => !msg.hasOwnProperty('bot_id'));
  
          // Format the messages
          let formattedMessages = "\n***SLACK.JS: letMeCheckFlag invoked!\nUSER MESSAGES IN THIS THREAD**\n";
@@ -201,10 +199,10 @@
 
   // Extract Bot Token from context
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
+  let channel_id = context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event && context.activity.channelData.SlackMessage.event.channel;
 
   // Extract thread_ts from context
   let thread_ts = "";
-
 
   // Get bot id
   let botId = await getBotId(apiToken);
