@@ -93,7 +93,7 @@ async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
   });
 }
 
-async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
+async function postChatHistoryToSlack(context, channel_id, thread_ts, apiToken, botId) {
   const options = {
     hostname: 'slack.com',
     path: `/api/conversations.replies?channel=${channel_id}&ts=${thread_ts}`,
@@ -150,7 +150,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 
         // After cleaning the messages store it in the context
         context.activity.cleanedFormattedMessages = cleanedFormattedMessages;
-        
+
         resolve(cleanedFormattedMessages);
 
         // Call chat.postMessage API

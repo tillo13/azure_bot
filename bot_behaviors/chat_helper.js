@@ -37,7 +37,7 @@ function shouldRequery(responseContent) {
     return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
-async function chatCompletion(context, chatTexts, roleMessage) { 
+async function chatCompletion(context, chatTexts, roleMessage, cleanedFormattedMessages) { 
     const cleanedFormattedMessages = context.activity.cleanedFormattedMessages;
     console.log('\n***CHAT_HELPER.JS: (NEW!) Inside chatCompletion, cleanedFormattedMessages is: ', cleanedFormattedMessages);
     
