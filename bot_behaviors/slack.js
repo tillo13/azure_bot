@@ -200,6 +200,10 @@
   // Extract Bot Token from context
   let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
 
+  // Extract thread_ts from context
+  let thread_ts = "";
+
+
   // Get bot id
   let botId = await getBotId(apiToken);
 
