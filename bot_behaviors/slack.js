@@ -112,9 +112,11 @@
        });
  
        res.on('end', () => {
+        let messages = [];
         let responseParsed = JSON.parse(responsePayload);
         if (responseParsed.messages) {
-          let messages = responseParsed.messages.filter(msg => !msg.hasOwnProperty('bot_id'));}
+          messages = responseParsed.messages.filter(msg => !msg.hasOwnProperty('bot_id'));
+        }
  
          // Format the messages
          let formattedMessages = "\n***SLACK.JS: letMeCheckFlag invoked!\nUSER MESSAGES IN THIS THREAD**\n";
