@@ -198,38 +198,27 @@
  let activeThreads = {};
  async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
+
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
   let cleanedFormattedMessages;  // Declare it here
 
-  let thread_ts = ""; 
-  if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-    thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-  }
-
+  let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
+  let botId = await getBotId(apiToken);
+  
   if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-      const apiToken = context.activity.channelData.ApiToken;
-      const channel_id = context.activity.channelData.SlackMessage.event.channel;
-      const botId = await getBotId(apiToken);
+      let channel_id = context.activity.channelData.SlackMessage.event.channel;
       cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
   }
 
-   // Process the response message
-   if (context.activity.text && activeThreads[thread_ts]) {
-    if (context.activity.channelId === 'slack' && thread_ts !== "") {
-       // Post the OpenAI response
-       await postMessageToSlack(context.activity.channelData.SlackMessage.event.channel, thread_ts, assistantResponse, context.activity.channelData.ApiToken);
-    }
+  // Process the response message
+  if (context.activity.text && activeThreads[thread_ts]) {
+      if (context.activity.channelId === 'slack' && thread_ts !== "") {
+          await postMessageToSlack(context.activity.channelData.SlackMessage.event.channel, thread_ts, assistantResponse, context.activity.channelData.ApiToken);
+      }
   }
 
-  // Check conditions and query conversation history
-  if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-     let apiToken = context.activity.channelData.ApiToken;
-     let channel_id = context.activity.channelData.SlackMessage.event.channel;
-     cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
-  }
-
- return cleanedFormattedMessages;
+  return cleanedFormattedMessages;
 };
 
 module.exports = { handleSlackMessage, isFromSlack };
