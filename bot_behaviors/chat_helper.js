@@ -38,7 +38,7 @@ function shouldRequery(responseContent) {
 }
 
 async function chatCompletion(context, chatTexts, roleMessage, cleanedFormattedMessages) { 
-    const cleanedFormattedMessages = context.activity.cleanedFormattedMessages;
+
     console.log('\n***CHAT_HELPER.JS: (NEW!) Inside chatCompletion, cleanedFormattedMessages is: ', cleanedFormattedMessages);
     
     let letMeCheckFlag = false;
