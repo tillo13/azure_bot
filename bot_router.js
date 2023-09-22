@@ -58,9 +58,6 @@ class EchoBot extends ActivityHandler {
         // Now add the assistant's message to chatMessagesUser
         chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
 
-        //test to see if it errors with wait, not ideal, but...
-        await new Promise(resolve => setTimeout(resolve, 3000)); // wait for 3000 ms (5 seconds)    
-
         let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
         console.log('\n\n*****BOT_ROUTER.JS: cleanedFormattedMessages after handleSlackMessage call:', cleanedFormattedMessages);
   
