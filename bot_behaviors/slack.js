@@ -200,25 +200,26 @@
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
-  // Extract Bot Token from context
-  let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
+  let cleanedFormattedMessages;  // Declare it here
 
-  // Extract thread_ts from context
-  let thread_ts = "";
+  if(letMeCheckFlag) {
+      // Extract Bot Token from context
+      let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
 
-  // Get bot id
-  let botId = await getBotId(apiToken);
+      // Get bot id
+      let botId = await getBotId(apiToken);
+      console.log('\n\n***SLACK.JS: EXTRACTED BOTID:', botId);
 
-  let cleanedFormattedMessages = ''; // Initialize as empty string
+       let thread_ts = "";
+       if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
+            thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+       }
 
-  if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-     let channel_id = context.activity.channelData.SlackMessage.event.channel;
-  if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-      thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-   }
-
-     // The function postChatHistoryToSlack is called regardless of letMeCheckFlag value
-     cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
+      if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+          let apiToken = context.activity.channelData.ApiToken;
+          let channel_id = context.activity.channelData.SlackMessage.event.channel;
+          cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
+      }
   }
 
   if (context.activity.text && activeThreads[thread_ts]) {
