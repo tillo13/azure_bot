@@ -216,10 +216,10 @@
         let channel_id = context.activity.channelData.SlackMessage.event.channel;
         cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
     }
-}
+  }
 
-// Process the response message
-if (context.activity.text && activeThreads[thread_ts]) {
+  // Process the response message
+  if (context.activity.text && activeThreads[thread_ts]) {
     let slackMessageResponse = processSlackResponseMessage(assistantResponse);
     const replyActivity = MessageFactory.text(slackMessageResponse);
 
@@ -235,9 +235,9 @@ if (context.activity.text && activeThreads[thread_ts]) {
     } catch (error) {
         console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
     }
-}
+  }
 
-return cleanedFormattedMessages;
+  return cleanedFormattedMessages;
 };
  
  module.exports = { handleSlackMessage, isFromSlack };
