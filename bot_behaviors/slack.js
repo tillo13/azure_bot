@@ -196,8 +196,6 @@
  async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
    console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
    console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
-   context.turnState.set('cleanedFormattedMessages', cleanedFormattedMessages);
-
  
    let cleanedFormattedMessages; // Declare the variable here
  

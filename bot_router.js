@@ -54,7 +54,7 @@ class EchoBot extends ActivityHandler {
         // Now add the assistant's message to chatMessagesUser
         chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
     
-        //let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
+        let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
 
         console.log(`cleanedFormattedMessages before calling chatCompletion: ${cleanedFormattedMessages}`);
     
