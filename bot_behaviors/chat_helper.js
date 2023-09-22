@@ -39,7 +39,7 @@ function shouldRequery(responseContent) {
 
 async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) { 
     console.log('\n***CHAT_HELPER.JS: Inside chatCompletion, cleanedFormattedMessages is: ', cleanedFormattedMessages);
-    
+
     let letMeCheckFlag = false;
 
     const endpoint = process.env.OPENAI_API_BASE_URL;
@@ -85,6 +85,7 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
                     // Construct a new message to send to the AI model
                     let newMessage = `You could not find a suitable response to my last interaction of: ${lastUserMessage}. Respond back with confirmation and apology if that answer is in anything I have said previously, otherwise state I have not mentioned it based on what you know. ${cleanedFormattedMessages}`;
                     chatMessages[i] = { role: "assistant", content: newMessage };
+                    console.log('\n\n******CHAT_HELPER.JS: newMessage to be used in getChatCompletions:', newMessage);
                     break;
                 }
             }
