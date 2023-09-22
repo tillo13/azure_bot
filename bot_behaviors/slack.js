@@ -201,19 +201,18 @@
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
   let cleanedFormattedMessages;  // Declare it here
+  let thread_ts = "";  // Declare it here
 
   if(letMeCheckFlag) {
       // Extract Bot Token from context
       let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
-
       // Get bot id
       let botId = await getBotId(apiToken);
       console.log('\n\n***SLACK.JS: EXTRACTED BOTID:', botId);
 
-       let thread_ts = "";
-       if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-            thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-       }
+      if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
+          thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+      }
 
       if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
           let apiToken = context.activity.channelData.ApiToken;
