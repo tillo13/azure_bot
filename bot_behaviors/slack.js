@@ -147,6 +147,9 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
         }
         
         console.log('\n\n****SLACK.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
+
+        // After cleaning the messages store it in the context
+        context.activity.cleanedFormattedMessages = cleanedFormattedMessages;
         
         resolve(cleanedFormattedMessages);
 
