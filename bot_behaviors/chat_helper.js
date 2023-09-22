@@ -37,9 +37,8 @@ function shouldRequery(responseContent) {
     return patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
 }
 
-async function chatCompletion(context, chatTexts, roleMessage, cleanedFormattedMessages) { 
-
-    console.log('\n***CHAT_HELPER.JS: (NEW!) Inside chatCompletion, cleanedFormattedMessages is: ', cleanedFormattedMessages);
+async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) { 
+    console.log('\n***CHAT_HELPER.JS: Inside chatCompletion, cleanedFormattedMessages is: ', cleanedFormattedMessages);
     
     let letMeCheckFlag = false;
 
@@ -51,7 +50,6 @@ async function chatCompletion(context, chatTexts, roleMessage, cleanedFormattedM
     let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
 
     if (chatMessages.length === 0 || (chatMessages[0] && chatMessages[0].role !== "system")) {
-        let roleMessage = PERSONALITY_OF_BOT; 
         console.log('\n***CHAT_HELPER.JS: BEFORE unshifting chatMessages, cleanedFormattedMessages is: ', cleanedFormattedMessages);
         chatMessages.unshift({ role: "system", content: roleMessage });
         console.log('\n***CHAT_HELPER.JS: AFTER unshifting chatMessages, cleanedFormattedMessages is: ', cleanedFormattedMessages);
