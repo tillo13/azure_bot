@@ -200,44 +200,36 @@
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
+  // New lines added to update activeThreads
+  let thread_ts = "";
+  if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
+    thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+  }
+  if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
+    activeThreads[thread_ts] = true;
+  }
+  // end of new lines
+
   let cleanedFormattedMessages;  // Declare it here
-  let thread_ts = "";  // Declare it here
 
   if (letMeCheckFlag) {
     let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
     let botId = await getBotId(apiToken);
-    let thread_ts = "";
-
-    if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
-        thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
-    }
 
     if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-        let channel_id = context.activity.channelData.SlackMessage.event.channel;
-        cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
+      let channel_id = context.activity.channelData.SlackMessage.event.channel;
+      cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
     }
   }
 
   // Process the response message
   if (context.activity.text && activeThreads[thread_ts]) {
-    let slackMessageResponse = processSlackResponseMessage(assistantResponse);
-    const replyActivity = MessageFactory.text(slackMessageResponse);
-
-    // Try to send as thread reply in Slack
-    try {
-        if (context.activity.channelId === 'slack' && thread_ts !== "") {
-            replyActivity.conversation = context.activity.conversation;
-            if (!replyActivity.conversation.id.includes(thread_ts)) {
-                replyActivity.conversation.id += ':' + thread_ts;
-            }
-            await context.sendActivity(replyActivity);
-        }
-    } catch (error) {
-        console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
-    }
+      if (context.activity.channelId === 'slack' && thread_ts !== "") {
+          await postMessageToSlack(context.activity.channelData.SlackMessage.event.channel, thread_ts, assistantResponse, context.activity.channelData.ApiToken);
+      }
   }
 
   return cleanedFormattedMessages;
 };
- 
- module.exports = { handleSlackMessage, isFromSlack };
+
+module.exports = { handleSlackMessage, isFromSlack };
