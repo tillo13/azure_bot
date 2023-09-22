@@ -51,6 +51,7 @@ async function chatCompletion(context, chatTexts, roleMessage, cleanedFormattedM
     let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
 
     if (chatMessages.length === 0 || (chatMessages[0] && chatMessages[0].role !== "system")) {
+        let roleMessage = PERSONALITY_OF_BOT_WILL_GET_POPULATED_LATER; 
         console.log('\n***CHAT_HELPER.JS: BEFORE unshifting chatMessages, cleanedFormattedMessages is: ', cleanedFormattedMessages);
         chatMessages.unshift({ role: "system", content: roleMessage });
         console.log('\n***CHAT_HELPER.JS: AFTER unshifting chatMessages, cleanedFormattedMessages is: ', cleanedFormattedMessages);
