@@ -27,6 +27,7 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
+          let cleanedFormattedMessages = "not_defined_yet_in_bot_router";
           console.log(`*****************NEW BOT_ROUTER: cleanedFormattedMessages is: ${context.activity.cleanedFormattedMessages}`);
           //Reset chatMessagesUser if it's a new thread.
           let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
@@ -56,14 +57,14 @@ class EchoBot extends ActivityHandler {
         chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
     
         //Pass context to handleSlackMessage and chatCompletion
-        let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
+        cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
 
         console.log(`cleanedFormattedMessages before calling chatCompletion: ${cleanedFormattedMessages}`);
 
         console.log('\n\n****BOT_ROUTER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
 
         //Pass cleanedFormattedMessages to chatCompletion
-        await chatCompletion(context, chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages || "not_defined_yet"); 
+        await chatCompletion(context, chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages || "not_defined_yet_in_both_router_2"); 
     
         await this.chatMessagesProperty.set(context, chatMessagesUser);
         console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
