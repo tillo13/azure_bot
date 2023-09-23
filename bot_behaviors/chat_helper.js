@@ -22,6 +22,16 @@ const bot_response_patterns = [
     "have access to past conversations",
     "just a virtual assistant",
     "as a text-based AI",
+    "as an AI system",
+    "being a digital entity",
+    "as an AI, I don't",
+    "as an AI model",
+    "as a machine learning model",
+    "as a AI assistant",
+    "as a machine learning assistant",
+    "access to the conversation",
+    "I don't have access to personal data",
+    "I'm not privy to that information",    
     // Include any more patterns...
 ];
 
