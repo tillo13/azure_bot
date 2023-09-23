@@ -51,14 +51,21 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
     }
 
     //show the passed value to add to openai here: 
-    console.log('\n\n****CHAT_HELPER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
+    console.log('\n\n****CHAT_HELPER.JS: this will be undefined if the letmecheckflag is false: ', cleanedFormattedMessages);
     
     if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
         console.log('****CHAT_HELPER.JS: NO PAYLOAD');
-      } else {
+    } else {
         console.log('\n\n**********CHAT_HELPER.JS:******** PAYLOAD HIT:\n\n ', cleanedFormattedMessages);
         console.log('\n\n****CHAT_HELPER.JS: the payload we want to add to is:\n\n ', chatMessages);
-      }
+        
+        // when there is a payload hit, add your new messages to chatMessages
+        chatMessages.push(
+            { role: 'assistant', content: "I could not find a suitable response to your latest message.  Please respond with your conversation history to this point and I will investigate." }, 
+            { role: 'user', content: `Certainly, here is what I have said so far in this thread, with timestamps: ${cleanedFormattedMessages}.  Read these messages to see if you can answer my latest question of: ${chatMessages[chatMessages.length-1].content}.  If you cannot find a suitable response in what I have provided, state that you are sorry but couldn't find a match.` }
+        );
+        console.log('\n\n****CHAT_HELPER.JS: the payload we added to is now:\n\n ', chatMessages);
+    }
 
     console.log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:\n
     Endpoint: ${endpoint}
