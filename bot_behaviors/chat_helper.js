@@ -55,7 +55,7 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
 console.log('\n\n****CHAT_HELPER.JS: this will be undefined if the letmecheckflag is false: ', cleanedFormattedMessages);
 
 if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
-    console.log('\n\n****CHAT_HELPER.JS: letmecheckflag HIT!');
+    console.log('\n\n****CHAT_HELPER.JS: looks to be undefined or blank still!');
 } else {
     console.log('\n\n**********CHAT_HELPER.JS:******** PAYLOAD1 HIT:\n\n ', cleanedFormattedMessages);
     console.log('\n\n****CHAT_HELPER.JS: the payload we want to add to is:\n\n ', chatMessages);
@@ -114,9 +114,16 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
                 }
             }
         
+            // Add the cleanedFormattedMessages as an assistant’s message
+            chatMessages.push({
+                role: 'user',
+                content: cleanedFormattedMessages
+            });
+        
             result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
         }
-        console.log('\n\n\n' + '***CHAT_HELPER.JS: Response in letmecheckflag path from OpenAI API:' + '\n');
+        }
+        console.log('\n\n\n' + '******CHAT_HELPER.JS: Response in letmecheckflag path from OpenAI API:\n');
         console.log(JSON.stringify(result));
 
 
