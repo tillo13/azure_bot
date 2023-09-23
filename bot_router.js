@@ -86,9 +86,12 @@ class EchoBot extends ActivityHandler {
     }
 
     async run(context) {
-        await super.run(context);
-        await this.userState.saveChanges(context);
-    }
+      try {
+          await super.run(context);
+      } finally {
+          await this.userState.saveChanges(context);
+      }
+  }
 }
 
 module.exports.EchoBot = EchoBot;
