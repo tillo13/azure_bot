@@ -69,7 +69,7 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
     }
     
     // find the index of the latest 'let me check' from the end
-    const checkMessage = "Let me check our past conversations, one moment...";
+    const checkMessage = "Let me check our past conversations, one moment from chat_helper...";
     let lastIndex;
     for (let i = chatMessages.length - 1; i >= 0; i--) {
         if (chatMessages[i].content === checkMessage && chatMessages[i].role === 'assistant') {

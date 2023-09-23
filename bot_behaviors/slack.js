@@ -248,6 +248,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
         }
 
         await context.sendActivity(replyActivity);
+        console.log('\n\n***SLACK.JS: clean format regardless', cleanedFormattedMessages); 
         return cleanedFormattedMessages;
 
       } catch (error) {
