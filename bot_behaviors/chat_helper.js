@@ -49,9 +49,7 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
     if(cleanedFormattedMessages && !chatMessages.map(item => item.content).includes(cleanedFormattedMessages)) {
         chatMessages.push(
             { role: 'user', content: `Here is what I have said so far: ${cleanedFormattedMessages}` },
-            console.log('\n\n*%*%*%*%CHAT_HELPER.JS ->DEBUG check --> had to tell bot what we have said so far, this is ok, FYI', cleanedFormattedMessages);
-
-            
+            console.log('\n\n*%*%*%*%CHAT_HELPER.JS ->DEBUG check --> had to tell bot what we have said so far, this is ok, FYI', cleanedFormattedMessages)           
         );
     }
     if (lastIndex > -1) {
