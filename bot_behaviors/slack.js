@@ -1,4 +1,4 @@
-//2023sept21 242pm test GOLDEN VERSION//
+//2023sep20 902pm PROD GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
@@ -47,6 +47,8 @@ function getBotId(apiToken) {
   });
 }
 
+// Isolate the postMessageToSlack as a tasks method in broken_slack.js and 
+// make it an independent function in the new_slack.js like this.
 
 async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
   console.log("\n\n***SLACK.JS: Post message to Slack.");
@@ -191,7 +193,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 };
 
 let activeThreads = {};
-async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, chatCompletion) {
+async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
@@ -213,17 +215,21 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, ch
     activeThreads[thread_ts] = true;
   }
 
-  let result;
-  if (letMeCheckFlag) {
-    if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-      let channel_id = context.activity.channelData.SlackMessage.event.channel;
-      cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
-    }
-  } else {
-    result = await chatCompletion();
+  if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
+    console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING!  User said: ', context.activity.text);
+    return;
   }
 
-  // Process the response message
+  if (letMeCheckFlag) {
+    if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+      let apiToken = context.activity.channelData.ApiToken;
+      let channel_id = context.activity.channelData.SlackMessage.event.channel;
+      cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
+
+      //await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+    }
+  }
+
   if (context.activity.text && activeThreads[thread_ts]) {
     console.log('\n\n***SLACK.JS: Latest user posted message:', context.activity.text); // Always log user message in the console
 
@@ -251,8 +257,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, ch
       console.log('\n\n***SLACK.JS: Can\'t identify thread, not posting anything.***');
     } else {
       console.log('\n\n***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
+      }
     }
-  }
-}
+  };
 
 module.exports = { handleSlackMessage, isFromSlack };
