@@ -47,8 +47,6 @@ function getBotId(apiToken) {
   });
 }
 
-// Isolate the postMessageToSlack as a tasks method in broken_slack.js and 
-// make it an independent function in the new_slack.js like this.
 
 async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
   console.log("\n\n***SLACK.JS: Post message to Slack.");
@@ -193,11 +191,18 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 };
 
 let activeThreads = {};
-async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
+async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, chatCompletion) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
 
-  let cleanedFormattedMessages; 
+  let cleanedFormattedMessages; // Declare the variable here
+
+  // Extract Bot Token from context
+  let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
+
+  // Get bot id
+  let botId = await getBotId(apiToken);
+  console.log('\n\n***SLACK.JS: EXTRACTED BOTID:', botId);
 
   let thread_ts = "";
   if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
@@ -208,46 +213,46 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     activeThreads[thread_ts] = true;
   }
 
-  let apiToken = context.activity.channelData && context.activity.channelData.ApiToken;
-  let botId = await getBotId(apiToken);
-
-  if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
-    let channel_id = context.activity.channelData.SlackMessage.event.channel;
-    cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId); 
+  let result;
+  if (letMeCheckFlag) {
+    if (context.activity.channelData && context.activity.channelData.ApiToken && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event.channel) {
+      let channel_id = context.activity.channelData.SlackMessage.event.channel;
+      cleanedFormattedMessages = await postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId);
+    }
+  } else {
+    result = await chatCompletion();
   }
 
   // Process the response message
   if (context.activity.text && activeThreads[thread_ts]) {
-      console.log('\n\n***SLACK.JS: Latest user posted message:', context.activity.text); // Always log user message in the console
+    console.log('\n\n***SLACK.JS: Latest user posted message:', context.activity.text); // Always log user message in the console
 
-      if (context.activity.channelId === 'slack' && thread_ts !== "") {
-        // Process the assistant response message for Slack
-        let slackMessageResponse = processSlackResponseMessage(assistantResponse);
-        const replyActivity = MessageFactory.text(slackMessageResponse);
+    if (context.activity.channelId === 'slack' && thread_ts !== "") {
+      // Process the assistant response message for Slack
+      let slackMessageResponse = processSlackResponseMessage(assistantResponse);
+      const replyActivity = MessageFactory.text(slackMessageResponse);
 
-        // Try to send as thread reply in Slack
-        try {
-          replyActivity.conversation = context.activity.conversation;
+      // Try to send as thread reply in Slack
+      try {
+        replyActivity.conversation = context.activity.conversation;
 
-          // Verify if thread_ts is already in the conversation id
-          if (!replyActivity.conversation.id.includes(thread_ts)) {
-            replyActivity.conversation.id += ':' + thread_ts;
-          }
-
-          await context.sendActivity(replyActivity);
-          console.log('\n\n***SLACK.JS: Cleaned message regardless of path:', cleanedFormattedMessages);
-          return cleanedFormattedMessages;
-
-        } catch (error) {
-          console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
+        // Verify if thread_ts is already in the conversation id
+        if (!replyActivity.conversation.id.includes(thread_ts)) {
+          replyActivity.conversation.id += ':' + thread_ts;
         }
-      } else if (thread_ts === "") {
-        console.log('\n\n***SLACK.JS: Can\'t identify thread, not posting anything.***');
-      } else {
-        console.log('\n\n***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
-        }
+
+        await context.sendActivity(replyActivity);
+        return cleanedFormattedMessages;
+
+      } catch (error) {
+        console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
       }
-      return cleanedFormattedMessages;
-};
+    } else if (thread_ts === "") {
+      console.log('\n\n***SLACK.JS: Can\'t identify thread, not posting anything.***');
+    } else {
+      console.log('\n\n***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
+    }
+  }
+}
 
 module.exports = { handleSlackMessage, isFromSlack };
