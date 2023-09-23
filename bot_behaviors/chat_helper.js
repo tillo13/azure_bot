@@ -49,10 +49,12 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
         chatMessages.unshift({ role: "system", content: roleMessage });
     }
 
-    const lastUserMessage = chatMessages.find((msg, index) => msg.role === 'user' && index > chatMessages.map(item => item.content).lastIndexOf("Let me check our past conversations, one moment...")).content;
-
+    const lastUserMessageObj = chatMessages.find((msg, index) => msg.role === 'user' && index > chatMessages.map(item => item.content).lastIndexOf("Let me check our past conversations, one moment..."));
+    
+    const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
+    
     if(cleanedFormattedMessages)
-       chatMessages = formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage);
+        chatMessages = formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage);
 
     console.log('*** Sending request to OpenAI API with payload:', chatMessages);
     
