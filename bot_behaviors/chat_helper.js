@@ -59,11 +59,25 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
         console.log('\n\n**********CHAT_HELPER.JS:******** PAYLOAD HIT:\n\n ', cleanedFormattedMessages);
         console.log('\n\n****CHAT_HELPER.JS: the payload we want to add to is:\n\n ', chatMessages);
         
-        // when there is a payload hit, add your new messages to chatMessages
-        chatMessages.push(
-            { role: 'assistant', content: "I could not find a suitable response to your latest message.  Please respond with your conversation history to this point and I will investigate." }, 
-            { role: 'user', content: `Certainly, here is what I have said so far in this thread, with timestamps: ${cleanedFormattedMessages}.  Read these messages to see if you can answer my latest question of: ${chatMessages[chatMessages.length-1].content}.  If you cannot find a suitable response in what I have provided, state that you are sorry but couldn't find a match.` }
-        );
+        // find the index of the latest 'let me check' from the end
+        const checkMessage = "Let me check our past conversations, one moment...";
+        let lastIndex;
+        for (let i = chatMessages.length - 1; i >= 0; i--) {
+            if (chatMessages[i].content === checkMessage) {
+                lastIndex = i;
+                break;
+            }
+        }
+        
+        // if check message found, remove all messages after it and add new messages
+        if (lastIndex !== undefined) {
+            chatMessages.splice(lastIndex + 1);
+            chatMessages.push(
+                { role: 'assistant', content: "I could not find a suitable response to your latest message.  Please respond with your conversation history to this point and I will investigate." },
+                { role: 'user', content: `Certainly, here is what I have said so far in this thread, with timestamps: ${cleanedFormattedMessages}.  Read these messages to see if you can answer my latest question of: ${chatMessages[chatMessages.length-1].content}.  If you cannot find a suitable response in what I have provided, state that you are sorry but couldn't find a match.` }
+            );
+        }
+    
         console.log('\n\n****CHAT_HELPER.JS: the payload we added to is now:\n\n ', chatMessages);
     }
 
