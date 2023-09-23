@@ -43,6 +43,10 @@ function shouldRequery(responseContent) {
 }
 
 function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage) {
+//if it is the first message, it won't have a message trail...
+    if (!cleanedFormattedMessages) {
+        cleanedFormattedMessages = '';
+      }
 
     const checkMessage = "Let me check our past conversations, one moment...";
     const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
