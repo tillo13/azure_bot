@@ -106,6 +106,18 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
 
         if (requeryStatus) {
             letMeCheckFlag = true;  // this is set if anything from shouldRequery function is hit...
+
+                /* Start of loop code block */
+            let looped_through_payload = '';
+            for (let i = chatMessages.length - 1; i >= 0; i--) {
+            if (chatMessages[i].role === 'user') {
+                looped_through_payload = chatMessages[i].content + ', ' + looped_through_payload;
+            }
+            }
+            /* End of loop code block */
+
+            // removes trailing comma and space, gross, but...:
+            looped_through_payload = looped_through_payload.replace(/,\s*$/, "");
         
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (chatMessages[i].role === "assistant") {
@@ -137,7 +149,7 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
                 chatMessages.splice(lastIndex + 1);
                 chatMessages.push(
                     { role: 'assistant', content: "I could not find a suitable response to your latest message. Please respond with your conversation history to this point and I will investigate." },
-                    { role: 'user', content: `Certainly, here is what I have said so far in this thread, with timestamps: ${cleanedFormattedMessages}.  Read these messages to see if you can answer my latest question of: ${lastUserMessage}.  If you cannot find a suitable response in what I have provided, state that you are sorry but couldn not find a match and suggest a topic related to what we have discussed.` }
+                    { role: 'user', content: `Certainly, here is what I have said so far in this thread, with timestamps: ${looped_through_payload}.  Read these messages to see if you can answer my latest question of: ${lastUserMessage}.  If you cannot find a suitable response in what I have provided, state that you are sorry but couldn not find a match and suggest a topic related to what we have discussed.` }
                 );
             }
             console.log('\n\n****CHAT_HELPER.JS: the payload2 we added to is now:\n\n ', chatMessages);
