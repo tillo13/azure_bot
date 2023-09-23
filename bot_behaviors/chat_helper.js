@@ -38,7 +38,6 @@ function shouldRequery(responseContent) {
 }
 
 async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) {
-    //console.log('\n***CHAT_HELPER.JS: chatCompletion only', chatTexts);
     
     let letMeCheckFlag = false;
 
@@ -48,6 +47,25 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
     const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
     if (!validatedTokens) return;
     let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
+
+    // move the botMentioned check here, after chatMessages is assigned
+    let botMentioned = false;
+
+    // Check for '@bot' or '@atbot' in each user message
+    for (let message of chatMessages) {
+      if (message.role === 'user') {
+          if (message.content.includes('@bot') || message.content.includes('@atbot')) {
+          botMentioned = true;
+          break;
+          }
+      }
+    }
+
+    // If '@bot' or '@atbot' wasn't mentioned in any user message, return
+    if (!botMentioned) {
+      console.log('No @bot or @atbot mention. Skipping OpenAI API request.');
+      return;
+    }
 
     if (chatMessages.length === 0 || (chatMessages[0] && chatMessages[0].role !== "system")) {
         chatMessages.unshift({ role: "system", content: roleMessage });
