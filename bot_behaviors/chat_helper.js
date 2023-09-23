@@ -114,14 +114,7 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
                 }
             }
         
-            // Add the cleanedFormattedMessages as an assistant’s message
-            chatMessages.push({
-                role: 'user',
-                content: cleanedFormattedMessages
-            });
-        
             result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
-        }
         }
         console.log('\n\n\n' + '******CHAT_HELPER.JS: Response in letmecheckflag path from OpenAI API:\n');
         console.log(JSON.stringify(result));
