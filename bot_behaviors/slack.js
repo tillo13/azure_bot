@@ -178,8 +178,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       console.log('\n\n***SLACK.JS: Can\'t identify thread, not posting anything.***');
     } else {
       console.log('\n\n***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
-      }
     }
-  };
+  }
+};
 
 module.exports = { handleSlackMessage, isFromSlack };
