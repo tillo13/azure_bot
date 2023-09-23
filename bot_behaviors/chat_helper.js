@@ -54,6 +54,11 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
     if(cleanedFormattedMessages)
         chatMessages = formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage);
 
+            // Extrapolate user messages and log them
+            let userMessages = chatMessages.filter(msg => msg.role === 'user' && msg.content !== lastUserMessage);
+            let messagePayload = userMessages.map((msg, index) => `${index + 1}. ${msg.content}`).join(", ");
+            console.log(`\n\n****CHAT_HELPER.JS: EXTRAPOLATED USER MESSAGES: ${messagePayload}`);
+
         console.log('\n\n*****CHAT_HELPER.JS: *** Sending request to OpenAI API with payload:', chatMessages);
     
         const oldChatMessages = JSON.stringify(chatMessages);
