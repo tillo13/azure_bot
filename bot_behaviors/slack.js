@@ -122,7 +122,8 @@ function cleanChatRecord(chatRecord) {
 
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   const apiToken = context.activity.channelData?.ApiToken;
-
+  let cleanedFormattedMessages;
+  
   // Fetch conversation details from the current context
   const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
 
@@ -137,7 +138,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
 
   // If 'letMeCheckFlag' is true, then fetch the chat history
   if (letMeCheckFlag && apiToken) {
-    const cleanedFormattedMessages = await postChatHistoryToSlack(
+    cleanedFormattedMessages = await postChatHistoryToSlack(
       context.activity.channelData.SlackMessage.event.channel,
       thread_ts,
       apiToken,
