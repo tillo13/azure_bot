@@ -81,13 +81,13 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages){
             console.log('\n\n*****CHAT_HELPER.JS: *** Sending request to OpenAI API with payload:', chatMessages);
             const oldChatMessages = JSON.stringify(chatMessages);
             try {
-                const cleanChatMessages = [];
                 const seenMessages = new Set();
-                let originalLength = chatMessages.length;
                 for (let i = chatMessages.length - 1; i >= 0; i--) {
-                    const messageContent = chatMessages[i].content;
-                    if (!seenMessages.has(messageContent)) {
-                        seenMessages.add(messageContent);
+                    const messageContent = chatMessages[i].content.split(', here is what I have said so far')[0]; //only take the first part of the content string before the list of previous messages
+                    const messageRole = chatMessages[i].role;
+                    const combinedContentRole = messageContent + messageRole
+                    if (!seenMessages.has(combinedContentRole)) {
+                        seenMessages.add(combinedContentRole);
                         cleanChatMessages.unshift(chatMessages[i]);
                     }
                 }
