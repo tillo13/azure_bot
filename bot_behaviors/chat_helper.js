@@ -53,6 +53,13 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
     //show the passed value to add to openai here: 
     console.log('\n\n****CHAT_HELPER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
     
+    if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
+        console.log('****CHAT_HELPER.JS: NO PAYLOAD');
+      } else {
+        console.log('\n\n****CHAT_HELPER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
+        console.log('\n\n****CHAT_HELPER.JS: the payload we want to add to is: ', chatMessages);
+      }
+
     console.log(`\n***CHAT_HELPER.JS: Sending request to OpenAI API with the following parameters:\n
     Endpoint: ${endpoint}
     Deployment Id: ${deploymentId}
