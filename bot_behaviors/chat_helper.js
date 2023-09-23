@@ -98,9 +98,10 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
                 const duplicatesRemoved = originalLength - cleanedLength;
 
                 if (duplicatesRemoved > 0) {
-                console.log(`\n\n*****CHAT_HELPER.JS: CLEANED CODE OF THIS MANY DUPLICATES: ${duplicatesRemoved}`);
+                    console.log(`\n\n*****CHAT_HELPER.JS: CLEANED CODE OF THIS MANY DUPLICATES: ${duplicatesRemoved}`);
+                    console.log('\n\n*****CHAT_HELPER.JS: AFTER DUPLICATES REMOVED, CLEANED PAYLOAD: \n', cleanChatMessages);
                 } else {
-                console.log('\n\n*****CHAT_HELPER.JS: CLEAN PAYLOAD, NO DUPLICATION.');
+                    console.log('\n\n*****CHAT_HELPER.JS: CLEAN PAYLOAD, NO DUPLICATION.');
                 }
                 //end duplicates count
 
