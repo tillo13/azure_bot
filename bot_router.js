@@ -79,7 +79,7 @@ class EchoBot extends ActivityHandler {
             await next();
             
           } else { // This is the added else block
-            console.log('NOT IN AN ACTIVE THREAD');
+            console.log('***\n\nBOT_ROUTER.JS: THIS NOT IN AN ACTIVE THREAD, IGNORING');
             await next();
           }
         });
