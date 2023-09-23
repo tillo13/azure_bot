@@ -57,8 +57,8 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
     return chatMessages;
 }
 
-async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages){
-            const endpoint = process.env.OPENAI_API_BASE_URL;
+async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages, botInvoked){
+    const endpoint = process.env.OPENAI_API_BASE_URL;
             const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
             const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
             const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
@@ -106,6 +106,8 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages){
                 }
                 //end duplicates count
 
+                console.log(`\n\n*****NEWLOG1___CHAT_HELPER.JS: botInvoked is: ${botInvoked}`);
+
                 let result = await client.getChatCompletions(deploymentId, cleanChatMessages, { maxTokens: validatedTokens });
                 if (result && result.choices[0]?.message?.content) {
                     let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
@@ -114,6 +116,8 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages){
                         chatMessages = formatChatPayload(chatMessages, looped_through_payload, lastUserMessage);
                         if(JSON.stringify(chatMessages) !== oldChatMessages)
                             console.log('\n\n!!!IMPORTANT!!!! CHAT_HELPER.JS: *** Payload was updated after removing duplicates. This was triggered by the letMeCheckFlag from the handleSlackMessage() function in slack.js. The new payload: \n', chatMessages);
+
+                        console.log(`\n\n*****NEWLOG2___CHAT_HELPER.JS: botInvoked is: ${botInvoked}`);
 
                         result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
                     }

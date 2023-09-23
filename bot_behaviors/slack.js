@@ -1,4 +1,4 @@
-//2023sep20 902pm PROD GOLDEN VERSION//
+//2023sep23 402pm PROD GOLDEN VERSION//
 
 const { MessageFactory } = require('botbuilder');
 const https = require('https');
@@ -131,6 +131,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
 
   if (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) {
     activeThreads[thread_ts] = true;
+    context.activity.botInvoked = true; // this is what we will send to chat_helper.js to determine to send to openai or not...
   }
 
   if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
