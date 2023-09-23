@@ -132,8 +132,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   if (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) {
     activeThreads[thread_ts] = true;
   }
-  
-  // ignoring non-active non-group threads
+
   if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
     console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', context.activity.text);
     return;
@@ -148,6 +147,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       await getBotId(apiToken),
     );
     console.log('\n\n*&*&*& SLACK.JS bug check --> Cleaned formatted messages after postChatHistoryToSlack', cleanedFormattedMessages);
+
   }
 
   if (context.activity.text && activeThreads[thread_ts]) {
@@ -181,3 +181,5 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       }
     }
   };
+
+module.exports = { handleSlackMessage, isFromSlack };
