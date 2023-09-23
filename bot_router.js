@@ -34,14 +34,14 @@ class EchoBot extends ActivityHandler {
             console.log('******BOT_ROUTER.JS: Current content of chatMessagesUser:', chatMessagesUser);
 
 
-            let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, false, context.activity.botInvoked);
+            let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.botInvoked);
             
             if (chatResponse.requery) {
                 const requeryNotice = "Let me check our past conversations, one moment...";
                 await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
                 chatMessagesUser.push({ role: "assistant", content: requeryNotice });
   
-                chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, false, context.activity.botInvoked);
+                chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.botInvoked);
 
             }
 
