@@ -113,8 +113,16 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
                     break;
                 }
             }
-        
-                // find the index of the latest 'let me check' from the end of the convo to replace it...
+        ///copied from path above...
+            let lastUserMessage;
+            for (let i = chatMessages.length - 1; i >= 0; i--) {
+              if (chatMessages[i].role === 'user') {
+                lastUserMessage = chatMessages[i].content;
+                break;
+              }
+            }
+            
+            // find the index of the latest 'let me check' from the end of the convo to replace it...
             const checkMessage = "Let me check our past conversations, one moment...";
             let lastIndex;
             for (let i = chatMessages.length - 1; i >= 0; i--) {
