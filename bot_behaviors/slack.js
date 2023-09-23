@@ -261,5 +261,5 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       }
     }
   };
-
+  console.log ('slack.js: active threads flag',  activeThreads);
   module.exports = { handleSlackMessage, isFromSlack, activeThreads };
