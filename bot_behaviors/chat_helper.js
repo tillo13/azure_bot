@@ -39,7 +39,8 @@ function shouldRequery(responseContent) {
 
 async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) {
     
-    
+    let containsAtLeastOneBotMessage = false;    // Add this line 
+
     let letMeCheckFlag = false;
 
     const endpoint = process.env.OPENAI_API_BASE_URL;
