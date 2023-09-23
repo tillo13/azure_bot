@@ -57,7 +57,7 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
     return chatMessages;
 }
 
-async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages, botInvoked){
+async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages){
     const endpoint = process.env.OPENAI_API_BASE_URL;
             const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
             const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
@@ -71,8 +71,10 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages, 
                 chatMessages.unshift({ role: "system", content: roleMessage });
             }
 
-            const lastUserMessageObj = chatMessages.filter((msg, index) => msg.role === 'user' && index > chatMessages.map(item => item.content).lastIndexOf("Let me check our past conversations, one moment...")).pop()    
+            // Fetch the last user message before calling `formatChatPayload`
+            const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
             const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
+
 
             // Get user messages from the start of the conversation
             let userMessages = chatMessages.filter(msg => msg.role === 'user');
@@ -106,7 +108,6 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages, 
                 }
                 //end duplicates count
 
-                console.log(`\n\n*****NEWLOG1___CHAT_HELPER.JS: botInvoked is: ${botInvoked}`);
 
                 let result = await client.getChatCompletions(deploymentId, cleanChatMessages, { maxTokens: validatedTokens });
                 if (result && result.choices[0]?.message?.content) {
@@ -116,8 +117,6 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages, 
                         chatMessages = formatChatPayload(chatMessages, looped_through_payload, lastUserMessage);
                         if(JSON.stringify(chatMessages) !== oldChatMessages)
                             console.log('\n\n!!!IMPORTANT!!!! CHAT_HELPER.JS: *** Payload was updated after removing duplicates. This was triggered by the letMeCheckFlag from the handleSlackMessage() function in slack.js. The new payload: \n', chatMessages);
-
-                        console.log(`\n\n*****NEWLOG2___CHAT_HELPER.JS: botInvoked is: ${botInvoked}`);
 
                         result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
                     }

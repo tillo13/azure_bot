@@ -131,7 +131,6 @@
  
    if (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) {
      activeThreads[thread_ts] = true;
-     context.activity.botInvoked = true; // this is what we will send to chat_helper.js to determine to send to openai or not...
    }
  
    if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
