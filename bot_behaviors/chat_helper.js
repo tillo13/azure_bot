@@ -30,7 +30,8 @@ const bot_response_patterns = [
     "as a machine learning assistant",
     "access to the conversation",
     "have access to personal data",
-    "not privy to that information",    
+    "not privy to that information", 
+    "just a helpful assistant"   
     // Include any more patterns...
 ];
 
@@ -55,20 +56,22 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
     return chatMessages;
 }
 
-async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) {
-
+async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages){
             const endpoint = process.env.OPENAI_API_BASE_URL;
             const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
             const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
             const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
-            if (!validatedTokens) return;
+            if(!validatedTokens) return;
 
             let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
             console.log('\n\n*%*%*%*%CHAT_HELPER.JS ->DEBUG check --> Chat messages after creation', chatMessages);
-
+            
             if (!chatMessages.length || chatMessages[0].role !== "system") {
                 chatMessages.unshift({ role: "system", content: roleMessage });
             }
+
+            const lastUserMessageObj = chatMessages.filter((msg, index) => msg.role === 'user' && index > chatMessages.map(item => item.content).lastIndexOf("Let me check our past conversations, one moment...")).pop()    
+            const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
 
             // Get user messages from the start of the conversation
             let userMessages = chatMessages.filter(msg => msg.role === 'user');
