@@ -246,7 +246,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
         console.log('\n\n***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
         }
       }
-    return cleanedFormattedMessages;
+      console.log('\n\n***SLACK.JS: Cleaned message regardless of path:', cleanedFormattedMessages);
+      return cleanedFormattedMessages;
 };
 
 module.exports = { handleSlackMessage, isFromSlack };
