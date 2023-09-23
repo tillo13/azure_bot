@@ -27,54 +27,61 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
-          //Reset chatMessagesUser if it's a new thread.
+          // Reset chatMessagesUser if it's a new thread.
           let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
-                                  context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
-          let chatMessagesUser = [];
-            // Only process the message if the thread is active
-  if(activeThreads[current_thread_ts]) {
-          if(current_thread_ts === this.thread_ts) {
-               chatMessagesUser = await this.chatMessagesProperty.get(context, []);
-          }
-          this.thread_ts = current_thread_ts;
-
-          chatMessagesUser.push({role:"user", content:context.activity.text});
-
-        // Get chatResponse without immediately adding assistant's message and send the cleaned payload
-        let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
-
-        if(chatResponse.requery){
-            const requeryNotice = "Let me check our past conversations, one moment...";
-            await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-            chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
-        }
-    
-        // Now add the assistant's message to chatMessagesUser
-        chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
-    
-        let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
-    
-        console.log('\n\n****BOT_ROUTER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
+                                    context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
+          
+          if(activeThreads[current_thread_ts]) { // Only process the message if the thread is active
         
-        // now when chatCompletion is called the 3rd time, pass cleanedFormattedMessages in
-        await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages); // cleanedFormattedMessages is passed here
-    
-        await this.chatMessagesProperty.set(context, chatMessagesUser);
-        console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
-
-          if (isFromSlack(context)) {
-            //await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
-            console.log('\n***BOT_ROUTER.JS: letMeCheckFlag is: ', chatResponse.letMeCheckFlag);
-
-          } else {
-              const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
-              await context.sendActivity(replyActivity);
+            let chatMessagesUser = [];
+        
+            if(current_thread_ts === this.thread_ts) {
+              chatMessagesUser = await this.chatMessagesProperty.get(context, []);
+            }
+            this.thread_ts = current_thread_ts;
+        
+            chatMessagesUser.push({role:"user", content:context.activity.text});
+        
+            // Get chatResponse without immediately adding assistant's message and send the cleaned payload
+            let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+        
+            if(chatResponse.requery){
+                const requeryNotice = "Let me check our past conversations, one moment...";
+                await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
+                chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
+            }
+          
+            // Now add the assistant's message to chatMessagesUser
+            chatMessagesUser.push({role:"assistant", content:chatResponse.assistantResponse});
+          
+            let cleanedFormattedMessages = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
+          
+            console.log('\n\n****BOT_ROUTER.JS: cleaned payload ready for Openai: ', cleanedFormattedMessages);
+            
+            // now when chatCompletion is called the 3rd time, pass cleanedFormattedMessages in
+            await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, cleanedFormattedMessages); // cleanedFormattedMessages is passed here
+          
+            await this.chatMessagesProperty.set(context, chatMessagesUser);
+            console.log("\n\n***BOT_ROUTER.JS: Running_OpenAI payload after saving latest response from OpenAI:\n", chatMessagesUser);
+        
+            if (isFromSlack(context)) {
+              //await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag);
+              console.log('\n***BOT_ROUTER.JS: letMeCheckFlag is: ', chatResponse.letMeCheckFlag);
+        
+            } else {
+                const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
+                await context.sendActivity(replyActivity);
+            }
+        
+            //console.log("\n\n\n****BOT_ROUTER.JS current channelData:\n\n", JSON.stringify(context.activity.channelData, null, 2));
+            console.log(`\n\n\n****BOT_ROUTER.JS current channelData:\n\n${JSON.stringify(context.activity.channelData, null, 2)}`);
+        
+            await next();
+            
+          } else { // This is the added else block
+            console.log('NOT IN AN ACTIVE THREAD');
+            await next();
           }
-
-          //console.log("\n\n\n****BOT_ROUTER.JS current channelData:\n\n", JSON.stringify(context.activity.channelData, null, 2));
-          console.log(`\n\n\n****BOT_ROUTER.JS current channelData:\n\n${JSON.stringify(context.activity.channelData, null, 2)}`);
-
-          await next();
         });
     }
 
@@ -82,6 +89,6 @@ class EchoBot extends ActivityHandler {
       await super.run(context);
       await this.userState.saveChanges(context);
   }
-}}
+}
 
 module.exports.EchoBot = EchoBot;
