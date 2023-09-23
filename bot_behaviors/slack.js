@@ -261,4 +261,5 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       }
     }
   };
-  module.exports = { handleSlackMessage, isFromSlack, isActiveThread };
+
+module.exports = { handleSlackMessage, isFromSlack };
