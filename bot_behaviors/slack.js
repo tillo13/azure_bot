@@ -124,15 +124,21 @@ function cleanChatRecord(chatRecord) {
 
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   const apiToken = context.activity.channelData?.ApiToken;
-  
- // Fetch conversation details from the current context
+   let cleanedFormattedMessages;
+
+  // Add this check to the start of function
+  const invocationStrings = ['@bot', '@atbot'];
+  if (!invocationStrings.some(i => context.activity.text.includes(i)) && !context.activity.conversation.isGroup) {
+    console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', context.activity.text);
+    return;
+  }
+
+  // Fetch conversation details from the current context
   const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
 
-  // If the message is from a thread where the bot has not been mentioned and it's not a group conversation.
-  if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
-    console.log('\n\n***SLACK.JS: The bot was not mentioned in this thread -- IGNORING! User said: ', context.activity.text);
-    return;
-  }  
+  if (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) {
+    activeThreads[thread_ts] = true;
+  }
 
   // If 'letMeCheckFlag' is true, then fetch the chat history
   if (letMeCheckFlag && apiToken) {
