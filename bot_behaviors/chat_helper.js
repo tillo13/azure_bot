@@ -55,7 +55,7 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
 console.log('\n\n****CHAT_HELPER.JS: this will be undefined if the letmecheckflag is false: ', cleanedFormattedMessages);
 
 if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
-    console.log('****CHAT_HELPER.JS: NO PAYLOAD');
+    console.log('\n\n****CHAT_HELPER.JS: NO PAYLOAD');
 } else {
     console.log('\n\n**********CHAT_HELPER.JS:******** PAYLOAD HIT:\n\n ', cleanedFormattedMessages);
     console.log('\n\n****CHAT_HELPER.JS: the payload we want to add to is:\n\n ', chatMessages);
@@ -69,7 +69,7 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
     }
     
     // find the index of the latest 'let me check' from the end
-    const checkMessage = "Let me check our past conversations, one moment from chat_helper...";
+    const checkMessage = "Let me check our past conversations, one moment...";
     let lastIndex;
     for (let i = chatMessages.length - 1; i >= 0; i--) {
         if (chatMessages[i].content === checkMessage && chatMessages[i].role === 'assistant') {
