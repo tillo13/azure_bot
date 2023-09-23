@@ -12,14 +12,13 @@ function validateOpenAITokens(tokens) {
 
 const bot_response_patterns = ["as an", "artificial intelligence", "digital assistant", "computer program", "helpful assistant", 
 "virtual assistant", "access to", "previous conversations", "shared in", "past conversations", "just a", "text-based AI"];
-const bot_response_patternsRegex = new RegExp('\\b(' + bot_response_patterns.join('..*|') + '..*)\\b', 'gmi');
+const bot_response_patternsRegex = new RegExp('(' + bot_response_patterns.join('|') + ')', 'gmi');
 
 function shouldRequery(responseContent) {
     return responseContent && bot_response_patternsRegex.test(responseContent);
 }
 
 function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage) {
-
     const checkMessage = "Let me check our past conversations, one moment...";
     const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
 
@@ -28,8 +27,7 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
             { role: 'assistant', content: "I could not find a suitable response to your latest message. Please respond with your conversation history to this point and I will investigate." },
             { role: 'user', content: `Certainly, here is what I have said so far in this thread, with timestamps: ${cleanedFormattedMessages}.  Read these messages to see if you can answer my latest question of: ${lastUserMessage}.  If you cannot find a suitable response in what I have provided, state that you are sorry but couldn not find a match and suggest a topic related to what we have discussed.` }
         );
-    }
-  
+    }  
     return chatMessages;
 }
 
@@ -47,8 +45,7 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
         chatMessages.unshift({ role: "system", content: roleMessage });
     }
 
-    const lastUserMessageObj = chatMessages.find((msg, index) => msg.role === 'user' && index > chatMessages.map(item => item.content).lastIndexOf("Let me check our past conversations, one moment..."));
-    
+    const lastUserMessageObj = chatMessages.find((msg, index) => msg.role === 'user' && index > chatMessages.map(item => item.content).lastIndexOf("Let me check our past conversations, one moment..."));    
     const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
     
     if(cleanedFormattedMessages)
@@ -57,10 +54,9 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
             // Extrapolate user messages and log them
             let userMessages = chatMessages.filter(msg => msg.role === 'user' && msg.content !== lastUserMessage);
             let messagePayload = userMessages.map((msg, index) => `${index + 1}. ${msg.content}`).join(", ");
-            console.log(`\n\n****CHAT_HELPER.JS: EXTRAPOLATED USER MESSAGES: ${messagePayload}`);
+            console.log(`\n\n****CHAT_HELPER.JS: EXTRAPOLATED USER MESSAGES:\n\n ${messagePayload}`);
 
-        console.log('\n\n*****CHAT_HELPER.JS: *** Sending request to OpenAI API with payload:', chatMessages);
-    
+        console.log('\n\n*****CHAT_HELPER.JS: *** Sending request to OpenAI API with payload:', chatMessages);    
         const oldChatMessages = JSON.stringify(chatMessages);
         try {
             let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
