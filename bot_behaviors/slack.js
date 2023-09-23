@@ -235,6 +235,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
           }
 
           await context.sendActivity(replyActivity);
+          console.log('\n\n***SLACK.JS: Cleaned message regardless of path:', cleanedFormattedMessages);
           return cleanedFormattedMessages;
 
         } catch (error) {
@@ -246,7 +247,6 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
         console.log('\n\n***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
         }
       }
-      console.log('\n\n***SLACK.JS: Cleaned message regardless of path:', cleanedFormattedMessages);
       return cleanedFormattedMessages;
 };
 
