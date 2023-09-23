@@ -43,23 +43,30 @@ function shouldRequery(responseContent) {
 }
 
 function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage) {
+
     const checkMessage = "Let me check our past conversations, one moment...";
     const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
-
-    if(cleanedFormattedMessages && !chatMessages.map(item => item.content).includes(cleanedFormattedMessages)) {
-        chatMessages.push(
-            { role: 'user', content: `Here is what I have said so far: ${cleanedFormattedMessages}` },
-        );
-        console.log('\n\n*%*%*%*%CHAT_HELPER.JS ->DEBUG check --> had to tell bot what we have said so far, this is ok, FYI', cleanedFormattedMessages);
-    }
+  
+    // Convert your 'cleanedFormattedMessages' back to array
+    const userMessagesArray = cleanedFormattedMessages.split(', ');
+  
+    // push userMessages one-by-one if not already there
+    userMessagesArray.forEach(message => {
+      if(!chatMessages.map(item => item.content).includes(message)) {
+          chatMessages.push(
+            { role: 'user', content: message },
+          );
+      }
+    });
+  
     if (lastIndex > -1) {
-        chatMessages.push(
-            { role: 'assistant', content: "I could not find a suitable response to your latest message. Please respond with your conversation history to this point and I will investigate." },
-            { role: 'user', content: `Certainly, here is what I have said so far in this thread, with timestamps: ${cleanedFormattedMessages}.  Read these messages to see if you can answer my latest question of: ${lastUserMessage}.  If you cannot find a suitable response in what I have provided, state that you are sorry but couldn not find a match and suggest a topic related to what we have discussed.` }
-        );
+      chatMessages.push(
+        { role: 'assistant', content: "I could not find a suitable response to your latest message. Please respond with your conversation history to this point and I will investigate." },
+        { role: 'user', content: `Certainly, here is what I have said so far in this thread, with timestamps: ${cleanedFormattedMessages}.  Read these messages to see if you can answer my latest question of: ${lastUserMessage}.  If you cannot find a suitable response in what I have provided, state that you are sorry but couldn not find a match and suggest a topic related to what we have discussed.` }
+      );
     }  
     return chatMessages;
-}
+  }
 
 async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) {
 
