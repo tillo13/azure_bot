@@ -36,7 +36,7 @@ function shouldRequery(responseContent) {
 }
 
 async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) {
-    ...
+
     chatMessages = prepareChatMessages(chatMessages, roleMessage);
 
     try {
