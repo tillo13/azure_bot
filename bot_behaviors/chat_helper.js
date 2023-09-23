@@ -10,25 +10,26 @@ function validateOpenAITokens(tokens) {
     return tokens;
 }
 
-const bot_response_patterns_regEx = ["as an", "access to", "just a"];
-const bot_response_patterns_explicit = [
-    "as an artificial intelligence", 
-    "as a digital assistant", 
-    "as a computer program", 
-    "as a helpful assistant", 
-    "as a virtual assistant", 
-    "previous conversations", 
-    "shared in", 
-    "past conversations", 
-    "text-based AI"
+const bot_response_patterns = [
+    "as an artificial intelligence",
+    "as a digital assistant",
+    "as a computer program",
+    "as a helpful assistant",
+    "as a virtual assistant",
+    "access to personal information",
+    "access to previous conversations",
+    "shared in previous conversations",
+    "have access to past conversations",
+    "just a virtual assistant",
+    "as a text-based AI",
+    // Include any more patterns...
 ];
-    
-const bot_response_patterns_Regex = new RegExp('\\b(' + bot_response_patterns_regEx.join('..*|') + '..*)\\b', 'gmi');
 
 function shouldRequery(responseContent) {
-    return responseContent && (
-        bot_response_patterns_Regex.test(responseContent) ||
-        bot_response_patterns_explicit.some(pattern => responseContent.includes(pattern))
+    const lowerCasedResponse = responseContent.toLowerCase();
+    
+    return bot_response_patterns.some(pattern =>
+       lowerCasedResponse.includes(pattern.toLowerCase())
     );
 }
 
