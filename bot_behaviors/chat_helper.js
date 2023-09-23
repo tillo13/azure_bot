@@ -110,7 +110,7 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
                         let looped_through_payload = chatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(', ');
                         chatMessages = formatChatPayload(chatMessages, looped_through_payload, lastUserMessage);
                         if(JSON.stringify(chatMessages) !== oldChatMessages)
-                            console.log('\n\n!!!IMPORTANT!!!! CHAT_HELPER.JS: *** Payload was updated after removing duplicates. This was triggered by the letMeCheckFlag from the handleSlackMessage() function in slack.js. The new payload: \n', chatMessages););
+                            console.log('\n\n!!!IMPORTANT!!!! CHAT_HELPER.JS: *** Payload was updated after removing duplicates. This was triggered by the letMeCheckFlag from the handleSlackMessage() function in slack.js. The new payload: \n', chatMessages);
 
                         result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
                     }
