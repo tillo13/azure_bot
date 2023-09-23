@@ -56,7 +56,7 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
     if(cleanedFormattedMessages)
         chatMessages = formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage);
 
-    console.log('*** Sending request to OpenAI API with payload:', chatMessages);
+        console.log('\n\n&&&&CHAT_HELPER.JS: *** Sending request to OpenAI API with payload:', chatMessages);
     
     try {
         let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
@@ -65,18 +65,18 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
             if (letMeCheckFlag) {
                 let looped_through_payload = chatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(', ');
                 chatMessages = formatChatPayload(chatMessages, looped_through_payload, lastUserMessage);
-                console.log('*** Updated payload:', chatMessages);
+                console.log('\n\n&&&&CHAT_HELPER.JS: *** Updated payload:', chatMessages);
                 result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
             }
-            console.log('*** Response from OpenAI API:\n', JSON.stringify(result));
-console.log('*** letMeCheckFlag is: ', letMeCheckFlag);
+            console.log('\n\n&&&&CHAT_HELPER.JS: *** Response from OpenAI API:\n', JSON.stringify(result));
+            console.log('\n\n&&&&CHAT_HELPER.JS: *** letMeCheckFlag is: ', letMeCheckFlag);
 return {
     'assistantResponse': result.choices[0].message.content,
     'requery': letMeCheckFlag,
     'letMeCheckFlag': letMeCheckFlag
 };
 } else {
-console.log("No content in API response");
+    console.log('\n\n&&&&CHAT_HELPER.JS: ***No content in API response');
 return {
     'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
     'requery': false,
