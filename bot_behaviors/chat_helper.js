@@ -64,6 +64,8 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
     if (!validatedTokens) return;
 
     let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
+    console.log('\n\n*%*%*%*%CHAT_HELPER.JS ->DEBUG check --> Chat messages after creation', chatMessages);
+
 
     if (!chatMessages.length || chatMessages[0].role !== "system") {
         chatMessages.unshift({ role: "system", content: roleMessage });
@@ -74,6 +76,8 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
     
     if(cleanedFormattedMessages)
         chatMessages = formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage);
+        console.log('\n\n*%*%*%*%*CHAT_HELPER.JS -->DEBUG--> Chat messages after formatChatPayload', chatMessages);
+
 
             // Extrapolate user messages and log them
             let userMessages = chatMessages.filter(msg => msg.role === 'user' && msg.content !== lastUserMessage);

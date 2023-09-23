@@ -146,6 +146,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       apiToken,
       await getBotId(apiToken),
     );
+    console.log('\n\n*&*&*& SLACK.JS bug check --> Cleaned formatted messages after postChatHistoryToSlack', cleanedFormattedMessages);
+
   }
 
   if (context.activity.text && activeThreads[thread_ts]) {
