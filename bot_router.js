@@ -31,7 +31,7 @@ class EchoBot extends ActivityHandler {
           let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
                                   context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
           let chatMessagesUser = [];
-          console.log('\n\n******BOT_ROUTER.JS: Initialized chatMessagesUser');
+          //not needed unless troublehshooting chatgpt payload console.log('\n\n******BOT_ROUTER.JS: Initialized chatMessagesUser');
 
           if(current_thread_ts === this.thread_ts) {
                chatMessagesUser = await this.chatMessagesProperty.get(context, []);
@@ -43,7 +43,7 @@ class EchoBot extends ActivityHandler {
 
         // Get chatResponse without immediately adding assistant's message and send the cleaned payload
         let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT);
-        console.log('\n\n******BOT_ROUTER.JS: chatResponse after first chatCompletion call:', chatResponse);
+        //not needed unless chat_router.js is not functioning console.log('\n\n******BOT_ROUTER.JS: chatResponse after first chatCompletion call:', chatResponse);
 
         if(chatResponse.requery){
           const requeryNotice = "Let me check our past conversations, one moment...";
