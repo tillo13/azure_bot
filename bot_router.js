@@ -1,11 +1,10 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const { handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
 const chatCompletion = require('./bot_behaviors/chat_helper');
+const { PERSONALITY_OF_BOT } = require('./config');
 
 const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
-
-const PERSONALITY_OF_BOT = "You talk like an old cowboy. You are a helpful assistant from Teradata that always checks any past conversations within this thread before responding to any new information received.";
 
 class EchoBot extends ActivityHandler {
     constructor(userState) {
