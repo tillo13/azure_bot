@@ -10,14 +10,12 @@ function validateOpenAITokens(tokens) {
     return tokens;
 }
 
-const patterns = [
-    "as an ai", "as an artificial intelligence", "as a digital assistant", "as a computer program", "as a helpful assistant", 
-    "as a virtual assistant", "access to personal information", "access to previous conversations", "shared in previous conversations", 
-    "have access to past conversations", "just a virtual assistant", "as a text-based AI"
-];
+const bot_response_patterns = ["as an", "artificial intelligence", "digital assistant", "computer program", "helpful assistant", 
+"virtual assistant", "access to", "previous conversations", "shared in", "past conversations", "just a", "text-based AI"];
+const bot_response_patternsRegex = new RegExp('\\b(' + bot_response_patterns.join('..*|') + '..*)\\b', 'gmi');
 
 function shouldRequery(responseContent) {
-    return responseContent && patterns.some(pattern => responseContent.toLowerCase().includes(pattern.toLowerCase()));
+    return responseContent && bot_response_patternsRegex.test(responseContent);
 }
 
 function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage) {
