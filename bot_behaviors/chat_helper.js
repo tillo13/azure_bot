@@ -55,27 +55,29 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
     if(cleanedFormattedMessages)
         chatMessages = formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage);
 
-        console.log('\n\n&&&&CHAT_HELPER.JS: *** Sending request to OpenAI API with payload:', chatMessages);
+        console.log('\n\n*****CHAT_HELPER.JS: *** Sending request to OpenAI API with payload:', chatMessages);
     
-    try {
-        let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
-        if (result && result.choices[0]?.message?.content) {
-            let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
-            if (letMeCheckFlag) {
-                let looped_through_payload = chatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(', ');
-                chatMessages = formatChatPayload(chatMessages, looped_through_payload, lastUserMessage);
-                console.log('\n\n&&&&CHAT_HELPER.JS: *** Updated payload:', chatMessages);
-                result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
-            }
-            console.log('\n\n&&&&CHAT_HELPER.JS: *** Response from OpenAI API:\n', JSON.stringify(result));
-            console.log('\n\n&&&&CHAT_HELPER.JS: *** letMeCheckFlag is: ', letMeCheckFlag);
+        const oldChatMessages = JSON.stringify(chatMessages);
+        try {
+            let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
+            if (result && result.choices[0]?.message?.content) {
+                let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
+                if (letMeCheckFlag) {
+                    let looped_through_payload = chatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(', ');
+                    chatMessages = formatChatPayload(chatMessages, looped_through_payload, lastUserMessage);
+                    if(JSON.stringify(chatMessages) !== oldChatMessages)
+                        console.log('\n\n&&&&CHAT_HELPER.JS: *** !Updated payload!!:', chatMessages);
+                    result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
+                }
+            console.log('\n\n*****CHAT_HELPER.JS: *** Response from OpenAI API:\n', JSON.stringify(result));
+            console.log('\n\n*****CHAT_HELPER.JS: *** letMeCheckFlag is: ', letMeCheckFlag);
 return {
     'assistantResponse': result.choices[0].message.content,
     'requery': letMeCheckFlag,
     'letMeCheckFlag': letMeCheckFlag
 };
 } else {
-    console.log('\n\n&&&&CHAT_HELPER.JS: ***No content in API response');
+    console.log('\n\n*****CHAT_HELPER.JS: ***No content in API response');
 return {
     'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
     'requery': false,
@@ -83,7 +85,7 @@ return {
 };
 }
 } catch (error) {
-console.error("\n\n&&&&CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
+console.error("\n\n*****CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
 throw error;
 }
 }
