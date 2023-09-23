@@ -16,6 +16,7 @@ const bot_response_patterns = [
     "as a computer program",
     "as a helpful assistant",
     "as a virtual assistant",
+    "as a language model",
     "access to personal information",
     "access to previous conversations",
     "shared in previous conversations",
