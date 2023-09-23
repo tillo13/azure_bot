@@ -1,5 +1,5 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
-const { handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
+const { handleSlackMessage, isFromSlack, activeThreads } = require('./bot_behaviors/slack');
 const chatCompletion = require('./bot_behaviors/chat_helper');
 
 const WELCOMED_USER = 'welcomedUserProperty';
@@ -31,6 +31,8 @@ class EchoBot extends ActivityHandler {
           let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
                                   context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
           let chatMessagesUser = [];
+            // Only process the message if the thread is active
+  if(activeThreads[current_thread_ts]) {
           if(current_thread_ts === this.thread_ts) {
                chatMessagesUser = await this.chatMessagesProperty.get(context, []);
           }
@@ -80,6 +82,6 @@ class EchoBot extends ActivityHandler {
       await super.run(context);
       await this.userState.saveChanges(context);
   }
-}
+}}
 
 module.exports.EchoBot = EchoBot;
