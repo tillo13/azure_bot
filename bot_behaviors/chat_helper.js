@@ -100,7 +100,21 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
     `);
 
    try {
-    let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
+
+    if (containsAtLeastOneBotMessage) {
+        try {
+            let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
+        } 
+        catch (error) {
+           // Handle the error case
+        }
+        finally {
+            // Execute any cleanup code if necessary
+        }
+    }
+    else {
+        console.log("****CHAT_HELPER.JS***: try1: current payload does not contain '@bot' or '@atbot' in the thread anywhere, skipping send to openai.");
+    }
 
     // Only proceed if result and result.choices[0] and result.choices[0].message and result.choices[0].message.content exist 
     if (result && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
@@ -111,12 +125,18 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
 
             /* Start of loop code block */
             let looped_through_payload = '';
+            let containsAtLeastOneBotMessage = false;
             for (let i = chatMessages.length - 1; i >= 0; i--) {
                 if (
                     chatMessages[i].role === 'user' &&
                     !chatMessages[i].content.startsWith("Certainly, here is what I have said")
                 ) {
                     looped_through_payload = chatMessages[i].content + ', ' + looped_through_payload;
+
+                    // Check if the message contains '@bot' or '@atbot'
+                    if (chatMessages[i].content.includes("@bot") || chatMessages[i].content.includes("@atbot")) {
+                        containsAtLeastOneBotMessage = true;
+                    }
                 }
             }
             /* End of loop code block */
@@ -158,7 +178,21 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
                 );
             }
             console.log('\n\n****CHAT_HELPER.JS: the payload2 we added to is now:\n\n ', chatMessages);
-            result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
+            if (containsAtLeastOneBotMessage) {
+                try {
+                    result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
+                } 
+                catch (error) {
+                   // Handle the error case
+                }
+                finally {
+                    // Execute any cleanup code if necessary
+                }
+            }
+            else {
+                console.log("****CHAT_HELPER.JS***: try2: current payload does not contain '@bot' or '@atbot' in the thread anywhere, skipping send to openai.");
+            }
+            
         }
         console.log('\n\n\n' + '******CHAT_HELPER.JS: Response in letmecheckflag path from OpenAI API:\n');
         console.log(JSON.stringify(result));
