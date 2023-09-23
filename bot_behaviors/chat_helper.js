@@ -39,7 +39,8 @@ function shouldRequery(responseContent) {
 
 async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) {
     
-    let containsAtLeastOneBotMessage = false;    // Add this line 
+    let containsAtLeastOneBotMessage = false;    // Add these for the try/catch blocks deciding to post
+    let result; 
 
     let letMeCheckFlag = false;
 
