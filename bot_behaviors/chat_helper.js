@@ -37,6 +37,7 @@ function shouldRequery(responseContent) {
 
 async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) {
 
+    let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
     chatMessages = prepareChatMessages(chatMessages, roleMessage);
 
     try {
