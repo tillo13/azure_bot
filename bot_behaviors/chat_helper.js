@@ -57,30 +57,21 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 
 async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) {
 
-    const endpoint = process.env.OPENAI_API_BASE_URL;
-    const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
-    const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
-    const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
-    if (!validatedTokens) return;
+            const endpoint = process.env.OPENAI_API_BASE_URL;
+            const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
+            const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
+            const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
+            if (!validatedTokens) return;
 
-    let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
-    console.log('\n\n*%*%*%*%CHAT_HELPER.JS ->DEBUG check --> Chat messages after creation', chatMessages);
+            let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
+            console.log('\n\n*%*%*%*%CHAT_HELPER.JS ->DEBUG check --> Chat messages after creation', chatMessages);
 
+            if (!chatMessages.length || chatMessages[0].role !== "system") {
+                chatMessages.unshift({ role: "system", content: roleMessage });
+            }
 
-    if (!chatMessages.length || chatMessages[0].role !== "system") {
-        chatMessages.unshift({ role: "system", content: roleMessage });
-    }
-
-    const lastUserMessageObj = chatMessages.find((msg, index) => msg.role === 'user' && index > chatMessages.map(item => item.content).lastIndexOf("Let me check our past conversations, one moment..."));    
-    const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
-    
-    if(cleanedFormattedMessages)
-        chatMessages = formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage);
-        console.log('\n\n*%*%*%*%*CHAT_HELPER.JS -->DEBUG--> Chat messages after formatChatPayload', chatMessages);
-
-
-            // Extrapolate user messages and log them
-            let userMessages = chatMessages.filter(msg => msg.role === 'user' && msg.content !== lastUserMessage);
+            // Get user messages from the start of the conversation
+            let userMessages = chatMessages.filter(msg => msg.role === 'user');
             let messagePayload = userMessages.map((msg, index) => `${index + 1}. ${msg.content}`).join(", ");
             console.log(`\n\n****CHAT_HELPER.JS: EXTRAPOLATED USER MESSAGES:\n\n ${messagePayload}`);
 
