@@ -85,6 +85,7 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
             try {
                 const cleanChatMessages = [];
                 const seenMessages = new Set();
+                let originalLength = chatMessages.length;
                 for (let i = chatMessages.length - 1; i >= 0; i--) {
                     const messageContent = chatMessages[i].content;
                     if (!seenMessages.has(messageContent)) {
