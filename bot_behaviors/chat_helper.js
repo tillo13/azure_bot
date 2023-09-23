@@ -107,12 +107,15 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
         if (requeryStatus) {
             letMeCheckFlag = true;  // this is set if anything from shouldRequery function is hit...
 
-                /* Start of loop code block */
+            /* Start of loop code block */
             let looped_through_payload = '';
             for (let i = chatMessages.length - 1; i >= 0; i--) {
-            if (chatMessages[i].role === 'user') {
-                looped_through_payload = chatMessages[i].content + ', ' + looped_through_payload;
-            }
+                if (
+                    chatMessages[i].role === 'user' &&
+                    !chatMessages[i].content.startsWith("Certainly, here is what I have said")
+                ) {
+                    looped_through_payload = chatMessages[i].content + ', ' + looped_through_payload;
+                }
             }
             /* End of loop code block */
 
