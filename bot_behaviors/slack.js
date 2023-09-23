@@ -124,20 +124,19 @@ function cleanChatRecord(chatRecord) {
 
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   const apiToken = context.activity.channelData?.ApiToken;
-   let cleanedFormattedMessages;
-
-  // Add this check to the start of function
-  const invocationStrings = ['@bot', '@atbot'];
-  if (!invocationStrings.some(i => context.activity.text.includes(i)) && !context.activity.conversation.isGroup) {
-    console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', context.activity.text);
-    return;
-  }
-
+  let cleanedFormattedMessages;
+  
   // Fetch conversation details from the current context
   const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
 
   if (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) {
     activeThreads[thread_ts] = true;
+  }
+  
+  // ignoring non-active non-group threads
+  if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
+    console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', context.activity.text);
+    return;
   }
 
   // If 'letMeCheckFlag' is true, then fetch the chat history
@@ -149,7 +148,6 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       await getBotId(apiToken),
     );
     console.log('\n\n*&*&*& SLACK.JS bug check --> Cleaned formatted messages after postChatHistoryToSlack', cleanedFormattedMessages);
-
   }
 
   if (context.activity.text && activeThreads[thread_ts]) {
@@ -183,5 +181,3 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       }
     }
   };
-
-module.exports = { handleSlackMessage, isFromSlack };
