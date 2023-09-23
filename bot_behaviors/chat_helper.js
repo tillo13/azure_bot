@@ -61,11 +61,15 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages) 
       }
     }
 
-    // If '@bot' or '@atbot' wasn't mentioned in any user message, return
-    if (!botMentioned) {
-      console.log('No @bot or @atbot mention. Skipping OpenAI API request.');
-      return;
-    }
+// If '@bot' or '@atbot' wasn't mentioned in any user message, return
+if (!botMentioned) {
+    console.log('No @bot or @atbot mention. Skipping OpenAI API request.');
+    return {
+       'assistantResponse': "No @bot or @atbot mentioned in the user messages.", 
+        'requery': false, 
+        'letMeCheckFlag': false
+    };
+  }
 
     if (chatMessages.length === 0 || (chatMessages[0] && chatMessages[0].role !== "system")) {
         chatMessages.unshift({ role: "system", content: roleMessage });
