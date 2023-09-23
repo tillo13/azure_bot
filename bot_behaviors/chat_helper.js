@@ -103,7 +103,7 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
         // Check if parent has @bot or @atbot, if not, return
         let parentMessage = chatMessages[0] && chatMessages[0].content;
         if (parentMessage && !(parentMessage.includes('@bot') || parentMessage.includes('@atbot'))) {
-            console.log('THIS MESSAGE FROM SLACK SPECIFICALLY DID NOT HAVE AN @BOT OR @ATBOT CALL IN PARENT MESSAGE, SO WILL NOT SEND ON TO OPENAI...');
+            console.log('THIS MESSAGE FROM SLACK SPECIFICALLY DID NOT HAVE AN @BOT OR @ATBOT CALL IN PARENT MESSAGE1, SO WILL NOT SEND ON TO OPENAI...');
             return;
         }
 
