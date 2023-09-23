@@ -21,17 +21,18 @@ function shouldRequery(responseContent) {
 }
 
 function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage) {
-  
+
     const checkMessage = "Let me check our past conversations, one moment...";
     const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
 
     if (lastIndex > -1) {
-        chatMessages.splice(lastIndex + 1);
+        chatMessages = chatMessages.filter(msgObj => !(msgObj.role === 'user' && msgObj.content.startsWith('Certainly, here is what I have said')));
         chatMessages.push(
             { role: 'assistant', content: "I could not find a suitable response to your latest message. Please respond with your conversation history to this point and I will investigate." },
             { role: 'user', content: `Certainly, here is what I have said so far in this thread, with timestamps: ${cleanedFormattedMessages}.  Read these messages to see if you can answer my latest question of: ${lastUserMessage}.  If you cannot find a suitable response in what I have provided, state that you are sorry but couldn not find a match and suggest a topic related to what we have discussed.` }
         );
     }
+  
     return chatMessages;
 }
 
@@ -84,7 +85,7 @@ return {
 };
 }
 } catch (error) {
-console.error("An error occurred while interacting with OpenAI API", error);
+console.error("\n\n&&&&CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
 throw error;
 }
 }
