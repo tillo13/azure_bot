@@ -193,6 +193,14 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
 };
 
 let activeThreads = {};
+function setActiveThread(threadId, status) {  // Use to set active thread status
+  activeThreads[threadId] = status;
+}
+
+function isActiveThread(threadId) {  // Use to check if thread is active
+  return !!activeThreads[threadId];
+}
+
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   console.log('\n\n***SLACK.JS: handleSlackMessage called with assistantResponse:', assistantResponse);
   console.log('\n\n***SLACK.JS: letMeCheckFlag is:', letMeCheckFlag);
@@ -207,15 +215,17 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
   console.log('\n\n***SLACK.JS: EXTRACTED BOTID:', botId);
 
   let thread_ts = "";
+
   if (context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event) {
     thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
   }
 
+  // Use the set function instead of directly modifying activeThreads
   if (context.activity.text && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
-    activeThreads[thread_ts] = true;
+    setActiveThread(thread_ts, true);  // here!
   }
 
-  if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
+  if (!isActiveThread(thread_ts) && !context.activity.conversation.isGroup) {  // updated here!
     console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING!  User said: ', context.activity.text);
     return;
   }
@@ -261,5 +271,4 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
       }
     }
   };
-  console.log ('slack.js: active threads flag',  activeThreads);
-  module.exports = { handleSlackMessage, isFromSlack, activeThreads };
+  module.exports = { handleSlackMessage, isFromSlack, isActiveThread };

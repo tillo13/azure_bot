@@ -1,5 +1,5 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
-const { handleSlackMessage, isFromSlack, activeThreads } = require('./bot_behaviors/slack');
+const { handleSlackMessage, isFromSlack, isActiveThread } = require('./bot_behaviors/slack');
 const chatCompletion = require('./bot_behaviors/chat_helper');
 
 const WELCOMED_USER = 'welcomedUserProperty';
@@ -31,7 +31,8 @@ class EchoBot extends ActivityHandler {
           let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
                                     context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
           
-          if(activeThreads[current_thread_ts]) { // Only process the message if the thread is active
+            if(isActiveThread(current_thread_ts)) { // use isActiveThread function here
+
         
             let chatMessagesUser = [];
         
@@ -79,7 +80,7 @@ class EchoBot extends ActivityHandler {
             await next();
             
           } else { // This is the added else block
-            console.log ('bot_router.js: active threads flag',  activeThreads);
+            console.log ('bot_router.js: active threads flag',  isActiveThread);
             console.log('***\n\nBOT_ROUTER.JS: THIS NOT IN AN ACTIVE THREAD, IGNORING');
             await next();
           }
