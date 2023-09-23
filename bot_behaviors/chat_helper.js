@@ -99,16 +99,8 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
     Maximum Tokens: ${validatedTokens}
     `);
 
-    try {
-        // Check if parent has @bot or @atbot, if not, return
-        let parentMessage = chatMessages[0] && chatMessages[0].content;
-        if (parentMessage && !(parentMessage.includes('@bot') || parentMessage.includes('@atbot'))) {
-            console.log('THIS MESSAGE FROM SLACK SPECIFICALLY DID NOT HAVE AN @BOT OR @ATBOT CALL IN PARENT MESSAGE1, SO WILL NOT SEND ON TO OPENAI...');
-            return;
-        }
-
-        // Make the request to OpenAI
-        let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
+   try {
+    let result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
 
     // Only proceed if result and result.choices[0] and result.choices[0].message and result.choices[0].message.content exist 
     if (result && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
@@ -166,14 +158,6 @@ if (!cleanedFormattedMessages || cleanedFormattedMessages.trim() === "") {
                 );
             }
             console.log('\n\n****CHAT_HELPER.JS: the payload2 we added to is now:\n\n ', chatMessages);
-
-            // Check if parent has @bot or @atbot, if not, return
-            let parentMessage = chatMessages[0] && chatMessages[0].content;
-            if (parentMessage && !(parentMessage.includes('@bot') || parentMessage.includes('@atbot'))) {
-                console.log('THIS MESSAGE FROM SLACK SPECIFICALLY DID NOT HAVE AN @BOT OR @ATBOT CALL IN THE PARENT MESSAGE, SO WILL NOT SEND ON TO OPENAI...');
-                return;
-            }
-            //send to openai
             result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
         }
         console.log('\n\n\n' + '******CHAT_HELPER.JS: Response in letmecheckflag path from OpenAI API:\n');
