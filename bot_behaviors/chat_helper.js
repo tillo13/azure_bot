@@ -130,7 +130,9 @@ if (duplicatesRemoved > 0) {
 
 // Start interacting with OpenAI
 try {
-  let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+      // Before making the first call to openai, ensure the channelId is not slack or the thread is active
+      if (!(channelId === 'slack' && isActiveThread === null)) {
+        let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });}
 
   if (result && result.choices[0]?.message?.content) {
     // Check if assistant wants to requery message
@@ -144,7 +146,9 @@ try {
       if(JSON.stringify(newCleanChatMessages) !== oldChatMessages)
         console.log('\n\n!!!IMPORTANT!!!! CHAT_HELPER.JS: *** Payload was updated after removing duplicates. This was triggered by the letMeCheckFlag from the handleSlackMessage() function in slack.js. The new payload: \n', newCleanChatMessages);
 
-      result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+        if (!(channelId === 'slack' && isActiveThread === null)) {
+          result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+       }
     }
 
     console.log('\n\n*****CHAT_HELPER.JS: *** Response from OpenAI API:\n', JSON.stringify(result));
