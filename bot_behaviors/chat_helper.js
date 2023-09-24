@@ -1,4 +1,6 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+const { fetchConversationHistory } = require('./slack_utils');
+
 
 const MAX_OPENAI_TOKENS = 400;
 
@@ -88,6 +90,24 @@ if (typeof cleanedFormattedMessages === 'string') {
     });
 } else {
     console.log('\n\n****CHAT_HELPER.JS>>>No previous user messages via cleanedFormattedMessages\n');
+}
+
+// Fetch thread_ts and channelId from context
+const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
+const channelId = context.activity.channelData?.SlackMessage?.channel;
+
+if (thread_ts && channelId) {
+    const res = await fetchConversationHistory(channelId, thread_ts, process.env.SLACK_API_TOKEN);
+    console.log('\n\n****CHAT_HELPER.JS>>>USER MESSAGES FROM SLACK CONVERSATION HISTORY:\n');
+    let i = 1;
+    res.messages.forEach((msg) => {
+        if (msg.user !== process.env.SLACK_BOT_USER_ID) {  //to filter out bot's own messages
+            console.log(`${i}. ${msg.text}`);
+            i += 1;
+        }
+    });
+} else {
+    console.log('\n\n****CHAT_HELPER.JS>>> MISSING channelId or thread_ts');
 }
 
 const oldChatMessages = JSON.stringify(chatMessages);
