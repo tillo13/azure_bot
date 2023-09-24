@@ -58,41 +58,19 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
     return chatMessages;
 }
 
-function findAtBotInPayload(chatMessages){
-  const foundAtBot = chatMessages.some(({content}) => 
-      content.toLowerCase().includes("@bot") || content.toLowerCase().includes("@atbot")
-  );
-  if(foundAtBot) {
-      console.log("***CHAT_HELPER.JS:Found @bot or @atbot in the chatMessage payload");
-  } else {
-      console.log("***CHAT_HELPER.JS:Did NOT find @bot or @atbot in the chatMessage payload");
-  }
-  return foundAtBot;
-}
-
 async function chatCompletion(chatTexts, roleMessage, channelId){
   console.log('\n\n***CHAT_HELPER.JS:>>>The incoming payload is coming from: ', channelId);
   const endpoint = process.env.OPENAI_API_BASE_URL;
-  const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
-  const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
-  const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
-  if(!validatedTokens) return;
+    const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
+    const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
+    const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
+    if(!validatedTokens) return;
 
-  let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
+    let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
 
-  if (!chatMessages.length || chatMessages[0].role !== "system") {
-      chatMessages.unshift({ role: "system", content: roleMessage });
-  }
-
-  // Don't send to OpenAI if source is Slack and no @bot or @atbot is found.
-  if (channelId === 'slack' && !findAtBotInPayload(chatMessages)) {
-    console.log('\n\n***CHAT_HELPER.JS>>>>Not sending payload to OpenAI as I do not think it has an @bot reference...');
-    return {
-      'assistantResponse': "I'm only activated for messages that include @bot or @atbot in any payload",
-      'requery': false,
-      'letMeCheckFlag': false
-    };
-}
+    if (!chatMessages.length || chatMessages[0].role !== "system") {
+        chatMessages.unshift({ role: "system", content: roleMessage });
+    }
 // Fetch the last user message before calling `formatChatPayload`
 const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
 const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
