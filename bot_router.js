@@ -32,7 +32,7 @@ class EchoBot extends ActivityHandler {
             this.thread_ts = current_thread_ts;
             chatMessagesUser.push({ role: "user", content: context.activity.text });
             
-            let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
+            const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
         
             chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
             
