@@ -1,6 +1,6 @@
  //2023sep23 402pm PROD GOLDEN VERSION//
  const { MessageFactory } = require('botbuilder');
- const { fetchConversationHistory, getBotId, executeHttpPostRequest } = require('./slack_utils');
+ const { fetchConversationHistory, getBotId, executeHttpPostRequest, postMessageToSlack } = require('./slack_utils');
  const activeThreads = {};
  
  function processSlackResponseMessage(assistantResponse) {
@@ -9,27 +9,6 @@
  
  function isFromSlack(context) {
      return context.activity.channelId === 'slack';
- }
- 
- async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
-     const data = JSON.stringify({
-         channel: channel_id,
-         thread_ts: thread_ts,
-         text: message
-     });
- 
-     const options = {
-         hostname: 'slack.com',
-         path: '/api/chat.postMessage',
-         method: 'POST',
-         headers: {
-             'Content-Type': 'application/json; charset=utf-8',
-             'Authorization': `Bearer ${apiToken}`,
-             'Content-Length': data.length
-         }
-     };
- 
-     return await executeHttpPostRequest(options, data);
  }
  
  async function postChatHistoryToSlack(channel_id, thread_ts, apiToken) {

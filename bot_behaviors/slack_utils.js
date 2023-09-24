@@ -38,6 +38,27 @@ async function fetchConversationHistory(channelId, thread_ts, apiToken) {
   return await executeHttpGetRequest(options);
 }
 
+async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
+    const data = JSON.stringify({
+        channel: channel_id,
+        thread_ts: thread_ts,
+        text: message
+    });
+
+    const options = {
+        hostname: 'slack.com',
+        path: '/api/chat.postMessage',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Authorization': `Bearer ${apiToken}`,
+            'Content-Length': data.length
+        }
+    };
+
+    return await executeHttpPostRequest(options, data);
+}
+
 async function getBotId(apiToken) {
   const options = {
     hostname: 'slack.com',
@@ -51,4 +72,4 @@ async function getBotId(apiToken) {
   return response.user_id;
 }
 
-module.exports = { fetchConversationHistory, getBotId, executeHttpGetRequest, executeHttpPostRequest };
+module.exports = { fetchConversationHistory, getBotId, executeHttpGetRequest, executeHttpPostRequest, postMessageToSlack };
