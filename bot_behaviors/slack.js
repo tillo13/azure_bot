@@ -30,8 +30,6 @@
    });
  }
  
- // Removed fetchConversationHistory function from here
- 
  function processSlackResponseMessage(assistantResponse) {
    return `slack_chat_path: ${assistantResponse}`;
  }
