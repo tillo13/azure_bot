@@ -5,71 +5,71 @@
  const activeThreads = {};
  
  async function executeHttpGetRequest(options) {
-   return new Promise((resolve, reject) => {
-     https
-       .get(options, res => {
-         let responsePayload = '';
-         res.on('data', (d) => (responsePayload += d));
-         res.on('end', () => resolve(JSON.parse(responsePayload)));
-         res.on('error', reject);
-       })
-       .end();
-   });
+     return new Promise((resolve, reject) => {
+         https
+         .get(options, res => {
+             let responsePayload = '';
+             res.on('data', (d) => (responsePayload += d));
+             res.on('end', () => resolve(JSON.parse(responsePayload)));
+             res.on('error', reject);
+         })
+         .end();
+     });
  }
  
  async function executeHttpPostRequest(options, data = '') {
-   return new Promise((resolve, reject) => {
-     const req = https.request(options, res => {
-       let returnData = '';
-       res.on('data', chunk => returnData += chunk);
-       res.on('end', () => resolve(JSON.parse(returnData)));
-       res.on('error', reject);
+     return new Promise((resolve, reject) => {
+         const req = https.request(options, res => {
+             let returnData = '';
+             res.on('data', chunk => returnData += chunk);
+             res.on('end', () => resolve(JSON.parse(returnData)));
+             res.on('error', reject);
+         });
+         req.write(data);
+         req.end();
      });
-     req.write(data);
-     req.end();
-   });
  }
  
  function processSlackResponseMessage(assistantResponse) {
-   return `slack_chat_path: ${assistantResponse}`;
+     return `slack_chat_path: ${assistantResponse}`;
  }
  
  function isFromSlack(context) {
-   return context.activity.channelId === 'slack';
+     return context.activity.channelId === 'slack';
  }
  
  async function getBotId(apiToken) {
-   const options = {
-     hostname: 'slack.com',
-     path: '/api/auth.test',
-     headers: {
-       'Content-Type': 'application/x-www-form-urlencoded',
-       'Authorization': `Bearer ${apiToken}`
-     }
-   };
-   const response = await executeHttpPostRequest(options);
-   return response.user_id;
+     const options = {
+         hostname: 'slack.com',
+         path: '/api/auth.test',
+         headers: {
+             'Content-Type': 'application/x-www-form-urlencoded',
+             'Authorization': `Bearer ${apiToken}`
+         }
+     };
+     const response = await executeHttpPostRequest(options);
+     return response.user_id;
  }
  
  async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
-   const data = JSON.stringify({
-     channel: channel_id,
-     thread_ts: thread_ts,
-     text: message
-   });
+     const data = JSON.stringify({
+         channel: channel_id,
+         thread_ts: thread_ts,
+         text: message
+     });
  
-   const options = {
-     hostname: 'slack.com',
-     path: '/api/chat.postMessage',
-     method: 'POST',
-     headers: {
-       'Content-Type': 'application/json; charset=utf-8',
-       'Authorization': `Bearer ${apiToken}`,
-       'Content-Length': data.length
-     }
-   };
+     const options = {
+         hostname: 'slack.com',
+         path: '/api/chat.postMessage',
+         method: 'POST',
+         headers: {
+             'Content-Type': 'application/json; charset=utf-8',
+             'Authorization': `Bearer ${apiToken}`,
+             'Content-Length': data.length
+         }
+     };
  
-   return await executeHttpPostRequest(options, data);
+     return await executeHttpPostRequest(options, data);
  }
  
  async function fetchConversationHistory(channelId, thread_ts, apiToken) {
