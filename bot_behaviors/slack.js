@@ -61,9 +61,12 @@
      }
  
      if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
-         console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', context.activity.text);
-         return;
-     }
+        console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', context.activity.text);
+        return {
+          cleanedFormattedMessages: null,
+          isActiveThread: null
+        };
+      }
  
      // If 'letMeCheckFlag' is true, then fetch the chat history
      if (letMeCheckFlag && apiToken) {
