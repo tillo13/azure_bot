@@ -32,7 +32,7 @@ class EchoBot extends ActivityHandler {
             this.thread_ts = current_thread_ts;
             chatMessagesUser.push({ role: "user", content: context.activity.text });
             
-            const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
+            let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
         
             chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
             
@@ -45,7 +45,7 @@ class EchoBot extends ActivityHandler {
                 const requeryNotice = "Let me check our past conversations, one moment...";
                 await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
                 chatMessagesUser.push({ role: "assistant", content: requeryNotice });
-                chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId, isActiveThread);
+                let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId, isActiveThread);
                 chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
             }
             
