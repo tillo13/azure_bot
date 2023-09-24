@@ -86,9 +86,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId){
 
   // Don't send to OpenAI if source is Slack and no @bot or @atbot is found.
   if (channelId === 'slack' && !findAtBotInPayload(chatMessages)) {
-    console.log('Not sending payload to OpenAI');
+    console.log('\n\n***CHAT_HELPER.JS>>>>Not sending payload to OpenAI as I do not think it has an @bot reference...');
     return {
-      'assistantResponse': "I'm only activated for messages that include @bot or @atbot",
+      'assistantResponse': "I'm only activated for messages that include @bot or @atbot in any payload",
       'requery': false,
       'letMeCheckFlag': false
     };
