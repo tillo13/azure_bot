@@ -84,11 +84,15 @@ async function chatCompletion(chatTexts, roleMessage, channelId){
       chatMessages.unshift({ role: "system", content: roleMessage });
   }
 
-  // Don't send to OpenAI if source is Slack and no @bot or @atbot is found
+  // Don't send to OpenAI if source is Slack and no @bot or @atbot is found.
   if (channelId === 'slack' && !findAtBotInPayload(chatMessages)) {
-      console.log('Not sending payload to OpenAI');
-      return;
-  }
+    console.log('Not sending payload to OpenAI');
+    return {
+      'assistantResponse': "I'm only activated for messages that include @bot or @atbot",
+      'requery': false,
+      'letMeCheckFlag': false
+    };
+}
 // Fetch the last user message before calling `formatChatPayload`
 const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
 const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
