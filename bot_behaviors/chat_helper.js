@@ -56,13 +56,13 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 catch(error){
     console.error('\n\n****CHAT_HELPER.JS>>>Error encountered while processing cleanedFormattedMessages: ', error); // handles any error during the process
 }
-finally{
-    if (typeof cleanedFormattedMessages !== 'string') {
-        console.log('\n\n****CHAT_HELPER.JS>>>Could not parse cleanedFormattedMessages, it is not a string'); // prints this message when cleanedFormattedMessages is not a string
-    }
-    else{
-        console.log('\n\n****CHAT_HELPER.JS>>>Completed processing cleanedFormattedMessages'); // prints this message when cleanedFormattedMessages has been processed properly
-    }      
+finally {
+  if (typeof cleanedFormattedMessages !== 'string') {
+      console.error('\n\n****CHAT_HELPER.JS>>>Could not parse cleanedFormattedMessages, it is not a string or does not have a valid value. Its current value is:', cleanedFormattedMessages); 
+  }
+  else{
+      console.log('\n\n****CHAT_HELPER.JS>>>Completed processing cleanedFormattedMessages');
+  }
 }
     const checkMessage = "Let me check our past conversations, one moment...";
     const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
