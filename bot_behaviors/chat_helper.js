@@ -60,8 +60,17 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
   console.log('\n\n****CHAT_HELPER.JS>>>Is the slack thread active?:', isActiveThread);
-
   console.log('\n\n***CHAT_HELPER.JS:>>>The incoming payload is coming from: ', channelId);
+
+  //decide if we even more forward from Slack specifically: 
+  if(channelId === "slack" && isActiveThread !== true) {
+    console.log("INACTIVE SLACK THREAD, NOT POSTING TO OPENAI");
+    return; // Exit the function without making OpenAI API call
+}
+
+
+
+
   const endpoint = process.env.OPENAI_API_BASE_URL;
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
     const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
