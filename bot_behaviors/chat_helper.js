@@ -129,6 +129,7 @@ if (duplicatesRemoved > 0) {
 }
 
 // Start interacting with OpenAI
+let result;
 try {
       // Before making the first call to openai, ensure the channelId is not slack or the thread is active
       if (!(channelId === 'slack' && isActiveThread === null)) {
