@@ -73,11 +73,18 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages){
 const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
 const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
 
-// Print out the user messages so far
+// Print out the user messages so far via chat messages
 const userMessages = chatMessages.filter((msg) => msg.role === 'user');
-console.log('\n\n****CHAT_HELPER.JS>>>USER MESSAGES SO FAR:\n');
+console.log('\n\n****CHAT_HELPER.JS>>>USER MESSAGES SO FAR via chatmessages:\n');
 userMessages.forEach((msg, index) => {
   console.log(`${index + 1}. ${msg.content}`);
+});
+
+const userMessages2 = cleanedFormattedMessages.split(', ');
+
+console.log('\n\n****CHAT_HELPER.JS>>>USER MESSAGES SO FAR via cleanedFormattedMessages:\n');
+userMessages2.forEach((msg, index) => {
+  console.log(`${index + 1}. ${msg}`);
 });
 
 const oldChatMessages = JSON.stringify(chatMessages);
