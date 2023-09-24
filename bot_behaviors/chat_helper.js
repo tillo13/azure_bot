@@ -64,11 +64,11 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
   //decide if we even more forward from Slack specifically: 
     // Before processing `chatTexts`, check if it's an inactive slack thread
-    if(channelId === "slack" && isActiveThread === false) {
+    if(channelId === "slack" && isActiveThread == false) {
       console.log("INACTIVE SLACK THREAD, NOT POSTING TO OPENAI");
 
       return {
-          'assistantResponse': "Sorry, I think this is Slack, so currently I can only respond in an active thread that has invoked @bot (hint: try that).",
+          'assistantResponse': "Sorry, I think this is Slack, so currently I can only respond in an active thread that has invoked @bot (hint: @bot something).",
           'requery': false,
           'letMeCheckFlag': false,
       }; // return a default response
@@ -130,13 +130,7 @@ if (duplicatesRemoved > 0) {
 
 // Start interacting with OpenAI
 try {
-  let result; // Still define result up here
-
-  if (!(channelId === 'slack' && isActiveThread === null)) {
-      result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
-  } else {
-      result = { choices: [ { message: { content: "Not posting to OpenAI because I think this is a new message, but no @ happened yet." } } ] }; // Put a default response here
-  }
+  let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
 
   if (result && result.choices[0]?.message?.content) {
     // Check if assistant wants to requery message
@@ -150,12 +144,7 @@ try {
       if(JSON.stringify(newCleanChatMessages) !== oldChatMessages)
         console.log('\n\n!!!IMPORTANT!!!! CHAT_HELPER.JS: *** Payload was updated after removing duplicates. This was triggered by the letMeCheckFlag from the handleSlackMessage() function in slack.js. The new payload: \n', newCleanChatMessages);
 
-        if (!(channelId === 'slack' && isActiveThread === null)) {
-          result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
-      } else {
-          result = { choices: [ { message: { content: "Not posting to OpenAI because I think this is a new message, but no @ happened yet." } } ] }; // Put a default response here
-      }
-  
+      result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
     }
 
     console.log('\n\n*****CHAT_HELPER.JS: *** Response from OpenAI API:\n', JSON.stringify(result));
