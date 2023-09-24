@@ -129,11 +129,14 @@ if (duplicatesRemoved > 0) {
 }
 
 // Start interacting with OpenAI
-let result;
 try {
-      // Before making the first call to openai, ensure the channelId is not slack or the thread is active
-      if (!(channelId === 'slack' && isActiveThread === null)) {
-        let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });}
+  let result; // Still define result up here
+
+  if (!(channelId === 'slack' && isActiveThread === null)) {
+      result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+  } else {
+      result = { choices: [ { message: { content: "Not posting to OpenAI because I think this is a new message, but no @ happened yet." } } ] }; // Put a default response here
+  }
 
   if (result && result.choices[0]?.message?.content) {
     // Check if assistant wants to requery message
@@ -149,7 +152,10 @@ try {
 
         if (!(channelId === 'slack' && isActiveThread === null)) {
           result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
-       }
+      } else {
+          result = { choices: [ { message: { content: "Not posting to OpenAI because I think this is a new message, but no @ happened yet." } } ] }; // Put a default response here
+      }
+  
     }
 
     console.log('\n\n*****CHAT_HELPER.JS: *** Response from OpenAI API:\n', JSON.stringify(result));
