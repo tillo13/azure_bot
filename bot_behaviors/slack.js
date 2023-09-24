@@ -72,8 +72,10 @@
      return await executeHttpPostRequest(options, data);
  }
  
- const { fetchConversationHistory } = require('./slack_utils');
- const options = {
+ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken, botId) {
+  // Fetch the conversation history
+  const conversationHistory = await fetchConversationHistory(channel_id, thread_ts, apiToken);
+   const options = {
      hostname: 'slack.com',
      path: `/api/conversations.replies?channel=${channelId}&ts=${thread_ts}`,
      headers: {
