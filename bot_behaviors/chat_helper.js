@@ -80,12 +80,15 @@ userMessages.forEach((msg, index) => {
   console.log(`${index + 1}. ${msg.content}`);
 });
 
-const userMessages2 = cleanedFormattedMessages.split(', ');
-
-console.log('\n\n****CHAT_HELPER.JS>>>USER MESSAGES SO FAR via cleanedFormattedMessages:\n');
-userMessages2.forEach((msg, index) => {
-  console.log(`${index + 1}. ${msg}`);
-});
+if (typeof cleanedFormattedMessages === 'string') {
+    const userMessages2 = cleanedFormattedMessages.split(', ');
+    console.log('\n\n****CHAT_HELPER.JS>>>USER MESSAGES SO FAR via cleanedFormattedMessages:\n');
+    userMessages2.forEach((msg, index) => {
+        console.log(`${index + 1}. ${msg}`);
+    });
+} else {
+    console.log('\n\n****CHAT_HELPER.JS>>>No previous user messages via cleanedFormattedMessages\n');
+}
 
 const oldChatMessages = JSON.stringify(chatMessages);
 
