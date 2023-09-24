@@ -1,3 +1,15 @@
+/** 2023sept23 5:37pm
+ * This module contains utility functions interacting with Slack's API:
+ * 
+ * - executeHttpGetRequest: a generic function to issue GET requests to a given API endpoint.
+ * - executeHttpPostRequest: a generic function to issue POST requests to a given API endpoint with a provided data payload.
+ * - fetchConversationHistory: using Slack's conversations.replies API, fetches the conversation history for a provided channel ID and message thread timestamp.
+ * - postMessageToSlack: posts a message to a given Slack channel and thread by interacting with Slack's chat.postMessage API.
+ * - getBotId: using Slack's auth.test API, fetches the Bot user ID associated with the provided API token.
+ * 
+ * All functions are exported for use in other modules by listing them in module.exports at the end. 
+ */
+
 const https = require('https');
 
 async function executeHttpGetRequest(options) {

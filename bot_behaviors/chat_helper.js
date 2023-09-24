@@ -59,86 +59,90 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 
 async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages){
     const endpoint = process.env.OPENAI_API_BASE_URL;
-            const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
-            const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
-            const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
-            if(!validatedTokens) return;
+    const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
+    const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
+    const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
+    if(!validatedTokens) return;
 
-            let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
-            console.log('\n\n*%*%*%*%CHAT_HELPER.JS ->DEBUG check --> Chat messages after creation', chatMessages);
-            
-            if (!chatMessages.length || chatMessages[0].role !== "system") {
-                chatMessages.unshift({ role: "system", content: roleMessage });
-            }
+    let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
 
-            // Fetch the last user message before calling `formatChatPayload`
-            const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
-            const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
+    if (!chatMessages.length || chatMessages[0].role !== "system") {
+        chatMessages.unshift({ role: "system", content: roleMessage });
+    }
 
+// Fetch the last user message before calling `formatChatPayload`
+const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
+const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
 
-            // Get user messages from the start of the conversation
-            let userMessages = chatMessages.filter(msg => msg.role === 'user');
-            let messagePayload = userMessages.map((msg, index) => `${index + 1}. ${msg.content}`).join(", ");
-            console.log(`\n\n****CHAT_HELPER.JS: EXTRAPOLATED USER MESSAGES:\n\n ${messagePayload}`);
+const oldChatMessages = JSON.stringify(chatMessages);
 
-            console.log('\n\n*****CHAT_HELPER.JS: *** Sending request to OpenAI API with payload:', chatMessages);
-            const oldChatMessages = JSON.stringify(chatMessages);
-            try {
-                const seenMessages = new Set();
-                const cleanChatMessages = []; 
-                let originalLength = chatMessages.length; 
-                for (let i = chatMessages.length - 1; i >= 0; i--) {
-                    const messageContent = chatMessages[i].content.split(', here is what I have said so far')[0]; //only take the first part of the content string before the list of previous messages
-                    const messageRole = chatMessages[i].role;
-                    const combinedContentRole = messageContent + messageRole;
-                    if (!seenMessages.has(combinedContentRole)) {
-                        seenMessages.add(combinedContentRole);
-                        cleanChatMessages.unshift(chatMessages[i]);
-                    }
-                }
-                //count duplicates
-                const cleanedLength = cleanChatMessages.length;
-                const duplicatesRemoved = originalLength - cleanedLength;
+// Track original length of conversation
+const originalLength = chatMessages.length;
 
-                if (duplicatesRemoved > 0) {
-                    console.log(`\n\n*****CHAT_HELPER.JS: CLEANED CODE OF THIS MANY DUPLICATES: ${duplicatesRemoved}`);
-                    console.log('\n\n*****CHAT_HELPER.JS: AFTER DUPLICATES REMOVED, CLEANED PAYLOAD: \n', cleanChatMessages);
-                } else {
-                    console.log('\n\n*****CHAT_HELPER.JS: CLEAN PAYLOAD, NO DUPLICATION.');
-                }
-                //end duplicates count
+// Separate out each kind of message
+let newCleanChatMessages = chatMessages.filter(item => !item.content.startsWith('Certainly, here is what I have said so far'));
+const certainlyMessages = chatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far'));
 
+if (certainlyMessages.length > 0) {
+  // If there are any 'Certainly' messages, only keep the last one
+  newCleanChatMessages.push(certainlyMessages[certainlyMessages.length - 1]);
+}
 
-                let result = await client.getChatCompletions(deploymentId, cleanChatMessages, { maxTokens: validatedTokens });
-                if (result && result.choices[0]?.message?.content) {
-                    let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
-                    if (letMeCheckFlag) {
-                        let looped_through_payload = chatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(', ');
-                        chatMessages = formatChatPayload(chatMessages, looped_through_payload, lastUserMessage);
-                        if(JSON.stringify(chatMessages) !== oldChatMessages)
-                            console.log('\n\n!!!IMPORTANT!!!! CHAT_HELPER.JS: *** Payload was updated after removing duplicates. This was triggered by the letMeCheckFlag from the handleSlackMessage() function in slack.js. The new payload: \n', chatMessages);
+// More efficient deduplication by converting to JSON (prevents issues with object references)
+let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
 
-                        result = await client.getChatCompletions(deploymentId, chatMessages, { maxTokens: validatedTokens });
-                    }
-                    console.log('\n\n*****CHAT_HELPER.JS: *** Response from OpenAI API:\n', JSON.stringify(result));
-                    console.log('\n\n*****CHAT_HELPER.JS: *** letMeCheckFlag is: ', letMeCheckFlag);
-                    return {
-                        'assistantResponse': result.choices[0].message.content,
-                        'requery': letMeCheckFlag,
-                        'letMeCheckFlag': letMeCheckFlag
-                    };
-            
-                } else {
-                    console.log('\n\n*****CHAT_HELPER.JS: ***No content in API response');
-                    return {
-                        'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
-                        'requery': false,
-                        'letMeCheckFlag': false
-                    };
-                }
-            } catch (error) {
-                console.error("\n\n*****CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
-                throw error;
-            }
+// Remove duplicate messages
+newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
+
+// How many duplicates were removed
+const duplicatesRemoved = originalLength - newCleanChatMessages.length;
+
+if (duplicatesRemoved > 0) {
+  console.log(`\n\n*****CHAT_HELPER.JS: CLEANED CODE OF THIS MANY DUPLICATES: ${duplicatesRemoved}`);
+  console.log('\n\n*****CHAT_HELPER.JS: AFTER DUPLICATES REMOVED, CLEANED PAYLOAD: \n', newCleanChatMessages);
+} else {
+  console.log('\n\n*****CHAT_HELPER.JS: CLEAN PAYLOAD, NO DUPLICATION.');
+}
+
+// Start interacting with OpenAI
+try {
+  let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+
+  if (result && result.choices[0]?.message?.content) {
+    // Check if assistant wants to requery message
+    let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
+
+    if (letMeCheckFlag) {
+      // If so, update payload and requery
+      let looped_through_payload = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(', ');
+      newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_payload, lastUserMessage);
+
+      if(JSON.stringify(newCleanChatMessages) !== oldChatMessages)
+        console.log('\n\n!!!IMPORTANT!!!! CHAT_HELPER.JS: *** Payload was updated after removing duplicates. This was triggered by the letMeCheckFlag from the handleSlackMessage() function in slack.js. The new payload: \n', newCleanChatMessages);
+
+      result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+    }
+
+    console.log('\n\n*****CHAT_HELPER.JS: *** Response from OpenAI API:\n', JSON.stringify(result));
+    console.log('\n\n*****CHAT_HELPER.JS: *** letMeCheckFlag is: ', letMeCheckFlag);
+
+    // Send response back
+    return {
+      'assistantResponse': result.choices[0].message.content,
+      'requery': letMeCheckFlag,
+      'letMeCheckFlag': letMeCheckFlag
+    };
+  } else {
+    console.log('\n\n*****CHAT_HELPER.JS: ***No content in API response');
+    return {
+      'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
+      'requery': false,
+      'letMeCheckFlag': false
+    };
+  }
+} catch (error) {
+  console.error("\n\n*****CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
+  throw error;
+}
         }
 module.exports = chatCompletion;
