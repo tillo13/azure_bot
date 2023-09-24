@@ -69,10 +69,16 @@ async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages){
     if (!chatMessages.length || chatMessages[0].role !== "system") {
         chatMessages.unshift({ role: "system", content: roleMessage });
     }
-
 // Fetch the last user message before calling `formatChatPayload`
 const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
 const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
+
+// Print out the user messages so far
+const userMessages = chatMessages.filter((msg) => msg.role === 'user');
+console.log('USER MESSAGES SO FAR:');
+userMessages.forEach((msg, index) => {
+  console.log(`${index + 1}. ${msg.content}`);
+});
 
 const oldChatMessages = JSON.stringify(chatMessages);
 
