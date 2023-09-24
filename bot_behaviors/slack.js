@@ -96,9 +96,9 @@
                  await context.sendActivity(replyActivity);
                  console.log('\n\n***SLACK.JS: clean format regardless', cleanedFormattedMessages); 
                  return {
-                    cleanedFormattedMessages: cleanedFormattedMessages,
-                    isActiveThread: !!activeThreads[thread_ts] // convert truthy/falsy value to boolean
-                  };
+                     cleanedFormattedMessages: cleanedFormattedMessages,
+                     isActiveThread: !!activeThreads[thread_ts] // convert truthy/falsy value to boolean
+                 };
 
  
              } catch (error) {
