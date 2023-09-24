@@ -64,7 +64,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
   //decide if we even more forward from Slack specifically: 
     // Before processing `chatTexts`, check if it's an inactive slack thread
-    if(channelId === "slack" && isActiveThread === false) {      console.log("INACTIVE SLACK THREAD, NOT POSTING TO OPENAI");
+    if(channelId === "slack" && isActiveThread === false) {
+      console.log("INACTIVE SLACK THREAD, NOT POSTING TO OPENAI");
 
       return {
           'assistantResponse': "Sorry, I think this is Slack, so currently I can only respond in an active thread that has invoked @bot (hint: try that).",
