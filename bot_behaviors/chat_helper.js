@@ -58,8 +58,9 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
     return chatMessages;
 }
 
-async function chatCompletion(chatTexts, roleMessage, cleanedFormattedMessages){
-    const endpoint = process.env.OPENAI_API_BASE_URL;
+async function chatCompletion(chatTexts, roleMessage, channelId){
+  console.log('The payload is coming from: ', channelId);
+  const endpoint = process.env.OPENAI_API_BASE_URL;
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
     const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
     const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
