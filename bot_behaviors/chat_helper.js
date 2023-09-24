@@ -63,11 +63,16 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
   console.log('\n\n***CHAT_HELPER.JS:>>>The incoming payload is coming from: ', channelId);
 
   //decide if we even more forward from Slack specifically: 
-  if(channelId === "slack" && isActiveThread !== true) {
-    console.log("INACTIVE SLACK THREAD, NOT POSTING TO OPENAI");
-    return; // Exit the function without making OpenAI API call
-}
+    // Before processing `chatTexts`, check if it's an inactive slack thread
+    if(channelId === "slack" && isActiveThread !== true) {
+      console.log("INACTIVE SLACK THREAD, NOT POSTING TO OPENAI");
 
+      return {
+          'assistantResponse': "Sorry, currently I can only respond in an active thread.",
+          'requery': false,
+          'letMeCheckFlag': false,
+      }; // return a default response
+  }
 
 
 
