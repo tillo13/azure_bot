@@ -95,7 +95,11 @@
  
                  await context.sendActivity(replyActivity);
                  console.log('\n\n***SLACK.JS: clean format regardless', cleanedFormattedMessages); 
-                 return cleanedFormattedMessages;
+                 return {
+                    cleanedFormattedMessages: cleanedFormattedMessages,
+                    isActiveThread: !!activeThreads[thread_ts] // convert truthy/falsy value to boolean
+                  };
+
  
              } catch (error) {
                  console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
