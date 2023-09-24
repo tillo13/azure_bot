@@ -33,7 +33,9 @@ class EchoBot extends ActivityHandler {
             chatMessagesUser.push({ role: "user", content: context.activity.text });
             console.log('******BOT_ROUTER.JS: Current content of chatMessagesUser:', chatMessagesUser);
 
-            let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
+
+            let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId, isActiveThread);
+
 
             
             if (chatResponse.requery) {
@@ -46,8 +48,10 @@ class EchoBot extends ActivityHandler {
             chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
             const result = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
             const cleanedFormattedMessages = result.cleanedFormattedMessages;
+
             const isActiveThread = result.isActiveThread;
             console.log('\n\n****BOT_ROUTER>JS>>>Is the slack thread active?:', isActiveThread);
+
             await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
             await this.chatMessagesProperty.set(context, chatMessagesUser);
             console.log(`\n\n\n****BOT_ROUTER.JS current channelData:\n\n${JSON.stringify(context.activity.channelData, null, 2)}`);
