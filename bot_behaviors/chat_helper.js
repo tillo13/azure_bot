@@ -45,6 +45,16 @@ function shouldRequery(responseContent) {
 }
 
 function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage) {
+
+  if (typeof cleanedFormattedMessages === 'string') {
+    const userMessages2 = cleanedFormattedMessages.split(', ');
+    console.log('\n\n****CHAT_HELPER.JS>>>USER MESSAGES SO FAR via cleanedFormattedMessages:\n');
+    userMessages2.forEach((msg, index) => {
+        console.log(`\n${index + 1}. ${msg}\n`);
+    });
+} else {
+    console.log('\n\n****CHAT_HELPER.JS>>>No previous user messages via cleanedFormattedMessages\n');
+}
     const checkMessage = "Let me check our past conversations, one moment...";
     const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
 
