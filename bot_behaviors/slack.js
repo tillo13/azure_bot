@@ -49,52 +49,33 @@ function cleanChatRecord(chatRecord) {
     }
 }
 
-async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
+function checkBotInvocation(text) {
+    const botInvocation = ["@bot", "@atbot"];
+    return botInvocation.some(invocation => text.includes(invocation));
+}
 
+async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, chatCompletion) {
     const apiToken = context.activity.channelData?.ApiToken;
-  
+    let cleanedFormattedMessages = null;
+
     // Fetch conversation details from the current context
     const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
-  
-    const botKeywords = ['@bot', '@atbot'];
 
-    const text = context.activity.text.trim();
-    
-    // Remove duplicate mentions
-    const dedupedText = text.replace(new RegExp(`(${botKeywords.join('|')})+`, 'ig'), '$1'); 
-    
-    const isBotInvoked = new RegExp(botKeywords.join('|'), 'i').test(dedupedText);
-  
-    // Set initial value for activeThreads
-    let isActiveThread = false;
-  
-    // Check if thread is already active
-    if (activeThreads[thread_ts]) {
-      isActiveThread = true;
+    const isBotInvoked = checkBotInvocation(context.activity.text);
+
+    if (isBotInvoked || context.activity.conversation.isGroup) {
+        activeThreads[thread_ts] = true;
     }
-  
-    // Handle based on bot invocation and active status
-    if (!isBotInvoked && !isActiveThread) {
-      console.log('THREAD NOT ACTIVE, NO BOT INVOCATION - NOT SENDING TO OPENAI');
-      console.log('isBotInvoked:', isBotInvoked); 
-console.log('isActiveThread before:', isActiveThread);
-    } else if (isBotInvoked && !isActiveThread) {
-      // Bot invoked for first time in thread
-      activeThreads[thread_ts] = true;
-      isActiveThread = true;
-      console.log('BOT INVOKED, THREAD NOW ACTIVE - SENDING TO OPENAI');
-      console.log('isActiveThread after:', isActiveThread);
-    } else if (isActiveThread) {
-      // Thread already active, send message
-      console.log('THREAD ACTIVE - SENDING TO OPENAI'); 
+
+    if (!activeThreads[thread_ts]) {
+        console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', context.activity.text);
+        return;
     }
-  
-    // Only continue if thread active
-    if (!isActiveThread) {
-      return {
-        cleanedFormattedMessages: null,
-        isActiveThread: false  
-      };
+
+    if (isBotInvoked) {
+        console.log('\n\n***SLACK.JS: Bot invoked, continuing');
+    } else if (activeThreads[thread_ts]) {
+        console.log('\n\n***SLACK.JS: Existing active thread, continuing');
     }
 
     // If 'letMeCheckFlag' is true, then fetch the chat history
@@ -123,6 +104,7 @@ console.log('isActiveThread before:', isActiveThread);
                 // Verify if thread_ts is already in the conversation id
                 if (!replyActivity.conversation.id.includes(thread_ts)) {
                     replyActivity.conversation.id += ':' + thread_ts;
+                
                 }
 
                 await context.sendActivity(replyActivity);
