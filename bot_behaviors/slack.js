@@ -1,4 +1,4 @@
-slack.js:  //2023sep23 402pm PROD GOLDEN VERSION//
+//2023sep23 402pm PROD GOLDEN VERSION//
  const { MessageFactory } = require('botbuilder');
  const { fetchConversationHistory, getBotId, executeHttpPostRequest, postMessageToSlack } = require('./slack_utils');
  const activeThreads = {};
