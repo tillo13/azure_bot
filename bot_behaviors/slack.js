@@ -8,20 +8,7 @@ function processSlackResponseMessage(assistantResponse) {
 }
 
 function isFromSlack(context) {
-    const channelId = context.activity.channelId;
-    if (channelId === 'slack') {
-        const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
-
-        let mentionsBot = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
-
-        if (mentionsBot) {
-           activeThreads[thread_ts] = true;
-        }
-
-        return !!activeThreads[thread_ts];
-    }
-
-    return false;
+    return context.activity.channelId === 'slack';
 }
 
 async function postChatHistoryToSlack(channel_id, thread_ts, apiToken) {
@@ -63,26 +50,42 @@ function cleanChatRecord(chatRecord) {
 }
 
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
-    const apiToken = context.activity.channelData?.ApiToken;
-    let cleanedFormattedMessages = null;
 
+    const apiToken = context.activity.channelData?.ApiToken;
+  
     // Fetch conversation details from the current context
     const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
-
-    // Check the mentions in the message for 'bot' or 'atbot'
-    let mentionsBot = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
-
-    if (mentionsBot) {
-        activeThreads[thread_ts] = true;
+  
+    // Check if bot is invoked in message text
+    const isBotInvoked = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
+  
+    // Set initial value for activeThreads
+    let isActiveThread = false;
+  
+    // Check if thread is already active
+    if (activeThreads[thread_ts]) {
+      isActiveThread = true;
     }
-
-    // If thread is inactive or conversation is not group, just return
-    if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
-       console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', context.activity.text);
-       return {
-           cleanedFormattedMessages: null,
-           isActiveThread: null
-       };
+  
+    // Handle based on bot invocation and active status
+    if (!isBotInvoked && !isActiveThread) {
+      console.log('THREAD NOT ACTIVE, NO BOT INVOCATION - NOT SENDING TO OPENAI');
+    } else if (isBotInvoked && !isActiveThread) {
+      // Bot invoked for first time in thread
+      activeThreads[thread_ts] = true;
+      isActiveThread = true;
+      console.log('BOT INVOKED, THREAD NOW ACTIVE - SENDING TO OPENAI');
+    } else if (isActiveThread) {
+      // Thread already active, send message
+      console.log('THREAD ACTIVE - SENDING TO OPENAI'); 
+    }
+  
+    // Only continue if thread active
+    if (!isActiveThread) {
+      return {
+        cleanedFormattedMessages: null,
+        isActiveThread: false  
+      };
     }
 
     // If 'letMeCheckFlag' is true, then fetch the chat history
@@ -117,8 +120,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
                 console.log('\n\n***SLACK.JS: clean format regardless', cleanedFormattedMessages); 
                 return {
                     cleanedFormattedMessages: cleanedFormattedMessages,
-                    isActiveThread: !!activeThreads[thread_ts] // convert truthy/falsy value to boolean
-                };
+                    isActiveThread: true
+                 };
 
 
             } catch (error) {
