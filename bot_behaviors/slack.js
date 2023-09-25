@@ -70,11 +70,14 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     // Handle based on bot invocation and active status
     if (!isBotInvoked && !isActiveThread) {
       console.log('THREAD NOT ACTIVE, NO BOT INVOCATION - NOT SENDING TO OPENAI');
+      console.log('isBotInvoked:', isBotInvoked); 
+console.log('isActiveThread before:', isActiveThread);
     } else if (isBotInvoked && !isActiveThread) {
       // Bot invoked for first time in thread
       activeThreads[thread_ts] = true;
       isActiveThread = true;
       console.log('BOT INVOKED, THREAD NOW ACTIVE - SENDING TO OPENAI');
+      console.log('isActiveThread after:', isActiveThread);
     } else if (isActiveThread) {
       // Thread already active, send message
       console.log('THREAD ACTIVE - SENDING TO OPENAI'); 
