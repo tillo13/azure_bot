@@ -56,8 +56,14 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     // Fetch conversation details from the current context
     const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
   
-    // Check if bot is invoked in message text
-    const isBotInvoked = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
+    const botKeywords = ['@bot', '@atbot'];
+
+    const text = context.activity.text.trim();
+    
+    // Remove duplicate mentions
+    const dedupedText = text.replace(new RegExp(`(${botKeywords.join('|')})+`, 'ig'), '$1'); 
+    
+    const isBotInvoked = new RegExp(botKeywords.join('|'), 'i').test(dedupedText);
   
     // Set initial value for activeThreads
     let isActiveThread = false;
