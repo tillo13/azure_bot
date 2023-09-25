@@ -52,6 +52,7 @@
  async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     const apiToken = context.activity.channelData?.ApiToken;
     let cleanedFormattedMessages = null;
+    let isActiveThread = false;
   
     // Fetch conversation details from the current context
     const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
@@ -59,8 +60,11 @@
     if ((context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) && (!thread_ts || !activeThreads[thread_ts])) {
       console.log('Valid invoke of bot, continue');
       activeThreads[thread_ts] = true;
+      isActiveThread = true;
+    } else if(context.activity.conversation.isGroup) {
+      console.log('No bot invocation in main channel message. Dropped due to no invoke of bot.');
     } else {
-      console.log('No bot invocation in main channel message or new thread. Dropped due to no invoke of bot anywhere in thread');
+      console.log('Thread message or new thread without bot invocation');
     }
   
     // If 'letMeCheckFlag' is true, then fetch the chat history
@@ -87,13 +91,9 @@
                 if (!replyActivity.conversation.id.includes(thread_ts)) {
                     replyActivity.conversation.id += ':' + thread_ts;
                 }
-      
+    
                 await context.sendActivity(replyActivity);
                 console.log('THREAD_TS/CHANNEL_ID is active, processing payload sending to OpenAI'); 
-                return {
-                    cleanedFormattedMessages: cleanedFormattedMessages,
-                    isActiveThread: !!activeThreads[thread_ts]
-                };
             } catch (error) {
                 console.error('An error occurred while trying to reply in the thread:', error);
             }
@@ -103,6 +103,10 @@
             console.log('Message is not invoking the bot, ignoring for now!');
         }
     }
+    return {
+        cleanedFormattedMessages: cleanedFormattedMessages,
+        isActiveThread: isActiveThread
+    };
   };
  
  module.exports = { handleSlackMessage, isFromSlack };
