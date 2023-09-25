@@ -8,7 +8,20 @@ function processSlackResponseMessage(assistantResponse) {
 }
 
 function isFromSlack(context) {
-    return context.activity.channelId === 'slack';
+    const channelId = context.activity.channelId;
+    if (channelId === 'slack') {
+        const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
+
+        let mentionsBot = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
+
+        if (mentionsBot) {
+           activeThreads[thread_ts] = true;
+        }
+
+        return !!activeThreads[thread_ts];
+    }
+
+    return false;
 }
 
 async function postChatHistoryToSlack(channel_id, thread_ts, apiToken) {
@@ -55,20 +68,21 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
 
     // Fetch conversation details from the current context
     const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
-    const text = context.activity.text;
 
-    if (text.includes('@bot') || text.includes('@atbot')) {
-        console.log(`Bot invoked: text=${text}`);
+    // Check the mentions in the message for 'bot' or 'atbot'
+    let mentionsBot = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
+
+    if (mentionsBot) {
         activeThreads[thread_ts] = true;
-    } else {
-        console.log(`Bot not invoked: text=${text}`);
-        if (!context.activity.conversation.isGroup && !activeThreads[thread_ts]) {
-            console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', text);
-            return {
-              cleanedFormattedMessages: null,
-              isActiveThread: null
-            };
-        }
+    }
+
+    // If thread is inactive or conversation is not group, just return
+    if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
+       console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', context.activity.text);
+       return {
+           cleanedFormattedMessages: null,
+           isActiveThread: null
+       };
     }
 
     // If 'letMeCheckFlag' is true, then fetch the chat history
