@@ -50,60 +50,61 @@
  }
  
  async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
+    const mainChannelMessage = context.activity.channelData?.SlackMessage?.event?.text || "";
     const apiToken = context.activity.channelData?.ApiToken;
     let cleanedFormattedMessages = null;
-    let isActiveThread = false;
-  
-    // Fetch conversation details from the current context
+    
+    // Fetch conversation details from current context
     const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
-    const parent_thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts;
+
+    if (!thread_ts && (!mainChannelMessage.includes('@bot') && !mainChannelMessage.includes('@atbot'))) {
+        console.log('main thread, no bot invocation, not sending to openai');
+        return {
+            cleanedFormattedMessages: null,
+            isActiveThread: false
+        };
+    }
+    
+    if (thread_ts && (!activeThreads[thread_ts] && !(context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')))) {
+        console.log('threaded slack message, no bot invocation, not sending to openai');
+        return {
+            cleanedFormattedMessages: null,
+            isActiveThread: false
+        };
+    }
+
+    activeThreads[thread_ts] = true;
+    console.log("THREAD_TS/CHANNEL_ID is now activethread, passing payload to openai and marking as ACTIVETHREAD=true");
   
-    if ((context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) && !activeThreads[thread_ts]) {
-      console.log('Valid invoke of bot, continue');
-      activeThreads[thread_ts] = true;
-      isActiveThread = true;
-    } else if (parent_thread_ts && !activeThreads[parent_thread_ts]) {
-      console.log('Thread message or new thread without bot invocation');
-      console.log('Not sending to OpenAI');
-      return {
-        cleanedFormattedMessages: null,
-        isActiveThread: false
-      };
-    } else if (context.activity.conversation.isGroup) {
-      console.log('No bot invocation in main channel message. Dropped due to no invoke of bot.');
-    } 
-  
-    // If 'letMeCheckFlag' is true, then fetch the chat history
-    if (letMeCheckFlag && apiToken && activeThreads[thread_ts]) {
-      cleanedFormattedMessages = await postChatHistoryToSlack(
-        context.activity.channelData.SlackMessage.event.channel,
-        thread_ts,
-        apiToken,
-        await getBotId(apiToken)
-      );
-      console.log('\n\n*&*&*& SLACK.JS bug check --> Cleaned formatted messages after postChatHistoryToSlack', cleanedFormattedMessages);
+    if (letMeCheckFlag && apiToken && activeThreads[thread_ts]) {  // If 'letMeCheckFlag' is true, then fetch the chat history
+        cleanedFormattedMessages = await postChatHistoryToSlack(
+          context.activity.channelData.SlackMessage.event.channel,
+          thread_ts,
+          apiToken,
+          await getBotId(apiToken),
+        );
+        console.log('\n\n*&*&*& SLACK.JS bug check --> Cleaned formatted messages after postChatHistoryToSlack', cleanedFormattedMessages);
     }
   
     if (context.activity.text && activeThreads[thread_ts]) {
-      console.log('\n\n***SLACK.JS: Latest user posted message:', context.activity.text); // Always log user message in the console.
-  
-      if (context.activity.channelId === 'slack' && thread_ts !== "") {
-        let slackMessageResponse = processSlackResponseMessage(assistantResponse);
-        const replyActivity = MessageFactory.text(slackMessageResponse);
-  
-        try {
-          replyActivity.conversation = context.activity.conversation;
-  
-          if (!replyActivity.conversation.id.includes(thread_ts)) {
-            replyActivity.conversation.id += ':' + thread_ts;
-          }
-  
-          await context.sendActivity(replyActivity);
-          console.log('THREAD_TS/CHANNEL_ID is active, processing payload sending to OpenAI'); 
-        } catch (error) {
-          console.error('An error occurred while trying to reply in the thread:', error);
-        }
-      } else if (thread_ts === "") {
+        console.log('\n\n***SLACK.JS: Latest user posted message:', context.activity.text);
+        if (context.activity.channelId === 'slack' && thread_ts !== "") {
+            let slackMessageResponse = processSlackResponseMessage(assistantResponse);
+            const replyActivity = MessageFactory.text(slackMessageResponse);
+    
+            try {
+                replyActivity.conversation = context.activity.conversation;
+    
+                if (!replyActivity.conversation.id.includes(thread_ts)) {
+                    replyActivity.conversation.id += ':' + thread_ts;
+                }
+    
+                await context.sendActivity(replyActivity);
+                console.log('THREAD_TS/CHANNEL_ID is active, processing payload sending to OpenAI'); 
+            } catch (error) {
+                console.error('An error occurred while trying to reply in the thread:', error);
+            }
+        } else if (thread_ts === "") {
             console.log('Can\'t identify thread, not posting anything.');
         } else {
             console.log('Message is not invoking the bot, ignoring for now!');
