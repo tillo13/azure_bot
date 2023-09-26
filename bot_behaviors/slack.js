@@ -19,7 +19,7 @@
      const messages = conversationHistory.messages.filter(msg => !msg.hasOwnProperty('bot_id'));
  
      // Format the messages
-     let chatRecord = '\n***SLACK.JS: letMeCheckFlag invoked!\nUSER MESSAGES IN THIS THREAD**\n';
+     let chatRecord = '\n****SLACK.JS: letMeCheckFlag invoked!\nUSER MESSAGES IN THIS THREAD**\n';
      chatRecord += messages.map((msg, idx) => `\n${idx + 1}. [${msg.ts}] ${msg.text}\n`).join('\n');
      chatRecord += '\n***END OF USER MESSAGES***';
  
@@ -61,7 +61,7 @@
      }
  
      if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
-        console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', context.activity.text);
+        console.log('\n\n****SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', context.activity.text);
         return {
           cleanedFormattedMessages: null,
           isActiveThread: null
@@ -80,7 +80,7 @@
      }
  
      if (context.activity.text && activeThreads[thread_ts]) {
-         console.log('\n\n***SLACK.JS: Latest user posted message:', context.activity.text); // Always log user message in the console.
+         console.log('\n\n****SLACK.JS: Latest user posted message:', context.activity.text); // Always log user message in the console.
  
          if (context.activity.channelId === 'slack' && thread_ts !== "") {
              // Process the assistant response message for Slack
@@ -97,7 +97,7 @@
                  }
  
                  await context.sendActivity(replyActivity);
-                 console.log('\n\n***SLACK.JS: clean format regardless', cleanedFormattedMessages); 
+                 console.log('\n\n****SLACK.JS: clean format regardless', cleanedFormattedMessages); 
                  return {
                      cleanedFormattedMessages: cleanedFormattedMessages,
                      isActiveThread: !!activeThreads[thread_ts] // convert truthy/falsy value to boolean
@@ -105,12 +105,12 @@
 
  
              } catch (error) {
-                 console.error('\n\n***SLACK.JS: An error occurred while trying to reply in the thread:', error);
+                 console.error('\n\n****SLACK.JS: An error occurred while trying to reply in the thread:', error);
              }
          } else if (thread_ts === "") {
-             console.log('\n\n***SLACK.JS: Can\'t identify thread, not posting anything.***');
+             console.log('\n\n****SLACK.JS: Can\'t identify thread, not posting anything.***');
          } else {
-             console.log('\n\n***SLACK.JS: Message is not invoking the bot, ignoring for now!***');
+             console.log('\n\n****SLACK.JS: Message is not invoking the bot, ignoring for now!***');
              }
          }
      };

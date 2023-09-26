@@ -17,8 +17,8 @@ class EchoBot extends ActivityHandler {
         this.userState = userState;
 
         this.onMembersAdded(async (context, next) => {
-            console.log("\n\n***\nBOT_ROUTER.JS: A member(s) has been added to the chat");
-            console.log("\n\n***\nBOT_ROUTER.JS: The ids of the added members are: ", context.activity.membersAdded.map(member => member.id));
+            console.log("\n\n**BOT_ROUTER.JS: A member(s) has been added to the chat");
+            console.log("\n\n**BOT_ROUTER.JS: The ids of the added members are: ", context.activity.membersAdded.map(member => member.id));
             const membersAdded = context.activity.membersAdded;
             const welcomeText = 'Hello and welcome to the memoried ATT-ESS Chat bot!';
             for (let cnt = 0; cnt < membersAdded.length; ++cnt) {
@@ -30,9 +30,9 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
-            console.log('\n\n****BOT_ROUTER.JS: onMessage triggered');
-            console.log('\n\n***BOT_ROUTER.JS: Bot received a message');
-            console.log("\n\n***BOT_ROUTER.JS: Message content: ", context.activity.text);
+            console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
+            console.log('\n\n**BOT_ROUTER.JS: Bot received a message');
+            console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
 
                 // Check if the message is the special command
     if (context.activity.text.trim() === '$hamburger') {
@@ -44,7 +44,7 @@ class EchoBot extends ActivityHandler {
             
             const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
                 context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
-                console.log("\n\n***BOT_ROUTER.JS: Current Slack thread timestamp: ", current_thread_ts);
+                console.log("\n\n**BOT_ROUTER.JS: Current Slack thread timestamp: ", current_thread_ts);
 
             
             let savedThread_ts = await this.threadproperty.get(context, "");
@@ -59,14 +59,14 @@ class EchoBot extends ActivityHandler {
             }
             
             if (botCalled) {
-                console.log("\n\n***BOT_ROUTER.JS: '@bot' or '@atbot' mentioned in the message. Bot Invoked: ", botCalled);
+                console.log("\n\n**BOT_ROUTER.JS: '@bot' or '@atbot' mentioned in the message. Bot Invoked: ", botCalled);
 
                 botInThread = true;
                 await this.botInvokedFlag.set(context, botInThread);
             }
                 
             if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
-                console.log("\n\n***BOT_ROUTER.JS: Message from Slack and bot was either called or is already in thread. Processing...");
+                console.log("\n\n**BOT_ROUTER.JS: Message from Slack and bot was either called or is already in thread. Processing...");
                 let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
                 
                 if(chatResponse.requery && chatResponse.isActiveThread) {
@@ -81,14 +81,14 @@ class EchoBot extends ActivityHandler {
                 
                 const result = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
         
-                console.log(`\n\n****BOT_ROUTER.JS: letMeCheckFlag is: ${chatResponse.letMeCheckFlag}`);
+                console.log(`\n\n**BOT_ROUTER.JS: letMeCheckFlag is: ${chatResponse.letMeCheckFlag}`);
             } else if (!isFromSlack(context)) {
                 const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
-                console.log(`\n\n****BOT_ROUTER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
+                console.log(`\n\n***BOT_ROUTER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
                 
                 await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
             } else {
-                console.log('\n\n**nBOT_ROUTER.JS: The received message did not originate from an invoked Slack bot, or it was not a @bot or @atbot message.');
+                console.log('\n\n**BOT_ROUTER.JS: The received message did not originate from an invoked Slack bot, or it was not a @bot or @atbot message.');
             }
 
             await this.chatMessagesProperty.set(context, chatMessagesUser);
@@ -97,10 +97,10 @@ class EchoBot extends ActivityHandler {
     }
 
     async run(context) {
-        console.log('\n\n***BOT_ROUTER.JS: Running the bot...');
+        console.log('\n\n**BOT_ROUTER.JS: Running the bot...');
         await super.run(context);
         await this.userState.saveChanges(context);
-        console.log('\n\n***\nBOT_ROUTER.JS: State changes have been saved.');
+        console.log('\n\n**BOT_ROUTER.JS: State changes have been saved.');
     }
 }
 module.exports.EchoBot = EchoBot;

@@ -59,8 +59,8 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 }
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
-  console.log('\n\n****CHAT_HELPER.JS>>>Is the slack thread active?:', isActiveThread);
-  console.log('\n\n***CHAT_HELPER.JS:>>>The incoming payload is coming from: ', channelId);
+  console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
+  console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
 
   // //decide if we even more forward from Slack specifically: 
   //   // Before processing `chatTexts`, check if it's an inactive slack thread
@@ -93,7 +93,7 @@ const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
 
 // Print out the user messages so far via chat messages
 const userMessages = chatMessages.filter((msg) => msg.role === 'user');
-console.log('\n\n****CHAT_HELPER.JS>>>USER MESSAGES SO FAR via chatmessages:\n');
+console.log('\n\n***CHAT_HELPER.JS -> USER MESSAGES SO FAR via chatmessages:\n');
 userMessages.forEach((msg, index) => {
     console.log(`\n${index + 1}. ${msg.content}\n`);
 });
@@ -122,10 +122,10 @@ newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
 const duplicatesRemoved = originalLength - newCleanChatMessages.length;
 
 if (duplicatesRemoved > 0) {
-  console.log(`\n\n*****CHAT_HELPER.JS: CLEANED CODE OF THIS MANY DUPLICATES: ${duplicatesRemoved}`);
-  console.log('\n\n*****CHAT_HELPER.JS: AFTER DUPLICATES REMOVED, CLEANED PAYLOAD: \n', newCleanChatMessages);
+  console.log(`\n\n***CHAT_HELPER.JS: CLEANED CODE OF THIS MANY DUPLICATES: ${duplicatesRemoved}`);
+  console.log('\n\n***CHAT_HELPER.JS: AFTER DUPLICATES REMOVED, CLEANED PAYLOAD: \n', newCleanChatMessages);
 } else {
-  console.log('\n\n*****CHAT_HELPER.JS: CLEAN PAYLOAD, NO DUPLICATION.');
+  console.log('\n\n***CHAT_HELPER.JS: CLEAN PAYLOAD, NO DUPLICATION.');
 }
 
 // Start interacting with OpenAI
@@ -147,8 +147,8 @@ try {
       result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
     }
 
-    console.log('\n\n*****CHAT_HELPER.JS: *** Response from OpenAI API:\n', JSON.stringify(result));
-    console.log('\n\n*****CHAT_HELPER.JS: *** letMeCheckFlag is: ', letMeCheckFlag);
+    console.log('\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n', JSON.stringify(result));
+    console.log('\n\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
 
     // Send response back
     return {
@@ -157,7 +157,7 @@ try {
       'letMeCheckFlag': letMeCheckFlag
     };
   } else {
-    console.log('\n\n*****CHAT_HELPER.JS: ***No content in API response');
+    console.log('\n\n***CHAT_HELPER.JS: No content in API response');
     return {
       'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
       'requery': false,
@@ -165,7 +165,7 @@ try {
     };
   }
 } catch (error) {
-  console.error("\n\n*****CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
+  console.error("\n\n***CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
   throw error;
 }
         }
