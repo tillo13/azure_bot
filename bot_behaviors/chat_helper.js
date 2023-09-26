@@ -62,17 +62,17 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
   console.log('\n\n****CHAT_HELPER.JS>>>Is the slack thread active?:', isActiveThread);
   console.log('\n\n***CHAT_HELPER.JS:>>>The incoming payload is coming from: ', channelId);
 
-  //decide if we even more forward from Slack specifically: 
-    // Before processing `chatTexts`, check if it's an inactive slack thread
-    if(channelId === "slack" && isActiveThread == false) {
-      console.log("INACTIVE SLACK THREAD, NOT POSTING TO OPENAI");
+  // //decide if we even more forward from Slack specifically: 
+  //   // Before processing `chatTexts`, check if it's an inactive slack thread
+  //   if(channelId === "slack" && isActiveThread == false) {
+  //     console.log("INACTIVE SLACK THREAD, NOT POSTING TO OPENAI");
 
-      return {
-          'assistantResponse': "Sorry, I think this is Slack, so currently I can only respond in an active thread that has invoked @bot (hint: @bot something).",
-          'requery': false,
-          'letMeCheckFlag': false,
-      }; // return a default response
-  }
+  //     return {
+  //         'assistantResponse': "Sorry, I think this is Slack, so currently I can only respond in an active thread that has invoked @bot (hint: @bot something).",
+  //         'requery': false,
+  //         'letMeCheckFlag': false,
+  //     }; // return a default response
+  // }
 
 
 
