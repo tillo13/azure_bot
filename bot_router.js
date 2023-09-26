@@ -44,18 +44,22 @@ class EchoBot extends ActivityHandler {
                 console.log('\n\n****BOT_ROUTER.JS: thread status evaluated ', isNewThread);
         
                 if (botCalled || !isNewThread) {
-                    console.log('\n\n****BOT_ROUTER.JS: bot called or not a new thread');
+                    console.log('\n\n****BOT_ROUTER.JS: Bot is specifically invoked in the message OR this message is part of an existing thread.');
+
                     chatMessagesUser.length = isNewThread ? 0 : chatMessagesUser.length; // clear conversation history if its a new thread
                     const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
-                    console.log('\n\n****BOT_ROUTER.JS: chat completion completed');
+                    console.log('\n\n****BOT_ROUTER.JS: Successfully fetched and processed the chat response from OpenAI API.');
+
                     chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse});
                     console.log(`\n\n****BOT_ROUTER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
                     const result = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
-                    console.log('\n\n****BOT_ROUTER.JS: handle slack message completed');
+                    console.log('\n\n****BOT_ROUTER.JS: Successfully processed and responded to the Slack message.');
+
                     const isThreadActive = result.isActiveThread;
                     
                     if(chatResponse.requery && isThreadActive){
-                        console.log('\n\n****BOT_ROUTER.JS: requery and isActiveThread is true');
+                        console.log('\n\n****BOT_ROUTER.JS: The flag for a requery with OpenAI was set, and the bot is currently active within a Slack thread.');
+
                         const requeryNotice = "Let me check our past conversations, one moment...";
                         await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
                         chatMessagesUser.push({ role: "assistant", content: requeryNotice });
@@ -66,7 +70,8 @@ class EchoBot extends ActivityHandler {
                     console.log(`\n\n****BOT_ROUTER.JS: letMeCheckFlag is: ${chatResponse.letMeCheckFlag}`);
                 } 
             } else {
-                console.log('\n\n****BOT_ROUTER.JS: message not from Slack');
+                console.log('\n\n****BOT_ROUTER.JS: The received message did not originate from Slack.');
+
                 const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
                 console.log(`\n\n****BOT_ROUTER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
                 const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
