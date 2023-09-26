@@ -64,10 +64,6 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts 
                       || context.activity.channelData?.SlackMessage?.event?.ts; 
 
-    if (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) {
-        activeThreads[thread_ts] = true;
-    }
-
     // Fetch the conversation history
     const conversationHistory = await fetchConversationHistory(
         context.activity.channelData.SlackMessage.event.channel,
@@ -82,12 +78,20 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     // Check if bot is called in the user messages in the thread
     const isBotCalled = checkIfBotCalled(messages);
 
-    if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup && !isBotCalled) {
-        console.log('\n\n***SLACK.JS: No bot invocation in the thread. Ignoring! User said: ', context.activity.text);
+    // Handle bot invocation
+    if (isBotCalled) {
+        console.log('\n\n***SLACK.JS: Bot invocation detected in the thread. Making API call.');
+        activeThreads[thread_ts] = true;
+    }
+
+    // If thread is not active, and the bot is not invoked, skip the current message and return
+    if (!activeThreads[thread_ts] && !isBotCalled) {
+        console.log('\n\n***SLACK.JS: No bot invocation in the thread or thread is not active. Ignoring! User said: ', context.activity.text);
         return {
             cleanedFormattedMessages: null,
             isActiveThread: null
         };
+    }
     } else {
         console.log('\n\n***SLACK.JS: Valid invocation of bot, continue. User said: ', context.activity.text);
     }
