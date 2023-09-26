@@ -24,7 +24,6 @@ class EchoBot extends ActivityHandler {
             }
             await next();
         });
-
         this.onMessage(async (context, next) => {
             console.log('\n\n****BOT_ROUTER.JS: onMessage triggered');
             const chatMessagesUser = await this.chatMessagesProperty.get(context, []) || [];
@@ -34,11 +33,14 @@ class EchoBot extends ActivityHandler {
                 const botCalled = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
                 const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
                     context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
+                
+                console.log(`\n\n****BOT_ROUTER.JS: channelId is: ${context.activity.channelId}`);
+                console.log(`\n\n****BOT_ROUTER.JS: current thread_ts: ${current_thread_ts}`);
         
                 // Logic to check for active thread
                 let isNewThread = current_thread_ts !== this.thread_ts;
                 this.thread_ts = current_thread_ts;
-                console.log('\n\n****BOT_ROUTER.JS: thread status evaluated');
+                console.log('\n\n****BOT_ROUTER.JS: thread status evaluated ', isNewThread);
         
                 if (botCalled || !isNewThread) {
                     console.log('\n\n****BOT_ROUTER.JS: bot called or not a new thread');
@@ -46,6 +48,7 @@ class EchoBot extends ActivityHandler {
                     const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
                     console.log('\n\n****BOT_ROUTER.JS: chat completion completed');
                     chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse});
+                    console.log(`\n\n****BOT_ROUTER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
                     const result = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
                     console.log('\n\n****BOT_ROUTER.JS: handle slack message completed');
                     const isThreadActive = result.isActiveThread;
@@ -64,6 +67,7 @@ class EchoBot extends ActivityHandler {
             } else {
                 console.log('\n\n****BOT_ROUTER.JS: message not from Slack');
                 const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
+                console.log(`\n\n****BOT_ROUTER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
                 const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
                 await context.sendActivity(replyActivity);
             }
