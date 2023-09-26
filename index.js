@@ -62,7 +62,7 @@ const myBot = new EchoBot(userState);
 server.post('/api/messages', async (req, res) => {
     console.log("***\nINDEX.JS: Incoming request to /api/messages endpoint\n");
     console.log("***\nINDEX.JS: Request payload: \n", req.body, "\n"); // Logs the entire request payload
-    console.log("***\nINDEX.JS: Request source IP: \n", req.connection.remoteAddress, "\n");// Logs the origin IP address
+    console.log("***\nINDEX.JS: Request source IP: \n", req.socket.remoteAddress, "\n");// Logs the origin IP address
     console.log("***\nINDEX.JS: Processing the request...\n");
     await adapter.process(req, res, (context) => myBot.run(context));
     console.log("***\nINDEX.JS: Finished processing request\n");
