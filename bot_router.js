@@ -25,23 +25,29 @@ class EchoBot extends ActivityHandler {
             await next();
         });
 
-const activeThreads = {};
-this.onMessage(async (context, next) => {
-    let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage &&
-    context.activity.channelData.SlackMessage.event ?
-        context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
-    
-    let chatMessagesUser = current_thread_ts === this.thread_ts ? await this.chatMessagesProperty.get(context, []) : [];
-    
-    this.thread_ts = current_thread_ts;
-    chatMessagesUser.push({ role: "user", content: context.activity.text });
-    let chatResponse;
-
-    if (isFromSlack(context)) {
-        const botCalled = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
-        function logToConsole(message) {
-            console.log(`\n\n***BOT_ROUTER.JS: ${message}`);
-        }
+        const activeThreads = {};
+        this.onMessage(async (context, next) => {
+        
+            let current_thread_ts = "";
+            if (isFromSlack(context)) {
+                current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage &&
+                    context.activity.channelData.SlackMessage.event ?
+                    context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
+            } else {
+                current_thread_ts = context.activity.id;  // Each non-Slack message is treated as a unique conversation
+            }
+            
+            let chatMessagesUser = current_thread_ts === this.thread_ts ? await this.chatMessagesProperty.get(context, []) : [];
+            this.thread_ts = current_thread_ts;
+        
+            chatMessagesUser.push({ role: "user", content: context.activity.text });
+            let chatResponse;
+        
+            if (isFromSlack(context)) {
+                const botCalled = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
+                function logToConsole(message) {
+                    console.log(`\n\n***BOT_ROUTER.JS: ${message}`);
+                }  
 
         if(botCalled || activeThreads[current_thread_ts]) {
             chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
