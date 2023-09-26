@@ -59,6 +59,7 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 }
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
+  console.log('\n\n***CHAT_HELPER.JS: Sending Payload to OpenAI via first call: ', newCleanChatMessages);
   console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
   console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
 
@@ -130,6 +131,7 @@ if (duplicatesRemoved > 0) {
 
 // Start interacting with OpenAI
 try {
+  console.log('\n\n***CHAT_HELPER.JS: Sending Payload to OpenAI via 2nd branch: ', newCleanChatMessages);
   let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
 
   if (result && result.choices[0]?.message?.content) {
