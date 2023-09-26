@@ -46,26 +46,37 @@ const onTurnErrorHandler = async (context, error) => {
 
 adapter.onTurnError = onTurnErrorHandler;
 
+// Server start
 server.listen(process.env.port || process.env.PORT || 3978, () => {
-    console.log(`\n${ server.name } listening to ${ server.url }`);
-    console.log('\nGet Bot Framework Emulator: https://aka.ms/botframework-emulator');
-    console.log('\nTo talk to your bot, open the emulator select "Open Bot"');
+    console.log("***\nINDEX.JS: Server is starting up...");
+    console.log("***\nINDEX.JS: Server is now listening to " + server.url);
+    console.log("***\nINDEX.JS: Get Bot Framework Emulator at https://aka.ms/botframework-emulator");
+    console.log("***\nINDEX.JS: To talk to your bot, open the emulator and select 'Open Bot'");
 });
 
-// Initialize the EchoBot with the UserState
+// EchoBot initialization
+console.log("***\nINDEX.JS: Initializing the EchoBot with User State...");
 const myBot = new EchoBot(userState);
 
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
     console.log("***\nINDEX.JS: Incoming request to /api/messages endpoint");
+    console.log("***\nINDEX.JS: Request payload: ", req.body); // Logs the entire request payload
+    console.log("***\nINDEX.JS: Request source IP: ", req.connection.remoteAddress); // Logs the origin IP address
+    console.log("***\nINDEX.JS: Processing the request...");
     await adapter.process(req, res, (context) => myBot.run(context));
-    console.log("Finished processing request");
+    console.log("***\nINDEX.JS: Finished processing request");
 });
 
+
+// Upgrade request handling
 server.on('upgrade', async (req, socket, head) => {
-    console.log("Handling upgrade request");
+    console.log("***\nINDEX.JS: Handling upgrade request");
+    console.log("***\nINDEX.JS: Initializing CloudAdapter for upgrade request...");
     const streamingAdapter = new CloudAdapter(botFrameworkAuthentication);
+    console.log("***\nINDEX.JS: Setting turn error handler for the streaming adapter...");
     streamingAdapter.onTurnError = onTurnErrorHandler;
+    console.log("***\nINDEX.JS: Processing upgrade request...");
     await streamingAdapter.process(req, socket, head, (context) => myBot.run(context));
-    console.log("Finished handling upgrade request");
+    console.log("***\nINDEX.JS: Finished handling upgrade request");
 });
