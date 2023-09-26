@@ -33,6 +33,11 @@ class EchoBot extends ActivityHandler {
             console.log('\n\n****BOT_ROUTER.JS: onMessage triggered');
             console.log('\n***\nBOT_ROUTER.JS: Bot received a message');
             console.log("***\nBOT_ROUTER.JS: Message content: ", context.activity.text);
+
+                // Check if the message is the special command
+    if (context.activity.text.trim() === '$hamburger') {
+        await context.sendActivity('ketchup!');
+    } else { 
             
             let chatMessagesUser = await this.chatMessagesProperty.get(context, []) || [];
             chatMessagesUser.push({ role: "user", content: context.activity.text });
@@ -88,7 +93,7 @@ class EchoBot extends ActivityHandler {
 
             await this.chatMessagesProperty.set(context, chatMessagesUser);
             await next();
-        });
+    }});
     }
 
     async run(context) {
