@@ -24,45 +24,40 @@ class EchoBot extends ActivityHandler {
             }
             await next();
         });
-
         this.onMessage(async (context, next) => {
-            let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
-                context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
-            let chatMessagesUser = current_thread_ts === this.thread_ts ? await this.chatMessagesProperty.get(context, []) : [];
-            this.thread_ts = current_thread_ts;
-            chatMessagesUser.push({ role: "user", content: context.activity.text });
-            
-            const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
+            let chatMessagesUserState = await this.chatMessagesProperty.get(context, { messages: [], thread_ts: "" }) || { messages: [], thread_ts: "" };
+            chatMessagesUserState.messages.push({ role: "user", content: context.activity.text });
         
-            chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
-            
-            const result = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
-            const cleanedFormattedMessages = result.cleanedFormattedMessages;
-            
-            const isActiveThread = result.isActiveThread;
-            
-            if (chatResponse.requery && isActiveThread) {
-                const requeryNotice = "Let me check our past conversations, one moment...";
-                await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-                chatMessagesUser.push({ role: "assistant", content: requeryNotice });
-                let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId, isActiveThread);
-                chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
-            }
-            
-            console.log('\n\n****BOT_ROUTER.JS>>>Is the slack thread active?:', isActiveThread);
-            
-            await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId, isActiveThread);
-            await this.chatMessagesProperty.set(context, chatMessagesUser);
-            
-            console.log(`\n\n\n****BOT_ROUTER.JS current channelData:\n\n${JSON.stringify(context.activity.channelData, null, 2)}`);
-        
+            // Slack-specific handling
             if (isFromSlack(context)) {
-                console.log('\n***BOT_ROUTER.JS: letMeCheckFlag is: ', chatResponse.letMeCheckFlag);
-            } else {
-                const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
-                await context.sendActivity(replyActivity);
+                const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
+                    context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
+                if(chatMessagesUserState.thread_ts !== current_thread_ts){
+                    chatMessagesUserState.messages = [{ role: "user", content: context.activity.text }]; // clear conversation history if it's a new thread
+                }
+                chatMessagesUserState.thread_ts = current_thread_ts;
+        
+                const chatResponse = await chatCompletion(chatMessagesUserState.messages, PERSONALITY_OF_BOT, context.activity.channelId);
+                chatMessagesUserState.messages.push({ role: "assistant", content: chatResponse.assistantResponse});
+        
+                const result = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
+                if(chatResponse.requery && result.isActiveThread){
+                    const requeryNotice = "Let me check our past conversations, one moment...";
+                    await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
+                    chatMessagesUserState.messages.push({ role: "assistant", content: requeryNotice });
+                    let requeryResponse = await chatCompletion(chatMessagesUserState.messages, PERSONALITY_OF_BOT, context.activity.channelId, result.isActiveThread);
+                    chatMessagesUserState.messages.push({ role: "assistant", content: requeryResponse.assistantResponse });
+                }
+        
+            } else { // handling for non-slack platforms
+                const chatResponse = await chatCompletion(chatMessagesUserState.messages, PERSONALITY_OF_BOT, context.activity.channelId);
+                 chatMessagesUserState.messages.push({ role: "assistant", content: chatResponse.assistantResponse });
+                 const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
+                 await context.sendActivity(replyActivity);
             }
-            
+        
+            await this.chatMessagesProperty.set(context, chatMessagesUserState);
+        
             await next();
         });
     }
