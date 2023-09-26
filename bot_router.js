@@ -31,8 +31,9 @@ class EchoBot extends ActivityHandler {
             if (isFromSlack(context)) {
                 console.log('\n\n****BOT_ROUTER.JS: message from Slack');
                 const botCalled = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
+                console.log('\n\n****BOT_ROUTER.JS: bot is specifically invoked in the message:', botCalled);  
                 const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
-                    context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
+                  context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
                 
                 console.log(`\n\n****BOT_ROUTER.JS: channelId is: ${context.activity.channelId}`);
                 console.log(`\n\n****BOT_ROUTER.JS: current thread_ts: ${current_thread_ts}`);
