@@ -49,45 +49,43 @@ class EchoBot extends ActivityHandler {
                     console.log(`\n\n***BOT_ROUTER.JS: ${message}`);
                 }  
 
-        if(botCalled || activeThreads[current_thread_ts]) {
-            chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
-            logToConsole(`THREAD_TS/CHANNEL_ID ${current_thread_ts}/${context.activity.channelId} is active, processing payload ${JSON.stringify(chatResponse, null, 2)} sending to openai.`);
-        } else {
-            if(current_thread_ts) {
-                logToConsole(`threaded slack message, no bot invocation, not sending to openai.`);
+                if(botCalled || activeThreads[current_thread_ts]) {
+                    chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
+                    logToConsole(`THREAD_TS/CHANNEL_ID ${current_thread_ts}/${context.activity.channelId} is active, processing payload ${JSON.stringify(chatResponse, null, 2)} sending to openai.`);
+                } else {
+                    if(isFromSlack(context)) {
+                        // If not called but the context is from Slack, it means it's a threaded slack message
+                        logToConsole(`threaded slack message, no bot invocation, not sending to openai.`);
+                    } else {
+                        // If not called and the context is not from Slack, it's a main thread message from other services.
+                        logToConsole(`main thread, no bot invocation, not sending to openai.`);
+                    }
+                    return;
+                }
+
+                const result = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
+                const cleanedFormattedMessages = result.cleanedFormattedMessages;
+                const isActiveThread = result.isActiveThread;
+
+                if (chatResponse.requery && isActiveThread) {
+                    const requeryNotice = "Let me check our past conversations, one moment...";
+                    await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
+                    chatMessagesUser.push({ role: "assistant", content: requeryNotice });
+
+                    chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId, isActiveThread);
+                    chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
+                }
+
+                logToConsole(`letMeCheckFlag is: ${chatResponse.letMeCheckFlag}`);
             } else {
-                logToConsole(`main thread, no bot invocation, not sending to openai.`);
+                chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
+                const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
+                await context.sendActivity(replyActivity);
             }
-            return;
-        }
 
-        if (botCalled) {
-            activeThreads[current_thread_ts] = true;
-        }
-
-        const result = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
-        const cleanedFormattedMessages = result.cleanedFormattedMessages;
-        const isActiveThread = result.isActiveThread;
-
-        if (chatResponse.requery && isActiveThread) {
-            const requeryNotice = "Let me check our past conversations, one moment...";
-            await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-            chatMessagesUser.push({ role: "assistant", content: requeryNotice });
-
-            chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId, isActiveThread);
-            chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
-        }
-
-        logToConsole(`letMeCheckFlag is: ${chatResponse.letMeCheckFlag}`);
-    } else {
-        chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
-        const replyActivity = MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`);
-        await context.sendActivity(replyActivity);
-    }
-
-    await this.chatMessagesProperty.set(context, chatMessagesUser);
-    await next();
-});
+            await this.chatMessagesProperty.set(context, chatMessagesUser);
+            await next();
+        });
     }
 
     async run(context) {
