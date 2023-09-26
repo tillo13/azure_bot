@@ -28,7 +28,8 @@ class EchoBot extends ActivityHandler {
         const activeThreads = {};
 
         this.onMessage(async (context, next) => {
-            const current_thread_ts = context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts;
+            const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event
+    ? context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts 
             let chatMessagesUser = current_thread_ts === this.thread_ts ? await this.chatMessagesProperty.get(context, []) : [];
             this.thread_ts = current_thread_ts;
             chatMessagesUser.push({ role: "user", content: context.activity.text });
