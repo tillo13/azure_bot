@@ -26,6 +26,17 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
+                if (isFromSlack(context) && (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot'))) {
+                    console.log('***BOT_ROUTER.JS: Detected bot invocation, processing message...');
+                } else if (threadIsActive) {
+                    console.log('***BOT_ROUTER.JS: Thread is active, processing message...');
+                } else if (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) {
+                    console.log('***BOT_ROUTER.JS: Detected bot invocation in thread, marking as active and processing message...');
+                    threadIsActive = true;
+                } else {
+                    console.log('***BOT_ROUTER.JS: No bot invocation detected in inactive thread, not processing message...');
+                    return;
+                }
             let current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
                 context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
             let chatMessagesUser = current_thread_ts === this.thread_ts ? await this.chatMessagesProperty.get(context, []) : [];

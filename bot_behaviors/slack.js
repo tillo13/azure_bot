@@ -50,37 +50,34 @@
  }
  
  async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
-    const apiToken = context.activity.channelData?.ApiToken;
-    let cleanedFormattedMessages = null;
-
-    // Fetch conversation details from the current context
-    const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
-    const userMessage = context.activity.text;
-    const isBotInvoked = userMessage.includes('@bot') || userMessage.includes('@atbot');
-
-    if (isBotInvoked) {
-        activeThreads[thread_ts] = true;
-        console.log('***SLACK.JS: Valid invoke of bot, continue.');
-    }
-
-    if (!activeThreads[thread_ts]) {
-       console.log('\n\n***SLACK.JS: Slack payload without calling bot, ignoring! User said: ', context.activity.text);
-       return {
-         cleanedFormattedMessages: null,
-         isActiveThread: null
-       };
-    }
-    
-    // If 'letMeCheckFlag' is true, then fetch the chat history
-    if (letMeCheckFlag && apiToken) {
-        cleanedFormattedMessages = await postChatHistoryToSlack(
-            context.activity.channelData.SlackMessage.event.channel,
-            thread_ts,
-            apiToken,
-            await getBotId(apiToken),
-        );
-        console.log('\n\n*&*&*& SLACK.JS bug check --> Cleaned formatted messages after postChatHistoryToSlack', cleanedFormattedMessages);
-    }
+     const apiToken = context.activity.channelData?.ApiToken;
+     let cleanedFormattedMessages = null;
+ 
+     // Fetch conversation details from the current context
+     const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
+ 
+     if (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) {
+         activeThreads[thread_ts] = true;
+     }
+ 
+     if (!activeThreads[thread_ts] && !context.activity.conversation.isGroup) {
+        console.log('\n\n***SLACK.JS: SLACK_PAYLOAD_WITHOUT_CALLING_BOT -- IGNORING! User said: ', context.activity.text);
+        return {
+          cleanedFormattedMessages: null,
+          isActiveThread: null
+        };
+      }
+ 
+     // If 'letMeCheckFlag' is true, then fetch the chat history
+     if (letMeCheckFlag && apiToken) {
+         cleanedFormattedMessages = await postChatHistoryToSlack(
+             context.activity.channelData.SlackMessage.event.channel,
+             thread_ts,
+             apiToken,
+             await getBotId(apiToken),
+         );
+         console.log('\n\n*&*&*& SLACK.JS bug check --> Cleaned formatted messages after postChatHistoryToSlack', cleanedFormattedMessages);
+     }
  
      if (context.activity.text && activeThreads[thread_ts]) {
          console.log('\n\n***SLACK.JS: Latest user posted message:', context.activity.text); // Always log user message in the console.
