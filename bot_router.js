@@ -25,6 +25,7 @@ class EchoBot extends ActivityHandler {
             await next();
         });
 
+const activeThreads = {};
         this.onMessage(async (context, next) => {
             if (isFromSlack(context)) {
                 const botCalled = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
