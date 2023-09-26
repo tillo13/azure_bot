@@ -92,9 +92,9 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
             isActiveThread: null
         };
     }
-    } else {
-        console.log('\n\n***SLACK.JS: Valid invocation of bot, continue. User said: ', context.activity.text);
-    }
+   // removed else from here
+
+    console.log('\n\n***SLACK.JS: Valid invocation of bot, continue. User said: ', context.activity.text);
 
     // If 'letMeCheckFlag' is true, then fetch the chat history
     if (letMeCheckFlag && apiToken) {
