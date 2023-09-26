@@ -14,6 +14,8 @@ class EchoBot extends ActivityHandler {
         this.chatMessagesProperty = userState.createProperty(CHAT_MESSAGES);
         this.threadproperty = userState.createProperty(THREAD_TS);
         this.userState = userState;
+        this.botInvokedFlag = userState.createProperty('botInvokedFlag');
+
 
         this.onMembersAdded(async (context, next) => {
             const membersAdded = context.activity.membersAdded;
