@@ -48,35 +48,35 @@ adapter.onTurnError = onTurnErrorHandler;
 
 // Server start
 server.listen(process.env.port || process.env.PORT || 3978, () => {
-    console.log("***\nINDEX.JS: Server is starting up...");
-    console.log("***\nINDEX.JS: Server is now listening to " + server.url);
-    console.log("***\nINDEX.JS: Get Bot Framework Emulator at https://aka.ms/botframework-emulator");
-    console.log("***\nINDEX.JS: To talk to your bot, open the emulator and select 'Open Bot'");
+    console.log("***\nINDEX.JS: Server is starting up...\n");
+    console.log("***\nINDEX.JS: Server is now listening to " + server.url + "\n");
+    console.log("***\nINDEX.JS: Get Bot Framework Emulator at https://aka.ms/botframework-emulator \n");
+    console.log("***\nINDEX.JS: To talk to your bot, open the emulator and select 'Open Bot'\n");
 });
 
 // EchoBot initialization
-console.log("***\nINDEX.JS: Initializing the EchoBot with User State...");
+console.log("***\nINDEX.JS: Initializing the EchoBot with User State...\n");
 const myBot = new EchoBot(userState);
 
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
-    console.log("***\nINDEX.JS: Incoming request to /api/messages endpoint");
-    console.log("***\nINDEX.JS: Request payload: ", req.body); // Logs the entire request payload
-    console.log("***\nINDEX.JS: Request source IP: ", req.connection.remoteAddress); // Logs the origin IP address
-    console.log("***\nINDEX.JS: Processing the request...");
+    console.log("***\nINDEX.JS: Incoming request to /api/messages endpoint\n");
+    console.log("***\nINDEX.JS: Request payload: \n", req.body, "\n"); // Logs the entire request payload
+    console.log("***\nINDEX.JS: Request source IP: \n", req.connection.remoteAddress, "\n");// Logs the origin IP address
+    console.log("***\nINDEX.JS: Processing the request...\n");
     await adapter.process(req, res, (context) => myBot.run(context));
-    console.log("***\nINDEX.JS: Finished processing request");
+    console.log("***\nINDEX.JS: Finished processing request\n");
 });
 
 
 // Upgrade request handling
 server.on('upgrade', async (req, socket, head) => {
-    console.log("***\nINDEX.JS: Handling upgrade request");
-    console.log("***\nINDEX.JS: Initializing CloudAdapter for upgrade request...");
+    console.log("***\nINDEX.JS: Handling upgrade request\n");
+    console.log("***\nINDEX.JS: Initializing CloudAdapter for upgrade request...\n");
     const streamingAdapter = new CloudAdapter(botFrameworkAuthentication);
-    console.log("***\nINDEX.JS: Setting turn error handler for the streaming adapter...");
+    console.log("***\nINDEX.JS: Setting turn error handler for the streaming adapter...\n");
     streamingAdapter.onTurnError = onTurnErrorHandler;
-    console.log("***\nINDEX.JS: Processing upgrade request...");
+    console.log("***\nINDEX.JS: Processing upgrade request...\n");
     await streamingAdapter.process(req, socket, head, (context) => myBot.run(context));
-    console.log("***\nINDEX.JS: Finished handling upgrade request");
+    console.log("***\nINDEX.JS: Finished handling upgrade request\n");
 });
