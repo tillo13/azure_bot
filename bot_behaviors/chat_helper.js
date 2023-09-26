@@ -59,7 +59,7 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 }
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
-  console.log('\n\n***CHAT_HELPER.JS: Sending Payload to OpenAI via first call: ', newCleanChatMessages);
+
   console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
   console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
 
@@ -106,6 +106,8 @@ const originalLength = chatMessages.length;
 
 // Separate out each kind of message
 let newCleanChatMessages = chatMessages.filter(item => !item.content.startsWith('Certainly, here is what I have said so far'));
+console.log('\n\n***CHAT_HELPER.JS: Sending Payload to OpenAI via first call: ', newCleanChatMessages);
+
 const certainlyMessages = chatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far'));
 
 if (certainlyMessages.length > 0) {
@@ -131,7 +133,6 @@ if (duplicatesRemoved > 0) {
 
 // Start interacting with OpenAI
 try {
-  console.log('\n\n***CHAT_HELPER.JS: Sending Payload to OpenAI via 2nd branch: ', newCleanChatMessages);
   let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
 
   if (result && result.choices[0]?.message?.content) {
@@ -142,6 +143,8 @@ try {
       // If so, update payload and requery
       let looped_through_payload = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(', ');
       newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_payload, lastUserMessage);
+      console.log('\n\n***CHAT_HELPER.JS: Sending Payload to OpenAI via 2nd branch: ', newCleanChatMessages);
+
 
       if(JSON.stringify(newCleanChatMessages) !== oldChatMessages)
         console.log('\n\n!!!IMPORTANT!!!! CHAT_HELPER.JS: *** Payload was updated after removing duplicates. This was triggered by the letMeCheckFlag from the handleSlackMessage() function in slack.js. The new payload: \n', newCleanChatMessages);
