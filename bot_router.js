@@ -73,7 +73,9 @@ class EchoBot extends ActivityHandler {
             }
         
             await this.chatMessagesProperty.set(context, chatMessagesUser);
-            console.log('\n\n****BOT_ROUTER.JS: chat message property set');
+            console.log(`\n\n****BOT_ROUTER.JS: chat message property set with value ${JSON.stringify(chatMessagesUser, null, 2)}\n`);
+
+
             await next();
         });
     }
