@@ -44,12 +44,12 @@ class EchoBot extends ActivityHandler {
     
             const botCalled = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
             console.log('\n\n****BOT_ROUTER.JS: bot is specifically invoked in the message:', botCalled);
-                                                      
+                                                  
             console.log(`\n\n****BOT_ROUTER.JS: channelId is: ${context.activity.channelId}`);
             console.log(`\n\n****BOT_ROUTER.JS: current thread_ts: ${current_thread_ts}`);
             
-            if (botCalled || (chatMessagesUserState.thread_ts !== current_thread_ts)) {
-                console.log('\n\n****BOT_ROUTER.JS: Bot is specifically invoked in the message OR this message is part of a new thread.');
+            if (botCalled || (chatMessagesUserState.thread_ts === current_thread_ts)) {
+                console.log('\n\n****BOT_ROUTER.JS: Bot is specifically invoked in the message OR this message is part of an existing thread.');
             
                 // Here botCalled || !isNewThread should also be checked and accordingly implemented if required as chatResponse might make 3rd party API call
                 const chatResponse = await chatCompletion(chatMessagesUserState.messages, PERSONALITY_OF_BOT, context.activity.channelId);
