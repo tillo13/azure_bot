@@ -1,19 +1,16 @@
-require('dotenv').config(); 
-
+require("dotenv").config();
 const fetch = require('node-fetch');
 const fs = require('fs');
 const util = require('util');
-const url =  require('url');
+const url = require('url');
 const FormData = require('form-data');
 const moment = require('moment');
 const sharp = require('sharp');
-require('dotenv').config();
 
 const OPENAI_DALLE_API_KEY = process.env.OPENAI_DALLE_API_KEY;
 const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
-const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
-
+const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION || 'v1';
 
 const dalleResponse = async (command_text, numImages) => {
     const response = await fetch(`${OPENAI_DALLE_BASE_URL}/${OPENAI_DALLE_VERSION}/images/dalle`, {

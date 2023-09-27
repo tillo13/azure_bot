@@ -1,3 +1,5 @@
+const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+
 const handleDalleCommand = require('./dalle_utils');
 
 async function createDalleImages(context) {
