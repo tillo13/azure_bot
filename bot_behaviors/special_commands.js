@@ -68,13 +68,24 @@ async function generateDogImage(context) {
             data += chunk;
         });
 
-        // The whole response has been received.
+        // The whole response has been received. Print out the result.
         res.on('end', () => {
-            (async () => {
+            console.log("Received response: ", data); // <---- Added this for better logging
+
+            try {
                 const response = JSON.parse(data);
-                const imageUrl = response.data[0].url;
-                await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
-            })();
+                if (response && response.data && response.data[0] && response.data[0].url) {
+                    (async () => {
+                        const imageUrl = response.data[0].url;
+                        await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
+                    })();
+                }
+                else {
+                    console.error("Unexpected response format: ", response);
+                }
+            } catch (err) {
+                console.error("Error parsing response: ", err);
+            }
         });
 
     }).on("error", (err) => {
