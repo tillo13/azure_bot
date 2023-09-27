@@ -63,6 +63,8 @@ class EchoBot extends ActivityHandler {
 
                 botInThread = true;
                 await this.botInvokedFlag.set(context, botInThread);
+                chatMessagesUser.push({ role: "user", content: context.activity.text }); //add this line
+
             }
                 
             if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
