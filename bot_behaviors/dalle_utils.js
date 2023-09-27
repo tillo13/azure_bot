@@ -1,6 +1,3 @@
-require('dotenv').config({ path: '../.env' });
-const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
-
 const fetch = require('node-fetch');
 const fs = require('fs');
 const util = require('util');
@@ -15,12 +12,18 @@ const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
 const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION || 'v1';
 
 const dalleResponse = async (command_text, numImages) => {
-    const response = await fetch(`${OPENAI_DALLE_BASE_URL}/${OPENAI_DALLE_VERSION}/images/dalle`, {
+    const url = `${OPENAI_DALLE_BASE_URL}/${OPENAI_DALLE_VERSION}/images/dalle`;
+    const payload = JSON.stringify({
+        'prompt': command_text,
+        'n': numImages,
+    });
+
+    console.log(`URL: ${url}`);
+    console.log(`Payload: ${payload}`);
+    
+    const response = await fetch(url, {
         method: 'POST',
-        body: JSON.stringify({
-            'prompt': command_text,
-            'n': numImages,
-        }),
+        body: payload,
         headers: {
             'Authorization': `Bearer ${OPENAI_DALLE_API_KEY}`,
             'Content-Type': 'application/json',
