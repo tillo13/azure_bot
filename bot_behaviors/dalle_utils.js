@@ -19,13 +19,19 @@ const dalleResponse = async (command_text, numImages) => {
         method: 'POST',
         body: payload,
         headers: {
-            "Authorization": `Bearer ${OPENAI_DALLE_API_KEY}`,
+            'Authorization': `Bearer ${OPENAI_DALLE_API_KEY}`,
             'Content-Type': 'application/json',
         },
     });
     
-    if (!response.ok) {
-        throw new Error(`Failed to get response from DALL·E: ${response.status}`);
+    console.log('Response: ', response);
+    console.log('Response status: ', response.status);
+    console.log('Response headers: ', response.headers.raw());
+
+    if(!response.ok) {
+        const error = await response.text();
+        console.log('Error: ', error);
+        throw new Error("DALL·E error. Status: " + response.status + " Message: " + error);
     } else {
         const json = await response.json();
         return {
@@ -34,7 +40,7 @@ const dalleResponse = async (command_text, numImages) => {
             'prompt': command_text,
         };
     }
-}
+};
 
 const downloadAndResize = async (imageData) => {
 	const imageResponse = await fetch(imageData.url);
