@@ -1,6 +1,5 @@
 const fetch = require("node-fetch");
 
-
 const OPENAI_DALLE_API_KEY = process.env.OPENAI_DALLE_API_KEY;
 const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
 const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
@@ -20,7 +19,7 @@ const dalleResponse = async (command_text, numImages) => {
         method: 'POST',
         body: payload,
         headers: {
-            'Ocp-Apim-Subscription-Key': OPENAI_DALLE_API_KEY,
+            "Authorization": `Bearer ${OPENAI_DALLE_API_KEY}`,
             'Content-Type': 'application/json',
         },
     });
