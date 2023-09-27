@@ -1,6 +1,10 @@
 const handleDalleCommand = require('./dalle_utils');
 
 async function createDalleImages(context) {
+    //test to show the values
+console.log("OPENAI_DALLE_API_KEY:", process.env.OPENAI_DALLE_API_KEY);
+console.log("OPENAI_DALLE_BASE_URL:", process.env.OPENAI_DALLE_BASE_URL);
+console.log("OPENAI_DALLE_VERSION:", process.env.OPENAI_DALLE_VERSION);
 	const messageText = context.activity.text.replace('$dalle', '');
 	await handleDalleCommand(context.activity.conversation.id, context.timestamp, messageText.trim());
 	return await context.sendActivity(`Images are on their way, might take some time.`);
