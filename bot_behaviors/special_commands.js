@@ -56,7 +56,9 @@ async function generateDogImage(context) {
             }
         };
 
-        const response = await axios.post(apiEndpoint, data, options);
+        const response = await axios.post(apiEndpoint, data, {
+            headers: options
+        });
         const imageUrl = response.data["data"][0]["url"];
         await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
     } catch (error) {
