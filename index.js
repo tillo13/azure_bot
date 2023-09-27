@@ -46,13 +46,6 @@ server.listen(process.env.port || process.env.PORT || 3978, () => {
     console.log("\n\n*INDEX.JS: Server is now listening to " + server.url + "\n");
     console.log("\n\n*INDEX.JS: Get Bot Framework Emulator at https://aka.ms/botframework-emulator \n");
     console.log("\n\n*INDEX.JS: To talk to your bot, open the emulator and select 'Open Bot'\n");
-
-
-    //are the params loading over?
-    console.log("\nindex.js>>OPENAI_DALLE_API_KEY:", process.env.OPENAI_DALLE_API_KEY);
-    console.log("\nindex.js>>OPENAI_DALLE_BASE_URL:", process.env.OPENAI_DALLE_BASE_URL);
-    console.log("\nindex.js>>OPENAI_DALLE_VERSION:", process.env.OPENAI_DALLE_VERSION);
-    console.log("\nindex.js>>AZURE_DIRECTLINE:", process.env.AZURE_DIRECT_LINE_URL);
     
 });
 

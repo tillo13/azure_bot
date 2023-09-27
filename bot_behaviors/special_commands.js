@@ -4,14 +4,12 @@ const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
 const handleDalleCommand = require('./dalle_utils');
 
 async function createDalleImages(context) {
-    //are the params coming over?
-    console.log("\n\n*special_commands.js:OPENAI_DALLE_BASE_URL:", OPENAI_DALLE_BASE_URL);
-    console.log("\n\n*special_commands.js:OPENAI_DALLE_VERSION:", OPENAI_DALLE_VERSION);
-
     const messageText = context.activity.text.replace('$dalle', '').trim(); // Trimmed to remove leading/trailing white space
     let splitMessage = messageText.split(" --");
-    const prompt = splitMessage[0]; // This is the content after '$dalle ' and before ' --'
-    const numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1; // This is the content after ' --' in the incoming message
+    // Set "a happy dog" as the default prompt if none is provided
+    const prompt = splitMessage[0] || "a happy dog";
+    // Set 3 as the default number of images if none is specified
+    const numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 3;
     await handleDalleCommand(context.activity.conversation.id, context.timestamp, prompt, numImages);
     const completionMessage = numImages > 1 ? `Images are on their way, might take some time.` : `Image is on its way, might take some time.`;
     return await context.sendActivity(completionMessage);
