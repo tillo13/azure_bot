@@ -33,22 +33,18 @@ class EchoBot extends ActivityHandler {
             console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
             console.log('\n\n**BOT_ROUTER.JS: Bot received a message');
             console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
-        
-            let userMessage = context.activity.text;
+
+                // Check if the message is the special command
+    if (context.activity.text.trim() === '$hamburger') {
+        await context.sendActivity('ketchup!');
+    } else { 
             
             let chatMessagesUser = await this.chatMessagesProperty.get(context, []) || [];
-        
-            // Bot was called
-            if (userMessage.includes('@bot') || userMessage.includes('@atbot')) {
-                // Remove @bot or @atbot from the message
-                userMessage = userMessage.replace('@bot', '').replace('@atbot', '').trim();
-                            
-                // Add updated message to 'chatMessagesUser'
-                chatMessagesUser.push({ role: "user", content: userMessage });
-                
-                const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
-                    context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
-                    console.log("\n\n**BOT_ROUTER.JS: Current Slack thread timestamp: ", current_thread_ts);
+            chatMessagesUser.push({ role: "user", content: context.activity.text });
+            
+            const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
+                context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
+                console.log("\n\n**BOT_ROUTER.JS: Current Slack thread timestamp: ", current_thread_ts);
 
             
             let savedThread_ts = await this.threadproperty.get(context, "");
@@ -71,7 +67,6 @@ class EchoBot extends ActivityHandler {
                 
             if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
                 console.log("\n\n**BOT_ROUTER.JS: Message from Slack and bot was either called or is already in thread. Processing...");
-                // Note: chatMessagesUser is passed to chatCompletion which contains all user and assistant messages in correct order.
                 let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
                 
                 if(chatResponse.requery && chatResponse.isActiveThread) {
