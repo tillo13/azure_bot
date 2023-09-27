@@ -2,15 +2,6 @@ const OPENAI_DALLE_API_KEY = process.env.OPENAI_DALLE_API_KEY;
 const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
 const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
 
-const response = await fetch(url, {
-    method: 'POST',
-    body: payload,
-    headers: {
-        'Ocp-Apim-Subscription-Key': OPENAI_DALLE_API_KEY,
-        'Content-Type': 'application/json',
-    },
-});
-
 const dalleResponse = async (command_text, numImages) => {
     const url = `${OPENAI_DALLE_BASE_URL}/openai/images/generations:submit?api-version=${OPENAI_DALLE_VERSION}`;
     const payload = JSON.stringify({
