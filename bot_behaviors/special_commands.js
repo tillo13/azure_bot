@@ -1,4 +1,4 @@
-const axios = require('axios');
+const https = require('https');
 const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
 const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
 
@@ -42,28 +42,45 @@ async function sendMessageResponse(context, message) {
 }
 
 async function generateDogImage(context) {
-    try {
-        const apiEndpoint = 'https://tillo-openai.openai.azure.com/openai/images/generations:submit?api-version=2023-06-01-preview';
-        const data = {
-            prompt: 'a nice photo of a dog',
-            size: '1024x1024',
-            n: 1
-        };
-        const options = {
-            headers: {
-                'Authorization': `Bearer ${process.env.OPENAI_DALLE_API_KEY}`,
-                'Content-Type': 'application/json'
-            }
-        };
+    const dataString = JSON.stringify({
+        prompt: 'a nice photo of a dog',
+        size: '1024x1024',
+        n: 1
+    });
 
-        const response = await axios.post(apiEndpoint, data, {
-            headers: options
-        });
-        const imageUrl = response.data["data"][0]["url"];
-        await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
-    } catch (error) {
-        console.log(error);
+    const options = {
+        hostname: 'tillo-openai.openai.azure.com',
+        port: 443,
+        path: '/openai/images/generations:submit?api-version=2023-06-01-preview',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': dataString.length,
+            'Authorization': `Bearer ${process.env.OPENAI_DALLE_API_KEY}`
+        }
     }
+
+    const req = https.request(options, res => {
+        let data = '';
+
+        // A chunk of data has been received.
+        res.on('data', (chunk) => {
+            data += chunk;
+        });
+
+        // The whole response has been received.
+        res.on('end', () => {
+            const response = JSON.parse(data);
+            const imageUrl = response.data[0].url;
+            await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
+        });
+
+    }).on("error", (err) => {
+        console.log("Error: " + err.message);
+    });
+
+    req.write(dataString);
+    req.end();
 }
 
 const commands = {
