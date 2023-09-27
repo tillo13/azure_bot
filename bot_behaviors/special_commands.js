@@ -56,7 +56,7 @@ async function generateDogImage(context) {
         headers: {
             'Content-Type': 'application/json',
             'Content-Length': dataString.length,
-            'Authorization': `Bearer ${process.env.OPENAI_DALLE_API_KEY}`
+            'Ocp-Apim-Subscription-Key': process.env.OPENAI_DALLE_API_KEY
         }
     }
 
