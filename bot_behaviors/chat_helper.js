@@ -67,8 +67,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
   console.log('\n\n***CHAT_HELPER.JS: OpenAI API Deployment: ', process.env.OPENAI_API_DEPLOYMENT);
 
   ///test dalle items showing in .env
-  console.log('\n\n***CHAT_HELPER.JS: OpenAI API Base URL: ', process.env.OPENAI_DALLE_BASE_URL);
-  console.log('\n\n***CHAT_HELPER.JS: OpenAI API Deployment: ', process.env.OPENAI_DALLE_VERSION);
+  console.log('\n\n***CHAT_HELPER.JS: OpenAI DallE API Base URL: ', process.env.OPENAI_DALLE_BASE_URL);
+  console.log('\n\n***CHAT_HELPER.JS: OpenAI DallE API Deployment: ', process.env.OPENAI_DALLE_VERSION);
 
 
 
