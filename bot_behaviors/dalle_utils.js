@@ -12,6 +12,10 @@ const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
 const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
 
+//test to show the values
+console.log("OPENAI_DALLE_API_KEY:", process.env.OPENAI_DALLE_API_KEY);
+console.log("OPENAI_DALLE_BASE_URL:", process.env.OPENAI_DALLE_BASE_URL);
+console.log("OPENAI_DALLE_VERSION:", process.env.OPENAI_DALLE_VERSION);
 const dalleResponse = async (command_text) => {
 	let n_images = 3;
 	let prompt = command_text.trim();
