@@ -70,9 +70,11 @@ async function generateDogImage(context) {
 
         // The whole response has been received.
         res.on('end', () => {
-            const response = JSON.parse(data);
-            const imageUrl = response.data[0].url;
-            await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
+            (async () => {
+                const response = JSON.parse(data);
+                const imageUrl = response.data[0].url;
+                await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
+            })();
         });
 
     }).on("error", (err) => {
