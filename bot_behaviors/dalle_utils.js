@@ -1,4 +1,6 @@
 require("dotenv").config();
+const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+
 const fetch = require('node-fetch');
 const fs = require('fs');
 const util = require('util');
@@ -80,6 +82,9 @@ const uploadToSlack = async (channelId, timestamp, resizedBuffer, fileName, imag
 
 const handleDalleCommand = async (channelId, timestamp, commandText, numImages) => {
     try {
+            //are the params coming over?
+    console.log("\n\ndalle_utils.js:OPENAI_DALLE_BASE_URL:", OPENAI_DALLE_BASE_URL);
+    console.log("\n\n*dalle_utils.js:OPENAI_DALLE_VERSION:", OPENAI_DALLE_VERSION);
         const dalleData = await dalleResponse(commandText, numImages);
         const parsedData = dalleData.data;
         parsedData.forEach(async (data, index) => {

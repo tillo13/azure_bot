@@ -1,12 +1,16 @@
+require("dotenv").config();
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+
+
+const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
+const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION || 'v1';
 
 const handleDalleCommand = require('./dalle_utils');
 
 async function createDalleImages(context) {
     //are the params coming over?
-    console.log("\n\n*special_commands.js: OPENAI_DALLE_API_KEY:", process.env.OPENAI_DALLE_API_KEY);
-    console.log("\n\n*special_commands.js:OPENAI_DALLE_BASE_URL:", process.env.OPENAI_DALLE_BASE_URL);
-    console.log("\n\n*special_commands.js:OPENAI_DALLE_VERSION:", process.env.OPENAI_DALLE_VERSION);
+    console.log("\n\n*special_commands.js:OPENAI_DALLE_BASE_URL:", OPENAI_DALLE_BASE_URL);
+    console.log("\n\n*special_commands.js:OPENAI_DALLE_VERSION:", OPENAI_DALLE_VERSION);
 
     const messageText = context.activity.text.replace('$dalle', '').trim(); // Trimmed to remove leading/trailing white space
     let splitMessage = messageText.split(" --");
