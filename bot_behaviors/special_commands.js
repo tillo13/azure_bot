@@ -42,19 +42,22 @@ async function sendMessageResponse(context, message) {
 }
 
 async function generateDogImage(context) {
-    const response = await axios.post('https://tillo-openai.openai.azure.com/openai/images/generations:submit?api-version=2023-06-01-preview', {
-        prompt: 'a nice photo of a dog',
-        size: '1024x1024',
-        n: 1
-    }, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.OPENAI_DALLE_API_KEY}`
-        }
-    });
+    try {
+        const response = await axios.post('https://api.openai.com/v1/dalle/images/generations:submit', {
+            prompt: 'a nice photo of a dog',
+            n: 1
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENAI_DALLE_API_KEY}`
+            }
+        });
 
-    const imageUrl = response.data["url"];
-    await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
+        const imageUrl = response.data.results[0]["id"];
+        await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
+    } catch (error) {
+        console.log(error.message);
+    }
 }
 
 const commands = {
