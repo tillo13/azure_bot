@@ -40,9 +40,27 @@ async function sendMessageResponse(context, message) {
     await context.sendActivity(replyActivity);
 }
 
+async function generateDogImage(context) {
+    const response = await axios.post('https://tillo-openai.openai.azure.com/openai/images/generations:submit?api-version=2023-06-01-preview', {
+        prompt: 'a nice photo of a dog',
+        size: '1024x1024',
+        n: 1
+    }, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        }
+    });
+
+    const imageUrl = response.data["url"];
+    await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
+}
+
 const commands = {
 	'$hamburger': addToppings,
 	'$help': contactHelp,
-	'$dalle': createDalleImages, 
+	'$dalle': createDalleImages,
+    '$dog': generateDogImage
 };
+
 module.exports = commands;

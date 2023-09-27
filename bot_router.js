@@ -1,6 +1,7 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const { handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
 const specialCommands = require('./bot_behaviors/special_commands');
+const dog = require('./dog');
 
 const chatCompletion = require('./bot_behaviors/chat_helper');
 
