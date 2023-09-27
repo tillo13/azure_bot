@@ -1,10 +1,11 @@
-const { UserState } = require('botbuilder');
-const { MemoryStorage } = require('botbuilder');
+// Load environment variables at the top-most level
+require('dotenv').config();
+
+const { UserState, MemoryStorage, CloudAdapter, ConfigurationServiceClientCredentialFactory, createBotFrameworkAuthenticationFromConfiguration } = require('botbuilder');
+
 const path = require('path');
 const restify = require('restify');
-const dotenv = require('dotenv');
-const ENV_FILE = path.join(__dirname, '.env');
-dotenv.config({ path: ENV_FILE });
+const { EchoBot } = require('./bot_router');
 
 const {
     CloudAdapter,
@@ -58,7 +59,7 @@ server.listen(process.env.port || process.env.PORT || 3978, () => {
     console.log("\nindex.js>>OPENAI_DALLE_API_KEY:", process.env.OPENAI_DALLE_API_KEY);
     console.log("\nindex.js>>OPENAI_DALLE_BASE_URL:", process.env.OPENAI_DALLE_BASE_URL);
     console.log("\nindex.js>>OPENAI_DALLE_VERSION:", process.env.OPENAI_DALLE_VERSION);
-    console.log("\nindex.js>>OPENAI_DALLE_VERSION:", process.env.AZURE_DIRECT_LINE_URL);
+    console.log("\nindex.js>>AZURE_DIRECTLINE:", process.env.AZURE_DIRECT_LINE_URL);
     
 });
 
