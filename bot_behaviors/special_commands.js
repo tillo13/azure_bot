@@ -1,4 +1,5 @@
-const https = require('https');
+const fetch = require('node-fetch'); // make sure to install this with npm install node-fetch
+
 const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
 const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
 
@@ -41,59 +42,55 @@ async function sendMessageResponse(context, message) {
     await context.sendActivity(replyActivity);
 }
 
-async function generateDogImage(context) {
-    const dataString = JSON.stringify({
-        prompt: 'a nice photo of a dog',
-        size: '1024x1024',
-        n: 1
-    });
 
-    const options = {
-        hostname: 'tillo-openai.openai.azure.com',
-        port: 443,
-        path: '/openai/images/generations:submit?api-version=2023-06-01-preview',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': dataString.length,
-            'Ocp-Apim-Subscription-Key': process.env.OPENAI_DALLE_API_KEY
+async function generateDogImage(context) {
+    const baseUrl = "https://tillo-openai.openai.azure.com/openai";
+    const headers = {
+        "API-Key": process.env.OPENAI_API_KEY,
+        "Content-Type": "application/json",
+    };
+
+    const requestBody = {
+        prompt: "a nice photo of a dog",
+        size: "1024x1024",
+        n: 1,
+    };
+
+    const response = await fetch(
+        `${baseUrl}/images/generations:submit?api-version=2023-06-01-preview`,
+        {
+            method: "POST",
+            headers,
+            body: JSON.stringify(requestBody),
+        }
+    );
+
+    const initJob = await response.json();
+    const jobId = initJob?.id;
+
+    for (let i = 0; i < 5; i++) {
+        // Wait 1.5 seconds after a request
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        const response = await fetch(
+            `${baseUrl}/operations/images/${jobId}?api-version=2023-06-01-preview`,
+            {
+                method: "GET",
+                headers,
+            }
+        );
+
+        const job = await response.json();
+
+        if (job.status === "succeeded") {
+            const imageUrl = job?.result?.data[0]?.url;
+            if (imageUrl) {
+                await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
+            }
+            // exit the for-loop early since we have what we wanted
+            break;
         }
     }
-
-    const req = https.request(options, res => {
-        let data = '';
-
-        // A chunk of data has been received.
-        res.on('data', (chunk) => {
-            data += chunk;
-        });
-
-        // The whole response has been received. Print out the result.
-        res.on('end', () => {
-            console.log("Received response: ", data); // <---- Added this for better logging
-
-            try {
-                const response = JSON.parse(data);
-                if (response && response.data && response.data[0] && response.data[0].url) {
-                    (async () => {
-                        const imageUrl = response.data[0].url;
-                        await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
-                    })();
-                }
-                else {
-                    console.error("Unexpected response format: ", response);
-                }
-            } catch (err) {
-                console.error("Error parsing response: ", err);
-            }
-        });
-
-    }).on("error", (err) => {
-        console.log("Error: " + err.message);
-    });
-
-    req.write(dataString);
-    req.end();
 }
 
 const commands = {
