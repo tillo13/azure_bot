@@ -43,8 +43,7 @@ async function sendMessageResponse(context, message) {
 }
 
 async function generateDogImage(context) {
-    const startRuntime = Date.now(); // Begin the count for runtime since the function is called
-    console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() Called...');
+    console.log('generateDogImage() - About to generate a new dog image...');
 
     const baseUrl = process.env.OPENAI_DALLE_BASE_URL;
     const version = process.env.OPENAI_DALLE_VERSION;
@@ -59,7 +58,7 @@ async function generateDogImage(context) {
         n: 1,
     };
 
-    console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Making the POST request...');
+    console.log('generateDogImage() - Making the POST request...');
     const response = await fetch(
         `${baseUrl}/images/generations:submit?api-version=${version}`,
         {
@@ -70,21 +69,20 @@ async function generateDogImage(context) {
     );
 
     const initJob = await response.json();
-    console.log('\n\n*****SPECIAL_COMMANDS.JS: Post Request Response Body:', JSON.stringify(initJob));
-
     if(!initJob.id){
-        console.log('\n\n*****SPECIAL_COMMANDS.JS: Error while submitting a job', initJob);
+        console.log('Error while submitting a job', initJob);
         return;
     } 
 
     const jobId = initJob.id;
-    console.log('\n\n*****SPECIAL_COMMANDS.JS: Job submitted, id: ', jobId);
+    console.log('Job submitted, id: ', jobId);
 
     for (let i = 0; i < 5; i++) {
-        console.log('\n\n*****SPECIAL_COMMANDS.JS: Start iteration number:', i+1);
+        console.log('generateDogImage() - Start iteration number:', i+1);
 
+        // Wait 1.5 seconds after a request
         await new Promise(resolve => setTimeout(resolve, 1500));
-        console.log('\n\n*****SPECIAL_COMMANDS.JS: Completed wait, making the GET request...');
+        console.log('generateDogImage() - Completed wait, making the GET request...');
 
         const response = await fetch(
             `${baseUrl}/operations/images/${jobId}?api-version=${version}`,
@@ -95,23 +93,20 @@ async function generateDogImage(context) {
         );
 
         const job = await response.json();
-        console.log('\n\n*****SPECIAL_COMMANDS.JS: GET Request Response Body:', JSON.stringify(job));
 
-        console.log('\n\n*****SPECIAL_COMMANDS.JS: Got job status:', job.status);
+        console.log('generateDogImage() - Got job status:', job.status);
         if (job.status === "succeeded") {
             const imageUrl = job?.result?.data[0]?.url;
             if (imageUrl) {
-                console.log('\n\n*****SPECIAL_COMMANDS.JS: Image generated, url: ', imageUrl);
+                console.log('Image generated, url: ', imageUrl);
                 await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
             }
+            // exit the for-loop early since we have what we wanted
             break;
         } else if(job.status !== 'running'){
-            console.log('\n\n*****SPECIAL_COMMANDS.JS: Unknown job status: ', job.status)
+            console.log('Unknown job status: ', job.status)
         }
     }
-
-    const endRuntime = Date.now(); // End of the runtime when function finishes
-    console.log(`\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() completed. Run time: ${endRuntime - startRuntime} milliseconds`);
 }
 
 const commands = {
