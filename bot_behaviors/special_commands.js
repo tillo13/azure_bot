@@ -49,7 +49,7 @@ async function generateDogImage(context) {
     }, {
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+            'Authorization': `Bearer ${process.env.OPENAI_DALLE_API_KEY}`
         }
     });
 
