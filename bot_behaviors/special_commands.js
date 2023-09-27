@@ -1,4 +1,4 @@
-const handleDalleCommand = require('./bot_behaviors/dalle_utils');
+const handleDalleCommand = require('./dalle_utils');
 
 async function createDalleImages(context) {
 	const messageText = context.activity.text.replace('$dalle', '');
