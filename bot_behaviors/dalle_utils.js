@@ -1,4 +1,4 @@
-require("dotenv").config();
+require('dotenv').config({ path: '../.env' });
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 
 const fetch = require('node-fetch');
