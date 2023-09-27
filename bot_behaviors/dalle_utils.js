@@ -15,14 +15,12 @@ const dalleResponse = async (command_text, numImages) => {
     console.log(`URL: ${url}`);
     console.log(`Payload: ${payload}`);
     
-    const response = await fetch(url, {
-        method: 'POST',
-        body: payload,
+    const response = await axios.post(url, payload, {
         headers: {
-            'Authorization': `Bearer ${OPENAI_DALLE_API_KEY}`,
-            'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_DALLE_API_KEY}`,
+          'Content-Type': 'application/json',
         },
-    });
+      });
     
     console.log('Response: ', response);
     console.log('Response status: ', response.status);
