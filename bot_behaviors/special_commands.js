@@ -1,13 +1,18 @@
 const handleDalleCommand = require('./dalle_utils');
 
 async function createDalleImages(context) {
-    //test to show the values
-console.log("OPENAI_DALLE_API_KEY:", process.env.OPENAI_DALLE_API_KEY);
-console.log("OPENAI_DALLE_BASE_URL:", process.env.OPENAI_DALLE_BASE_URL);
-console.log("OPENAI_DALLE_VERSION:", process.env.OPENAI_DALLE_VERSION);
-	const messageText = context.activity.text.replace('$dalle', '');
-	await handleDalleCommand(context.activity.conversation.id, context.timestamp, messageText.trim());
-	return await context.sendActivity(`Images are on their way, might take some time.`);
+    //are the params coming over?
+    console.log("\nOPENAI_DALLE_API_KEY:", process.env.OPENAI_DALLE_API_KEY);
+    console.log("\nOPENAI_DALLE_BASE_URL:", process.env.OPENAI_DALLE_BASE_URL);
+    console.log("\nOPENAI_DALLE_VERSION:", process.env.OPENAI_DALLE_VERSION);
+
+    const messageText = context.activity.text.replace('$dalle', '').trim(); // Trimmed to remove leading/trailing white space
+    let splitMessage = messageText.split(" --");
+    const prompt = splitMessage[0]; // This is the content after '$dalle ' and before ' --'
+    const numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1; // This is the content after ' --' in the incoming message
+    await handleDalleCommand(context.activity.conversation.id, context.timestamp, prompt, numImages);
+    const completionMessage = numImages > 1 ? `Images are on their way, might take some time.` : `Image is on its way, might take some time.`;
+    return await context.sendActivity(completionMessage);
 }
 
 async function addToppings(context) {

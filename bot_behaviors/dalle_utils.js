@@ -12,49 +12,30 @@ const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
 const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
 
-//test to show the values
-console.log("OPENAI_DALLE_API_KEY:", process.env.OPENAI_DALLE_API_KEY);
-console.log("OPENAI_DALLE_BASE_URL:", process.env.OPENAI_DALLE_BASE_URL);
-console.log("OPENAI_DALLE_VERSION:", process.env.OPENAI_DALLE_VERSION);
-const dalleResponse = async (command_text) => {
-	let n_images = 3;
-	let prompt = command_text.trim();
-	
-	const command_parts = command_text.split(" ");
-	command_parts.forEach((part, index) => {
-		if (part.startsWith("--")) {
-			try {
-				n_images = Math.min(parseInt(part.replace("--", "")), 5);
-				command_parts.splice(index, 1);
-				prompt = command_parts.join(" ").trim();
-			} catch (err) {
-				console.error(`Error parsing --number from DALL·E command: ${err.message}`);
-			}
-		}
-	});
-	
-	const response = await fetch(`${OPENAI_DALLE_BASE_URL}/${OPENAI_DALLE_VERSION}/images/dalle`, {
-		method: 'POST',
-		body: JSON.stringify({
-			'prompt': prompt,
-			'n': n_images,
-		}),
-		headers: {
-			'Authorization': `Bearer ${OPENAI_DALLE_API_KEY}`,
-			'Content-Type': 'application/json',
-		},
-	});
-	
-	if (!response.ok) {
-		throw new Error(`Failed to get response from DALL·E: ${response.status}`);
-	} else {
-		const json = await response.json();
-		return {
-			'data': json.data,
-			'n_images': n_images,
-			'prompt': prompt,
-		};
-	}
+
+const dalleResponse = async (command_text, numImages) => {
+    const response = await fetch(`${OPENAI_DALLE_BASE_URL}/${OPENAI_DALLE_VERSION}/images/dalle`, {
+        method: 'POST',
+        body: JSON.stringify({
+            'prompt': command_text,
+            'n': numImages,
+        }),
+        headers: {
+            'Authorization': `Bearer ${OPENAI_DALLE_API_KEY}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    
+    if (!response.ok) {
+        throw new Error(`Failed to get response from DALL·E: ${response.status}`);
+    } else {
+        const json = await response.json();
+        return {
+            'data': json.data,
+            'n_images': numImages,
+            'prompt': command_text,
+        };
+    }
 }
 
 const downloadAndResize = async (imageData) => {
@@ -98,25 +79,25 @@ const uploadToSlack = async (channelId, timestamp, resizedBuffer, fileName, imag
 	}
 }
 
-const handleDalleCommand = async (channelId, timestamp, commandText) => {
-	try {
-		const dalleData = await dalleResponse(commandText);
-		const parsedData = dalleData.data;
-		parsedData.forEach(async (data, index) => {
-			const resizedBuffer = await downloadAndResize(data);
-			await uploadToSlack(
-				channelId,
-				timestamp,
-				resizedBuffer,
-				`dalle_${dalleData.prompt}_${index + 1}_of_${dalleData.n_images}.png`,
-				data,
-				dalleData.prompt,
-				dalleData.n_images
-			);
-		});
-	} catch(err) {
-		console.error(`Error occurred while handling DALL·E command: ${err.message}`);
-	}
+const handleDalleCommand = async (channelId, timestamp, commandText, numImages) => {
+    try {
+        const dalleData = await dalleResponse(commandText, numImages);
+        const parsedData = dalleData.data;
+        parsedData.forEach(async (data, index) => {
+            const resizedBuffer = await downloadAndResize(data);
+            await uploadToSlack(
+                channelId,
+                timestamp,
+                resizedBuffer,
+                `dalle_${dalleData.prompt}_${index + 1}_of_${dalleData.n_images}.png`,
+                data,
+                dalleData.prompt,
+                dalleData.n_images
+            );
+        });
+    } catch(err) {
+        console.error(`Error occurred while handling DALL·E command: ${err.message}`);
+    }
 }
 
 module.exports = handleDalleCommand;
