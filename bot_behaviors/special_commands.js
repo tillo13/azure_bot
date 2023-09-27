@@ -1,9 +1,5 @@
-require('dotenv').config({ path: '../.env' });
-const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
-
-
 const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
-const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION || 'v1';
+const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
 
 const handleDalleCommand = require('./dalle_utils');
 
