@@ -1,4 +1,10 @@
-const { MessageFactory } = require('botbuilder');
+const handleDalleCommand = require('./bot_behaviors/dalle_utils');
+
+async function createDalleImages(context) {
+	const messageText = context.activity.text.replace('$dalle', '');
+	await handleDalleCommand(context.activity.conversation.id, context.timestamp, messageText.trim());
+	return await context.sendActivity(`Images are on their way, might take some time.`);
+}
 
 async function addToppings(context) {
     return sendMessageResponse(context, 'Ketchup!');
@@ -26,9 +32,8 @@ async function sendMessageResponse(context, message) {
 }
 
 const commands = {
-    '$hamburger': addToppings,
-    '$help': contactHelp
-    // Add new commands here as we go...
+	'$hamburger': addToppings,
+	'$help': contactHelp,
+	'$dalle': createDalleImages, 
 };
-
 module.exports = commands;
