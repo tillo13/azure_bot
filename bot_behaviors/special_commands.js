@@ -46,7 +46,7 @@ async function sendMessageResponse(context, message) {
 async function generateDogImage(context) {
     const baseUrl = "https://tillo-openai.openai.azure.com/openai";
     const headers = {
-        "API-Key": process.env.OPENAI_API_KEY,
+        "API-Key": process.env.OPENAI_DALLE_API_KEY,
         "Content-Type": "application/json",
     };
 
@@ -66,7 +66,13 @@ async function generateDogImage(context) {
     );
 
     const initJob = await response.json();
-    const jobId = initJob?.id;
+    if(!initJob.id){
+        console.log('Error while submitting a job', initJob);
+        return;
+    } 
+
+    const jobId = initJob.id;
+    console.log('Job submitted, id: ', jobId);
 
     for (let i = 0; i < 5; i++) {
         // Wait 1.5 seconds after a request
@@ -85,10 +91,13 @@ async function generateDogImage(context) {
         if (job.status === "succeeded") {
             const imageUrl = job?.result?.data[0]?.url;
             if (imageUrl) {
+                console.log('Image generated, url: ', imageUrl);
                 await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
             }
             // exit the for-loop early since we have what we wanted
             break;
+        } else if(job.status !== 'running'){
+            console.log('Unknown job status: ', job.status)
         }
     }
 }
