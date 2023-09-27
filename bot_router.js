@@ -1,5 +1,7 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const { handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
+const specialCommands = require('./bot_behaviors/special_commands');
+
 const chatCompletion = require('./bot_behaviors/chat_helper');
 
 const WELCOMED_USER = 'welcomedUserProperty';
@@ -30,32 +32,16 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
+            const messageContent = context.activity.text.trim();
             console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
             console.log('\n\n**BOT_ROUTER.JS: Bot received a message');
             console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
-
-  // Special command check
-  if (context.activity.text.trim() === '$hamburger') {
-    // Get the thread timestamp
-    const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
-    
-    // Create the reply activity
-    const replyActivity = MessageFactory.text('ketchup!');
-    
-    try {
-        // Update the conversation id to ensure it's posted in the thread
-        replyActivity.conversation = context.activity.conversation;
-        if (!replyActivity.conversation.id.includes(thread_ts)) {
-            replyActivity.conversation.id += ':' + thread_ts;
-        }
-
-        // Post 'ketchup!' to the thread
-        await context.sendActivity(replyActivity);
-    } catch (error) {
-        console.error('Error occurred while trying to reply in the thread:', error);
-    }
-
-} else { 
+                
+                
+                if (specialCommands[messageContent]) {
+                    // If the command exists in our special commands, execute it
+                    await specialCommands[messageContent](context);
+                } else {
             
             let chatMessagesUser = await this.chatMessagesProperty.get(context, []) || [];
             chatMessagesUser.push({ role: "user", content: context.activity.text });
