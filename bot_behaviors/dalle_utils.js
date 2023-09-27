@@ -1,4 +1,4 @@
-const fetch = require("node-fetch");
+const axios = require('axios');
 
 const OPENAI_DALLE_API_KEY = process.env.OPENAI_DALLE_API_KEY;
 const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
