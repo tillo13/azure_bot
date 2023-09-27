@@ -34,10 +34,28 @@ class EchoBot extends ActivityHandler {
             console.log('\n\n**BOT_ROUTER.JS: Bot received a message');
             console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
 
-                // Check if the message is the special command
-    if (context.activity.text.trim() === '$hamburger') {
-        await context.sendActivity('ketchup!');
-    } else { 
+  // Special command check
+  if (context.activity.text.trim() === '$hamburger') {
+    // Get the thread timestamp
+    const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
+    
+    // Create the reply activity
+    const replyActivity = MessageFactory.text('ketchup!');
+    
+    try {
+        // Update the conversation id to ensure it's posted in the thread
+        replyActivity.conversation = context.activity.conversation;
+        if (!replyActivity.conversation.id.includes(thread_ts)) {
+            replyActivity.conversation.id += ':' + thread_ts;
+        }
+
+        // Post 'ketchup!' to the thread
+        await context.sendActivity(replyActivity);
+    } catch (error) {
+        console.error('Error occurred while trying to reply in the thread:', error);
+    }
+
+} else { 
             
             let chatMessagesUser = await this.chatMessagesProperty.get(context, []) || [];
             chatMessagesUser.push({ role: "user", content: context.activity.text });
@@ -64,7 +82,6 @@ class EchoBot extends ActivityHandler {
                 botInThread = true;
                 await this.botInvokedFlag.set(context, botInThread);
                 chatMessagesUser.push({ role: "user", content: context.activity.text }); 
-
             }
                 
             if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
