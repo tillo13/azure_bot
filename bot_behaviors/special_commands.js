@@ -44,7 +44,13 @@ async function sendMessageResponse(context, message) {
 
 
 async function generateDogImage(context) {
-    const baseUrl = "https://tillo-openai.openai.azure.com/openai";
+    const startTime = Date.now();
+    console.log("\n\n*****SPECIAL_COMMANDS.JS: Starting execution at: ", new Date(startTime).toISOString());
+
+    console.log('generateDogImage() - About to generate a new dog image...');
+
+    const baseUrl = process.env.OPENAI_DALLE_BASE_URL;
+    const version = process.env.OPENAI_DALLE_VERSION;
     const headers = {
         "API-Key": process.env.OPENAI_DALLE_API_KEY,
         "Content-Type": "application/json",
@@ -56,8 +62,9 @@ async function generateDogImage(context) {
         n: 1,
     };
 
+    console.log('generateDogImage() - Making the POST request...');
     const response = await fetch(
-        `${baseUrl}/images/generations:submit?api-version=2023-06-01-preview`,
+        `${baseUrl}/images/generations:submit?api-version=${version}`,
         {
             method: "POST",
             headers,
@@ -67,31 +74,40 @@ async function generateDogImage(context) {
 
     const initJob = await response.json();
     if(!initJob.id){
-        console.log('Error while submitting a job', initJob);
+        console.error('Error while submitting a job', initJob);
         return;
     } 
 
     const jobId = initJob.id;
     console.log('Job submitted, id: ', jobId);
 
+    console.log("\n\n*****SPECIAL_COMMANDS.JS: Starting iterations to generate image...");
     for (let i = 0; i < 5; i++) {
-        // Wait 1.5 seconds after a request
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        console.log('generateDogImage() - Start iteration number:', i+1);
 
+        console.log("\n\n*****SPECIAL_COMMANDS.JS: About to wait for 1.5 seconds in current iteration number", i+1);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        console.log("\n\n*****SPECIAL_COMMANDS.JS: Completed wait, making the GET request...");
+
+        console.log("\n\n*****SPECIAL_COMMANDS.JS: Sent request, awaiting response...");
         const response = await fetch(
-            `${baseUrl}/operations/images/${jobId}?api-version=2023-06-01-preview`,
+            `${baseUrl}/operations/images/${jobId}?api-version=${version}`,
             {
                 method: "GET",
                 headers,
             }
         );
 
+        console.log("\n\n*****SPECIAL_COMMANDS.JS: Response received, parsing...");
         const job = await response.json();
 
+        console.log("\n\n*****SPECIAL_COMMANDS.JS: Job status received as: ", job.status);
+        const imageUrl = job?.result?.data[0]?.url;
+        console.log("\n\n*****SPECIAL_COMMANDS.JS: Image URL (if it exists): ", imageUrl);
+
         if (job.status === "succeeded") {
-            const imageUrl = job?.result?.data[0]?.url;
             if (imageUrl) {
-                console.log('Image generated, url: ', imageUrl);
+                console.log("\n\n*****SPECIAL_COMMANDS.JS: image generated and sent! URL is: ", imageUrl);
                 await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
             }
             // exit the for-loop early since we have what we wanted
@@ -100,6 +116,10 @@ async function generateDogImage(context) {
             console.log('Unknown job status: ', job.status)
         }
     }
+
+    const endTime = Date.now();
+    console.log("\n\n*****SPECIAL_COMMANDS.JS: Ending execution at: ", new Date(endTime).toISOString());
+    console.log("\n\n*****SPECIAL_COMMANDS.JS: Execution time was ", endTime - startTime, " milliseconds.");
 }
 
 const commands = {
