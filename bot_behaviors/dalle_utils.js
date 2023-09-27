@@ -1,26 +1,36 @@
 const axios = require('axios');
+const { DefaultAzureCredential } = require('@azure/identity');
 
-const OPENAI_DALLE_API_KEY = process.env.OPENAI_DALLE_API_KEY;
+const OPENAI_DALLE_API_KEY = 'https://cognitiveservices.azure.com/.default'; // Replace with your resource
 const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
 const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
+// include the other requires for sharp, fetch, etc.
+
+const credential = new DefaultAzureCredential();
+let openai_token = null;
 
 const dalleResponse = async (command_text, numImages) => {
-    const url = `${OPENAI_DALLE_BASE_URL}/openai/images/generations:submit?api-version=${OPENAI_DALLE_VERSION}`;
-    const payload = JSON.stringify({
-        'prompt': command_text,
-        'size': '1024x1024',
-        'n': numImages,
-    });
+  await ensureOpenaiToken();
+
+  const url = `${OPENAI_DALLE_BASE_URL}/openai/images/generations:submit?api-version=${OPENAI_DALLE_VERSION}`;
+  const payload = JSON.stringify({
+      'prompt': command_text,
+      'size': '1024x1024',
+      'n': numImages,
+  });
+
+  console.log(`URL: ${url}`);
+  console.log(`Payload: ${payload}`);
+
+  const response = await axios.post(url, payload, {
+    headers: {
+      'Authorization': `Bearer ${openai_token.token}`,
+      'Content-Type': 'application/json',
+    },
+  });
 
     console.log(`URL: ${url}`);
     console.log(`Payload: ${payload}`);
-    
-    const response = await axios.post(url, payload, {
-        headers: {
-          'Authorization': `Bearer ${OPENAI_DALLE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      });
     
     console.log('Response: ', response);
     console.log('Response status: ', response.status);
@@ -40,6 +50,11 @@ const dalleResponse = async (command_text, numImages) => {
     }
 };
 
+async function ensureOpenaiToken() {
+    if (!openai_token || openai_token.expiresOnTimestamp <= new Date().getTime() + 5 * 60 * 1000) {
+        openai_token = await credential.getToken(OPENAI_DALLE_API_KEY);
+    }
+}
 const downloadAndResize = async (imageData) => {
 	const imageResponse = await fetch(imageData.url);
 	const buffer = await imageResponse.buffer();
