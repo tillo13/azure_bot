@@ -77,7 +77,10 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 
 
+  console.log('\n\n***CHAT_HELPER.JS: OpenAI API Base URL: ', process.env.OPENAI_API_BASE_URL);
+  console.log('\n\n***CHAT_HELPER.JS: OpenAI API Deployment: ', process.env.OPENAI_API_DEPLOYMENT);
   const endpoint = process.env.OPENAI_API_BASE_URL;
+
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
     const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
     const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
