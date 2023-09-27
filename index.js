@@ -7,14 +7,6 @@ const path = require('path');
 const restify = require('restify');
 const { EchoBot } = require('./bot_router');
 
-const {
-    CloudAdapter,
-    ConfigurationServiceClientCredentialFactory,
-    createBotFrameworkAuthenticationFromConfiguration
-} = require('botbuilder');
-
-const { EchoBot } = require('./bot_router');
-
 const server = restify.createServer();
 server.use(restify.plugins.bodyParser());
 
