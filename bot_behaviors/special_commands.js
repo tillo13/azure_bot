@@ -42,11 +42,11 @@ async function sendMessageResponse(context, message) {
     await context.sendActivity(replyActivity);
 }
 
-
 async function generateDogImage(context) {
     console.log('generateDogImage() - About to generate a new dog image...');
 
-    const baseUrl = "https://tillo-openai.openai.azure.com/openai";
+    const baseUrl = process.env.OPENAI_DALLE_BASE_URL;
+    const version = process.env.OPENAI_DALLE_VERSION;
     const headers = {
         "API-Key": process.env.OPENAI_DALLE_API_KEY,
         "Content-Type": "application/json",
@@ -60,7 +60,7 @@ async function generateDogImage(context) {
 
     console.log('generateDogImage() - Making the POST request...');
     const response = await fetch(
-        `${baseUrl}/images/generations:submit?api-version=2023-06-01-preview`,
+        `${baseUrl}/images/generations:submit?api-version=${version}`,
         {
             method: "POST",
             headers,
@@ -85,7 +85,7 @@ async function generateDogImage(context) {
         console.log('generateDogImage() - Completed wait, making the GET request...');
 
         const response = await fetch(
-            `${baseUrl}/operations/images/${jobId}?api-version=2023-06-01-preview`,
+            `${baseUrl}/operations/images/${jobId}?api-version=${version}`,
             {
                 method: "GET",
                 headers,
