@@ -1,6 +1,6 @@
 const { MessageFactory } = require('botbuilder');
 
-async function ketchup(context) {
+async function addToppings(context) {
     return sendMessageResponse(context, 'Ketchup!');
 }
 
@@ -26,9 +26,9 @@ async function sendMessageResponse(context, message) {
 }
 
 const commands = {
-    '$hamburger': ketchup,
+    '$hamburger': addToppings,
     '$help': contactHelp
-    // Add new commands here as wel go...
+    // Add new commands here as we go...
 };
 
 module.exports = commands;
