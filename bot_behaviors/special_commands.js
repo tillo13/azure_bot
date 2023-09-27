@@ -43,7 +43,8 @@ async function sendMessageResponse(context, message) {
 
 async function generateDogImage(context) {
     try {
-        const response = await axios.post('https://api.openai.com/v1/dalle/images/generations:submit', {
+        const apiEndpoint = `${OPENAI_DALLE_BASE_URL}/v1/images:generate`;
+        const response = await axios.post(apiEndpoint, {
             prompt: 'a nice photo of a dog',
             n: 1
         }, {
@@ -53,10 +54,10 @@ async function generateDogImage(context) {
             }
         });
 
-        const imageUrl = response.data.results[0]["id"];
+        const imageUrl = response.data.id;
         await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
     } catch (error) {
-        console.log(error.message);
+        console.log(error);
     }
 }
 
