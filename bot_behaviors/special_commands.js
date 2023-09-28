@@ -1,5 +1,22 @@
 const { MessageFactory } = require('botbuilder');
 const generateImages = require('./dalle_utils');
+const commands = new Proxy({
+    '$hamburger': addToppings,
+    '$help': contactHelp,
+    '$dalle': createDalleImages,
+}, {
+    get: function(target, property) {
+        if (property in target) {
+            return target[property];
+        } else {
+            for (let key in target) {
+                if (property.startsWith(key)) {
+                    return target[key];
+                }
+            }
+        }
+    }
+});
 
 async function addToppings(context) {
     return sendMessageResponse(context, 'Ketchup!');
@@ -39,7 +56,7 @@ async function createDalleImages(context) {
     let numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
     
     // Create filename-friendly version of the prompt
-    let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '').replace(/\s/g, '_').substring(0, 10);
+    let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s/g, '_').substring(0, 10);
 
     if (numImages >10) {
         await context.sendActivity(`You've asked for more than 10 images. We are going to generate the maximum allowed of 10. Please wait...`);
@@ -48,11 +65,11 @@ async function createDalleImages(context) {
 
     const completionMessage = `You asked for "${prompt}". We are generating ${numImages} image(s) for you. Each image takes a few seconds to generate. Please wait...`;
     await context.sendActivity(completionMessage);
-    await context.sendActivity({ type: 'typing' });
 
     for(let i=0; i<numImages; i++){
         let filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
         await context.sendActivity(`Creating ${filename}...`);
+        await context.sendActivity({ type: 'typing' });
         await generateImages(prompt, 1, async (imageUrl) => {
             const replyActivity = MessageFactory.attachment({
                 contentType: 'image/png',
@@ -67,23 +84,5 @@ async function createDalleImages(context) {
     let seconds = (difference / 1000).toFixed(3);
     await context.sendActivity(`We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
 }
-
-const commands = new Proxy({
-    '$hamburger': addToppings,
-    '$help': contactHelp,
-    '$dalle': createDalleImages,
-}, {
-    get: function(target, property) {
-        if (property in target) {
-            return target[property];
-        } else {
-            for (let key in target) {
-                if (property.startsWith(key)) {
-                    return target[key];
-                }
-            }
-        }
-    }
-});
 
 module.exports = commands;
