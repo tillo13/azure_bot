@@ -28,6 +28,7 @@ async function sendMessageResponse(context, message) {
 
 async function createDalleImages(context) {
     const messageText = context.activity.text.replace('$dalle', '').trim();
+    context.turnState.add('startTime', new Date());
     
     if (!messageText) {
         await context.sendActivity(`You did not ask for any image in particular, so get the default of a dog! Please wait a moment...`);
@@ -41,7 +42,7 @@ async function createDalleImages(context) {
     await context.sendActivity(completionMessage);
     await context.sendActivity({ type: 'typing' });
 
-    startTime = new Date();
+    
     for(let i=0; i<numImages; i++){
       await generateImages(prompt, 1, async (imageUrl) => {
           const replyActivity = MessageFactory.attachment({
@@ -52,11 +53,11 @@ async function createDalleImages(context) {
       });
     }
 
+    let startTime = context.turnState.get('startTime');
     let endTime = new Date();
     let difference = endTime - startTime;
     let seconds = (difference / 1000).toFixed(3);
     await context.sendActivity(`We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
-}
 
 const commands = new Proxy({
     '$hamburger': addToppings,
