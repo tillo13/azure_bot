@@ -36,8 +36,10 @@ async function sendMessageResponse(context, message) {
 
     return context.sendActivity(replyActivity);
 }
-
 async function generateDogImage(context) {
+    const resultsTime = "Time taken for generateDogImage";    
+    console.time(resultsTime);
+    
     const headers = {
         "API-Key": process.env.OPENAI_DALLE_API_KEY, 
         "Content-Type": "application/json"
@@ -46,15 +48,14 @@ async function generateDogImage(context) {
 
     let retryCount = 0;
     console.log("\n\n*****SPECIAL_COMMANDS.JS: Starting generateDogImage...");
-    console.time("Time taken for generateDogImage");
-    
+
     const initJob = await submitJob(headers, requestBody);
     if (!initJob.id) return;
     console.log('\n*****SPECIAL_COMMANDS.JS: Dall-E job submitted, id: ', initJob.id);
 
     while(retryCount < 5) {
         retryCount += 1;
-        console.log('\n*****SPECIAL_COMMANDS.JS: Checking Dall-E job status... attempt: ', retryCount);
+        console.log(`\n*****SPECIAL_COMMANDS.JS: Checking Dall-E job status... attempt: ${retryCount}`);
 
         const job = await checkJobStatus(headers, initJob.id);
         if (job.status === "succeeded" && job.result.data[0]?.url) {
@@ -69,7 +70,7 @@ async function generateDogImage(context) {
         }
         await new Promise(resolve => setTimeout(resolve, 1500));
     }
-    console.timeEnd("\n\nTime taken for generateDogImage");
+    console.timeEnd(resultsTime);
 }
 
 async function submitJob(headers, requestBody) {
