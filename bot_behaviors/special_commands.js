@@ -86,7 +86,7 @@ async function generateDogImage(context) {
         } 
 
         if(job.status !== 'running'){
-            console.error('*****SPECIAL_COMMANDS.JS: Unknown job status:', job.status)
+            console.error('\n*****SPECIAL_COMMANDS.JS: Unknown job status:', job.status)
         }
     }
 
@@ -99,8 +99,8 @@ async function generateDogImage(context) {
     // calculate time difference in seconds
     let seconds = Math.floor(difference / 1000);
 
-    console.log(`dog image Time difference is ${difference} milliseconds`);
-    console.log(`dog image Time difference is ${seconds} seconds`);
+    console.log(`\n*****SPECIAL_COMMANDS.JS:dog image Time difference is ${difference} milliseconds`);
+    console.log(`\n*****SPECIAL_COMMANDS.JS:dog image Time difference is ${seconds} seconds`);
 }
 
 const commands = {
