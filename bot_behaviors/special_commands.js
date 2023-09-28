@@ -1,11 +1,22 @@
 const { MessageFactory } = require('botbuilder');
 const generateImages = require('./dalle_utils');
 
-const commands = {
+const commands = new Proxy({
     '$hamburger': addToppings,
     '$help': contactHelp,
     '$dalle': createDalleImages
-};
+}, {
+    get: function (target, property) {
+        if (property in target) {
+            return target[property];
+        }
+        for (let key in target) {
+            if (property.startsWith(key)) {
+                return target[key];
+            }
+        }
+    }
+});
 
 async function addToppings(context) {
     return sendMessageResponse(context, 'Ketchup!');
