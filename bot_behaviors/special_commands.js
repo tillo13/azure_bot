@@ -69,27 +69,38 @@ async function createDalleImages(context) {
     // Split message by space and remove empty strings
     let splitMessage = messageText.split(" ").filter(Boolean);
 
-    // Initialize default values
-    let prompt = "a rembrandt-like painting of a dog in a field.";
-    let numImages = 3;
-    let imageSize = "1024x1024";
+// Initialize default values
+let prompt = "a rembrandt-like painting of a dog in a field.";
+let defaultPromptUsed = true;
+let numImages = 3;
+let imageSize = "1024x1024";
 
-    // Parse arguments
-    splitMessage.forEach((arg, index) => {
-      if (arg.startsWith("--")) {
+// Parse arguments
+splitMessage.forEach((arg, index) => {
+  if (arg.startsWith("--")) {
         let nextArg = splitMessage[index + 1];
         if (parseInt(arg.slice(2))) {
-          // If a number follows "--", it's the number of images
-          numImages = parseInt(arg.slice(2));
+            // If a number follows "--", it's the number of images
+            numImages = parseInt(arg.slice(2));
         } else if (["full", "medium", "small"].includes(arg.slice(2))) {
-          // If "full", "medium", or "small" follow "--", it's the image size
-          imageSize = arg.slice(2);
+            // If "full", "medium", or "small" follow "--", it's the image size
+            imageSize = arg.slice(2);
         }
-      } else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
+    } else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
         // If an argument does not start with "--" and is not directly following an argument that starts with "--", it's part of the prompt
-        prompt = prompt === "a nice photo of a dog" ? arg : `${prompt} ${arg}`;
-      }
-    });
+        if (defaultPromptUsed) {
+            prompt = arg;
+            defaultPromptUsed = false;
+        } else {
+            prompt = `${prompt} ${arg}`;
+        }
+    }
+  });
+  
+  // If prompt is still empty, set the default value back
+  if (!prompt.trim()) {
+    prompt = "a rembrandt-like painting of a dog in a field.";
+  }
 
     // Process imageSize
     switch (imageSize) {
