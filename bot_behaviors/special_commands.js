@@ -30,14 +30,14 @@ async function createDalleImages(context) {
     const messageText = context.activity.text.replace('$dalle', '').trim();
     
     if (!messageText) {
-        await context.sendActivity(`You get the default of a dog! Please wait...`);
+        await context.sendActivity(`You didn't ask for any image in particular, so get the default of a dog! Please wait a moment...`);
     }
 
     let splitMessage = messageText.split(" --");
     const prompt = splitMessage[0] || "a nice photo of a dog";
     const numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
-
-    const completionMessage = numImages > 1 ? `Images are on their way, might take some time.` : `Image is on its way, might take some time.`;
+    
+    const completionMessage = `You asked for "$dalle ${prompt}". We are generating ${numImages} image(s) for you. Each image takes a few seconds to generate. Please wait...`;
     await context.sendActivity(completionMessage);
     await context.sendActivity({ type: 'typing' });
 
@@ -55,7 +55,7 @@ async function createDalleImages(context) {
     let endTime = new Date();
     let difference = endTime - startTime;
     let seconds = Math.floor(difference / 1000);
-    await context.sendActivity(`You asked for "$dalle ${prompt}" and we generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
+    await context.sendActivity(`We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
 }
 
 const commands = new Proxy({
