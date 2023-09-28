@@ -52,9 +52,19 @@ async function processImagesGeneration(prompt, numImages = 1) {
     let startTime = new Date().getTime();
     let images = [];
 
-    for(let i=0; i<numImages; i++){
-        let image = await generateImages(prompt, 1, (imageUrl) => imageUrl);
-        images.push(image);
+    for(let i = 0; i < numImages; i++){
+        // Create a promise that resolves when the onImageReady callback is called
+        let imagePromise = new Promise((resolve) => {
+            generateImages(prompt, 1, (imageUrl) => {
+                resolve(imageUrl); // Resolve promise when onImageReady is called, passing imageUrl
+            });
+        });
+
+        // Wait for the above to resolve before moving on to the next iteration
+        let imageResult = await imagePromise;
+
+        // Push the resolved image url to the images array
+        images.push(imageResult);
     }
 
     let endTime = new Date().getTime();
@@ -64,4 +74,4 @@ async function processImagesGeneration(prompt, numImages = 1) {
     return { images, generationTime: seconds};
 }
 
-module.exports = generateImages;
+module.exports = { generateImages, processImagesGeneration };
