@@ -9,6 +9,10 @@ const CHAT_MESSAGES = 'chatMessagesProperty';
 const THREAD_TS = 'thread_ts';
 const PERSONALITY_OF_BOT = "You talk like an old cowboy. You are a helpful chatbot from Teradata. As a crucial aspect of your function, ensure you always reference past user and assistant prompts in the thread for the best understanding in order to respond effectively.";
 
+function isFromMsTeams(context) {
+    return context.activity.channelId === 'msteams';
+}
+
 class EchoBot extends ActivityHandler {
     constructor(userState) {
         super();
@@ -32,6 +36,7 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
+
             const messageContent = context.activity.text.trim();
             console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
             console.log('\n\n**BOT_ROUTER.JS: Bot received a message');
