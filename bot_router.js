@@ -1,5 +1,7 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 const { handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
+const { handleTeamsMessage, isFromMSTeams } = require('./bot_behaviors/msteams');
+
 const specialCommands = require('./bot_behaviors/special_commands');
 
 const chatCompletion = require('./bot_behaviors/chat_helper');
@@ -43,15 +45,13 @@ class EchoBot extends ActivityHandler {
             console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
             console.log('\n\n**BOT_ROUTER.JS: Bot received a message');
             console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
-                
-                
-                if (specialCommands[messageContent]) {
-                    // If the command exists in our special commands, execute it
-                    await specialCommands[messageContent](context);
-                } else {
-            
-            let chatMessagesUser = await this.chatMessagesProperty.get(context, []) || [];
-            chatMessagesUser.push({ role: "user", content: context.activity.text });
+                    
+            if (specialCommands[messageContent]) {
+                // If the command exists in our special commands, execute it
+                await specialCommands[messageContent](context);
+            } else {
+                let chatMessagesUser = await this.chatMessagesProperty.get(context, []) || [];
+                chatMessagesUser.push({ role: "user", content: context.activity.text });
             
             const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
                 context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
@@ -78,22 +78,13 @@ class EchoBot extends ActivityHandler {
             }
             
 
+            let isFirstInteraction = await this.isFirstInteraction.get(context, true);
 
-// Inside onMessage function
-let isFirstInteraction = await this.isFirstInteraction.get(context, true);
-
-if (isFromMsTeams(context)) {
-
-    if (isFirstInteraction) {
-        await context.sendActivity(MessageFactory.text(`msteams_chat_path: Hello from @bot in MS Teams!`));
-        await this.isFirstInteraction.set(context, false);
-    }
-    
-    const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
-    console.log(`\n\n***BOT_ROUTER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
-    
-    await context.sendActivity(MessageFactory.text(`MS_Teams_Chat_Path: ${chatResponse.assistantResponse}`));
-}
+            if (isFromMSTeams(context)) {
+                const assistantResponse = await handleTeamsMessage(context, chatMessagesUser, isFirstInteraction);
+                await context.sendActivity(MessageFactory.text(assistantResponse));
+                await this.isFirstInteraction.set(context, false);
+            } 
             else if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
                 // Code for handling Slack Interaction
                 console.log("\n\n**BOT_ROUTER.JS: Message from Slack and bot was either called or is already in thread. Processing...");
