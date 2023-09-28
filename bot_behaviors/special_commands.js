@@ -47,7 +47,7 @@ async function sendMessageResponse(context, message) {
 }
 
 async function createDalleImages(context) {
-    const messageText = context.activity.text.replace('$dalle', '').trim();
+    let messageText = context.activity.text.replace('$dalle', '').trim();
     let startTime = new Date().getTime();
 
     let thread_ts;
@@ -63,14 +63,35 @@ async function createDalleImages(context) {
     }
 
     if (!messageText) {
-        await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of a dog! Please wait a moment...`, thread_ts);
+        await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of [a rembrandt-like painting of a dog in a field]! Please wait a moment...`, thread_ts);
     }
 
-    let splitMessage = messageText.split(" --");
-    let prompt = splitMessage[0] || "a nice photo of a dog";
-    let numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
-    let imageSize = splitMessage[2] || "1024x1024";
+    // Split message by space and remove empty strings
+    let splitMessage = messageText.split(" ").filter(Boolean);
 
+    // Initialize default values
+    let prompt = "a rembrandt-like painting of a dog in a field.";
+    let numImages = 3;
+    let imageSize = "1024x1024";
+
+    // Parse arguments
+    splitMessage.forEach((arg, index) => {
+      if (arg.startsWith("--")) {
+        let nextArg = splitMessage[index + 1];
+        if (parseInt(arg.slice(2))) {
+          // If a number follows "--", it's the number of images
+          numImages = parseInt(arg.slice(2));
+        } else if (["full", "medium", "small"].includes(arg.slice(2))) {
+          // If "full", "medium", or "small" follow "--", it's the image size
+          imageSize = arg.slice(2);
+        }
+      } else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
+        // If an argument does not start with "--" and is not directly following an argument that starts with "--", it's part of the prompt
+        prompt = prompt === "a nice photo of a dog" ? arg : `${prompt} ${arg}`;
+      }
+    });
+
+    // Process imageSize
     switch (imageSize) {
         case 'full':
             imageSize = "1024x1024";
