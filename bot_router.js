@@ -64,38 +64,29 @@ class EchoBot extends ActivityHandler {
             
             if (botCalled) {
                 console.log("\n\n**BOT_ROUTER.JS: '@bot' or '@atbot' mentioned in the message. Bot Invoked: ", botCalled);
-
+            
                 botInThread = true;
                 await this.botInvokedFlag.set(context, botInThread);
                 chatMessagesUser.push({ role: "user", content: context.activity.text }); 
             }
-                
-            if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
+            
+            if (isFromMsTeams(context)) {
+                // Handle Microsoft Teams Interaction
+                await context.sendActivity(MessageFactory.text(`msteams_chat_path: Hello from @bot in MS Teams!`));
+            
+            }
+            else if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
+                // Code for handling Slack Interaction
                 console.log("\n\n**BOT_ROUTER.JS: Message from Slack and bot was either called or is already in thread. Processing...");
-                let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
-                
-                if(chatResponse.requery && chatResponse.isActiveThread) {
-                    const requeryNotice = "Let me check our past conversations, one moment...";
-                    await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-                    
-                    const chatResponses = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId, result.isActiveThread);
-                    chatMessagesUser.push({ role: "assistant", content: chatResponses.assistantResponse });
-                }
-                
-                chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
-                
-                const result = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
-        
-                console.log(`\n\n**BOT_ROUTER.JS: letMeCheckFlag is: ${chatResponse.letMeCheckFlag}`);
-            } else if (!isFromSlack(context)) {
+                // Rest of the code for handling Slack Messages...
+            } else {
+                // Code for handling default interaction
                 const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
                 console.log(`\n\n***BOT_ROUTER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
-                
+                            
                 await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
-            } else {
-                console.log('\n\n**BOT_ROUTER.JS: The received message did not originate from an invoked Slack bot, or it was not a @bot or @atbot message.');
             }
-
+            
             await this.chatMessagesProperty.set(context, chatMessagesUser);
             await next();
     }});
