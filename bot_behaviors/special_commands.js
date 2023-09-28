@@ -28,7 +28,8 @@ async function sendMessageResponse(context, message) {
 
 async function createDalleImages(context) {
     const messageText = context.activity.text.replace('$dalle', '').trim();
-    context.turnState.add('startTime', new Date());
+    context.turnState.set('startTime', new Date());
+
     
     if (!messageText) {
         await context.sendActivity(`You did not ask for any image in particular, so get the default of a dog! Please wait a moment...`);
@@ -36,24 +37,31 @@ async function createDalleImages(context) {
 
     let splitMessage = messageText.split(" --");
     const prompt = splitMessage[0] || "a nice photo of a dog";
-    const numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
+    let numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
     
+    // Check if the numImages is greater than 5, limit it to 5 if true
+    if (numImages > 5) {
+        await context.sendActivity(`You've asked for more than 5 images. We are going to generate the maximum allowed of 5. Please wait...`);
+        numImages = 5;
+    }
+
     const completionMessage = `You asked for "${prompt}". We are generating ${numImages} image(s) for you. Each image takes a few seconds to generate. Please wait...`;
     await context.sendActivity(completionMessage);
     await context.sendActivity({ type: 'typing' });
 
-    
     for(let i=0; i<numImages; i++){
-      await generateImages(prompt, 1, async (imageUrl) => {
-          const replyActivity = MessageFactory.attachment({
-              contentType: 'image/png',
-              contentUrl: imageUrl,
-          });
-          await context.sendActivity(replyActivity);
-      });
+        await generateImages(prompt, 1, async (imageUrl) => {
+            const replyActivity = MessageFactory.attachment({
+                contentType: 'image/png',
+                contentUrl: imageUrl,
+            });
+            await context.sendActivity(replyActivity);
+        });
     }
 
     let startTime = context.turnState.get('startTime');
+
+
     let endTime = new Date();
     let difference = endTime - startTime;
     let seconds = (difference / 1000).toFixed(3);
