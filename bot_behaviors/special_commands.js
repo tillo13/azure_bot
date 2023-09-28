@@ -37,7 +37,7 @@ async function createDalleImages(context) {
     const prompt = splitMessage[0] || "a nice photo of a dog";
     const numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
     
-    const completionMessage = `You asked for "$dalle ${prompt}". We are generating ${numImages} image(s) for you. Each image takes a few seconds to generate. Please wait...`;
+    const completionMessage = `You asked for "${prompt}". We are generating ${numImages} image(s) for you. Each image takes a few seconds to generate. Please wait...`;
     await context.sendActivity(completionMessage);
     await context.sendActivity({ type: 'typing' });
 
