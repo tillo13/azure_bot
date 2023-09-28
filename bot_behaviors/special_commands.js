@@ -28,7 +28,7 @@ async function sendMessageResponse(context, message) {
 
 async function createDalleImages(context) {
     const messageText = context.activity.text.replace('$dalle', '').trim();
-    context.turnState.set('startTime', new Date());
+    let startTime = new Date().getTime();
 
     
     if (!messageText) {
@@ -40,9 +40,9 @@ async function createDalleImages(context) {
     let numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
     
     // Check if the numImages is greater than 5, limit it to 5 if true
-    if (numImages > 5) {
-        await context.sendActivity(`You've asked for more than 5 images. We are going to generate the maximum allowed of 5. Please wait...`);
-        numImages = 5;
+    if (numImages >10) {
+        await context.sendActivity(`You've asked for more than 10 images. We are going to generate the maximum allowed of 10. Please wait...`);
+        numImages = 10;
     }
 
     const completionMessage = `You asked for "${prompt}". We are generating ${numImages} image(s) for you. Each image takes a few seconds to generate. Please wait...`;
@@ -59,10 +59,9 @@ async function createDalleImages(context) {
         });
     }
 
-    let startTime = context.turnState.get('startTime');
+    let endTime = new Date().getTime();
 
 
-    let endTime = new Date();
     let difference = endTime - startTime;
     let seconds = (difference / 1000).toFixed(3);
     await context.sendActivity(`We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
