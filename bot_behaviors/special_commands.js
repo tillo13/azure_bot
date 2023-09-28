@@ -30,7 +30,7 @@ async function createDalleImages(context) {
     const messageText = context.activity.text.replace('$dalle', '').trim();
     
     if (!messageText) {
-        await context.sendActivity(`You didn't ask for any image in particular, so get the default of a dog! Please wait a moment...`);
+        await context.sendActivity(`You did not ask for any image in particular, so get the default of a dog! Please wait a moment...`);
     }
 
     let splitMessage = messageText.split(" --");
