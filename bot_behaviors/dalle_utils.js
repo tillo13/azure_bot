@@ -48,5 +48,20 @@ async function generateImages(prompt = 'a nice photo of a dog', numImages = 1, o
         }
     }
 }
+async function processImagesGeneration(prompt, numImages = 1) {
+    let startTime = new Date().getTime();
+    let images = [];
+
+    for(let i=0; i<numImages; i++){
+        let image = await generateImages(prompt, 1, (imageUrl) => imageUrl);
+        images.push(image);
+    }
+
+    let endTime = new Date().getTime();
+    let difference = endTime - startTime;
+    let seconds = (difference / 1000).toFixed(3);
+
+    return { images, generationTime: seconds};
+}
 
 module.exports = generateImages;

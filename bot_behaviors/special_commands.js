@@ -1,5 +1,23 @@
 const { MessageFactory } = require('botbuilder');
-const generateImages = require('./dalle_utils');
+const { generateImages, processImagesGeneration } = require('./dalle_utils');
+
+const commands = new Proxy({
+    '$hamburger': addToppings,
+    '$help': contactHelp,
+    '$dalle': createDalleImages,
+}, {
+    get: function(target, property) {
+        if (property in target) {
+            return target[property];
+        } else {
+            for (let key in target) {
+                if (property.startsWith(key)) {
+                    return target[key];
+                }
+            }
+        }
+    }
+});
 
 async function addToppings(context) {
     return sendMessageResponse(context, 'Ketchup!');
@@ -30,7 +48,6 @@ async function createDalleImages(context) {
     const messageText = context.activity.text.replace('$dalle', '').trim();
     let startTime = new Date().getTime();
 
-    
     if (!messageText) {
         await context.sendActivity(`You did not ask for any image in particular, so get the default of a dog! Please wait a moment...`);
     }
@@ -49,40 +66,9 @@ async function createDalleImages(context) {
     await context.sendActivity(completionMessage);
     await context.sendActivity({ type: 'typing' });
 
-    for(let i=0; i<numImages; i++){
-        await generateImages(prompt, 1, async (imageUrl) => {
-            const replyActivity = MessageFactory.attachment({
-                contentType: 'image/png',
-                contentUrl: imageUrl,
-            });
-            await context.sendActivity(replyActivity);
-        });
-    }
+    const { images, generationTime } = await processImagesGeneration(prompt, numImages);
 
-    let endTime = new Date().getTime();
-
-
-    let difference = endTime - startTime;
-    let seconds = (difference / 1000).toFixed(3);
     await context.sendActivity(`We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
 }
-
-const commands = new Proxy({
-    '$hamburger': addToppings,
-    '$help': contactHelp,
-    '$dalle': createDalleImages,
-}, {
-    get: function(target, property) {
-        if (property in target) {
-            return target[property];
-        } else {
-            for (let key in target) {
-                if (property.startsWith(key)) {
-                    return target[key];
-                }
-            }
-        }
-    }
-});
 
 module.exports = commands;
