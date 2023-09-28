@@ -44,6 +44,10 @@ async function generateDogImage(context) {
     // Get start time
     let startTime = new Date();
 
+    // Inform the user that image generation has started and might take few seconds
+    await context.sendActivity(`Generating an image of a dog. This may take 5-10 seconds...`);
+
+
     const headers = { "API-Key": process.env.OPENAI_DALLE_API_KEY, "Content-Type": "application/json"};
     const requestBody = { prompt: "a nice photo of a dog", size: "1024x1024", n: 1 };
     const submitUrlPath = "/openai/images/generations:submit?api-version=";
