@@ -25,6 +25,8 @@ const commands = new Proxy({
 
 const special_commands = {
     "$forget": async (context) => {
+        console.log('\n******SPECIAL_COMMANDS: User asked for $forget at: ', new Date());
+
   // This function will be defined in bot_router.js
   await context._turnState.get('resetState')(context);
       
