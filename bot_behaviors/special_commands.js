@@ -69,7 +69,7 @@ async function createDalleImages(context) {
     for(let i=0; i<numImages; i++){
         let filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
         await context.sendActivity(`Creating ${filename}...`);
-    
+
         await context.sendActivity({ type: 'typing' });
         await generateImages(prompt, 1, async (imageUrl) => {
             const replyActivity = MessageFactory.attachment({
@@ -78,14 +78,16 @@ async function createDalleImages(context) {
             });
 
             // check if this is being run on slack to include thread_ts
-            if(context.activity.channelId === 'slack') {
-                const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || 
+            if (context.activity.channelId === 'slack') {
+                replyActivity.conversation = replyActivity.conversation || context.activity.conversation;
+                const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
                                   context.activity.channelData?.SlackMessage?.event?.ts;
-                
-                if (!replyActivity.conversation.id.includes(thread_ts)) {
+              
+                if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
                     replyActivity.conversation.id += ':' + thread_ts;
                 }
             }
+
             await context.sendActivity(replyActivity);
         });
     }
