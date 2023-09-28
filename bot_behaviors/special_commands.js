@@ -74,7 +74,9 @@ async function generateDogImage(context) {
         );
 
         const job = await res.json();
-        console.log('\n*****SPECIAL_COMMANDS.JS: Checking Dall-E job status...');
+        
+        // Added the counter (i+1) to indicate the iteration number
+        console.log('\n*****SPECIAL_COMMANDS.JS: Checking Dall-E job status...' + ' Attempt number: ' + (i+1));
 
         if (job.status === "succeeded") {
             const imageUrl = job.result.data[0]?.url;
@@ -86,7 +88,7 @@ async function generateDogImage(context) {
         } 
 
         if(job.status !== 'running'){
-            console.error('\n*****SPECIAL_COMMANDS.JS: Unknown job status:', job.status)
+            console.error('*****SPECIAL_COMMANDS.JS: Unknown job status:', job.status)
         }
     }
 
