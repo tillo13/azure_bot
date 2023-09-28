@@ -127,9 +127,12 @@ splitMessage.forEach((arg, index) => {
     }
 
       // Before generating images, notify the user about their specifications
-      const initialMessage = `You have asked for ${numImages} image(s) of "${prompt}", at ${imageSize}. Please hold while we create...`;
+      const initialMessage = `Summary: We are going to use DallE to create...
+      Prompt: ${prompt}
+      Number of images: ${numImages}
+      Size of images: ${imageSize}\nPlease hold while we create...`;   
+      
       await sendMessageWithThread(context, initialMessage, thread_ts);
-    
 
     for(let i=0; i<numImages; i++){
         let filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
@@ -161,11 +164,16 @@ splitMessage.forEach((arg, index) => {
         await addReaction(channelId, thread_ts, 'white_check_mark', apiToken);
     }
     let endTime = new Date().getTime();
-    let difference = endTime - startTime;
-    let seconds = (difference / 1000).toFixed(3);
-    const finishMessage = `We generated your ${numImages} image(s) @ ${imageSize} with a prompt of '${prompt}'.  This took a total of ${seconds} seconds. Thank you.`;
-    await sendMessageWithThread(context, finishMessage, thread_ts);
-  }}
+let difference = endTime - startTime;
+let seconds = (difference / 1000).toFixed(3);
+
+const finishMessage = `Summary: We used DallE to create...
+Prompt: ${prompt}
+Number of images: ${numImages}
+Size of images: ${imageSize}
+Time to complete: ${seconds} seconds. Thank you.`;    
+
+await sendMessageWithThread(context, finishMessage, thread_ts);}
 async function sendMessageWithThread(context, message, thread_ts) {
     const newActivity = MessageFactory.text(message);
     newActivity.conversation = context.activity.conversation; 
