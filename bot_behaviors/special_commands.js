@@ -96,5 +96,15 @@ async function createDalleImages(context) {
     let seconds = (difference / 1000).toFixed(3);
     await sendMessageWithThread(context, `We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`, thread_ts);
 }
+async function sendMessageWithThread(context, message, thread_ts) {
+    const newActivity = MessageFactory.text(message);
+    newActivity.conversation = context.activity.conversation; 
+
+    if (thread_ts && !newActivity.conversation.id.includes(thread_ts)) {
+        newActivity.conversation.id += ':' + thread_ts;
+    }
+
+    await context.sendActivity(newActivity);
+}
 
 module.exports = commands;
