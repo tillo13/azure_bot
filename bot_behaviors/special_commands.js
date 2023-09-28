@@ -1,5 +1,8 @@
 const { MessageFactory } = require('botbuilder');
 const generateImages = require('./dalle_utils');
+const { addReaction, removeReaction } = require('./slack_utils');
+
+
 const commands = new Proxy({
     '$hamburger': addToppings,
     '$help': contactHelp,
@@ -48,9 +51,15 @@ async function createDalleImages(context) {
     let startTime = new Date().getTime();
 
     let thread_ts;
+    const apiToken = context.activity.channelData?.ApiToken;
+    const channelId = context.activity.channelData?.SlackMessage?.event?.channel;
+
     if (context.activity.channelId === 'slack') {
         thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
-            context.activity.channelData?.SlackMessage?.event?.ts;
+        context.activity.channelData?.SlackMessage?.event?.ts;
+
+        // Add the :hourglass: emoji to the parent message
+        await addReaction(channelId, thread_ts, 'hourglass_flowing_sand', apiToken);
     }
 
     if (!messageText) {
@@ -85,6 +94,7 @@ async function createDalleImages(context) {
             });
         
             if (context.activity.channelId === 'slack') {
+                
                 replyActivity.conversation = replyActivity.conversation || context.activity.conversation;  
                 if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
                     replyActivity.conversation.id += ':' + thread_ts;
@@ -95,6 +105,12 @@ async function createDalleImages(context) {
         });
     }
 
+
+    if (context.activity.channelId === 'slack') {
+        // Upon completion, remove the :hourglass: emoji and add the :white_check_mark: emoji to the parent message
+        await removeReaction(channelId, thread_ts, 'hourglass_flowing_sand', apiToken);
+        await addReaction(channelId, thread_ts, 'white_check_mark', apiToken);
+    }
     let endTime = new Date().getTime();
     let difference = endTime - startTime;
     let seconds = (difference / 1000).toFixed(3);

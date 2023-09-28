@@ -84,4 +84,46 @@ async function getBotId(apiToken) {
   return response.user_id;
 }
 
-module.exports = { fetchConversationHistory, getBotId, executeHttpGetRequest, executeHttpPostRequest, postMessageToSlack };
+async function addReaction(channel, timestamp, reaction, apiToken) {
+  const data = JSON.stringify({
+      channel: channel,
+      timestamp: timestamp,
+      name: reaction
+  });
+
+  const options = {
+      hostname: 'slack.com',
+      path: '/api/reactions.add',
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': `Bearer ${apiToken}`,
+          'Content-Length': data.length
+      }
+  };
+
+  return await executeHttpPostRequest(options, data);
+}
+
+async function removeReaction(channel, timestamp, reaction, apiToken) {
+  const data = JSON.stringify({
+      channel: channel,
+      timestamp: timestamp,
+      name: reaction
+  });
+
+  const options = {
+      hostname: 'slack.com',
+      path: '/api/reactions.remove',
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': `Bearer ${apiToken}`,
+          'Content-Length': data.length
+      }
+  };
+
+  return await executeHttpPostRequest(options, data);
+}
+
+module.exports = { fetchConversationHistory, getBotId, executeHttpGetRequest, executeHttpPostRequest, postMessageToSlack, addReaction, removeReaction };
