@@ -42,7 +42,6 @@ async function sendMessageResponse(context, message) {
     await context.sendActivity(replyActivity);
 }
 
-
 async function generateDogImage(context) {
     console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Starting to generate a new dog image...');
 
@@ -71,15 +70,10 @@ async function generateDogImage(context) {
     );
     
     const initJob = await response.json();
-    const requestEndTime = new Date();
-    const requestDuration = (requestEndTime - startTime) / 1000; // in seconds
-    console.log(`\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - POST request completed in ${requestDuration} seconds`);
-    
-    if(!initJob.id){
+    if(!initJob || !initJob.id){
         console.log('\n\n*****SPECIAL_COMMANDS.JS: Error occurred while submitting a job', initJob);
         return;
     } 
-
     const jobId = initJob.id;
     console.log('\n\n*****SPECIAL_COMMANDS.JS: Job submitted, id: ', jobId);
 
