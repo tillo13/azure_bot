@@ -44,75 +44,76 @@ async function sendMessageResponse(context, message) {
 
 async function generateDogImage(context) {
     console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Starting to generate a new dog image...');
-
-    const baseUrl = process.env.OPENAI_DALLE_BASE_URL;
-    const version = process.env.OPENAI_DALLE_VERSION;
-    const headers = {
-        "API-Key": process.env.OPENAI_DALLE_API_KEY,
-        "Content-Type": "application/json",
-    };
+    
+    const startTime = new Date();
+    console.log(`\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - POST request starts at: ${startTime}`);
 
     const requestBody = {
         prompt: "a nice photo of a dog",
         size: "1024x1024",
         n: 1,
     };
+    console.log("\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - POST Request Body: ", requestBody);
 
-    console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Preparing to make the POST request...');
-    const startTime = new Date();
-    const response = await fetch(
-        `${baseUrl}/images/generations:submit?api-version=${version}`,
-        {
-            method: "POST",
-            headers,
-            body: JSON.stringify(requestBody),
-        }
-    );
-    
-    const initJob = await response.json();
-    if(!initJob || !initJob.id){
-        console.log('\n\n*****SPECIAL_COMMANDS.JS: Error occurred while submitting a job', initJob);
-        return;
-    } 
-    const jobId = initJob.id;
-    console.log('\n\n*****SPECIAL_COMMANDS.JS: Job submitted, id: ', jobId);
-
-    for (let i = 0; i < 5; i++) {
-        console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Start iteration number:', i+1);
-
-        // Wait 1.5 seconds after a request
-        const waitStartTime = new Date();
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        const waitEndTime = new Date();
-        const waitDuration = (waitEndTime - waitStartTime) / 1000; // in seconds
-        console.log(`\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Completed wait of ${waitDuration} seconds, preparing to make the GET request...`);
-
-        const getStartTime = new Date();
+    try {
         const response = await fetch(
-            `${baseUrl}/operations/images/${jobId}?api-version=${version}`,
+            `${OPENAI_DALLE_BASE_URL}/images/generations:submit?api-version=${OPENAI_DALLE_VERSION}`,
             {
-                method: "GET",
-                headers,
+                method: "POST",
+                headers: {
+                    "API-Key": process.env.OPENAI_DALLE_API_KEY,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(requestBody),
             }
         );
+        
+        const responseEndTime = new Date();
+        console.log(`\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - POST request ends at: ${responseEndTime}. It takes ${responseEndTime - startTime} ms.`);
 
-        const job = await response.json();
-        const getEndTime = new Date();
-        const getRequestDuration = (getEndTime - getStartTime) / 1000; // in seconds
-        console.log(`\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Completed the GET request in ${getRequestDuration} seconds`);
-
-        console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Received job status:', job.status);
-        if (job.status === "succeeded") {
-            const imageUrl = job?.result?.data[0]?.url;
-            if (imageUrl) {
-                console.log('\n\n*****SPECIAL_COMMANDS.JS: Image generated successfully, url: ', imageUrl);
-                await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
-            }
-            // exit the for-loop early since we have what we wanted
-            break;
-        } else if(job.status !== 'running'){
-            console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Received unexpected job status: ', job.status)
+        const initJob = await response.json();
+        if (!initJob.id) {
+            console.log('\n\n*****SPECIAL_COMMANDS.JS: Error while submitting a job', initJob);
+            return;
         }
+
+        const jobId = initJob.id;
+        console.log('\n\n*****SPECIAL_COMMANDS.JS: Job submitted, id: ', jobId);
+
+        for (let i = 0; i < 5; i++) {
+            console.log(`\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Start of iteration number ${i + 1} `);
+    
+            // Wait 1.5 seconds after a request
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Completed wait, making the GET request...');
+    
+            const getStatusResponse = await fetch(
+                `${OPENAI_DALLE_BASE_URL}/operations/images/${jobId}?api-version=${OPENAI_DALLE_VERSION}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "API-Key": process.env.OPENAI_DALLE_API_KEY,
+                    },
+                }
+            );
+
+            const job = await getStatusResponse.json();
+
+            console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Got job status:', job.status);
+            if (job.status === "succeeded") {
+                const imageUrl = job?.result?.data[0]?.url;
+                if (imageUrl) {
+                    console.log('\n\n*****SPECIAL_COMMANDS.JS: Image generated, url: ', imageUrl);
+                    await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
+                }
+                // exit the for-loop early since we have what we wanted
+                break;
+            } else if (job.status !== 'running') {
+                console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Unknown job status: ', job.status)
+            }
+        }
+    } catch (error) {
+        console.error('\n\n*****SPECIAL_COMMANDS.JS: Error occurred in generateDogImage: ', error);
     }
 }
 
