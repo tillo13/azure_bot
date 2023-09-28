@@ -30,16 +30,17 @@ async function createDalleImages(context) {
     const messageText = context.activity.text.replace('$dalle', '').trim();
     let startTime = new Date().getTime();
 
-    
     if (!messageText) {
         await context.sendActivity(`You did not ask for any image in particular, so get the default of a dog! Please wait a moment...`);
     }
 
     let splitMessage = messageText.split(" --");
-    const prompt = splitMessage[0] || "a nice photo of a dog";
+    let prompt = splitMessage[0] || "a nice photo of a dog";
     let numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
     
-    // Check if the numImages is greater than 5, limit it to 5 if true
+    // Create filename-friendly version of the prompt
+    let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '').replace(/\s/g, '_').substring(0, 10);
+
     if (numImages >10) {
         await context.sendActivity(`You've asked for more than 10 images. We are going to generate the maximum allowed of 10. Please wait...`);
         numImages = 10;
@@ -50,6 +51,8 @@ async function createDalleImages(context) {
     await context.sendActivity({ type: 'typing' });
 
     for(let i=0; i<numImages; i++){
+        let filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
+        await context.sendActivity(`Creating ${filename}...`);
         await generateImages(prompt, 1, async (imageUrl) => {
             const replyActivity = MessageFactory.attachment({
                 contentType: 'image/png',
@@ -60,8 +63,6 @@ async function createDalleImages(context) {
     }
 
     let endTime = new Date().getTime();
-
-
     let difference = endTime - startTime;
     let seconds = (difference / 1000).toFixed(3);
     await context.sendActivity(`We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
