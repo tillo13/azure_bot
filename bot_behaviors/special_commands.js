@@ -42,12 +42,19 @@ async function sendMessageResponse(context, message) {
 
     return await context.sendActivity(replyActivity);
 }
+
 async function createDalleImages(context) {
     const messageText = context.activity.text.replace('$dalle', '').trim();
     let startTime = new Date().getTime();
 
+    let thread_ts;
+    if (context.activity.channelId === 'slack') {
+        thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
+            context.activity.channelData?.SlackMessage?.event?.ts;
+    }
+
     if (!messageText) {
-        await context.sendActivity(`You did not ask for any image in particular, so we will generate the default of a dog! Please wait a moment...`);
+        await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of a dog! Please wait a moment...`, thread_ts);
     }
 
     let splitMessage = messageText.split(" --");
@@ -58,17 +65,17 @@ async function createDalleImages(context) {
     let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s+/g, '').replace(/_+/g, "_").substring(0, 15);
     filenameBase = filenameBase !== '_' ? filenameBase.trim('_') : filenameBase;
 
-    if (numImages >10) {
-        await context.sendActivity(`You've asked for more than 10 images. We are going to generate the maximum allowed of 10. Please wait...`);
+    if (numImages > 10) {
+        await sendMessageWithThread(context, `You've asked for more than 10 images. We are going to generate the maximum allowed of 10. Please wait...`, thread_ts);
         numImages = 10;
     }
 
     const completionMessage = `You asked for "${prompt}". We are generating ${numImages} image(s) for you. Each image may take a few seconds to generate. Please wait...`;
-    await context.sendActivity(completionMessage);
+    await sendMessageWithThread(context, completionMessage, thread_ts);
     
     for(let i=0; i<numImages; i++){
         let filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
-        await context.sendActivity(`Creating ${filename}...`);
+        await sendMessageWithThread(context, `Creating ${filename}...`, thread_ts);
 
         await context.sendActivity({ type: 'typing' });
         await generateImages(prompt, 1, async (imageUrl) => {
@@ -76,16 +83,8 @@ async function createDalleImages(context) {
                 contentType: 'image/png',
                 contentUrl: imageUrl,
             });
-
-            // check if this is being run on slack to include thread_ts
-            if (context.activity.channelId === 'slack') {
-                replyActivity.conversation = replyActivity.conversation || context.activity.conversation;
-                const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
-                                  context.activity.channelData?.SlackMessage?.event?.ts;
-              
-                if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
-                    replyActivity.conversation.id += ':' + thread_ts;
-                }
+            if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
+                replyActivity.conversation.id += ':' + thread_ts;
             }
 
             await context.sendActivity(replyActivity);
@@ -95,7 +94,7 @@ async function createDalleImages(context) {
     let endTime = new Date().getTime();
     let difference = endTime - startTime;
     let seconds = (difference / 1000).toFixed(3);
-    await context.sendActivity(`We generated ${numImages} image(s) for you that took ${seconds} seconds. Thank you.`);
+    await sendMessageWithThread(context, `We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`, thread_ts);
 }
 
 module.exports = commands;
