@@ -1,4 +1,5 @@
-const fetch = require('node-fetch');
+const fetch = require('node-fetch'); // make sure to install this with npm install node-fetch
+
 const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
 const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
 
@@ -41,11 +42,9 @@ async function sendMessageResponse(context, message) {
     await context.sendActivity(replyActivity);
 }
 
-async function generateDogImage(context) {
-    console.log('generateDogImage() - About to generate a new dog image...');
 
-    const baseUrl = process.env.OPENAI_DALLE_BASE_URL;
-    const version = process.env.OPENAI_DALLE_VERSION;
+async function generateDogImage(context) {
+    const baseUrl = "https://tillo-openai.openai.azure.com/openai";
     const headers = {
         "API-Key": process.env.OPENAI_DALLE_API_KEY,
         "Content-Type": "application/json",
@@ -57,9 +56,8 @@ async function generateDogImage(context) {
         n: 1,
     };
 
-    console.log('generateDogImage() - Making the POST request...');
     const response = await fetch(
-        `${baseUrl}/images/generations:submit?api-version=${version}`,
+        `${baseUrl}/images/generations:submit?api-version=2023-06-01-preview`,
         {
             method: "POST",
             headers,
@@ -77,14 +75,11 @@ async function generateDogImage(context) {
     console.log('Job submitted, id: ', jobId);
 
     for (let i = 0; i < 5; i++) {
-        console.log('generateDogImage() - Start iteration number:', i+1);
-
         // Wait 1.5 seconds after a request
         await new Promise(resolve => setTimeout(resolve, 1500));
-        console.log('generateDogImage() - Completed wait, making the GET request...');
 
         const response = await fetch(
-            `${baseUrl}/operations/images/${jobId}?api-version=${version}`,
+            `${baseUrl}/operations/images/${jobId}?api-version=2023-06-01-preview`,
             {
                 method: "GET",
                 headers,
@@ -93,7 +88,6 @@ async function generateDogImage(context) {
 
         const job = await response.json();
 
-        console.log('generateDogImage() - Got job status:', job.status);
         if (job.status === "succeeded") {
             const imageUrl = job?.result?.data[0]?.url;
             if (imageUrl) {
