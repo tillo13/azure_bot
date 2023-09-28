@@ -1,22 +1,20 @@
 const { MessageFactory } = require('botbuilder');
 const generateImages = require('./dalle_utils');
-const commands = new Proxy({
+
+let commandActions = {
     '$hamburger': addToppings,
     '$help': contactHelp,
-    '$dalle': createDalleImages,
-}, {
-    get: function(target, property) {
-        if (property in target) {
-            return target[property];
-        } else {
-            for (let key in target) {
-                if (property.startsWith(key)) {
-                    return target[key];
-                }
-            }
-        }
+    '$dalle': createDalleImages
+}
+
+async function handleCommand(command, context) {
+    for (let key in commandActions) {
+        if (command.startsWith(key)) {
+            return commandActions[key](context);
+        } 
     }
-});
+    return undefined;
+}
 
 async function addToppings(context) {
     return sendMessageResponse(context, 'Ketchup!');
@@ -27,88 +25,92 @@ async function contactHelp(context) {
 }
 
 async function sendMessageResponse(context, message) {
-    const replyActivity = MessageFactory.text(message);
-    
-    try {
-        replyActivity.conversation = context.activity.conversation;
-        const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || 
-                          context.activity.channelData?.SlackMessage?.event?.ts;
-        if (!replyActivity.conversation.id.includes(thread_ts)) {
-            replyActivity.conversation.id += ':' + thread_ts;
-        }
-    } catch (error) {
-        console.error('Error occurred while trying to reply in the thread:', error);
-    }
-
+    let replyActivity = MessageFactory.text(message);
+    modifyConversationId(context, replyActivity);
     return await context.sendActivity(replyActivity);
 }
 
 async function createDalleImages(context) {
-    const messageText = context.activity.text.replace('$dalle', '').trim();
+    let messageText = extractText(context);
     let startTime = new Date().getTime();
-
-    let thread_ts;
-    if (context.activity.channelId === 'slack') {
-        thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
-            context.activity.channelData?.SlackMessage?.event?.ts;
-    }
-
-    if (!messageText) {
-        await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of a dog! Please wait a moment...`, thread_ts);
-    }
-
     let splitMessage = messageText.split(" --");
-    let prompt = splitMessage[0] || "a nice photo of a dog";
-    let numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
-    
-    // Create filename-friendly version of the prompt, limit to 15 chars, and remove consecutive underscores
-    let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s+/g, '').replace(/_+/g, "_").substring(0, 15);
-    filenameBase = filenameBase !== '_' ? filenameBase.trim('_') : filenameBase;
+    let { prompt, numImages } = processMessage(splitMessage);
+    let filenameBase = createFilename(prompt);
 
+    numImages = await verifyImages(context, numImages);
+    await generateImages(context, prompt, numImages, filenameBase);
+    await postProcessing(context, numImages, startTime);
+}
+
+function extractText(context) {
+    return context.activity.text.replace('$dalle', '').trim();
+}
+
+function processMessage(splitMessage) {
+    return {
+        prompt: splitMessage[0] || "a nice photo of a dog",
+        numImages: splitMessage[1] ? parseInt(splitMessage[1]) : 1
+    }
+}
+
+function createFilename(prompt) {
+    let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s+/g, '').replace(/_+/g, "_").substring(0, 15);
+    return filenameBase !== '_' ? filenameBase.trim('_') : filenameBase;
+}
+
+async function verifyImages(context, numImages) {
     if (numImages > 10) {
-        await sendMessageWithThread(context, `You've asked for more than 10 images. We are going to generate the maximum allowed of 10. Please wait...`, thread_ts);
+        await sendMessageResponse(context, `You've asked for more than 10 images. We are going to generate the maximum allowed of 10. Please wait...`);
         numImages = 10;
     }
+    return numImages;
+}
 
-    const completionMessage = `You asked for "${prompt}". We are generating ${numImages} image(s) for you. Each image may take a few seconds to generate. Please wait...`;
-    await sendMessageWithThread(context, completionMessage, thread_ts);
-    
+async function generateImages(context, prompt, numImages, filenameBase) {
     for(let i=0; i<numImages; i++){
         let filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
-        await sendMessageWithThread(context, `Creating ${filename}...`, thread_ts);
+        await sendMessageResponse(context, `Creating ${filename}...`);
+        await postMessageAndType(context, () => getImage(prompt));
+    }
+}
 
-        await context.sendActivity({ type: 'typing' });
-        await generateImages(prompt, 1, async (imageUrl) => {
-            const replyActivity = MessageFactory.attachment({
-                contentType: 'image/png',
-                contentUrl: imageUrl,
-            });
-        
-            if (context.activity.channelId === 'slack') {
-                replyActivity.conversation = replyActivity.conversation || context.activity.conversation;  
-                if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
-                    replyActivity.conversation.id += ':' + thread_ts;
-                }
-            }
-        
-            await context.sendActivity(replyActivity);
+function getImage(prompt) {
+    return generateImages(prompt, 1, async (imageUrl) => {
+        return MessageFactory.attachment({
+            contentType: 'image/png',
+            contentUrl: imageUrl,
         });
-    }
+    });
+}
 
+async function postProcessing(context, numImages, startTime) {
     let endTime = new Date().getTime();
-    let difference = endTime - startTime;
-    let seconds = (difference / 1000).toFixed(3);
-    await sendMessageWithThread(context, `We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`, thread_ts);
+    let seconds = calculateSeconds(startTime, endTime);
+    await sendMessageResponse(context, `We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
 }
-async function sendMessageWithThread(context, message, thread_ts) {
-    const newActivity = MessageFactory.text(message);
-    newActivity.conversation = context.activity.conversation; 
 
-    if (thread_ts && !newActivity.conversation.id.includes(thread_ts)) {
-        newActivity.conversation.id += ':' + thread_ts;
+function calculateSeconds(startTime, endTime) {
+    return ((endTime - startTime) / 1000).toFixed(3);
+}
+
+function modifyConversationId(context, activity) {
+    activity.conversation = context.activity.conversation;
+    if (context.activity.channelData?.SlackMessage?.event?.thread_ts && activity.conversation.id.includes(thread_ts)) {
+        activity.conversation.id += ':' + thread_ts;
     }
-
-    await context.sendActivity(newActivity);
 }
+
+async function postMessageAndType(context, getMessage) {
+    await context.sendActivity({ type: 'typing' });
+    let message = await getMessage();
+    modifyConversationId(context, message);
+    await context.sendActivity(message);
+}
+
+const commands = new Proxy(commandActions, {
+    get: function(target, property) {
+        return target[property] || handleCommand;
+    }
+});
 
 module.exports = commands;
