@@ -3,7 +3,7 @@ const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
 const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
 const OPENAI_DALLE_API_KEY = process.env.OPENAI_DALLE_API_KEY;
 
-async function generateImages(prompt = 'a nice photo of a dog', numImages = 1) {
+async function generateImages(prompt, numImages = 1) {
     const headers = { "API-Key": OPENAI_DALLE_API_KEY, "Content-Type": "application/json"};
     const requestBody = { prompt, size: "1024x1024", n: numImages };
     const submitUrlPath = "/openai/images/generations:submit?api-version=";
@@ -16,41 +16,33 @@ async function generateImages(prompt = 'a nice photo of a dog', numImages = 1) {
 
     if(!initJob.id) {
         console.error('Error occurred while submitting a job', initJob);
-        return;
+        throw new Error('Error occurred while submitting a job');
     }
 
     const jobId = initJob.id;
     const checkJobUrlPath = "/openai/operations/images/";
-
-    const imageUrls = [];
-
-    for (let i = 0; i < 5; i++) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
+    const finalImageUrls = [];
+    
+    for (let i = 0; i < 40; i++) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
         const res = await fetch(
             `${OPENAI_DALLE_BASE_URL}${checkJobUrlPath}${jobId}?api-version=${OPENAI_DALLE_VERSION}`,
             { method: "GET", headers }
         );
+        
 
         const job = await res.json();
-
-        if (job.status === "succeeded") {
-            job.result.data.forEach(imageData => {
-                const imageUrl = imageData?.url;
-                if (imageUrl) {
-                    console.log('Dall-E image generated, url:', imageUrl);
-                    imageUrls.push(imageUrl)
-                }
-            });
+        if(job.status === 'succeeded'){
+            job.result.data.forEach(imgData =>
+                finalImageUrls.push(imgData.url)
+            );
             break;
-        } 
-
-        if(job.status !== 'running'){
-            console.error('Unknown job status:', job.status);
+        } else if (job.status !== 'running'){
+            throw new Error('Unknown job status: ' + job.status);
         }
     }
-    
-    return imageUrls;
+    return finalImageUrls;
 }
 
 module.exports = generateImages;
