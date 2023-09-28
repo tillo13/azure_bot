@@ -7,6 +7,8 @@ const commands = new Proxy({
     '$hamburger': addToppings,
     '$help': contactHelp,
     '$dalle': createDalleImages,
+    '$forget': resetBot,
+    // other commands...
 }, {
     get: function(target, property) {
         if (property in target) {
@@ -20,6 +22,15 @@ const commands = new Proxy({
         }
     }
 });
+
+const special_commands = {
+    "$forget": async (context) => {
+  // This function will be defined in bot_router.js
+  await context._turnState.get('resetState')(context);
+      
+      // Confirmatory message
+      await context.sendActivity("You got it! I'll forget everything to this point and start over. One moment!");
+    },}
 
 async function addToppings(context) {
     return sendMessageResponse(context, 'Ketchup!');
