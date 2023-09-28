@@ -21,6 +21,8 @@ class EchoBot extends ActivityHandler {
         this.threadproperty = userState.createProperty(THREAD_TS);
         this.botInvokedFlag = userState.createProperty('botInvokedFlag');
         this.userState = userState;
+        // During bot initialization via msteams addition
+        this.isFirstInteraction = userState.createProperty('isFirstInteraction');
 
         this.onMembersAdded(async (context, next) => {
             console.log("\n\n**BOT_ROUTER.JS: A member(s) has been added to the chat");
@@ -75,11 +77,23 @@ class EchoBot extends ActivityHandler {
                 chatMessagesUser.push({ role: "user", content: context.activity.text }); 
             }
             
-            if (isFromMsTeams(context)) {
-                // Handle Microsoft Teams Interaction
-                await context.sendActivity(MessageFactory.text(`msteams_chat_path: Hello from @bot in MS Teams!`));
-            
-            }
+
+
+// Inside onMessage function
+let isFirstInteraction = await this.isFirstInteraction.get(context, true);
+
+if (isFromMsTeams(context)) {
+
+    if (isFirstInteraction) {
+        await context.sendActivity(MessageFactory.text(`msteams_chat_path: Hello from @bot in MS Teams!`));
+        await this.isFirstInteraction.set(context, false);
+    }
+    
+    const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
+    console.log(`\n\n***BOT_ROUTER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
+    
+    await context.sendActivity(MessageFactory.text(`MS_Teams_Chat_Path: ${chatResponse.assistantResponse}`));
+}
             else if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
                 // Code for handling Slack Interaction
                 console.log("\n\n**BOT_ROUTER.JS: Message from Slack and bot was either called or is already in thread. Processing...");
