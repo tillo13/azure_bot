@@ -49,12 +49,17 @@ async function generateDogImage(context) {
         "API-Key": process.env.OPENAI_DALLE_API_KEY,
         "Content-Type": "application/json",
     };
-
+  
     const requestBody = {
         prompt: "a nice photo of a dog",
         size: "1024x1024",
         n: 1,
     };
+  
+    // Timestamp logs for performance evaluation
+    console.time("Time taken for generateDogImage");
+    
+    console.log("\n\n*****SPECIAL_COMMANDS.JS: Starting generateDogImage...");
 
     const response = await fetch(
         `${baseUrl}/images/generations:submit?api-version=2023-06-01-preview`,
@@ -67,17 +72,17 @@ async function generateDogImage(context) {
 
     const initJob = await response.json();
     if(!initJob.id){
-        console.log('Error while submitting a job', initJob);
+        console.error('\n\n*****SPECIAL_COMMANDS.JS: Error while submitting a job', initJob);
         return;
     } 
 
     const jobId = initJob.id;
-    console.log('Job submitted, id: ', jobId);
+    console.log('\n*****SPECIAL_COMMANDS.JS: Job submitted, id: ', jobId);
 
     for (let i = 0; i < 5; i++) {
         // Wait 1.5 seconds after a request
         await new Promise(resolve => setTimeout(resolve, 1500));
-
+        
         const response = await fetch(
             `${baseUrl}/operations/images/${jobId}?api-version=2023-06-01-preview`,
             {
@@ -88,18 +93,22 @@ async function generateDogImage(context) {
 
         const job = await response.json();
 
+        console.log('\n*****SPECIAL_COMMANDS.JS: Checking job status...');
+        
         if (job.status === "succeeded") {
             const imageUrl = job?.result?.data[0]?.url;
             if (imageUrl) {
-                console.log('Image generated, url: ', imageUrl);
+                console.log('*****SPECIAL_COMMANDS.JS: Image generated, url: ', imageUrl);
                 await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
             }
             // exit the for-loop early since we have what we wanted
             break;
         } else if(job.status !== 'running'){
-            console.log('Unknown job status: ', job.status)
+            console.error('*****SPECIAL_COMMANDS.JS: Unknown job status: ', job.status)
         }
     }
+
+    console.timeEnd("Time taken for generateDogImage"); // End of timer
 }
 
 const commands = {
