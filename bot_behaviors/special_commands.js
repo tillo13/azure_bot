@@ -83,10 +83,14 @@ async function createDalleImages(context) {
                 contentType: 'image/png',
                 contentUrl: imageUrl,
             });
-            if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
-                replyActivity.conversation.id += ':' + thread_ts;
+        
+            if (context.activity.channelId === 'slack') {
+                replyActivity.conversation = replyActivity.conversation || context.activity.conversation;  
+                if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
+                    replyActivity.conversation.id += ':' + thread_ts;
+                }
             }
-
+        
             await context.sendActivity(replyActivity);
         });
     }
