@@ -116,7 +116,7 @@ class EchoBot extends ActivityHandler {
     }
     async onTurn(turnContext, next) {
         // Add resetState to turnState so it can be accessed in commands
-        turnContext.turnState.set('resetState', this.resetState);
+        turnContext.turnState['resetState'] = this.resetState;
         await super.onTurn(turnContext, next);
     }
 
