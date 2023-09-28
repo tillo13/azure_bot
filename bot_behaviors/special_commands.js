@@ -47,7 +47,7 @@ async function createDalleImages(context) {
     let startTime = new Date().getTime();
 
     if (!messageText) {
-        await context.sendActivity(`You did not ask for any image in particular, so get the default of a dog! Please wait a moment...`);
+        await context.sendActivity(`You did not ask for any image in particular, so we will generate the default of a dog! Please wait a moment...`);
     }
 
     let splitMessage = messageText.split(" --");
@@ -55,7 +55,7 @@ async function createDalleImages(context) {
     let numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
     
     // Create filename-friendly version of the prompt, limit to 15 chars, and remove consecutive underscores
-    let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s/g, '_').replace(/_+/g, "_").substring(0, 15);
+    let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s+/g, '').replace(/_+/g, "_").substring(0, 15);
     filenameBase = filenameBase !== '_' ? filenameBase.trim('_') : filenameBase;
 
     if (numImages >10) {
@@ -63,7 +63,7 @@ async function createDalleImages(context) {
         numImages = 10;
     }
 
-    const completionMessage = `You asked for "${prompt}". We are generating ${numImages} image(s) for you. Each image takes a few seconds to generate. Please wait...`;
+    const completionMessage = `You asked for "${prompt}". We are generating ${numImages} image(s) for you. Each image may take a few seconds to generate. Please wait...`;
     await context.sendActivity(completionMessage);
     
     for(let i=0; i<numImages; i++){
@@ -76,6 +76,16 @@ async function createDalleImages(context) {
                 contentType: 'image/png',
                 contentUrl: imageUrl,
             });
+
+            // check if this is being run on slack to include thread_ts
+            if(context.activity.channelId === 'slack') {
+                const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || 
+                                  context.activity.channelData?.SlackMessage?.event?.ts;
+                
+                if (!replyActivity.conversation.id.includes(thread_ts)) {
+                    replyActivity.conversation.id += ':' + thread_ts;
+                }
+            }
             await context.sendActivity(replyActivity);
         });
     }
@@ -83,7 +93,7 @@ async function createDalleImages(context) {
     let endTime = new Date().getTime();
     let difference = endTime - startTime;
     let seconds = (difference / 1000).toFixed(3);
-    await context.sendActivity(`We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
+    await context.sendActivity(`We generated ${numImages} image(s) for you that took ${seconds} seconds. Thank you.`);
 }
 
 module.exports = commands;
