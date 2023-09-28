@@ -129,7 +129,7 @@ async function createDalleImages(context) {
     let endTime = new Date().getTime();
     let difference = endTime - startTime;
     let seconds = (difference / 1000).toFixed(3);
-    await sendMessageWithThread(context, `We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`, thread_ts);
+    await sendMessageWithThread(context, `We generated ${numImages} image(s) @ ${imageSize} for you that took a total of ${seconds} seconds. Thank you.`, thread_ts);
 }
 async function sendMessageWithThread(context, message, thread_ts) {
     const newActivity = MessageFactory.text(message);
