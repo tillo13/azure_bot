@@ -2,10 +2,14 @@ const fetch = require('node-fetch');
 const OPENAI_DALLE_BASE_URL = process.env.OPENAI_DALLE_BASE_URL;
 const OPENAI_DALLE_VERSION = process.env.OPENAI_DALLE_VERSION;
 const OPENAI_DALLE_API_KEY = process.env.OPENAI_DALLE_API_KEY;
+const addEmojiReaction = require('./slack_utils').addReaction;
+const removeEmojiReaction = require('./slack_utils').removeReaction;
 
-async function generateImages(prompt = 'a nice photo of a dog', numImages = 1, onImageReady) {
+
+async function generateImages(prompt = 'a painting of a nice dog', numImages = 1, size = '1024x1024', onImageReady) {
     const headers = { "API-Key": OPENAI_DALLE_API_KEY, "Content-Type": "application/json"};
-    const requestBody = { prompt, size: "1024x1024", n: numImages };
+    const requestBody = { prompt, size: size, n: numImages };
+
     const submitUrlPath = "/openai/images/generations:submit?api-version=";
 
     const response = await fetch(

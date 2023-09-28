@@ -69,8 +69,23 @@ async function createDalleImages(context) {
     let splitMessage = messageText.split(" --");
     let prompt = splitMessage[0] || "a nice photo of a dog";
     let numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
-    
-    // Create filename-friendly version of the prompt, limit to 15 chars, and remove consecutive underscores
+    let imageSize = splitMessage[2] || "1024x1024";
+
+    switch (imageSize) {
+        case 'full':
+            imageSize = "1024x1024";
+            break;
+        case 'medium':
+            imageSize = "512x512";
+            break;
+        case 'small':
+            imageSize = "256x256";
+            break;
+        default:
+            imageSize = "1024x1024";
+            break;
+    }
+
     let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s+/g, '').replace(/_+/g, "_").substring(0, 15);
     filenameBase = filenameBase !== '_' ? filenameBase.trim('_') : filenameBase;
 
@@ -79,20 +94,20 @@ async function createDalleImages(context) {
         numImages = 10;
     }
 
-    const completionMessage = `You asked for "${prompt}". We are generating ${numImages} image(s) for you. Each image may take a few seconds to generate. Please wait...`;
+    const completionMessage = `You asked for "${prompt}". We are generating ${numImages} image(s) for you in ${imageSize} size. Please wait...`;
     await sendMessageWithThread(context, completionMessage, thread_ts);
-    
+
     for(let i=0; i<numImages; i++){
         let filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
         await sendMessageWithThread(context, `Creating ${filename}...`, thread_ts);
 
         await context.sendActivity({ type: 'typing' });
-        await generateImages(prompt, 1, async (imageUrl) => {
+        await generateImages(prompt, 1, imageSize, async (imageUrl) => {
             const replyActivity = MessageFactory.attachment({
                 contentType: 'image/png',
                 contentUrl: imageUrl,
             });
-        
+
             if (context.activity.channelId === 'slack') {
                 
                 replyActivity.conversation = replyActivity.conversation || context.activity.conversation;  
