@@ -28,9 +28,8 @@ async function sendMessageResponse(context, message) {
 
 async function createDalleImages(context) {
     const messageText = context.activity.text.replace('$dalle', '').trim();
-
+    
     if (!messageText) {
-        // when $dalle command is used without any extra text.
         await context.sendActivity(`You get the default of a dog! Please wait...`);
     }
 
@@ -38,27 +37,25 @@ async function createDalleImages(context) {
     const prompt = splitMessage[0] || "a nice photo of a dog";
     const numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
 
-    let imageCount = 0;
-    let startTime = new Date();
-
     const completionMessage = numImages > 1 ? `Images are on their way, might take some time.` : `Image is on its way, might take some time.`;
     await context.sendActivity(completionMessage);
     await context.sendActivity({ type: 'typing' });
 
-    await generateImages(prompt, numImages, async (imageUrl) => {
-        const replyActivity = MessageFactory.attachment({
-            contentType: 'image/png',
-            contentUrl: imageUrl,
-        });
-        await context.sendActivity(replyActivity);
-        imageCount++;
-        if (imageCount === numImages) {
-            let endTime = new Date();
-            let difference = endTime - startTime;
-            let seconds = Math.floor(difference / 1000);
-            await context.sendActivity(`You asked for "$dalle ${prompt}" and we generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
-        }
-    });
+    startTime = new Date();
+    for(let i=0; i<numImages; i++){
+      await generateImages(prompt, 1, async (imageUrl) => {
+          const replyActivity = MessageFactory.attachment({
+              contentType: 'image/png',
+              contentUrl: imageUrl,
+          });
+          await context.sendActivity(replyActivity);
+      });
+    }
+
+    let endTime = new Date();
+    let difference = endTime - startTime;
+    let seconds = Math.floor(difference / 1000);
+    await context.sendActivity(`You asked for "$dalle ${prompt}" and we generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
 }
 
 const commands = new Proxy({
