@@ -36,10 +36,7 @@ class EchoBot extends ActivityHandler {
         this.userState = userState;
         // During bot initialization via msteams addition
         this.isFirstInteraction = userState.createProperty('isFirstInteraction');
-        this.onTurn(async (turnContext, next) => {
-            turnContext.turnState.set('resetState', this.resetState.bind(this));
-            await next();
-          });
+        this.resetState = this.resetState.bind(this);
 
         this.onMembersAdded(async (context, next) => {
             console.log("\n\n**BOT_ROUTER.JS: A member(s) has been added to the chat");
@@ -117,11 +114,13 @@ class EchoBot extends ActivityHandler {
             await next();
     }});
     }
-    async onTurn(turnContext) {
+    async onTurn(turnContext, next) {
         // Add resetState to turnState so it can be accessed in commands
         turnContext.turnState.set('resetState', this.resetState);
-        await super.onTurn(turnContext);
+        await super.onTurn(turnContext, next);
     }
+
+
     async run(context) {
         console.log('\n\n**BOT_ROUTER.JS: Running the bot...');
         await super.run(context);

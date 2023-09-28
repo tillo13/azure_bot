@@ -16,6 +16,10 @@ echo "==== Git Status Before Changes are Added ===="
 # Print git status
 git status
 
+echo "==== Changes in Files ===="
+# List changed files
+git diff --name-only
+
 echo "==== Adding Changes to Staging Area ===="
 # Add all changes to the staging area
 git add .
@@ -39,10 +43,6 @@ git status
 echo "==== Log of Last 5 Commits ===="
 # Print the log of the latest 5 commits 
 git log --pretty=format:"%h%x09%an%x09%ad%x09%s" -5
-
-echo "==== Changes happened in Files ===="
-# List changed files
-git diff --name-only
 
 echo "==== Verifying Everything Worked as Planned ===="
 uncommitted_changes=$(git status --porcelain)
