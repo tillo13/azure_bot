@@ -7,7 +7,7 @@ const commands = {
         console.log('\n******SPECIAL_COMMANDS: User asked for $forget at: ', new Date());
 
         // This function will be defined in bot_router.js
-        await context._turnState.get('resetState')(context);
+        await context.turnState.get('resetState')(context);
       
         // Confirmatory message
         await context.sendActivity("You got it! I'll forget everything to this point and start over. One moment!");
