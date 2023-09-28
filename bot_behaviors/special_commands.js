@@ -58,6 +58,7 @@ async function createDalleImages(context) {
     let difference = endTime - startTime;
     let seconds = (difference / 1000).toFixed(3);
     await context.sendActivity(`We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
+}
 
 const commands = new Proxy({
     '$hamburger': addToppings,
