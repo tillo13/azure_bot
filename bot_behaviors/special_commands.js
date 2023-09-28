@@ -2,51 +2,25 @@ const { MessageFactory } = require('botbuilder');
 const generateImages = require('./dalle_utils');
 const { addReaction, removeReaction } = require('./slack_utils');
 
-
-
-// Then in the commands object, link '$forget' to resetBot
-const commands = new Proxy({
-    '$hamburger': addToppings,
-    '$help': contactHelp,
-    '$dalle': createDalleImages,
-    '$forget': resetBot,   
-    // other commands...
-}, {
-    get: function(target, property) {
-        if (property in target) {
-            return target[property];
-        } else {
-            for (let key in target) {
-                if (property.startsWith(key)) {
-                    return target[key];
-                }
-            }
-        }
-    }
-});
-
-const special_commands = {
+const commands = {
     "$forget": async (context) => {
         console.log('\n******SPECIAL_COMMANDS: User asked for $forget at: ', new Date());
 
-  // This function will be defined in bot_router.js
-  await context._turnState.get('resetState')(context);
-      
-      // Confirmatory message
-      await context.sendActivity("You got it! I'll forget everything to this point and start over. One moment!");
-    },}
-
-    async function resetBot(context) {
-        console.log('\n******SPECIAL_COMMANDS: User asked for $forget at: ', new Date());
-    
-        // Call the resetState function from the context
+        // This function will be defined in bot_router.js
         await context._turnState.get('resetState')(context);
-          
-        // Send a confirmatory message
+      
+        // Confirmatory message
         await context.sendActivity("You got it! I'll forget everything to this point and start over. One moment!");
-    }
+    },
+    "$hamburger": addToppings,
+    "$help": contactHelp,
+    "$dalle": createDalleImages,
+    // other commands...
+}
+
 async function addToppings(context) {
-    return sendMessageResponse(context, 'Ketchup!');
+    return sendMessageResponse
+(context, 'Ketchup!');
 }
 
 async function contactHelp(context) {
