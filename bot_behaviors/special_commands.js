@@ -43,7 +43,8 @@ async function createDalleImages(context) {
 
     const completionMessage = numImages > 1 ? `Images are on their way, might take some time.` : `Image is on its way, might take some time.`;
     await context.sendActivity(completionMessage);
-    
+    await context.sendActivity({ type: 'typing' });
+
     await generateImages(prompt, numImages, async (imageUrl) => {
         const replyActivity = MessageFactory.attachment({
             contentType: 'image/png',
