@@ -126,8 +126,10 @@ splitMessage.forEach((arg, index) => {
         numImages = 10;
     }
 
-    const completionMessage = `You asked for "${prompt}". We are generating ${numImages} image(s) for you in ${imageSize} size. Please wait...`;
-    await sendMessageWithThread(context, completionMessage, thread_ts);
+      // Before generating images, notify the user about their specifications
+      const initialMessage = `You have asked for ${numImages} image(s) of "${prompt}", at ${imageSize}. Please hold while we create...`;
+      await sendMessageWithThread(context, initialMessage, thread_ts);
+    
 
     for(let i=0; i<numImages; i++){
         let filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
@@ -161,8 +163,9 @@ splitMessage.forEach((arg, index) => {
     let endTime = new Date().getTime();
     let difference = endTime - startTime;
     let seconds = (difference / 1000).toFixed(3);
-    await sendMessageWithThread(context, `We generated ${numImages} image(s) @ ${imageSize} for you that took a total of ${seconds} seconds. Thank you.`, thread_ts);
-}
+    const finishMessage = `We generated your ${numImages} image(s) @ ${imageSize} with a prompt of '${prompt}'.  This took a total of ${seconds} seconds. Thank you.`;
+    await sendMessageWithThread(context, finishMessage, thread_ts);
+  }}
 async function sendMessageWithThread(context, message, thread_ts) {
     const newActivity = MessageFactory.text(message);
     newActivity.conversation = context.activity.conversation; 
