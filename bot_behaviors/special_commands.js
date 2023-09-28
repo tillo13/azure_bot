@@ -41,45 +41,39 @@ async function sendMessageResponse(context, message) {
 }
 
 async function generateDogImage(context) {
-    const API_KEY = process.env.OPENAI_DALLE_API_KEY;
-    const headers = { "API-Key": API_KEY, "Content-Type": "application/json"};
+    const headers = { "API-Key": process.env.OPENAI_DALLE_API_KEY, "Content-Type": "application/json"};
     const requestBody = { prompt: "a nice photo of a dog", size: "1024x1024", n: 1 };
+    const submitUrlPath = "/openai/images/generations:submit?api-version=";
 
     console.time("\n\n*****SPECIAL_COMMANDS.JS: Time taken for generateDogImage");
     console.log("\n\n*****SPECIAL_COMMANDS.JS: Starting generateDogImage...");
 
     const response = await fetch(
-        `${OPENAI_DALLE_BASE_URL}/images/generations:submit?api-version=${OPENAI_DALLE_VERSION}`,
-        {
-            method: "POST",
-            headers,
-            body: JSON.stringify(requestBody),
-        }
+        `${OPENAI_DALLE_BASE_URL}${submitUrlPath}${OPENAI_DALLE_VERSION}`,
+        { method: "POST", headers, body: JSON.stringify(requestBody) }
     );
     const initJob = await response.json();
 
-    if(!initJob.id){
+    if(!initJob.id) {
         console.error('\n\n*****SPECIAL_COMMANDS.JS: Error occurred while submitting a job', initJob);
         return;
-    } 
+    }
 
     const jobId = initJob.id;
+    const checkJobUrlPath = "/openai/operations/images/";
     console.log('\n*****SPECIAL_COMMANDS.JS: Dall-E job submitted, id: ', jobId);
 
     for (let i = 0; i < 5; i++) {
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         const res = await fetch(
-            `${OPENAI_DALLE_BASE_URL}/operations/images/${jobId}?api-version=${OPENAI_DALLE_VERSION}`,
-            {
-                method: "GET",
-                headers,
-            }
+            `${OPENAI_DALLE_BASE_URL}${checkJobUrlPath}${jobId}?api-version=${OPENAI_DALLE_VERSION}`,
+            { method: "GET", headers }
         );
-                
+
         const job = await res.json();
         console.log('\n*****SPECIAL_COMMANDS.JS: Checking Dall-E job status...');
-        
+
         if (job.status === "succeeded") {
             const imageUrl = job.result.data[0]?.url;
             if (imageUrl) {
