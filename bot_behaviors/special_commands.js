@@ -25,9 +25,11 @@ async function sendMessageResponse(context, message) {
 
     return await context.sendActivity(replyActivity);
 }
+
 async function createDalleImages(context) {
     const messageText = context.activity.text.replace('$dalle', '').trim();
     let startTime = new Date().getTime();
+
     
     if (!messageText) {
         await context.sendActivity(`You did not ask for any image in particular, so get the default of a dog! Please wait a moment...`);
@@ -36,7 +38,8 @@ async function createDalleImages(context) {
     let splitMessage = messageText.split(" --");
     const prompt = splitMessage[0] || "a nice photo of a dog";
     let numImages = splitMessage[1] ? parseInt(splitMessage[1]) : 1;
-        
+    
+    // Check if the numImages is greater than 5, limit it to 5 if true
     if (numImages >10) {
         await context.sendActivity(`You've asked for more than 10 images. We are going to generate the maximum allowed of 10. Please wait...`);
         numImages = 10;
@@ -46,23 +49,19 @@ async function createDalleImages(context) {
     await context.sendActivity(completionMessage);
     await context.sendActivity({ type: 'typing' });
 
-    try {
-        const imageUrls = await generateImages(prompt, numImages);
-        for (let url of imageUrls) {
+    for(let i=0; i<numImages; i++){
+        await generateImages(prompt, 1, async (imageUrl) => {
             const replyActivity = MessageFactory.attachment({
                 contentType: 'image/png',
-                contentUrl: url,
+                contentUrl: imageUrl,
             });
             await context.sendActivity(replyActivity);
-        }
-    } catch (error) {
-        // Error handling 
-        console.error('Error occurred:', error);
-        await context.sendActivity("Error occurred while generating images: " + error.message);
-        return;
+        });
     }
 
     let endTime = new Date().getTime();
+
+
     let difference = endTime - startTime;
     let seconds = (difference / 1000).toFixed(3);
     await context.sendActivity(`We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
