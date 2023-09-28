@@ -54,7 +54,7 @@ async function createDalleImages(context) {
 
     let endTime = new Date();
     let difference = endTime - startTime;
-    let seconds = Math.floor(difference / 1000);
+    let seconds = (difference / 1000).toFixed(3);
     await context.sendActivity(`We generated ${numImages} image(s) for you that took a total of ${seconds} seconds. Thank you.`);
 }
 
