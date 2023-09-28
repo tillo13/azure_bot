@@ -44,7 +44,10 @@ async function sendMessageResponse(context, message) {
 
 
 async function generateDogImage(context) {
-    const baseUrl = "https://tillo-openai.openai.azure.com/openai";
+    console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Starting to generate a new dog image...');
+
+    const baseUrl = process.env.OPENAI_DALLE_BASE_URL;
+    const version = process.env.OPENAI_DALLE_VERSION;
     const headers = {
         "API-Key": process.env.OPENAI_DALLE_API_KEY,
         "Content-Type": "application/json",
@@ -56,30 +59,43 @@ async function generateDogImage(context) {
         n: 1,
     };
 
+    console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Preparing to make the POST request...');
+    const startTime = new Date();
     const response = await fetch(
-        `${baseUrl}/images/generations:submit?api-version=2023-06-01-preview`,
+        `${baseUrl}/images/generations:submit?api-version=${version}`,
         {
             method: "POST",
             headers,
             body: JSON.stringify(requestBody),
         }
     );
-
+    
     const initJob = await response.json();
+    const requestEndTime = new Date();
+    const requestDuration = (requestEndTime - startTime) / 1000; // in seconds
+    console.log(`\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - POST request completed in ${requestDuration} seconds`);
+    
     if(!initJob.id){
-        console.log('Error while submitting a job', initJob);
+        console.log('\n\n*****SPECIAL_COMMANDS.JS: Error occurred while submitting a job', initJob);
         return;
     } 
 
     const jobId = initJob.id;
-    console.log('Job submitted, id: ', jobId);
+    console.log('\n\n*****SPECIAL_COMMANDS.JS: Job submitted, id: ', jobId);
 
     for (let i = 0; i < 5; i++) {
-        // Wait 1.5 seconds after a request
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Start iteration number:', i+1);
 
+        // Wait 1.5 seconds after a request
+        const waitStartTime = new Date();
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        const waitEndTime = new Date();
+        const waitDuration = (waitEndTime - waitStartTime) / 1000; // in seconds
+        console.log(`\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Completed wait of ${waitDuration} seconds, preparing to make the GET request...`);
+
+        const getStartTime = new Date();
         const response = await fetch(
-            `${baseUrl}/operations/images/${jobId}?api-version=2023-06-01-preview`,
+            `${baseUrl}/operations/images/${jobId}?api-version=${version}`,
             {
                 method: "GET",
                 headers,
@@ -87,17 +103,21 @@ async function generateDogImage(context) {
         );
 
         const job = await response.json();
+        const getEndTime = new Date();
+        const getRequestDuration = (getEndTime - getStartTime) / 1000; // in seconds
+        console.log(`\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Completed the GET request in ${getRequestDuration} seconds`);
 
+        console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Received job status:', job.status);
         if (job.status === "succeeded") {
             const imageUrl = job?.result?.data[0]?.url;
             if (imageUrl) {
-                console.log('Image generated, url: ', imageUrl);
+                console.log('\n\n*****SPECIAL_COMMANDS.JS: Image generated successfully, url: ', imageUrl);
                 await context.sendActivity(`Here's a nice photo of a dog: ${imageUrl}`);
             }
             // exit the for-loop early since we have what we wanted
             break;
         } else if(job.status !== 'running'){
-            console.log('Unknown job status: ', job.status)
+            console.log('\n\n*****SPECIAL_COMMANDS.JS: generateDogImage() - Received unexpected job status: ', job.status)
         }
     }
 }
