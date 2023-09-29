@@ -72,20 +72,17 @@ class EchoBot extends ActivityHandler {
                     let handled = false;
                     handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction) || handled;
                     if (handled) {
-                      await this.chatMessagesProperty.set(context, chatMessagesUser);
-                      await next();
-                      return; // Add return statement here
+                        await this.chatMessagesProperty.set(context, chatMessagesUser);
+                        // remove await next(); from here
+                        return;
                     }
                     handled = await handleMessageFromSlack(context, chatMessagesUser, botCalled, botInThread, savedThread_ts, current_thread_ts, PERSONALITY_OF_BOT);
                     if (handled) {
-                      await this.chatMessagesProperty.set(context, chatMessagesUser);
-                      await next();
-                      return; // Add return statement here
+                        await this.chatMessagesProperty.set(context, chatMessagesUser);
+                        // remove await next(); from here as well
+                        return;
                     }
-                    if (!handled) {
-                        await handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT);
-                    }                    
-                    await this.chatMessagesProperty.set(context, chatMessagesUser);
+                    // call await next(); only once here:
                     await next();
                 }
             } catch (error) {
