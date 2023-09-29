@@ -12,7 +12,7 @@ function isFromSlack(context) {
 }
 
 async function postChatHistoryToSlack(channel_id, thread_ts, apiToken) {
-    const conversationHistory = await fetchConversationHistory(channel_id, thread_ts, apiToken);
+    const conversationHistory = await fetchConversationHistory(slack_channel_id, thread_ts, apiToken);
     const messages = conversationHistory.messages.filter(msg => !msg.hasOwnProperty('bot_id'));
     
     let chatRecord = formatChatRecord(messages);
@@ -21,7 +21,7 @@ async function postChatHistoryToSlack(channel_id, thread_ts, apiToken) {
     const cleanedChatRecord = cleanChatRecord(chatRecord);
     console.log('****SLACK.JS: cleaned payload ready for Openai: ', cleanedChatRecord);
   
-    await postMessageToSlack(channel_id, thread_ts, chatRecord, apiToken);
+    await postMessageToSlack(slack_channel_id, thread_ts, chatRecord, apiToken);
     return cleanedChatRecord;
 }
 
@@ -44,6 +44,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     const apiToken = context.activity.channelData?.ApiToken;
     const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
 
+    const slack_channel_id = context.activity.channelData.SlackMessage.event.channel;
+    
     if (context.activity.text.includes('@bot') || context.activity.text.includes('@atbot')) {
         activeThreads[thread_ts] = true;
     }
@@ -53,7 +55,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
         return;
     }
   
-    let cleanedFormattedMessages = letMeCheckFlag && apiToken ? await postChatHistoryToSlack(context.activity.channelData.SlackMessage.event.channel, thread_ts, apiToken) : null;
+    let cleanedFormattedMessages = letMeCheckFlag && apiToken ? await postChatHistoryToSlack(slack_channel_id, thread_ts, apiToken) : null;
+
     const isActiveThread = Boolean(activeThreads[thread_ts]);
     
     console.log('\n*&*&*& SLACK.JS bug check --> Cleaned formatted messages after postChatHistoryToSlack', cleanedFormattedMessages);
