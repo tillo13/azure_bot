@@ -70,7 +70,7 @@ class EchoBot extends ActivityHandler {
                 
                     let isFirstInteraction = await this.isFirstInteraction.get(context, true);
                     let handled = false;
-                    handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction);
+                    handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction) || handled;
                     if (handled) {
                       await this.chatMessagesProperty.set(context, chatMessagesUser);
                       await next();
@@ -82,7 +82,9 @@ class EchoBot extends ActivityHandler {
                       await next();
                       return; // Add return statement here
                     }
-                    await handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT);
+                    if (!handled) {
+                        await handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT);
+                    }                    
                     await this.chatMessagesProperty.set(context, chatMessagesUser);
                     await next();
                 }
