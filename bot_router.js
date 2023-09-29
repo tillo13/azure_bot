@@ -40,20 +40,28 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
+
             const messageContent = context.activity.text.trim();
             console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
             console.log('\n\n**BOT_ROUTER.JS: Bot received a message');
             console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
                         
-            // When the message is '$reset', clear the state and start over again
             if (messageContent.toLowerCase() === '$reset') {
                 try {
-                    // Clear user and conversation state, and start over again
+                    // Clear out user and conversation state
                     await this.userState.clear(context);
                     await this.conversationState.clear(context);
-                
-                    // Send a welcome message to start the dialog
-                    await context.sendActivity('Done! Let´s start over.');
+        
+                    // Start a new welcome message
+                    console.log('Bot state has been reset');
+                    await context.sendActivity('Hello and welcome to the memoried ATT-ESS Chatbot! Let´s start over.');
+        
+                    // Ensure to update the state changes
+                    await this.userState.saveChanges(context);
+                    await this.conversationState.saveChanges(context);
+        
+                    // End further processing of the message
+                    return;
                 } catch (error) {
                     await context.sendActivity(`Failed to reset: ${error}`);
                 }
