@@ -1,5 +1,5 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
-const { handleMessageFromWebChat, handleMessageFromMSTeams, handleMessageFromSlack, handleDefault } = require('./bot_behaviors/message_handler');
+const { handleMessageFromMSTeams, handleMessageFromSlack, handleDefault } = require('./bot_behaviors/message_handler');
 const specialCommands = require('./bot_behaviors/special_commands');
 
 const WELCOMED_USER = 'welcomedUserProperty';
@@ -72,7 +72,6 @@ class EchoBot extends ActivityHandler {
 
             let isFirstInteraction = await this.isFirstInteraction.get(context, true);
             let handled = false;
-            if (!handled) handled = await handleMessageFromWebChat(context, chatMessagesUser, isFirstInteraction, PERSONALITY_OF_BOT);
             if (!handled) handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction);
             if (!handled) handled = await handleMessageFromSlack(context, chatMessagesUser, botCalled, botInThread, savedThread_ts, current_thread_ts, PERSONALITY_OF_BOT);
             if (!handled) handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT);
