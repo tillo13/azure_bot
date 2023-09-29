@@ -86,9 +86,23 @@ class EchoBot extends ActivityHandler {
                 await this.isFirstInteraction.set(context, false);
             } 
             else if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
-                // Code for handling Slack Interaction
                 console.log("\n\n**BOT_ROUTER.JS: Message from Slack and bot was either called or is already in thread. Processing...");
-                // Rest of the code for handling Slack Messages...
+                let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
+                
+                if(chatResponse.requery && chatResponse.isActiveThread) {
+                    const requeryNotice = "Let me check our past conversations, one moment...";
+                    await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
+                    
+                    const chatResponses = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId, result.isActiveThread);
+                    chatMessagesUser.push({ role: "assistant", content: chatResponses.assistantResponse });
+                }
+                
+                chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
+                
+                const result = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
+        
+                console.log(`\n\n**BOT_ROUTER.JS: letMeCheckFlag is: ${chatResponse.letMeCheckFlag}`);
+                
             } else {
                 // Code for handling default interaction
                 const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
