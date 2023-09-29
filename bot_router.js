@@ -82,31 +82,35 @@ class EchoBot extends ActivityHandler {
 					}
 
 					let isFirstInteraction = await this.isFirstInteraction.get(context, true);
-					let handled = false;
-                    handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction) || handled;
-                    if (handled) {
-                          await this.chatMessagesProperty.set(context, chatMessagesUser);
-                          return;
-                    } 
-                    
-                    handled = await handleMessageFromSlack(context, chatMessagesUser, botCalled, botInThread, savedThread_ts, current_thread_ts, PERSONALITY_OF_BOT);
-                    if (handled) {
-                          await this.chatMessagesProperty.set(context, chatMessagesUser);
-                          return;
-                    } 
-                                        
-                    // If not handled by MSTeams or Slack, call the default handler
-                    handled = await handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT);
-                    if (handled) {
-                          await this.chatMessagesProperty.set(context, chatMessagesUser);
-                          await next();
-                          return;
+                    if (!botCalled && !(botInThread && savedThread_ts === current_thread_ts) && isFromSlack(context)) {
+                        console.log("\n\n**BOT_ROUTER.JS: Message from Slack was not directed to bot or in a thread where bot was active. Ignoring...");
+                            return;
                     }
-				}
-			} catch (error) {
-				console.error("**BOT_ROUTER.JS: An error occurred:", error);
-			}
-		});
+                        let handled = false;
+                        handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction) || handled;
+                        if (handled) {
+                            await this.chatMessagesProperty.set(context, chatMessagesUser);
+                            return;
+                        } 
+            
+                        handled = await handleMessageFromSlack(context, chatMessagesUser, botCalled, botInThread, savedThread_ts, current_thread_ts, PERSONALITY_OF_BOT);
+                        if (handled) {
+                            await this.chatMessagesProperty.set(context, chatMessagesUser);
+                            return;
+                        } 
+            
+                        // If not handled by MSTeams or Slack, call the default handler
+                        handled = await handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT);
+                        if (handled) {
+                            await this.chatMessagesProperty.set(context, chatMessagesUser);
+                            await next();
+                            return;
+                        }		
+                    }
+                } catch (error) {
+                    console.error("**BOT_ROUTER.JS: An error occurred:", error);
+                }
+            });
 	}
 
 	async run(context) {
