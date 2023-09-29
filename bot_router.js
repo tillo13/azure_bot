@@ -1,19 +1,11 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
-const { handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
-const { handleTeamsMessage, isFromMSTeams } = require('./bot_behaviors/msteams');
-
+const { handleMessageFromWebChat, handleMessageFromMSTeams, handleMessageFromSlack, handleDefault } = require('./bot_behaviors/message_handler');
 const specialCommands = require('./bot_behaviors/special_commands');
-
-const chatCompletion = require('./bot_behaviors/chat_helper');
 
 const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
 const THREAD_TS = 'thread_ts';
 const PERSONALITY_OF_BOT = "You talk like an old cowboy! You are a helpful chatbot from Teradata. As a crucial aspect of your function, ensure you always reference past user and assistant prompts in the thread for the best understanding in order to respond effectively.";
-
-function isFromMsTeams(context) {
-    return context.activity.channelId === 'msteams';
-}
 
 class EchoBot extends ActivityHandler {
     constructor(userState) {
@@ -79,42 +71,17 @@ class EchoBot extends ActivityHandler {
             
 
             let isFirstInteraction = await this.isFirstInteraction.get(context, true);
+            let handled = false;
+            if (!handled) handled = await handleMessageFromWebChat(context, chatMessagesUser, isFirstInteraction, PERSONALITY_OF_BOT);
+            if (!handled) handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction);
+            if (!handled) handled = await handleMessageFromSlack(context, chatMessagesUser, botCalled, botInThread, savedThread_ts, current_thread_ts, PERSONALITY_OF_BOT);
+            if (!handled) handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT);
 
-            if (isFromMSTeams(context)) {
-                const assistantResponse = await handleTeamsMessage(context, chatMessagesUser, isFirstInteraction);
-                await context.sendActivity(MessageFactory.text(assistantResponse));
-                await this.isFirstInteraction.set(context, false);
-            } 
-            else if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
-                console.log("\n\n**BOT_ROUTER.JS: Message from Slack and bot was either called or is already in thread. Processing...");
-                let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
-                
-                if(chatResponse.requery && chatResponse.isActiveThread) {
-                    const requeryNotice = "Let me check our past conversations, one moment...";
-                    await context.sendActivity(MessageFactory.text(requeryNotice, requeryNotice));
-                    
-                    const chatResponses = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId, result.isActiveThread);
-                    chatMessagesUser.push({ role: "assistant", content: chatResponses.assistantResponse });
-                }
-                
-                chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
-                
-                const result = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
-        
-                console.log(`\n\n**BOT_ROUTER.JS: letMeCheckFlag is: ${chatResponse.letMeCheckFlag}`);
-                
-            } else {
-                // Code for handling default interaction
-                const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
-                console.log(`\n\n***BOT_ROUTER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
-                            
-                await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
-            }
-            
             await this.chatMessagesProperty.set(context, chatMessagesUser);
             await next();
-    }});
-    }
+        }
+    });
+}
 
     async run(context) {
         console.log('\n\n**BOT_ROUTER.JS: Running the bot...');
