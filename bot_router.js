@@ -41,7 +41,7 @@ class EchoBot extends ActivityHandler {
 
 		this.onMessage(async (context, next) => {
 			try {
-                //log interaction to slack here
+                //log interaction to slack here.
                 const slack_api_token = process.env.SLACK_BOT_TOKEN;
                 const slack_channel_id = 'C05T52KUPLG';
                 console.log("\n\n**BOT_ROUTER.JS: slack_channel: ", slack_channel_id);
