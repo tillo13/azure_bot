@@ -84,5 +84,5 @@ elif [[ $hours -gt 0 ]]; then
 elif [[ $minutes -gt 0 ]]; then
     echo "Time since last save: $minutes minutes, $seconds seconds."
 else
-    echo "Time since last save: $seconds seconds."
+    echo "Time since last save: $seconds seconds.."
 fi
