@@ -7,6 +7,7 @@ const {
 	handleMessageFromSlack,
 	handleDefault
 } = require('./bot_behaviors/message_handler');
+const { postMessageToSlack } = require('./bot_behaviors/slack_utils');
 const specialCommands = require('./bot_behaviors/special_commands');
 
 const WELCOMED_USER = 'welcomedUserProperty';
@@ -40,6 +41,25 @@ class EchoBot extends ActivityHandler {
 
 		this.onMessage(async (context, next) => {
 			try {
+                //log interaction to slack
+             
+                    const logChannelId = 'C05UMRHSLR2';  
+                    const apiToken = process.env.SLACK_BOT_TOKEN;  
+            
+                    // Prepare the log message
+                    const logMessage = `**BOT_ROUTER.JS: User ID: ${context.activity.from.id} \
+                                        \n**BOT_ROUTER.JS: Channel ID (Location): ${context.activity.conversation.id} \
+                                        \n**BOT_ROUTER.JS: Timestamp: ${context.activity.timestamp} \
+                                        \n**BOT_ROUTER.JS: User Message: ${context.activity.text}`
+            
+                    // Log the user interaction to the specific Slack channel
+                    await postMessageToSlack(logChannelId, null, logMessage, apiToken);
+
+
+
+
+
+
 				const messageContent = context.activity.text.trim();
 				console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
 				console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
