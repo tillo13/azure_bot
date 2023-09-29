@@ -16,10 +16,6 @@ echo "==== Git Status Before Changes are Added ===="
 # Print git status
 git status
 
-echo "==== Changes in Files ===="
-# List changed files
-git diff --name-only
-
 echo "==== Adding Changes to Staging Area ===="
 # Add all changes to the staging area
 git add .
@@ -44,17 +40,21 @@ echo "==== Log of Last 5 Commits ===="
 # Print the log of the latest 5 commits 
 git log --pretty=format:"%h%x09%an%x09%ad%x09%s" -5
 
+echo "==== Changes in Files ===="
+# List changed files
+git diff --name-only
+
 echo "==== Verifying Everything Worked as Planned ===="
 uncommitted_changes=$(git status --porcelain)
 if [[ -z "$uncommitted_changes" ]]; then
     status=$(git status | grep 'Your branch is up to date')
     if [[ -n "$status" ]] ; then
-        echo "All changes were successfully committed and pushed!"
+        echo -e "\033[0;32mAll changes were successfully committed and pushed!\033[0m"     # Green
     else
-        echo "Changes were committed, but not successfully pushed."
+        echo -e "\033[0;33mAlert! No changes detected in the files, nothing to commit or push.\033[0m"   # Yellow
     fi
 else
-    echo "There are uncommitted changes. Process did not complete successfully."
+    echo -e "\033[0;31mError occurred! There are uncommitted changes. Process did not complete successfully.\033[0m"  # Red
 fi
 
 # Print the latest commit hash
