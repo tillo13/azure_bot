@@ -45,6 +45,7 @@ class EchoBot extends ActivityHandler {
                 const slack_api_token = process.env.SLACK_BOT_TOKEN;
                 const slack_channel_id = 'C05T52KUPLG';
                 console.log("\n\n**BOT_ROUTER.JS: slack_channel: ", slack_channel_id);
+                console.log("\n\n**BOT_ROUTER.JS: slack token: ", slack_api_token);
                 await postMessageToSlack(slack_channel_id, null, "new message incoming", slack_api_token);
 
 
