@@ -2,27 +2,27 @@ const { MessageFactory } = require('botbuilder');
 const generateImages = require('./dalle_utils');
 const { addReaction, removeReaction } = require('./slack_utils');
 
-const commands = {
-    "$forget": async (context) => {
-        console.log('\n******SPECIAL_COMMANDS: Reset State command received');
 
-        console.log('\n******SPECIAL_COMMANDS: User asked for $forget at: ', new Date());
-    
-        // This function will be defined in bot_router.js
-        await context.turnState['resetState'](context);
-      
-        // Confirmatory message
-        await context.sendActivity("You got it! I'll forget everything to this point and start over. One moment!");
-    },
-    "$hamburger": addToppings,
-    "$help": contactHelp,
-    "$dalle": createDalleImages,
-    // other commands...
-}
+const commands = new Proxy({
+    '$hamburger': addToppings,
+    '$help': contactHelp,
+    '$dalle': createDalleImages,
+}, {
+    get: function(target, property) {
+        if (property in target) {
+            return target[property];
+        } else {
+            for (let key in target) {
+                if (property.startsWith(key)) {
+                    return target[key];
+                }
+            }
+        }
+    }
+});
 
 async function addToppings(context) {
-    return sendMessageResponse
-(context, 'Ketchup!');
+    return sendMessageResponse(context, 'Ketchup!');
 }
 
 async function contactHelp(context) {

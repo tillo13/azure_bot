@@ -16,20 +16,6 @@ function isFromMsTeams(context) {
 }
 
 class EchoBot extends ActivityHandler {
-    // Define the resetState function
-    resetState(context) {
-        console.log("\n\n**BOT_ROUTER.JS: Resetting the state...");
-        // Sets all the state properties to their default values
-        this.welcomedUserProperty.set(context, false);
-        this.chatMessagesProperty.set(context, []);
-        this.threadproperty.set(context, "");
-        this.botInvokedFlag.set(context, false);
-        this.isFirstInteraction.set(context, false);
-        // Add your own properties to reset, if any
-        console.log("\n\n**BOT_ROUTER.JS: State has been reset!");
-
-    }
-
     constructor(userState) {
         super();
         this.welcomedUserProperty = userState.createProperty(WELCOMED_USER);
@@ -39,7 +25,6 @@ class EchoBot extends ActivityHandler {
         this.userState = userState;
         // During bot initialization via msteams addition
         this.isFirstInteraction = userState.createProperty('isFirstInteraction');
-        this.resetState = this.resetState.bind(this);
 
         this.onMembersAdded(async (context, next) => {
             console.log("\n\n**BOT_ROUTER.JS: A member(s) has been added to the chat");
@@ -60,7 +45,6 @@ class EchoBot extends ActivityHandler {
             console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
             console.log('\n\n**BOT_ROUTER.JS: Bot received a message');
             console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
-            
                     
             if (specialCommands[messageContent]) {
                 // If the command exists in our special commands, execute it
@@ -117,18 +101,10 @@ class EchoBot extends ActivityHandler {
             await next();
     }});
     }
-    async onTurn(turnContext, next) {
-        console.log("\n\n**BOT_ROUTER.JS: Adding resetState to turnState");
-        // Add resetState to turnState so it can be accessed in commands
-        turnContext.turnState['resetState'] = this.resetState;
-        await super.onTurn(turnContext, next);
-    }
-
 
     async run(context) {
         console.log('\n\n**BOT_ROUTER.JS: Running the bot...');
         await super.run(context);
-        console.log('\n\n**BOT_ROUTER.JS: Bot has been run.');
         await this.userState.saveChanges(context);
         console.log('\n\n**BOT_ROUTER.JS: State changes have been saved.');
     }
