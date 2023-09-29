@@ -51,6 +51,7 @@ async function fetchConversationHistory(slack_channel_id, thread_ts, apiToken) {
 }
 
 async function postMessageToSlack(slack_channel_id, thread_ts, message, apiToken) {
+  const slack_channel_id = 'C05T52KUPLG'; 
   const data = JSON.stringify({
       channel: slack_channel_id,
       thread_ts: thread_ts,
