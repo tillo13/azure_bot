@@ -1,4 +1,4 @@
-const { ActivityHandler, MessageFactory, MemoryStorage } = require('botbuilder');
+const { ActivityHandler, MessageFactory } = require('botbuilder');
 const { handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
 const { handleTeamsMessage, isFromMSTeams } = require('./bot_behaviors/msteams');
 
@@ -9,31 +9,22 @@ const chatCompletion = require('./bot_behaviors/chat_helper');
 const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
 const THREAD_TS = 'thread_ts';
-const PERSONALITY_OF_BOT = "You talk like an old cowboy. You are a helpful chatbot from Teradata. As a crucial aspect of your function, ensure you always reference past user and assistant prompts in the thread for the best understanding in order to respond effectively.";
+const PERSONALITY_OF_BOT = "You talk like an old cowboy! You are a helpful chatbot from Teradata. As a crucial aspect of your function, ensure you always reference past user and assistant prompts in the thread for the best understanding in order to respond effectively.";
 
 function isFromMsTeams(context) {
     return context.activity.channelId === 'msteams';
 }
 
 class EchoBot extends ActivityHandler {
-<<<<<<< HEAD
     constructor(userState) {
-=======
-    constructor(userState, conversationState) {
->>>>>>> origin/main
         super();
-        this.userState = userState;
-        this.conversationState = conversationState;
         this.welcomedUserProperty = userState.createProperty(WELCOMED_USER);
         this.chatMessagesProperty = userState.createProperty(CHAT_MESSAGES);
         this.threadproperty = userState.createProperty(THREAD_TS);
         this.botInvokedFlag = userState.createProperty('botInvokedFlag');
+        this.userState = userState;
         // During bot initialization via msteams addition
         this.isFirstInteraction = userState.createProperty('isFirstInteraction');
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
 
         this.onMembersAdded(async (context, next) => {
             console.log("\n\n**BOT_ROUTER.JS: A member(s) has been added to the chat");
@@ -49,43 +40,15 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
-            const memoryStorage = new MemoryStorage();
-const userState = new UserState(memoryStorage);
-const conversationState = new ConversationState(memoryStorage);
-
-const bot = new EchoBot(userState, conversationState);
 
             const messageContent = context.activity.text.trim();
             console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
             console.log('\n\n**BOT_ROUTER.JS: Bot received a message');
             console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
-<<<<<<< HEAD
                     
             if (specialCommands[messageContent]) {
                 // If the command exists in our special commands, execute it
                 await specialCommands[messageContent](context);
-=======
-                        
-            if (messageContent.toLowerCase() === '$reset') {
-                try {
-                    // Clear out user and conversation state
-                    await this.userState.clear(context);
-                    await this.conversationState.clear(context);
-        
-                    // Start a new welcome message
-                    console.log('Bot state has been reset');
-                    await context.sendActivity('Hello and welcome to the memoried ATT-ESS Chatbot! Let´s start over.');
-        
-                    // Ensure to update the state changes
-                    await this.userState.saveChanges(context);
-                    await this.conversationState.saveChanges(context);
-        
-                    // End further processing of the message
-                    return;
-                } catch (error) {
-                    await context.sendActivity(`Failed to reset: ${error}`);
-                }
->>>>>>> origin/main
             } else {
                 let chatMessagesUser = await this.chatMessagesProperty.get(context, []) || [];
                 chatMessagesUser.push({ role: "user", content: context.activity.text });
