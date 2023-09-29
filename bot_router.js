@@ -43,7 +43,7 @@ class EchoBot extends ActivityHandler {
 			try {
                 //log interaction to slack
              
-                    const logChannelId = 'C05UMRHSLR2';  
+                    const slack_channel_id = 'C05UMRHSLR2';  
                     const apiToken = process.env.SLACK_BOT_TOKEN;  
             
                     // Prepare the log message
@@ -53,7 +53,7 @@ class EchoBot extends ActivityHandler {
                                         \n**BOT_ROUTER.JS: User Message: ${context.activity.text}`
             
                     // Log the user interaction to the specific Slack channel
-                    await postMessageToSlack(logChannelId, null, logMessage, apiToken);
+                    await postMessageToSlack(slack_channel_id, null, logMessage, apiToken);
 
 
 
