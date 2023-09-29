@@ -2,8 +2,7 @@
 require('dotenv').config();
 
 
-const { UserState, MemoryStorage, CloudAdapter, ConfigurationServiceClientCredentialFactory, createBotFrameworkAuthenticationFromConfiguration } = require('botbuilder');
-
+const { UserState, ConversationState, MemoryStorage, CloudAdapter, ConfigurationServiceClientCredentialFactory, createBotFrameworkAuthenticationFromConfiguration } = require('botbuilder');
 const path = require('path');
 const restify = require('restify');
 const { EchoBot } = require('./bot_router');
@@ -25,6 +24,7 @@ const adapter = new CloudAdapter(botFrameworkAuthentication);
 
 // Create User State
 let userState = new UserState(new MemoryStorage());
+let conversationState = new ConversationState(new MemoryStorage());
 
 // Catch-all for errors.
 const onTurnErrorHandler = async (context, error) => {
@@ -51,7 +51,8 @@ server.listen(process.env.port || process.env.PORT || 3978, () => {
 
 // EchoBot initialization
 console.log("\n\n*INDEX.JS: Initializing the EchoBot with User State...\n");
-const myBot = new EchoBot(userState);
+
+const myBot = new EchoBot(userState, conversationState);
 
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
