@@ -41,24 +41,8 @@ class EchoBot extends ActivityHandler {
 
 		this.onMessage(async (context, next) => {
 			try {
-                //log interaction to slack
-             
-                    const slack_channel_id = 'C05T52KUPLG';  
-                    const apiToken = process.env.SLACK_BOT_TOKEN;  
-            
-                    // Prepare the log message
-                    const logMessage = `**BOT_ROUTER.JS: User ID: ${context.activity.from.id} \
-                                        \n**BOT_ROUTER.JS: Channel ID (Location): ${context.activity.conversation.id} \
-                                        \n**BOT_ROUTER.JS: Timestamp: ${context.activity.timestamp} \
-                                        \n**BOT_ROUTER.JS: User Message: ${context.activity.text}`
-            
-                    // Log the user interaction to the specific Slack channel
-                    await postMessageToSlack(slack_channel_id, null, logMessage, apiToken);
-
-
-
-
-
+                //log interaction to slack here
+                console.log("\n\n**BOT_ROUTER.JS: slack_channel: ", slack_channel_id);
 
 				const messageContent = context.activity.text.trim();
 				console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
