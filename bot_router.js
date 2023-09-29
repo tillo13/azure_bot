@@ -16,16 +16,16 @@ function isFromMsTeams(context) {
 }
 
 class EchoBot extends ActivityHandler {
-    constructor(userState) {
+    constructor(userState, conversationState) {
         super();
+        this.userState = userState;
+        this.conversationState = conversationState;
         this.welcomedUserProperty = userState.createProperty(WELCOMED_USER);
         this.chatMessagesProperty = userState.createProperty(CHAT_MESSAGES);
         this.threadproperty = userState.createProperty(THREAD_TS);
         this.botInvokedFlag = userState.createProperty('botInvokedFlag');
-        this.userState = userState;
         // During bot initialization via msteams addition
         this.isFirstInteraction = userState.createProperty('isFirstInteraction');
-        this.conversationState = conversationState;
 
 
         this.onMembersAdded(async (context, next) => {
