@@ -22,34 +22,60 @@ async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstIntera
     return false;
 }
 
-async function handleMessageFromSlack(context, chatMessagesUser, botCalled, botInThread, savedThread_ts, current_thread_ts, PERSONALITY_OF_BOT) {
-	if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
-		let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
+async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts, botInvokedFlag, threadproperty, PERSONALITY_OF_BOT) {
+	
+    const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
+        context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
+    console.log("\n\n**MESSAGE_HANDLER.JS: Current Slack thread timestamp: ", current_thread_ts);
 
-		if (chatResponse.requery && chatResponse.isActiveThread) {
-			const chatResponses = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId, result.isActiveThread);
-			chatMessagesUser.push({
-				role: "assistant",
-				content: chatResponses.assistantResponse
-			});
-		}
+    let savedThread_ts = await threadproperty.get(context, "");
 
-		chatMessagesUser.push({
-			role: "assistant",
-			content: chatResponse.assistantResponse
-		});
+    const botCalled = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
+    let botInThread = await botInvokedFlag.get(context, false);
 
-		const result = await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
-		return true;
-	}
+    // Reset messages on new thread init
+    if (savedThread_ts !== current_thread_ts) {
+        chatMessagesUser = [];
+        await threadproperty.set(context, current_thread_ts);
+    }
 
-	return false;
+    if (botCalled) {
+        console.log("\n\n**MESSAGE_HANDLER.JS: '@bot' or '@atbot' mentioned in the message. Bot Invoked: ", botCalled);
+
+        botInThread = true;
+        await botInvokedFlag.set(context, botInThread);
+        chatMessagesUser.push({
+            role: "user",
+            content: context.activity.text
+        });
+    } 
+
+    if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
+        let chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
+
+        if (chatResponse.requery && chatResponse.isActiveThread) {
+            const chatResponses = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId, result.isActiveThread);
+            chatMessagesUser.push({
+                role: "assistant",
+                content: chatResponses.assistantResponse
+            });
+        }
+
+        chatMessagesUser.push({
+            role: "assistant",
+            content: chatResponse.assistantResponse
+        });
+
+        await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
+        return true;
+    }
+    return false;
 }
 
 async function handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT) {
     // Code for handling default interaction
     const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
-    console.log(`\n\n***BOT_ROUTER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
+    console.log(`\n\n***MESSAGE_HANDLER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
                             
     await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
 
