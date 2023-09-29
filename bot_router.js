@@ -87,19 +87,21 @@ class EchoBot extends ActivityHandler {
                     if (handled) {
                           await this.chatMessagesProperty.set(context, chatMessagesUser);
                           return;
-                    }
+                    } 
                     
                     handled = await handleMessageFromSlack(context, chatMessagesUser, botCalled, botInThread, savedThread_ts, current_thread_ts, PERSONALITY_OF_BOT);
                     if (handled) {
                           await this.chatMessagesProperty.set(context, chatMessagesUser);
                           return;
-                    }
+                    } 
                                         
                     // If not handled by MSTeams or Slack, call the default handler
-                    await handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT);
-                    await this.chatMessagesProperty.set(context, chatMessagesUser);
-                    // call await next(); only once here:
-                    await next();
+                    handled = await handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT);
+                    if (handled) {
+                          await this.chatMessagesProperty.set(context, chatMessagesUser);
+                          await next();
+                          return;
+                    }
 				}
 			} catch (error) {
 				console.error("**BOT_ROUTER.JS: An error occurred:", error);
