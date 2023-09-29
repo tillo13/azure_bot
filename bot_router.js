@@ -1,4 +1,4 @@
-const { ActivityHandler, MessageFactory } = require('botbuilder');
+const { ActivityHandler, MessageFactory, MemoryStorage } = require('botbuilder');
 const { handleSlackMessage, isFromSlack } = require('./bot_behaviors/slack');
 const { handleTeamsMessage, isFromMSTeams } = require('./bot_behaviors/msteams');
 
