@@ -73,15 +73,22 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 }
 
 async function handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT) {
-    // Code for handling default interaction
+    // Ignore if the message source is from Slack
+    if (isFromSlack(context)) {
+        console.log("\n\n**MESSAGE_HANDLER.JS: Message from Slack and bot was not called or is not in thread. Ignoring...");
+        return false;
+    }
+
+    // Continue with the rest of the function
     const chatResponse = await chatCompletion(chatMessagesUser, PERSONALITY_OF_BOT, context.activity.channelId);
+
     console.log(`\n\n***MESSAGE_HANDLER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
-                            
+
     await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
 
     return true;
 }
-
+        
 module.exports = {
 	handleMessageFromMSTeams,
 	handleMessageFromSlack,
