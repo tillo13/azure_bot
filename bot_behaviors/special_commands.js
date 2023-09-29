@@ -7,6 +7,8 @@ const commands = new Proxy({
     '$hamburger': addToppings,
     '$help': contactHelp,
     '$dalle': createDalleImages,
+    '$forget': forgetCommand, 
+
 }, {
     get: function(target, property) {
         if (property in target) {
@@ -20,6 +22,16 @@ const commands = new Proxy({
         }
     }
 });
+
+async function forgetCommand(context) {
+    // Sending the reset acknowledgement message
+    await sendMessageResponse(context, 'Ok, I will forget everything and start over. One moment...');
+
+    // Clearing the context's chathistory
+    // Assuming that the chathistory is stored in a userState variable called chatMessages
+    // If the location or name is different in the actual code, adjust accordingly
+    await context.userState.clear(context);
+}
 
 async function addToppings(context) {
     return sendMessageResponse(context, 'Ketchup!');
