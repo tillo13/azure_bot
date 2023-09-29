@@ -36,6 +36,12 @@ echo "==== Pushing Changes to 'main' Branch ===="
 # Push the changes to the 'main' branch
 push_result=$(git push origin main)
 
+# Create a time stamp if push was successful
+if [[ $? -eq 0 ]]; then
+    # The push was successful. Record the current time.
+    date +%s > last_successful_push.timestamp
+fi
+
 echo "==== Git Status After Push ===="
 # Print git status after push
 git status
@@ -65,24 +71,33 @@ echo "Latest commit hash: $latest_commit"
 # Print the current local time
 current_time=$(date)
 echo "Current local time: $current_time"
-echo "==== Time Since Last Save ===="
+echo "==== Time Since Last Successful Push ===="
 
 current_time=$(date +%s)                # Current timestamp in seconds
-last_saved_time=$(git show -s --format=%ct HEAD)   # Timestamp of the last commit
-time_diff=$((current_time - last_saved_time))      # Difference in timestamps
 
-# Calculate days, hours, minutes and seconds
-days=$((time_diff/(60*60*24)))
-hours=$((time_diff/(60*60)%24))
-minutes=$((time_diff/60%60))
-seconds=$((time_diff%60))
+# Check if the last_successful_push.timestamp file exits
+if [ -f last_successful_push.timestamp ]; then
+    # Read the timestamp from the file
+    last_successful_push=$(cat last_successful_push.timestamp)
 
-if [[ $days -gt 0 ]]; then
-    echo "Time since last save: $days days, $hours hours, $minutes minutes, $seconds seconds."
-elif [[ $hours -gt 0 ]]; then
-    echo "Time since last save: $hours hours, $minutes minutes, $seconds seconds."
-elif [[ $minutes -gt 0 ]]; then
-    echo "Time since last save: $minutes minutes, $seconds seconds."
+    time_diff=$((current_time - last_successful_push))      # Difference in timestamps
+
+    # Calculate days, hours, minutes, and seconds
+    days=$((time_diff/(60*60*24)))
+    hours=$((time_diff/(60*60)%24))
+    minutes=$((time_diff/60%60))
+    seconds=$((time_diff%60))
+
+    # Choose the appropriate format based on the units of time that have elapsed
+    if [[ $days -gt 0 ]]; then
+        echo "Time since last successful push: $days days, $hours hours, $minutes minutes, $seconds seconds."
+    elif [[ $hours -gt 0 ]]; then
+        echo "Time since last successful push: $hours hours, $minutes minutes, $seconds seconds."
+    elif [[ $minutes -gt 0 ]]; then
+        echo "Time since last successful push: $minutes minutes, $seconds seconds."
+    else
+        echo "Time since last successful push: $seconds seconds."
+    fi
 else
-    echo "Time since last save: $seconds seconds.."
+    echo "No successful push has been recorded yet. Run this script after a successful push to start tracking."
 fi
