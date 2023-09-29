@@ -74,13 +74,13 @@ class EchoBot extends ActivityHandler {
                     if (handled) {
                       await this.chatMessagesProperty.set(context, chatMessagesUser);
                       await next();
-                      return;
+                      return; // Add return statement here
                     }
                     handled = await handleMessageFromSlack(context, chatMessagesUser, botCalled, botInThread, savedThread_ts, current_thread_ts, PERSONALITY_OF_BOT);
                     if (handled) {
                       await this.chatMessagesProperty.set(context, chatMessagesUser);
                       await next();
-                      return;
+                      return; // Add return statement here
                     }
                     await handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT);
                     await this.chatMessagesProperty.set(context, chatMessagesUser);
