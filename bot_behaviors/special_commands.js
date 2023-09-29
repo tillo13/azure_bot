@@ -24,13 +24,12 @@ const commands = new Proxy({
 });
 
 async function forgetCommand(context) {
-    // Sending the reset acknowledgement message
-    await sendMessageResponse(context, 'Ok, I will forget everything and start over. One moment...');
+    // send reset acknowledgement
+    await sendMessageResponse(context, 'Ok, I will forget everything and start over.');
 
-    // Clearing the context's chathistory
-    // Assuming that the chathistory is stored in a userState variable called chatMessages
-    // If the location or name is different in the actual code, adjust accordingly
-    await context.userState.clear(context);
+    // assuming chatMessagesProperty represents the chat history for the user
+    // if it's different in your actual code you might need to adjust accordingly
+    await this.chatMessagesProperty.delete(context);
 }
 
 async function addToppings(context) {
