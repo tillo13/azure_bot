@@ -4,6 +4,8 @@ const { addReaction, removeReaction } = require('./slack_utils');
 
 const commands = {
     "$forget": async (context) => {
+        console.log('\n******SPECIAL_COMMANDS: Reset State command received');
+
         console.log('\n******SPECIAL_COMMANDS: User asked for $forget at: ', new Date());
     
         // This function will be defined in bot_router.js
