@@ -82,7 +82,7 @@ class EchoBot extends ActivityHandler {
 					}
 
 					let isFirstInteraction = await this.isFirstInteraction.get(context, true);
-                    if (!botCalled && !(botInThread && savedThread_ts === current_thread_ts) && isFromSlack(context)) {
+                    if (!botCalled && !(botInThread && savedThread_ts === current_thread_ts) && handleMessageFromSlack(context)) {
                         console.log("\n\n**BOT_ROUTER.JS: Message from Slack was not directed to bot or in a thread where bot was active. Ignoring...");
                             return;
                     }
