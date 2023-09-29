@@ -7,8 +7,6 @@ const commands = new Proxy({
     '$hamburger': addToppings,
     '$help': contactHelp,
     '$dalle': createDalleImages,
-    '$forget': forgetCommand, 
-
 }, {
     get: function(target, property) {
         if (property in target) {
@@ -22,22 +20,6 @@ const commands = new Proxy({
         }
     }
 });
-
-async function forgetCommand(context) {
-    // send reset acknowledgement
-    await sendMessageResponse(context, 'Ok, I will forget everything and start over.');
-
-    // Reset the chatMessages to its initial state
-    let chatMessagesUser = [
-        {
-            role: "system",
-            content: "You are a helpful chatbot that likes the beatles."
-        }
-    ];
-    
-    // Save the reset state
-    await this.chatMessagesProperty.set(context, chatMessagesUser);
-}
 
 async function addToppings(context) {
     return sendMessageResponse(context, 'Ketchup!');
