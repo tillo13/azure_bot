@@ -41,6 +41,10 @@ class EchoBot extends ActivityHandler {
 
 		this.onMessage(async (context, next) => {
 			try {
+                const messageContent = context.activity.text.trim();
+				console.log('\n\n**BOT_ROUTER.JS: onMessage triggered!');
+				console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
+
                 //log interaction to slack here.
                 const slack_api_token = process.env.SLACK_BOT_TOKEN;
                 const slack_channel_id = 'C05T52KUPLG';
@@ -48,10 +52,6 @@ class EchoBot extends ActivityHandler {
                 console.log("\n\n**BOT_ROUTER.JS: slack token: ", slack_api_token);
                 await postMessageToSlack(slack_channel_id, null, "new message incoming", slack_api_token);
 
-
-				const messageContent = context.activity.text.trim();
-				console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
-				console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
 
                 if (specialCommands[messageContent]) {
                     console.log("\n\n**BOT_ROUTER.JS: A special command has been detected.");
