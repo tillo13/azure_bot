@@ -27,9 +27,16 @@ async function forgetCommand(context) {
     // send reset acknowledgement
     await sendMessageResponse(context, 'Ok, I will forget everything and start over.');
 
-    // assuming chatMessagesProperty represents the chat history for the user
-    // if it's different in your actual code you might need to adjust accordingly
-    await this.chatMessagesProperty.delete(context);
+    // Reset the chatMessages to its initial state
+    let chatMessagesUser = [
+        {
+            role: "system",
+            content: "You are a helpful chatbot that likes the beatles."
+        }
+    ];
+    
+    // Save the reset state
+    await this.chatMessagesProperty.set(context, chatMessagesUser);
 }
 
 async function addToppings(context) {
