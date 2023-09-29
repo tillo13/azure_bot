@@ -28,7 +28,7 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
         context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
     console.log("\n\n**MESSAGE_HANDLER.JS: Current Slack thread timestamp: ", current_thread_ts);
 
-    savedThread_ts = await this.threadproperty.get(context, "");
+    savedThread_ts = await threadproperty.get(context, "");
 
     const botCalled = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
     let botInThread = await botInvokedFlag.get(context, false);

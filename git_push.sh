@@ -65,3 +65,24 @@ echo "Latest commit hash: $latest_commit"
 # Print the current local time
 current_time=$(date)
 echo "Current local time: $current_time"
+echo "==== Time Since Last Save ===="
+
+current_time=$(date +%s)                # Current timestamp in seconds
+last_saved_time=$(git show -s --format=%ct HEAD)   # Timestamp of the last commit
+time_diff=$((current_time - last_saved_time))      # Difference in timestamps
+
+# Calculate days, hours, minutes and seconds
+days=$((time_diff/(60*60*24)))
+hours=$((time_diff/(60*60)%24))
+minutes=$((time_diff/60%60))
+seconds=$((time_diff%60))
+
+if [[ $days -gt 0 ]]; then
+    echo "Time since last save: $days days, $hours hours, $minutes minutes, $seconds seconds."
+elif [[ $hours -gt 0 ]]; then
+    echo "Time since last save: $hours hours, $minutes minutes, $seconds seconds."
+elif [[ $minutes -gt 0 ]]; then
+    echo "Time since last save: $minutes minutes, $seconds seconds."
+else
+    echo "Time since last save: $seconds seconds."
+fi
