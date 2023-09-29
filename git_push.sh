@@ -39,7 +39,7 @@ push_result=$(git push origin main)
 # Create a time stamp if push was successful
 if [[ $? -eq 0 ]]; then
     # The push was successful. Record the current time.
-    date +%s > last_successful_push.timestamp
+    date +%s > /tmp/last_successful_push.timestamp
 fi
 
 echo "==== Git Status After Push ===="
@@ -76,9 +76,9 @@ echo "==== Time Since Last Successful Push ===="
 current_time=$(date +%s)                # Current timestamp in seconds
 
 # Check if the last_successful_push.timestamp file exits
-if [ -f last_successful_push.timestamp ]; then
+if [ -f /tmp/last_successful_push.timestamp ]; then
     # Read the timestamp from the file
-    last_successful_push=$(cat last_successful_push.timestamp)
+    last_successful_push=$(cat /tmp/last_successful_push.timestamp)
 
     time_diff=$((current_time - last_successful_push))      # Difference in timestamps
 

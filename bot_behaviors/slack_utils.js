@@ -51,24 +51,38 @@ async function fetchConversationHistory(channelId, thread_ts, apiToken) {
 }
 
 async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
-    const data = JSON.stringify({
-        channel: channel_id,
-        thread_ts: thread_ts,
-        text: message
-    });
+  const data = JSON.stringify({
+      channel: channel_id,
+      thread_ts: thread_ts,
+      text: message
+  });
 
-    const options = {
-        hostname: 'slack.com',
-        path: '/api/chat.postMessage',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-            'Authorization': `Bearer ${apiToken}`,
-            'Content-Length': data.length
-        }
-    };
+  const options = {
+      hostname: 'slack.com',
+      path: '/api/chat.postMessage',
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': `Bearer ${apiToken}`,
+          'Content-Length': data.length
+      }
+  };
 
-    return await executeHttpPostRequest(options, data);
+  // log the data and options objects
+  console.log("*****SLACK_UTILS.JS: postMessageToSlack sending Data:", data);
+  console.log("*****SLACK_UTILS.JS: postMessageToSlack using Options:", options);
+  
+  return executeHttpPostRequest(options, data)
+      .then(response => {
+          // log the response object
+          console.log("*****SLACK_UTILS.JS: postMessageToSlack received Response:", response);
+          return response;
+      })
+      .catch(error => {
+          // log any error
+          console.error("*****SLACK_UTILS.JS: Error in postMessageToSlack:", error);
+          throw error;   // propagate the error to higher-level try-catch blocks
+      });
 }
 
 async function getBotId(apiToken) {
