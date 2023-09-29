@@ -1,3 +1,4 @@
+const { MessageFactory } = require('botbuilder');
 const {
     handleSlackMessage,
     isFromSlack
@@ -7,18 +8,6 @@ const {
     isFromMSTeams
 } = require('./msteams');
 const chatCompletion = require('./chat_helper');
-
-
-async function handleMessageFromWebChat(context, chatMessagesUser, isFirstInteraction, PERSONALITY_OF_BOT) {
-    if (context.activity.channelId === 'webchat') {
-        // Handle webchat messages here
-        // This is just a basic structure, adjust according to your needs
-        const assistantResponse = await handleWebChatMessage(context, chatMessagesUser, isFirstInteraction, PERSONALITY_OF_BOT);
-        await context.sendActivity(MessageFactory.text(assistantResponse));
-        return true;
-    }
-    return false;
-}
 
 async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction) {
     if (isFromMSTeams(context)) {
@@ -63,7 +52,6 @@ async function handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT) {
 }
 
 module.exports = {
-    handleMessageFromWebChat,
     handleMessageFromMSTeams,
     handleMessageFromSlack,
     handleDefault
