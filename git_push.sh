@@ -26,7 +26,7 @@ git add .
 
 echo "==== Committing Changes ===="
 # Commit the changes
-git commit -m "$1"
+commit_result=$(git commit -m "$1")
 
 echo "==== Details of Latest Commit ===="
 # Print the most recent commit
@@ -34,7 +34,7 @@ git log -1 --pretty=format:"%h%x09%an%x09%ad%x09%s"
 
 echo "==== Pushing Changes to 'main' Branch ===="
 # Push the changes to the 'main' branch
-git push origin main
+push_result=$(git push origin main)
 
 echo "==== Git Status After Push ===="
 # Print git status after push
@@ -47,11 +47,12 @@ git log --pretty=format:"%h%x09%an%x09%ad%x09%s" -5
 echo "==== Verifying Everything Worked as Planned ===="
 uncommitted_changes=$(git status --porcelain)
 if [[ -z "$uncommitted_changes" ]]; then
-    status=$(git status | grep 'Your branch is up to date')
-    if [[ -n "$status" ]] ; then
-        echo -e "\033[0;32mAll changes were successfully committed and pushed!\033[0m"     # Green
-    else
+    if [[ $commit_result =~ "nothing to commit" ]]; then
         echo -e "\033[0;33mAlert! No changes detected in the files, nothing to commit or push.\033[0m"   # Yellow
+    elif [[ $push_result =~ "Everything up-to-date" ]]; then
+        echo -e "\033[0;33mAlert! No new commits to push.\033[0m"   # Yellow
+    else
+        echo -e "\033[0;32mAll changes were successfully committed and pushed!\033[0m"     # Green
     fi
 else
     echo -e "\033[0;31mError occurred! There are uncommitted changes. Process did not complete successfully.\033[0m"  # Red
