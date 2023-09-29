@@ -44,10 +44,12 @@ class EchoBot extends ActivityHandler {
 				console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
 				console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
 
-				if (specialCommands[messageContent]) {
-					// If the command exists in our special commands, execute it
-					await specialCommands[messageContent](context);
-				} else {
+                if (specialCommands[messageContent]) {
+                    console.log("\n\n**BOT_ROUTER.JS: A special command has been detected.");
+                    console.log("\n\n**BOT_ROUTER.JS: Command content: ", context.activity.text);
+                    // If the command exists in our special commands, execute it
+                    await specialCommands[messageContent](context);
+                } else {
 					let chatMessagesUser = await this.chatMessagesProperty.get(context, []) || [];
 					chatMessagesUser.push({
 						role: "user",
