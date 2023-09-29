@@ -69,18 +69,18 @@ async function postMessageToSlack(channel_id, thread_ts, message, apiToken) {
   };
 
   // log the data and options objects
-  console.log("*****SLACK_UTILS.JS: postMessageToSlack sending Data:", data);
-  console.log("*****SLACK_UTILS.JS: postMessageToSlack using Options:", options);
+  console.log("\n*****SLACK_UTILS.JS: postMessageToSlack sending Data:\n", data);
+  console.log("\n*****SLACK_UTILS.JS: postMessageToSlack using Options:\n", options);
   
   return executeHttpPostRequest(options, data)
       .then(response => {
           // log the response object
-          console.log("*****SLACK_UTILS.JS: postMessageToSlack received Response:", response);
+          console.log("\n*****SLACK_UTILS.JS: postMessageToSlack received Response:\n", response);
           return response;
       })
       .catch(error => {
           // log any error
-          console.error("*****SLACK_UTILS.JS: Error in postMessageToSlack:", error);
+          console.error("\n*****SLACK_UTILS.JS: Error in postMessageToSlack:\n", error);
           throw error;   // propagate the error to higher-level try-catch blocks
       });
 }

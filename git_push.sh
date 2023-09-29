@@ -36,12 +36,6 @@ echo "==== Pushing Changes to 'main' Branch ===="
 # Push the changes to the 'main' branch
 push_result=$(git push origin main)
 
-# Create a time stamp if push was successful
-if [[ $? -eq 0 ]]; then
-    # The push was successful. Record the current time.
-    date +%s > /tmp/last_successful_push.timestamp
-fi
-
 echo "==== Git Status After Push ===="
 # Print git status after push
 git status
@@ -51,14 +45,13 @@ echo "==== Log of Last 5 Commits ===="
 git log --pretty=format:"%h%x09%an%x09%ad%x09%s" -5
 
 echo "==== Verifying Everything Worked as Planned ===="
-uncommitted_changes=$(git status --porcelain)
 if [[ -z "$uncommitted_changes" ]]; then
-    if [[ $commit_result =~ "nothing to commit" ]]; then
+    if [[ $commit_result =~ "nothing to commit" ]] && [[ $push_result =~ "Everything up-to-date" ]]; then
         echo -e "\033[0;33mAlert! No changes detected in the files, nothing to commit or push.\033[0m"   # Yellow
-    elif [[ $push_result =~ "Everything up-to-date" ]]; then
-        echo -e "\033[0;33mAlert! No new commits to push.\033[0m"   # Yellow
     else
         echo -e "\033[0;32mAll changes were successfully committed and pushed!\033[0m"     # Green
+        # Since there were changes that were successfully committed and pushed, update the timestamp file
+        date +%s > /tmp/last_successful_push.timestamp
     fi
 else
     echo -e "\033[0;31mError occurred! There are uncommitted changes. Process did not complete successfully.\033[0m"  # Red

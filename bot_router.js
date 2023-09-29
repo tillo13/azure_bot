@@ -43,7 +43,7 @@ class EchoBot extends ActivityHandler {
 			try {
                 //log interaction to slack
              
-                    const logChannelId = 'C05UMRHSLR2';  
+                    const logChannelId = 'C05T52KUPLG';  
                     const apiToken = process.env.SLACK_BOT_TOKEN;  
             
                     // Prepare the log message
