@@ -25,6 +25,8 @@ class EchoBot extends ActivityHandler {
         this.userState = userState;
         // During bot initialization via msteams addition
         this.isFirstInteraction = userState.createProperty('isFirstInteraction');
+        this.conversationState = conversationState;
+
 
         this.onMembersAdded(async (context, next) => {
             console.log("\n\n**BOT_ROUTER.JS: A member(s) has been added to the chat");
@@ -40,6 +42,11 @@ class EchoBot extends ActivityHandler {
         });
 
         this.onMessage(async (context, next) => {
+            const memoryStorage = new MemoryStorage();
+const userState = new UserState(memoryStorage);
+const conversationState = new ConversationState(memoryStorage);
+
+const bot = new EchoBot(userState, conversationState);
 
             const messageContent = context.activity.text.trim();
             console.log('\n\n**BOT_ROUTER.JS: onMessage triggered');
@@ -121,8 +128,9 @@ class EchoBot extends ActivityHandler {
     async run(context) {
         console.log('\n\n**BOT_ROUTER.JS: Running the bot...');
         await super.run(context);
+        await this.conversationState.saveChanges(context);
         await this.userState.saveChanges(context);
         console.log('\n\n**BOT_ROUTER.JS: State changes have been saved.');
-    }
+     }
 }
 module.exports.EchoBot = EchoBot;
