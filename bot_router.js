@@ -70,7 +70,7 @@ class EchoBot extends ActivityHandler {
                 
                     let isFirstInteraction = await this.isFirstInteraction.get(context, true);
                     let handled = false;
-                    if (!handled) handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction);
+                    if (!handled) handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction);
                     if (!handled) handled = await handleMessageFromSlack(context, chatMessagesUser, botCalled, botInThread, savedThread_ts, current_thread_ts, PERSONALITY_OF_BOT);
                     if (!handled) await handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT);
 
