@@ -45,6 +45,7 @@ echo "==== Log of Last 5 Commits ===="
 git log --pretty=format:"%h%x09%an%x09%ad%x09%s" -5
 
 echo "==== Verifying Everything Worked as Planned ===="
+uncommitted_changes=$(git status --porcelain) # Check if there are any uncommitted changes
 if [[ -z "$uncommitted_changes" ]]; then
     if [[ $commit_result =~ "nothing to commit" ]] && [[ $push_result =~ "Everything up-to-date" ]]; then
         echo -e "\033[0;33mAlert! No changes detected in the files, nothing to commit or push.\033[0m"   # Yellow
