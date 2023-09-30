@@ -30,7 +30,7 @@ class EchoBot extends ActivityHandler {
 			console.log("\n\n**BOT_ROUTER.JS: A member(s) has been added to the chat");
 			console.log("\n\n**BOT_ROUTER.JS: The ids of the added members are: ", context.activity.membersAdded.map(member => member.id));
 			const membersAdded = context.activity.membersAdded;
-			const welcomeText = 'Hello and welcome to the memoried ATT-ESS Chat bot!';
+			const welcomeText = '2023sept30_837. Hello and welcome to the memoried ATT-ESS Chat bot!';
 			for (let cnt = 0; cnt < membersAdded.length; ++cnt) {
 				if (membersAdded[cnt].id !== context.activity.recipient.id) {
 					await context.sendActivity(MessageFactory.text(welcomeText, welcomeText));
