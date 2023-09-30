@@ -53,7 +53,7 @@ async function fetchConversationHistory(slack_channel_id, thread_ts, apiToken) {
 async function postMessageToSlack(slack_channel_id, thread_ts, message, apiToken) {
   const data = JSON.stringify({
       channel: slack_channel_id,
-      thread_ts: thread_ts,
+      thread_ts: thread_ts || undefined 
       text: message
   });
 
@@ -69,7 +69,7 @@ async function postMessageToSlack(slack_channel_id, thread_ts, message, apiToken
   };
 
   // log the data and options objects
-  console.log("\n*****SLACK_UTILS.JS: postMessageToSlack sending Data:\n", data);
+  console.log("\n*****SLACK_UTILS.JS: postMessageToSlack sending slack payload:\n", data);
   console.log("\n*****SLACK_UTILS.JS: postMessageToSlack using Options:\n", options);
   
   return executeHttpPostRequest(options, data)
