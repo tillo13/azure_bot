@@ -26,7 +26,11 @@ git add .
 
 echo "==== Committing Changes ===="
 # Commit the changes
-git commit -m "$1"
+commit_result=$(git commit -m "$1")
+if [[ $commit_result == *"nothing to commit"* ]]; then
+    echo -e "\033[0;33mAlert! No changes detected in the files, nothing to commit or push.\033[0m"   # Yellow
+    exit 1
+fi
 
 echo "==== Details of Latest Commit ===="
 # Print the most recent commit
