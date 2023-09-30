@@ -130,7 +130,7 @@ class EchoBot extends ActivityHandler {
 
 					let isFirstInteraction = await this.isFirstInteraction.get(context, true);
 					let handled = false;
-                    handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction) || handled;
+                    handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, personality) || handled;
 
                     if (handled) {
                           await this.chatMessagesProperty.set(context, chatMessagesUser);
