@@ -93,7 +93,7 @@ class EchoBot extends ActivityHandler {
 	}
 
 	async run(context) {
-		console.log('\n\n**BOT_ROUTER.JS: Running the bot...');
+		console.log('\n\n**BOT_ROUTER.JS: TESTING123.Running the bot...');
 		await super.run(context);
 		await this.userState.saveChanges(context);
 		console.log('\n\n**BOT_ROUTER.JS: State changes have been saved.');
