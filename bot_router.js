@@ -46,11 +46,23 @@ class EchoBot extends ActivityHandler {
 				console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
 
 				//log interaction to slack here.
+				let username;
+				let id;
+				if (context.activity.channelId === 'webchat') {
+					username = ''; // Webchat doesn't provide a username
+					id = context.activity.conversation.id; // Use conversation id in webchat
+				} else if (context.activity.channelId === 'slack') {
+					username = context.activity.from.name;
+					id = context.activity.from.id;
+				} else if (context.activity.channelId === 'msteams') {
+					username = context.activity.from.name;
+					id = context.activity.from.id;
+				}
+
 				const slack_api_token = process.env.SLACK_BOT_TOKEN;
 				//force this to at_test2 in dev
 				const slack_channel_id = 'C05UMRHSLR2';
 				console.log("\n\n**BOT_ROUTER.JS: slack_channel: ", slack_channel_id);
-				console.log("\n\n**BOT_ROUTER.JS: slack token: ", slack_api_token);
 				
 				// define an object to structure the Slack block message
 				const slackBlocks = {
@@ -59,8 +71,20 @@ class EchoBot extends ActivityHandler {
 							"type": "section",
 							"text": {
 								"type": "mrkdwn",
-								"text": `*Incoming interaction:*\n*Source:* \`${context.activity.channelId}\`\n*User Requesting:* \`${context.activity.from.name}\`\n*User Payload:* \`${context.activity.text}\``
+								"text": `*Incoming interaction:*\n*Source:* \`${context.activity.channelId}\`\n*User ID:* \`${id}\`\n*Username:* \`${username}\`\n*User Payload:* \`${context.activity.text}\``
 							}
+						},
+						{
+							"type": "divider"
+						},
+						{
+							"type": "context",
+							"elements": [
+								{
+									"type": "mrkdwn",
+									"text": `:robot_face: _Message ID: ${context.activity.id}_`
+								}
+							]
 						}
 					]
 				};
