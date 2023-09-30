@@ -34,14 +34,10 @@ jobs:
           npm run test --if-present
          
       - name: Archive production artifacts
-        run: |
-          tar -czvf dist.tar.gz ./dist
-         
-      - name: Upload artifacts  
         uses: actions/upload-artifact@v2
         with:
-          name: dist
-          path: ./dist.tar.gz
+          name: node-app
+          path: .
 
   deploy:
 
@@ -49,11 +45,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download artifacts
+      - name: Download artifact
         uses: actions/download-artifact@v2
         with:
-          name: dist
-          path: ./dist
+          name: node-app
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v2
@@ -61,5 +56,5 @@ jobs:
           app-name: '2023sept11-tillo-webapp'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DA44BCDCCAA54A339F6B3BA80AB51571 }}
-          package: ./dist
+          package: .
           args: --only-changed-files
