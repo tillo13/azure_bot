@@ -7,7 +7,7 @@
  * - postMessageToSlack: posts a message to a given Slack channel and thread by interacting with Slack's chat.postMessage API.
  * - getBotId: using Slack's auth.test API, fetches the Bot user ID associated with the provided API token.
  * 
- * All functions are exported for use in other modules by listing them in module.exports at the end.. 
+ * All functions are exported for use in other modules by listing them in module.exports at the end...
  */
 
 const https = require('https');
