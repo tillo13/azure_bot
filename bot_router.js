@@ -30,7 +30,7 @@ class EchoBot extends ActivityHandler {
 			console.log("\n\n**BOT_ROUTER.JS: A member(s) has been added to the chat");
 			console.log("\n\n**BOT_ROUTER.JS: The ids of the added members are: ", context.activity.membersAdded.map(member => member.id));
 			const membersAdded = context.activity.membersAdded;
-			const welcomeText = '2023sept30_254. Hello and welcome to the memoried ATT-ESS Chat bot!';
+			const welcomeText = '2023sept30_314. Hello and welcome to the memoried ATT-ESS Chat bot!';
 			for (let cnt = 0; cnt < membersAdded.length; ++cnt) {
 				if (membersAdded[cnt].id !== context.activity.recipient.id) {
 					await context.sendActivity(MessageFactory.text(welcomeText, welcomeText));
@@ -45,50 +45,50 @@ class EchoBot extends ActivityHandler {
 				console.log('\n\n**BOT_ROUTER.JS: onMessage triggered!');
 				console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
 
-				//log interaction to slack here.
+				// Log interaction to Slack
 				let username;
 				let id;
+
 				if (context.activity.channelId === 'webchat') {
-					username = ''; // Webchat doesn't provide a username
-					id = context.activity.conversation.id; // Use conversation id in webchat
+				username = 'webchat';
+				id = context.activity.id; 
 				} else if (context.activity.channelId === 'slack') {
-					username = context.activity.from.name;
-					id = context.activity.from.id;
+				username = context.activity.from.name;
+				id = context.activity.from.id;
 				} else if (context.activity.channelId === 'msteams') {
-					username = context.activity.from.name;
-					id = context.activity.from.id;
+				username = context.activity.from.name; 
+				id = context.activity.from.aadObjectId; 
 				}
 
-				const slack_api_token = process.env.SLACK_BOT_TOKEN;
-				//force this to at_test2 in dev
-				const slack_channel_id = 'C05UMRHSLR2';
-				console.log("\n\n**BOT_ROUTER.JS: slack_channel: ", slack_channel_id);
-				
-				// define an object to structure the Slack block message
+				const slackApiToken = process.env.SLACK_BOT_TOKEN;
+				const slackChannelId = 'C05UMRHSLR2';
+
 				const slackBlocks = {
-					"blocks": [
+				"blocks": [
+					{
+					"type": "section",
+					"text": {
+						"type": "mrkdwn", 
+						"text": `:information_source: *Incoming interaction:*\n*Source:* \`${context.activity.channelId}\`\n*User ID:* \`${id}\`\n*Username:* \`${username}\`\n*User Payload:* \`${context.activity.text}\``  
+					}
+					},
+					{
+					"type": "divider" 
+					},
+					{
+					"type": "context",
+					"elements": [
 						{
-							"type": "section",
-							"text": {
-								"type": "mrkdwn",
-								"text": `*Incoming interaction:*\n*Source:* \`${context.activity.channelId}\`\n*User ID:* \`${id}\`\n*Username:* \`${username}\`\n*User Payload:* \`${context.activity.text}\``
-							}
-						},
-						{
-							"type": "divider"
-						},
-						{
-							"type": "context",
-							"elements": [
-								{
-									"type": "mrkdwn",
-									"text": `:robot_face: _Message ID: ${context.activity.id}_`
-								}
-							]
+						"type": "mrkdwn",
+						"text": `:robot_face: _Message ID: ${context.activity.id}_` 
 						}
 					]
+					}
+				]
 				};
-				await postMessageToSlack(slack_channel_id, null, slackBlocks, slack_api_token);
+
+				// Send message to Slack 
+				await postMessageToSlack(slackChannelId, null, slackBlocks, slackApiToken);
 
 
                 if (specialCommands[messageContent]) {
