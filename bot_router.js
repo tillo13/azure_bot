@@ -29,7 +29,7 @@ const specialCommands = require('./bot_behaviors/special_commands');
 const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
 const THREAD_TS = 'thread_ts';
-const PERSONALITY_OF_BOT = "You talk like an old cowboy! You are a helpful chatbot from Teradata. As a crucial aspect of your function, ensure you always reference past user and assistant prompts in the thread for the best understanding in order to respond effectively.";
+//const PERSONALITY_OF_BOT = "You talk like an old cowboy! You are a helpful chatbot from Teradata. As a crucial aspect of your function, ensure you always reference past user and assistant prompts in the thread for the best understanding in order to respond effectively.";
 
 class EchoBot extends ActivityHandler {
 	constructor(userState) {
@@ -130,7 +130,9 @@ class EchoBot extends ActivityHandler {
 
 					let isFirstInteraction = await this.isFirstInteraction.get(context, true);
 					let handled = false;
-                    handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, personality) || handled;
+                    //handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, personality) || handled;
+					handled = await handleMessageFromMSTeams(context, chatMessagesUser, this.isFirstInteraction, pathConfig.personality) || handled;
+
 
                     if (handled) {
                           await this.chatMessagesProperty.set(context, chatMessagesUser);

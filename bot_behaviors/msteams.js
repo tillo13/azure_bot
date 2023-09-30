@@ -9,6 +9,8 @@ function isFromMSTeams(context) {
 
 async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, personality) {
     console.log('\n*****MSTEAMS.JS: Preparing to handle a message from MS Teams');
+    console.log('\n*****MSTEAMS.JS: passed Bot Personality:', personality);
+
     
     // Log the entire activity object
     console.log('\n*****MSTEAMS.JS: Teams Activity:', JSON.stringify(context.activity, null, 2));
