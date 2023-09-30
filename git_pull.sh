@@ -11,12 +11,29 @@ git fetch origin
 echo "The latest commit fetched is:"
 git log origin/main -1
 
-# Merge the latest changes into your current workspace
-echo "Merging latest changes into your workspace..."
+# Attempt to merge the latest changes into your current workspace
+echo "Attempting to merge latest changes into your workspace..."
 git merge origin/main
+
+# Check if the merge was successful
+merge_exit_status=$?  # save the exit status of the git merge command
+if [[ $merge_exit_status -ne 0 ]]; then
+    echo "Merge failed due to conflicts."
+    echo "Would you like to overwrite local changes with the remote repository? (y/n)"
+    read user_input
+    if [[ $user_input == "y" || $user_input == "Y" ]]; then
+        git reset --hard origin/main
+        echo "Local changes have been overwritten."
+    else
+        echo "Please resolve conflicts manually."
+        exit 1
+    fi
+else
+    echo "Merge successful."
+fi
 
 # Print out that it's done
 echo "All done! Your workspace should now be updated with the latest changes from GitHub."
 
 # Print out suggestion for next steps
-echo "Do your coding magic now! Remember when you're done to go to this directory and then push the changes with './git_push.sh <commit-message>'."
+echo "Do your coding magic now! Remember to commit and push your changes when you're done."
