@@ -7,7 +7,7 @@ function isFromMSTeams(context) {
     return context.activity.channelId === 'msteams';
 }
 
-async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, personality) {
+async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, isFirstInteractionProperty, personality) {    
     console.log('\n*****MSTEAMS.JS: Preparing to handle a message from MS Teams');
     console.log('\n*****MSTEAMS.JS: passed Bot Personality:', personality);
 
@@ -26,7 +26,8 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
     if (isFirstInteraction) {
         console.log('*****MSTEAMS.JS: This is the first user interaction');
         assistantResponse = `msteams_chat_path: Hello ${username} from @bot in MS Teams!`;
-    } else {
+        await isFirstInteractionProperty.set(context, false); // use the PropertyAccessor
+    }  else {
         console.log('*****MSTEAMS.JS: This is not the first interaction. Calling OpenAI...');
         const chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
         console.log('*****MSTEAMS.JS: Received response from OpenAI');

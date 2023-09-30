@@ -129,9 +129,14 @@ class EchoBot extends ActivityHandler {
 					});
 
 					let isFirstInteraction = await this.isFirstInteraction.get(context, true);
+					
 					let handled = false;
                     //handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, personality) || handled;
-					handled = await handleMessageFromMSTeams(context, chatMessagesUser, this.isFirstInteraction, pathConfig.personality) || handled;
+					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, this.isFirstInteraction, pathConfig.personality) || handled;
+					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, pathConfig.personality) || handled;
+					handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, pathConfig.personality) || handled;
+
+
 
 
                     if (handled) {
