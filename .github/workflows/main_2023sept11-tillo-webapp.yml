@@ -1,6 +1,5 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - 2023sept11-tillo-webapp
 
 on:
@@ -12,7 +11,7 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
+    
     steps:
       - uses: actions/checkout@v2
 
@@ -20,31 +19,12 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16.x'
-      
-      - name: Check current directory
-        run: ls -al
 
-      - name: Cache Node.js modules
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install dependencies
-        run: npm install
-      
-      - name: Build and Test
-        run: |
-          npm run build --if-present
-          npm run test --if-present
-      
       - name: Archive changed files
         id: archive
         run: |
           git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs zip release.zip
-
+      
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
