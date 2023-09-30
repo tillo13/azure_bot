@@ -21,7 +21,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-
+            
       - name: Install dependencies
         run: npm install
           
@@ -61,4 +61,3 @@ jobs:
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DA44BCDCCAA54A339F6B3BA80AB51571 }}
           package: .
-          args: --only-changed-files
