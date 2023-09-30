@@ -1,66 +1,65 @@
 #updated with cache 2023sept30
  # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Node.js app to Azure Web App - 2023sept11-tillo-webapp
-
-on:
+on: 
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
+
   build:
-    runs-on: windows-latest
+
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+  - uses: actions/checkout@v2
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v1
-        with:
-          node-version: '16.x'
-
-      - name: Cache node modules
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: npm install, build, and test
-        run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
-      
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
-        with:
-          name: node-app
-          path: .
+  - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16.x
+        
+  - name: Cache node modules
+      uses: actions/cache@v2
+      with:
+        path: node_modules
+        key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
+        
+  - name: Install dependencies
+      run: npm ci
+          
+  - name: Build app
+     run: npm run build --if-present
+     run: npm run test --if-present
+         
+  - name: Archive production artifacts
+     run: |
+         tar -czvf dist.tar.gz ./dist
+         
+  - name: Upload artifacts  
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: ./dist.tar.gz
 
   deploy:
-    runs-on: ubuntu-latest
+
     needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v2
-        with:
-          name: node-app
+  - name: Download artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: dist
+        path: ./dist
 
-      - name: 'Deploy to Azure Web App'
-        uses: azure/webapps-deploy@v2
-        id: deploy-to-webapp
-        with:
-          app-name: '2023sept11-tillo-webapp'
-          slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DA44BCDCCAA54A339F6B3BA80AB51571 }}
-          package: .
-          args: --only-changed-files --exclude node_modules
+  - name: 'Deploy to Azure Web App'
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: '2023sept11-tillo-webapp'
+        slot-name: 'Production'
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DA44BCDCCAA54A339F6B3BA80AB51571 }}
+        package: ./dist
+        args: --only-changed-files
