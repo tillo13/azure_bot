@@ -21,7 +21,7 @@ jobs:
       - name: Archive changed files
         id: archive
         run: |
-          git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs zip release.zip
+          if OUTPUT=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }}); then echo ${OUTPUT} | xargs zip release.zip; fi
       
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
