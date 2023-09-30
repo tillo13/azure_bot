@@ -1,6 +1,5 @@
-#updated with cache 2023sept30
- # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+name: Node.js CI
+
 on: 
   push:
     branches:
@@ -13,35 +12,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-  - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-  - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 16.x
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
         
-  - name: Cache node modules
-      uses: actions/cache@v2
-      with:
-        path: node_modules
-        key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
         
-  - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
           
-  - name: Build app
-     run: npm run build --if-present
-     run: npm run test --if-present
+      - name: Build app
+        run: | 
+          npm run build --if-present
+          npm run test --if-present
          
-  - name: Archive production artifacts
-     run: |
-         tar -czvf dist.tar.gz ./dist
+      - name: Archive production artifacts
+        run: |
+          tar -czvf dist.tar.gz ./dist
          
-  - name: Upload artifacts  
-      uses: actions/upload-artifact@v2
-      with:
-        name: dist
-        path: ./dist.tar.gz
+      - name: Upload artifacts  
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: ./dist.tar.gz
 
   deploy:
 
@@ -49,17 +49,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-  - name: Download artifacts
-      uses: actions/download-artifact@v2
-      with:
-        name: dist
-        path: ./dist
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: ./dist
 
-  - name: 'Deploy to Azure Web App'
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: '2023sept11-tillo-webapp'
-        slot-name: 'Production'
-        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DA44BCDCCAA54A339F6B3BA80AB51571 }}
-        package: ./dist
-        args: --only-changed-files
+      - name: 'Deploy to Azure Web App'
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: '2023sept11-tillo-webapp'
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DA44BCDCCAA54A339F6B3BA80AB51571 }}
+          package: ./dist
+          args: --only-changed-files
