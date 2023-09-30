@@ -26,15 +26,30 @@ git add .
 
 echo "==== Committing Changes ===="
 # Commit the changes
-commit_result=$(git commit -m "$1")
+git commit -m "$1"
 
 echo "==== Details of Latest Commit ===="
 # Print the most recent commit
 git log -1 --pretty=format:"%h%x09%an%x09%ad%x09%s"
 
-echo "==== Pushing Changes to 'main' Branch ===="
-# Push the changes to the 'main' branch
-push_result=$(git push origin main)
+echo "==== Pushing Changes to '$currentBranch' Branch ===="
+# Push the changes to the current branch
+git push origin $currentBranch
+push_exit_status=$?  # save the exit status of the git push command
+
+# if the push was not successful, try to pull the latest changes
+if [[ $push_exit_status -ne 0 ]]; then
+    echo "Push failed, trying to pull the latest changes..."
+    git pull origin $currentBranch
+    # after pulling the latest changes, try pushing again
+    git push origin $currentBranch
+    push_exit_status=$?  # save the exit status again
+    # check if the push was successful this time
+    if [[ $push_exit_status -ne 0 ]]; then
+        echo -e "\033[0;31mError occurred! Could not push the changes even after pulling the latest changes. Please resolve conflicts manually.\033[0m"  # Red
+        exit 1
+    fi
+fi
 
 echo "==== Git Status After Push ===="
 # Print git status after push
@@ -47,13 +62,7 @@ git log --pretty=format:"%h%x09%an%x09%ad%x09%s" -5
 echo "==== Verifying Everything Worked as Planned ===="
 uncommitted_changes=$(git status --porcelain)
 if [[ -z "$uncommitted_changes" ]]; then
-    if [[ $commit_result =~ "nothing to commit" ]]; then
-        echo -e "\033[0;33mAlert! No changes detected in the files, nothing to commit or push.\033[0m"   # Yellow
-    elif [[ $push_result =~ "Everything up-to-date" ]]; then
-        echo -e "\033[0;33mAlert! No new commits to push.\033[0m"   # Yellow
-    else
-        echo -e "\033[0;32mAll changes were successfully committed and pushed!\033[0m"     # Green
-    fi
+    echo -e "\033[0;32mAll changes were successfully committed and pushed!\033[0m"     # Green
 else
     echo -e "\033[0;31mError occurred! There are uncommitted changes. Process did not complete successfully.\033[0m"  # Red
 fi
