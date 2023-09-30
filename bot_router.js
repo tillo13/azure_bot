@@ -30,7 +30,7 @@ class EchoBot extends ActivityHandler {
 			console.log("\n\n**BOT_ROUTER.JS: A member(s) has been added to the chat");
 			console.log("\n\n**BOT_ROUTER.JS: The ids of the added members are: ", context.activity.membersAdded.map(member => member.id));
 			const membersAdded = context.activity.membersAdded;
-			const welcomeText = '2023sept30_238. Hello and welcome to the memoried ATT-ESS Chat bot!';
+			const welcomeText = '2023sept30_254. Hello and welcome to the memoried ATT-ESS Chat bot!';
 			for (let cnt = 0; cnt < membersAdded.length; ++cnt) {
 				if (membersAdded[cnt].id !== context.activity.recipient.id) {
 					await context.sendActivity(MessageFactory.text(welcomeText, welcomeText));
@@ -47,7 +47,8 @@ class EchoBot extends ActivityHandler {
 
 				//log interaction to slack here.
 				const slack_api_token = process.env.SLACK_BOT_TOKEN;
-				const slack_channel_id = 'C05T52KUPLG';
+				//force this to at_test2 in dev
+				const slack_channel_id = 'C05UMRHSLR2';
 				console.log("\n\n**BOT_ROUTER.JS: slack_channel: ", slack_channel_id);
 				console.log("\n\n**BOT_ROUTER.JS: slack token: ", slack_api_token);
 				
@@ -58,7 +59,7 @@ class EchoBot extends ActivityHandler {
 							"type": "section",
 							"text": {
 								"type": "mrkdwn",
-								"text": `*Incoming interaction:*\n*Source:* ${context.activity.channelId}\n*User Requesting:* ${context.activity.from.name}\n*User Payload:* ${context.activity.text}`
+								"text": `*Incoming interaction:*\n*Source:* \`${context.activity.channelId}\`\n*User Requesting:* \`${context.activity.from.name}\`\n*User Payload:* \`${context.activity.text}\``
 							}
 						}
 					]

@@ -1,15 +1,3 @@
-/** 2023sept23 5:37pm
- * This module contains utility functions interacting with Slack's API:
- * 
- * - executeHttpGetRequest: a generic function to issue GET requests to a given API endpoint.
- * - executeHttpPostRequest: a generic function to issue POST requests to a given API endpoint with a provided data payload.
- * - fetchConversationHistory: using Slack's conversations.replies API, fetches the conversation history for a provided channel ID and message thread timestamp.
- * - postMessageToSlack: posts a message to a given Slack channel and thread by interacting with Slack's chat.postMessage API.
- * - getBotId: using Slack's auth.test API, fetches the Bot user ID associated with the provided API token.
- * 
- * All functions are exported for use in other modules by listing them in module.exports at the end...
- */
-
 const https = require('https');
 
 async function executeHttpGetRequest(options) {
@@ -52,9 +40,14 @@ async function fetchConversationHistory(slack_channel_id, thread_ts, apiToken) {
 
 async function postMessageToSlack(slack_channel_id, thread_ts, message, apiToken) {
   const dataJSON = {
-    channel: slack_channel_id,
-    text: message
+    channel: slack_channel_id
   };
+
+  if (message.blocks) {
+    dataJSON.blocks = message.blocks; // prefer first message is a block structure
+  } else {
+    dataJSON.text = message; // Treat as plain text
+  }
 
   if (thread_ts) {
     dataJSON.thread_ts = thread_ts;
@@ -63,8 +56,8 @@ async function postMessageToSlack(slack_channel_id, thread_ts, message, apiToken
   const data = JSON.stringify(dataJSON);
 
   const options = {
-      hostname: 'slack.com',
-      path: '/api/chat.postMessage',
+    hostname: 'slack.com',
+    path: '/api/chat.postMessage',
       method: 'POST',
       headers: {
           'Content-Type': 'application/json; charset=utf-8',
