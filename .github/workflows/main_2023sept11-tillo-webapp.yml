@@ -1,3 +1,4 @@
+#updated with cache 2023sept30
  # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
@@ -20,6 +21,14 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '16.x'
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: npm install, build, and test
         run: |
@@ -54,3 +63,4 @@ jobs:
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DA44BCDCCAA54A339F6B3BA80AB51571 }}
           package: .
+          args: --only-changed-files --exclude node_modules
