@@ -1,3 +1,19 @@
+const PATH_CONFIGS = {
+    'msteams': {
+        personality: "You talk like an old cowboy.",
+        welcomeMessage: "Howdy partner, welcome to our Microsoft Teams chat!"
+    },
+    'slack': {
+        personality: "You talk like a Space Merchant.",
+        welcomeMessage: "Greetings earthling, welcome to our Slack channel!"
+    },
+	'webchat': {
+        personality: "You talk like a salty pirate.",
+        welcomeMessage: "Ahoy! , welcome to our webchat channel!"
+    },
+    // add more paths as required
+};
+
 const {
 	ActivityHandler,
 	MessageFactory
@@ -30,7 +46,11 @@ class EchoBot extends ActivityHandler {
 			console.log("\n\n**BOT_ROUTER.JS: A member(s) has been added to the chat");
 			console.log("\n\n**BOT_ROUTER.JS: The ids of the added members are: ", context.activity.membersAdded.map(member => member.id));
 			const membersAdded = context.activity.membersAdded;
-			const welcomeText = '2023sept30_314. Hello and welcome to the memoried ATT-ESS Chat bot!';
+		
+			// Get the path specific config here
+			const pathConfig = PATH_CONFIGS[context.activity.channelId];
+			const welcomeText = pathConfig ? pathConfig.welcomeMessage : "Hello and welcome to our chat!";
+		
 			for (let cnt = 0; cnt < membersAdded.length; ++cnt) {
 				if (membersAdded[cnt].id !== context.activity.recipient.id) {
 					await context.sendActivity(MessageFactory.text(welcomeText, welcomeText));
@@ -46,6 +66,8 @@ class EchoBot extends ActivityHandler {
 				console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
 
 				// Log interaction to Slack
+				const slackApiToken = process.env.SLACK_BOT_TOKEN;
+				const slackChannelId = 'C05UMRHSLR2';
 				let username;
 				let id;
 
@@ -58,10 +80,11 @@ class EchoBot extends ActivityHandler {
 				} else if (context.activity.channelId === 'msteams') {
 				username = context.activity.from.name; 
 				id = context.activity.from.aadObjectId; 
+				} else {
+					// Default case
+					username = 'unknown';
+					id = 'unknown';
 				}
-
-				const slackApiToken = process.env.SLACK_BOT_TOKEN;
-				const slackChannelId = 'C05UMRHSLR2';
 
 				const slackBlocks = {
 				"blocks": [
@@ -97,6 +120,8 @@ class EchoBot extends ActivityHandler {
                     // If the command exists in our special commands, execute it
                     await specialCommands[messageContent](context);
                 } else {
+					const pathConfig = PATH_CONFIGS[context.activity.channelId];
+					const personality = pathConfig ? pathConfig.personality : "Default personality";
 					let chatMessagesUser = await this.chatMessagesProperty.get(context, []) || [];
 					chatMessagesUser.push({
 						role: "user",
@@ -106,18 +131,21 @@ class EchoBot extends ActivityHandler {
 					let isFirstInteraction = await this.isFirstInteraction.get(context, true);
 					let handled = false;
                     handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction) || handled;
+
                     if (handled) {
                           await this.chatMessagesProperty.set(context, chatMessagesUser);
                           return;
                     } 
                     
-                    handled = await handleMessageFromSlack(context, chatMessagesUser, this.threadproperty, this.botInvokedFlag, this.threadproperty, PERSONALITY_OF_BOT);                    if (handled) {
+                    handled = await handleMessageFromSlack(context, chatMessagesUser, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality);                    
+					if (handled) {
+						
                           await this.chatMessagesProperty.set(context, chatMessagesUser);
                           return;
                     } 
                                         
                     // If not handled by MSTeams or Slack, call the default handler
-                    handled = await handleDefault(context, chatMessagesUser, PERSONALITY_OF_BOT);
+                    handled = await handleDefault(context, chatMessagesUser, personality);
                     if (handled) {
                           await this.chatMessagesProperty.set(context, chatMessagesUser);
                           await next();
