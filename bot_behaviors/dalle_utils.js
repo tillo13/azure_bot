@@ -37,13 +37,15 @@ async function generateImages(prompt = 'a painting of a nice dog', numImages = 1
         const job = await res.json();
 
         if (job.status === "succeeded") {
-            job.result.data.forEach(imageData => {
+            for (const imageData of job.result.data) {
                 const imageUrl = imageData?.url;
                 if (imageUrl) {
                     console.log('Dall-E image generated, url:', imageUrl);
-                    onImageReady && onImageReady(imageUrl);
+                    if (onImageReady) {
+                        await onImageReady(imageUrl); // let's make sure the image is processed (sent to the user) before move onto next image.
+                    }
                 }
-            });
+            }
             break;
         } 
 
