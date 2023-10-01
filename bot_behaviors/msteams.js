@@ -24,6 +24,9 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
     if (isFirstInteraction) {
         console.log('*****MSTEAMS.JS: This is the first user interaction');
         assistantResponse = `msteams_chat_path: Hello ${username} from @bot in MS Teams!`;
+
+        // set isFirstInteraction to false, after responding user's first message
+        propertyAccessor.set(context, false);
     } else {
         console.log('*****MSTEAMS.JS: This is not the first interaction. Calling OpenAI...');
         const chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
