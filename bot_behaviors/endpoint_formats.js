@@ -8,6 +8,12 @@ const helpMessage = {
         "Type `$hamburger` for a fun surprise"
     ]
 };
+
+function applyTeamsFormatting(text) {
+    text = text.replace(/\$(\w+)/g, '***$$$1***');  // Applies bold and italic to words that start with "$"
+    return text;
+}
+
 function generateAdaptiveCardContent(textStyling) {
     return {
         type: "AdaptiveCard",
@@ -63,15 +69,15 @@ module.exports = {
             content: cardContent,
         };
     },
-
+    
     help_msteamsResponse: function() {
         const textStyling = {
             helpTitle: "**",
             helpTitleEnd: "**",
             listTitle: "**",
             listTitleEnd: "**",
-            listItem: index => `**${index + 1}.** `,
-            listItemEnd: ""
+            listItem: index => `**${index + 1}.** ${applyTeamsFormatting(helpMessage.list[index])}`,
+            listItemEnd: "",
         };
     
         let cardContent = generateAdaptiveCardContent(textStyling);
