@@ -146,9 +146,9 @@ splitMessage.forEach((arg, index) => {
             });
 
             if (context.activity.channelId === 'slack') {
-                const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || 
-                                    context.activity.channelData?.SlackMessage?.event?.ts;
-                if (!replyActivity.conversation.id.includes(thread_ts)) {
+                
+                replyActivity.conversation = replyActivity.conversation || context.activity.conversation;  
+                if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
                     replyActivity.conversation.id += ':' + thread_ts;
                 }
             }
@@ -176,17 +176,10 @@ Time to complete: ${seconds} seconds. Thank you.`;
 await sendMessageWithThread(context, finishMessage, thread_ts);}
 async function sendMessageWithThread(context, message, thread_ts) {
     const newActivity = MessageFactory.text(message);
+    newActivity.conversation = context.activity.conversation; 
 
-    // First, set the conversation values as a whole
-    newActivity.conversation = {
-        tenantId: context.activity.conversation.tenantId
-    };
-
-    // Then, update the 'id' inside it
-    if (context.activity.channelId === 'slack') {
-        if (!newActivity.conversation.id.includes(thread_ts)) {
-            newActivity.conversation.id += ':' + thread_ts;
-        }
+    if (thread_ts && !newActivity.conversation.id.includes(thread_ts)) {
+        newActivity.conversation.id += ':' + thread_ts;
     }
 
     await context.sendActivity(newActivity);
