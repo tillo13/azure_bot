@@ -66,9 +66,18 @@ module.exports = {
     },
 
     help_msteamsResponse: function() {
-        let cardContent = generateAdaptiveCardContent(sharedWebAndTeamsStyling);
+        const teamsStyling = {
+            helpTitle: "**",
+            helpTitleEnd: "**",
+            listTitle: "**",
+            listTitleEnd: "**",
+            listItem: index => `**${index + 1}.** Use **${helpMessage.list[index]}**`,
+            listItemEnd: "",
+        };
+    
+        let cardContent = generateAdaptiveCardContent(teamsStyling);
         cardContent.version = "1.4"; // MSTeams specific version
-
+    
         return {
             type: "attachment",
             contentType: "application/vnd.microsoft.card.adaptive",
