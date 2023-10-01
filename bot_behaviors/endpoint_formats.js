@@ -59,11 +59,13 @@ module.exports = {
     help_SlackResponse: function() {
         return [
             `*${helpMessage.title}*`,
-            helpMessage.note,
+            `\`${helpMessage.note}\``,
             `*${helpMessage.instructions}*`,
-            ...helpMessage.list.map((item, index) => `${index + 1}. ${item}`)
+            '```',
+            ...helpMessage.list.map((item, index) => `*${index + 1}.* ${item}`),
+            '```'
         ].join('\n');
-    },
+    }
     
     help_msteamsResponse: function() {
         const adaptiveCardContent = {
