@@ -9,11 +9,6 @@ const helpMessage = {
     ]
 };
 
-function applyTeamsFormatting(text) {
-    text = text.replace(/\$(\w+)/g, '***$$$1***');  // Applies bold and italic to words that start with "$"
-    return text;
-}
-
 function generateAdaptiveCardContent(textStyling) {
     return {
         type: "AdaptiveCard",
@@ -39,6 +34,15 @@ function generateAdaptiveCardContent(textStyling) {
         $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
     };
 }
+
+const sharedWebAndTeamsStyling = {
+    helpTitle: "**",
+    helpTitleEnd: "**",
+    listTitle: "**",
+    listTitleEnd: "**",
+    listItem: "• ",
+    listItemEnd: ""
+};
 module.exports = {
     help_DefaultResponse: function() {
         return [
@@ -50,16 +54,7 @@ module.exports = {
     },
 
     help_WebchatResponse: function() {
-        const textStyling = {
-            helpTitle: "*",
-            helpTitleEnd: "*",
-            listTitle: "*",
-            listTitleEnd: "*",
-            listItem: "• ",
-            listItemEnd: ""
-        };
-
-        let cardContent = generateAdaptiveCardContent(textStyling);
+        let cardContent = generateAdaptiveCardContent(sharedWebAndTeamsStyling);
         cardContent.version = "1.3"; // Webchat specific version
 
         return {
@@ -69,20 +64,11 @@ module.exports = {
             content: cardContent,
         };
     },
-    
+
     help_msteamsResponse: function() {
-        const textStyling = {
-            helpTitle: "**",
-            helpTitleEnd: "**",
-            listTitle: "**",
-            listTitleEnd: "**",
-            listItem: index => `**${index + 1}.** ${applyTeamsFormatting(helpMessage.list[index])}`,
-            listItemEnd: "",
-        };
-    
-        let cardContent = generateAdaptiveCardContent(textStyling);
-        cardContent.version = "1.4";
-    
+        let cardContent = generateAdaptiveCardContent(sharedWebAndTeamsStyling);
+        cardContent.version = "1.4"; // MSTeams specific version
+
         return {
             type: "attachment",
             contentType: "application/vnd.microsoft.card.adaptive",
