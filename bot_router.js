@@ -135,7 +135,9 @@ class EchoBot extends ActivityHandler {
 					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, this.isFirstInteraction, pathConfig.personality) || handled;
 					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, pathConfig.personality) || handled;
 					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, pathConfig.personality) || handled;
-					handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, personality) || handled;
+					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, personality) || handled;
+					handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, personality) || handled;
+
 
 					
 

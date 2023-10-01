@@ -11,9 +11,9 @@ const {
 } = require('./msteams');
 const chatCompletion = require('./chat_helper');
 
-async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, personality) {
+async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, propertyAccessor, personality) {
     if (isFromMSTeams(context)) {
-        const assistantResponse = await handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, personality);
+        const assistantResponse = await handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, propertyAccessor, personality);
         await context.sendActivity(MessageFactory.text(assistantResponse));
         return true;
     }
