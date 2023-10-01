@@ -39,18 +39,21 @@ async function contactHelp(context) {
         switch(context.activity.channelId) {
             case 'webchat':
                 message = formats.help_WebchatResponse();
+                console.log('\n******SPECIAL_COMMANDS: help path Chose Webchat format');
                 break;
             case 'slack':
                 message = formats.help_SlackResponse();
+                console.log('\n******SPECIAL_COMMANDS: help path Chose Slack format');
                 break;
             case 'msteams':
                 message = formats.help_msteamsResponse();
+                console.log('\n******SPECIAL_COMMANDS:help path Chose MSTeams format');
                 break;
             default:
                 message = formats.help_DefaultResponse();
-        }
+                console.log('\n******SPECIAL_COMMANDS: help path Chose default format');
     } catch (error) {
-        console.error('Failed to format the message:', error);
+        console.error('\n******SPECIAL_COMMANDS: help path Failed to format the message:', error);
         message = formats.help_DefaultResponse();
     }
 
