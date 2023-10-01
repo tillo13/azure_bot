@@ -6,7 +6,7 @@ const {
 	addReaction,
 	removeReaction
 } = require('./slack_utils');
-
+const https = require("https"); 
 
 const commands = new Proxy({
 	'$hamburger': addToppings,
@@ -271,7 +271,7 @@ async function createDalleImages(context) {
                 'Content-Length': data.length
             }
         }
-    
+       
         const req = https.request(options, res => {
             console.log(`statusCode: ${res.statusCode}`)
         });
