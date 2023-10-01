@@ -213,180 +213,33 @@ async function createDalleImages(context) {
 	let endTime = new Date().getTime();
 	let difference = endTime - startTime;
 	let seconds = (difference / 1000).toFixed(3);
-
-	if (context.activity.channelId === 'webchat') {
-		// Create the Adaptive Card for the finish message
-		const adaptiveCardFinishMessage = {
-			$schema: "http://adaptivecards.io/schemas/1.2/adaptive-card.json",
-			type: "AdaptiveCard",
-			version: "1.2",
-			body: [{
-					"type": "TextBlock",
-					"text": "Summary:",
-					"wrap": true,
-					"size": "large",
-					"weight": "bolder"
-				},
-				{
-					"type": "FactSet",
-					"facts": [{
-							"title": "We used DallE to create...",
-							"value": ""
-						},
-						{
-							"title": "Prompt:",
-							"value": `${prompt}`
-						},
-						{
-							"title": "Number of Images:",
-							"value": `${numImages}`
-						},
-						{
-							"title": "Size of Images:",
-							"value": `${imageSize}`
-						},
-						{
-							"title": "Time to complete:",
-							"value": `${seconds} seconds.`
-						}
-					]
-				}
-			]
-		};
-
-		// Send the Adaptive Card as the attachment
-		var reply = {
-			type: 'message',
-			attachments: [{
-				contentType: 'application/vnd.microsoft.card.adaptive',
-				content: adaptiveCardFinishMessage
-			}]
-		};
-		return await context.sendActivity(reply);
-	} else if (context.activity.channelId === 'slack') {
-        const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
-        
-        let slackMessage = {
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": `Your Image Request Summary:\nPrompt: ${prompt}\nNumber of Images: ${numImages}\nImage Size: ${imageSize}\nTime elapsed:  ${seconds} seconds.`
-                    }
-                }
-            ],
-            "thread_ts": thread_ts // Here we specify the thread_ts in the payload
-        };
-        let replyActivity = { type: 'message', 
-                              text: '',
-                              channelData: slackMessage }; 
-    try {
-        await context.sendActivity(replyActivity);
-        console.log('\n******SPECIAL_COMMANDS: Slack summary message sent successfully');
-    } catch (error) {
-        console.error('\n******SPECIAL_COMMANDS: Failed to send Slack summary message:', error);
-    }
-
-	} else if (context.activity.channelId === 'msteams') {
-
-        ///////start trying to post reactions to mstreams posts...
-        let teamId = context.activity.channelData.tenant.id;
-        let channelId = context.activity.conversation.id;
-        thread_ts = context.activity.id
-    
-        const data = JSON.stringify({
-            reactionType: "🔄"
-        });
-          
-        const options = {
-            hostname: 'graph.microsoft.com',
-            port: 443,
-            path: `/beta/teams/${teamId}/channels/${channelId}/messages/${thread_ts}/reactions`,
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiToken}`,
-                'Content-Type': 'application/json',
-                'Content-Length': data.length
-            }
-        }
-       
-        const req = https.request(options, (res) => {
-            console.log(`\n******SPECIAL_COMMANDS: statusCode: ${res.statusCode}`)
-        });
-        req.write(data);
-        req.end();
-        
-        req.on('error', (error) => {
-          console.error(`\n******SPECIAL_COMMANDS: beta-emoji request error: ${error}`);
-        });
-            ///////end trying to post reactions to mstreams posts...
-		const adaptiveCardFinishMessage = {
-			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-			type: "AdaptiveCard",
-			version: "1.4",
-			body: [{
-					type: "TextBlock",
-					text: "Summary: We used DallE to create...",
-					wrap: true,
-					size: "medium",
-					weight: "bolder"
-				},
-				{
-					type: "TextBlock",
-					text: `Prompt: ${prompt}`,
-					wrap: true
-				},
-				{
-					type: "TextBlock",
-					text: `Number of images: ${numImages}`,
-					wrap: true
-				},
-				{
-					type: "TextBlock",
-					text: `Size of images: ${imageSize}`,
-					wrap: true
-				},
-				{
-					type: "TextBlock",
-					text: `Time to complete: ${seconds} seconds.`,
-					wrap: true
-				}
-			]
-		};
-
-		const activityPreviewCard = {
-			contentType: 'application/vnd.microsoft.card.adaptive',
-			content: adaptiveCardFinishMessage
-		};
-
-		return await context.sendActivity({
-			attachments: [activityPreviewCard]
-		});
-	} else {
-		// This is the default case when none of the above matches
-		let endTime = new Date().getTime();
-		let difference = endTime - startTime;
-		let seconds = (difference / 1000).toFixed(3);
-
-		const finishMessage = `Summary: We used DallE to create...
-    Prompt: ${prompt}
-    Number of images: ${numImages}
-    Size of images: ${imageSize}
-    Time to complete: ${seconds} seconds. Thank you.`;
-
-		await sendMessageWithThread(context, finishMessage, thread_ts);
-	}
-	async function sendMessageWithThread(context, message, thread_ts) {
-		const newActivity = MessageFactory.text(message);
-		newActivity.conversation = context.activity.conversation;
-
-		if (thread_ts && !newActivity.conversation.id.includes(thread_ts)) {
-			newActivity.conversation.id += ':' + thread_ts;
+	let message;  
+	
+	try {
+		switch(context.activity.channelId) {
+			case 'webchat':
+				message = formats.dalle_WebchatResponse(numImages, imageSize, seconds);
+				console.log('\n******SPECIAL_COMMANDS: DallE path Chose Webchat format');
+				break;
+	
+			case 'slack':
+				message = formats.dalle_SlackResponse(numImages, imageSize, seconds);
+				console.log('\n******SPECIAL_COMMANDS: DallE path Chose Slack format');
+				break;
+	
+			case 'msteams':
+				message = formats.dalle_msteamsResponse(numImages, imageSize, seconds);
+				console.log('\n******SPECIAL_COMMANDS: DallE path Chose MSTeams format');
+				break;
+	
+			default:
+				message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
+				console.log('\n******SPECIAL_COMMANDS: DallE path Chose Default format');
 		}
-
-		await context.sendActivity(newActivity);
+	} catch (error) {
+		console.error('\n******SPECIAL_COMMANDS: DallE path Failed to format the message:', error);
+		message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
 	}
+	
+	await sendMessageResponse(context, message);
 }
-
-module.exports = commands;

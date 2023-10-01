@@ -112,5 +112,84 @@ module.exports = {
             contentUrl: null,
             content: adaptiveCardContent
         };
+    },
+
+
+    // new formatting functions:
+    dalle_DefaultResponse: function(numImages, imageSize, duration) {
+        return `Summary: We used DallE to create...\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${duration} seconds. Thank you.`;
+    },
+
+    dalle_WebchatResponse: function(numImages, imageSize, duration) {
+        const adaptiveCard = {
+            $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+            type: "AdaptiveCard",
+            version: "1.2",
+            body: [
+                {
+                    type: "TextBlock",
+                    text: "Summary: We used DallE to create...",
+                    wrap: true,
+                    size: "medium",
+                    weight: "bolder"
+                },
+                {
+                    type: "FactSet",
+                    facts: [
+                        { title: "Number of Images:", value: numImages.toString() },
+                        { title: "Size of Images:", value: imageSize },
+                        { title: "Time to complete:", value: `${duration} seconds` }
+                    ]
+                }
+            ]
+        };
+    
+        return {
+            type: "attachment",
+            contentType: "application/vnd.microsoft.card.adaptive",
+            contentUrl: null,
+            content: adaptiveCard,
+        };
+    },
+
+    dalle_SlackResponse: function(numImages, imageSize, duration) {
+        return [
+            `:pencil2: *Summary: We used DallE to create...*`,
+            `:framed_picture: *Number of Images:* ${numImages}`,
+            `:mag: *Size of Images:* ${imageSize}`,
+            `:stopwatch: *Time to complete:* ${duration} seconds.`
+        ].join('\n');
+    },
+
+    dalle_msteamsResponse: function(numImages, imageSize, duration) {
+        const adaptiveCard = {
+            $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+            type: "AdaptiveCard",
+            version: "1.4",
+            body: [
+                {
+                    type: "TextBlock",
+                    text: "Summary: We used DallE to create...",
+                    wrap: true,
+                    size: "medium",
+                    weight: "bolder"
+                },
+                {
+                    type: "FactSet",
+                    facts: [
+                        { title: "Number of Images:", value: numImages.toString() },
+                        { title: "Size of Images:", value: imageSize },
+                        { title: "Time to complete:", value: `${duration} seconds` }
+                    ]
+                }
+            ]
+        };
+    
+        return {
+            type: "attachment",
+            contentType: "application/vnd.microsoft.card.adaptive",
+            contentUrl: null,
+            content: adaptiveCard,
+        };
     }
 };
