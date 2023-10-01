@@ -39,8 +39,10 @@ function cleanChatRecord(chatRecord) {
         .replace(/\n/g, ' ')
         .trim();
 }
-
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
+    let pathConfig = PATH_CONFIGS[context.activity.channelId];
+    let slackMessageResponse = processSlackResponseMessage(assistantResponse, pathConfig.messagePrefix);
+    
     const apiToken = context.activity.channelData?.ApiToken;
     const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
 
@@ -62,7 +64,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
     console.log('\n*&*&*& SLACK.JS bug check --> Cleaned formatted messages after postChatHistoryToSlack', cleanedFormattedMessages);
     if (isActiveThread && context.activity.text) {
         console.log('****SLACK.JS: Latest user posted message:', context.activity.text);
-        await respondToSlackThread(context, assistantResponse, thread_ts);
+        await respondToSlackThread(context, slackMessageResponse, thread_ts);
     }
   
     console.log('****SLACK.JS: clean format regardless ', cleanedFormattedMessages);
@@ -70,22 +72,22 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
         cleanedFormattedMessages: cleanedFormattedMessages,
         isActiveThread: isActiveThread
     };
-}
 
-async function respondToSlackThread(context, assistantResponse, thread_ts) {
-    let slackMessageResponse = processSlackResponseMessage(assistantResponse, pathConfig.messagePrefix);
-    const replyActivity = MessageFactory.text(slackMessageResponse);
-  
-    try {
-        replyActivity.conversation = context.activity.conversation;
-   
-        if (!replyActivity.conversation.id.includes(thread_ts)) {
-            replyActivity.conversation.id += ':' + thread_ts;
+
+    async function respondToSlackThread(context, slackMessageResponse, thread_ts) {
+        const replyActivity = MessageFactory.text(slackMessageResponse);
+    
+        try {
+            replyActivity.conversation = context.activity.conversation;
+    
+            if (!replyActivity.conversation.id.includes(thread_ts)) {
+                replyActivity.conversation.id += ':' + thread_ts;
+            }
+    
+            await context.sendActivity(replyActivity);
+        } catch (error) {
+            console.error('****SLACK.JS: An error occurred while trying to reply in the thread:', error);
         }
-  
-        await context.sendActivity(replyActivity);
-    } catch (error) {
-        console.error('****SLACK.JS: An error occurred while trying to reply in the thread:', error);
     }
 }
 
