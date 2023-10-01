@@ -39,7 +39,7 @@ function cleanChatRecord(chatRecord) {
         .replace(/\n/g, ' ')
         .trim();
 }
-async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
+async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, pathConfig) {
     let pathConfig = PATH_CONFIGS[context.activity.channelId];
     let slackMessageResponse = processSlackResponseMessage(assistantResponse, pathConfig.messagePrefix);
     

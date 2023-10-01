@@ -2,17 +2,17 @@ const PATH_CONFIGS = {
 	'msteams': {
 	  personality: "You talk like an old cowboy.", 
 	  welcomeMessage: "Howdy partner, welcome to our Microsoft Teams chat!",
-	  messagePrefix: "teams_path:"
+	  messagePrefix: "teams_path"
 	},
 	'slack': {
 	  personality: "You talk like a Space Merchant.",
 	  welcomeMessage: "Greetings earthling, welcome to our Slack channel!", 
-	  messagePrefix: "slack_path:"
+	  messagePrefix: "slack_path"
 	},
 	'webchat': {
 	  personality: "You talk like a salty pirate.",
 	  welcomeMessage: "Ahoy! , welcome to our webchat channel!",
-	  messagePrefix: "default_path:" 
+	  messagePrefix: "default_path" 
 	}
   };
 
@@ -145,7 +145,8 @@ class EchoBot extends ActivityHandler {
                           return;
                     } 
                     
-                    handled = await handleMessageFromSlack(context, chatMessagesUser, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality);                    
+                    //handled = await handleMessageFromSlack(context, chatMessagesUser, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality);                    
+					handled = await handleMessageFromSlack(context, chatMessagesUser, savedThread_ts, botInvokedFlag, this.threadproperty, PATH_CONFIGS['slack'], personality);
 					if (handled) {
 						
                           await this.chatMessagesProperty.set(context, chatMessagesUser);
