@@ -225,57 +225,47 @@ if(context.activity.channelId === 'webchat') {
     return await context.sendActivity(reply);
 } 
 if(context.activity.channelId === 'msteams') {
-    // Create the MessageCard for Microsoft Teams
-    const messageCardFinishMessage = {
-      "@type": "MessageCard",
-      "@context": "http://schema.org/extensions",
-      "summary": "Dall-E Summary",
-      "sections": [
-        {
-          "facts": [
-            {
-              "name": "Prompt",
-              "value": `${prompt}`
+    const adaptiveCardFinishMessage = {
+        $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+        type: "AdaptiveCard",
+        version: "1.4",
+        body: [
+            { 
+                type: "TextBlock",
+                text: "Summary: We used DallE to create...",
+                wrap: true,
+                size: "medium",
+                weight: "bolder"
             },
-            {
-              "name": "Number of images",
-              "value": `${numImages}`
+            { 
+                type: "TextBlock",
+                text: `Prompt: ${prompt}`,
+                wrap: true
             },
-            {
-              "name": "Size of images",  
-              "value": `${imageSize}` 
+            { 
+                type: "TextBlock",
+                text: `Number of images: ${numImages}`,
+                wrap: true
             },
-            {
-              "name": "Time to Complete",
-              "value": `${seconds} seconds`
+            { 
+                type: "TextBlock",
+                text: `Size of images: ${imageSize}`,
+                wrap: true
+            },
+            { 
+                type: "TextBlock",
+                text: `Time to complete: ${seconds} seconds.`,
+                wrap: true
             }
-          ],
-          "text": "Summary: We used DallE to create..."
-        }
-      ]
-    }
-
-    // Send the MessageCard as the attachment
-    var reply = { 
-      type: 'message', 
-      attachments: [
-        { 
-          contentType: 'application/vnd.microsoft.teams.card.list',
-          content: messageCardFinishMessage 
-        }
-      ]
+        ]
     };
-    // Returns the response to the user
-    return await context.sendActivity(reply);
-} else {
-    const finishMessage = `Summary: We used DallE to create...
-    Prompt: ${prompt}
-    Number of images: ${numImages}
-    Size of images: ${imageSize}
-    Time to complete: ${seconds} seconds. Thank you.`;
 
-    // Finish message for other channels
-    return await context.sendActivity(finishMessage);
+    const activityPreviewCard = {
+        contentType: 'application/vnd.microsoft.card.adaptive',
+        content: adaptiveCardFinishMessage
+    };
+
+    return await context.sendActivity({ attachments: [activityPreviewCard] });
 }
 
 await sendMessageWithThread(context, finishMessage, thread_ts);}
