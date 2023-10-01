@@ -43,7 +43,10 @@ async function contactHelp(context) {
             message = formats.help_SlackResponse();
             break;
         case 'msteams':
-            message = formats.help_msteamsResponse();
+            message = {
+                type: 'message',
+                attachments: [ formats.help_msteamsResponse() ]
+            };
             break;
         default:
             message = formats.help_DefaultResponse();
