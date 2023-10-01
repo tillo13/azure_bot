@@ -72,32 +72,43 @@ module.exports = {
                 {
                     type: "TextBlock",
                     text: `**${helpMessage.title}**`,
-                    wrap: true,
+                    wrap: true
                 },
                 {
                     type: "TextBlock",
                     text: helpMessage.note,
-                    wrap: true,
+                    wrap: true
                 },
                 {
                     type: "TextBlock",
                     text: `**${helpMessage.instructions}**`,
-                    wrap: true,
+                    wrap: true
                 },
-                ...helpMessage.list.map((item, index) => ({
+                {
                     type: "TextBlock",
-                    text: `**${index + 1}.** ${item}`,
-                    wrap: true,
-                }))
+                    text: `**1.**  Ask basic questions, no keywords necessary!`,
+                    wrap: true
+                },
+                {
+                    type: "TextBlock",
+                    text: `**2.**  Use **$dalle** command to create images via DALL·E`,
+                    wrap: true
+                },
+                {
+                    type: "TextBlock",
+                    text: `**3.** Type **$hamburger** for a fun surprise`,
+                    wrap: true
+                }
             ],
             $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
             version: "1.4",
         };
+    
         return {
             type: "attachment",
             contentType: "application/vnd.microsoft.card.adaptive",
             contentUrl: null,
-            content: adaptiveCardContent,
+            content: adaptiveCardContent
         };
     }
 };
