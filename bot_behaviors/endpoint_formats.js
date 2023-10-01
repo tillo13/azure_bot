@@ -9,6 +9,11 @@ const helpMessage = [
 ];
 
 module.exports = {
+    help_DefaultResponse: function() {
+        // Join each string in the helpMessage array with a newline character to format your default help message
+        return helpMessage.join('\n');
+    },
+     
     help_WebchatResponse: function () {
         // format helpMessage array into adaptive card for WebChat
         const adaptiveCardContent = {

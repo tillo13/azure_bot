@@ -34,7 +34,6 @@ async function addToppings(context) {
 }
 
 async function contactHelp(context) {
-    // Context message goes from static to dynamic
     let message;
     switch(context.activity.channelId) {
         case 'webchat':
@@ -47,30 +46,41 @@ async function contactHelp(context) {
             message = formats.help_msteamsResponse();
             break;
         default:
-            message = 'Context not supported';
+            message = formats.help_DefaultResponse();
     }
 
     return sendMessageResponse(context, message);
 }
 
-async function sendMessageResponse(context, message) {
-	const replyActivity = MessageFactory.text(message);
+async function sendMessageResponse(context, messageOrAttachment) {
+    let replyActivity;
 
-	try {
-		replyActivity.conversation = context.activity.conversation;
+    if (typeof messageOrAttachment === 'string') {
+        replyActivity = MessageFactory.text(messageOrAttachment);
+    } else {
+        // Assume it's an attachment (AdaptiveCard, image etc.)
+        replyActivity = {
+            type: 'message',
+            attachments: [ messageOrAttachment ]
+        };
+    }
 
-		if (context.activity.channelId === 'slack') {
-			const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
-				context.activity.channelData?.SlackMessage?.event?.ts;
-			if (!replyActivity.conversation.id.includes(thread_ts)) {
-				replyActivity.conversation.id += ':' + thread_ts;
-			}
-		}
-	} catch (error) {
-		console.error('Error occurred while trying to reply in the thread:', error);
-	}
+    try {
+        replyActivity.conversation = context.activity.conversation;
 
-	return await context.sendActivity(replyActivity);
+        if (context.activity.channelId === 'slack') {
+            const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
+                context.activity.channelData?.SlackMessage?.event?.ts;
+            if (!replyActivity.conversation.id.includes(thread_ts)) {
+                replyActivity.conversation.id += ':' + thread_ts;
+            }
+        }
+    } catch (error) {
+        console.error('Error occurred while trying to reply in the thread:', error);
+    }
+
+    return await context.sendActivity(replyActivity);
+}return await context.sendActivity(replyActivity);
 }
 
 async function createDalleImages(context) {
