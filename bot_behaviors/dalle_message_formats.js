@@ -72,6 +72,22 @@ module.exports = {
         }
       ]
     },
+    'webchat': {
+      "type": "AdaptiveCard",
+      "version": "1.2",
+      "body": [
+        {
+            "type": "Image",
+            "url": "${generatedImageUrl}",
+            "size": "Stretch"
+        },
+        { 
+            "type": "TextBlock",
+            "text": `Prompt: ${prompt}\nNumber of images: ${numImages}\nSize of images: ${size}\nPlease wait while we generate your images...`,
+            "wrap": true 
+        }
+      ]
+    },
     'default': {
       "text": "Summary: We used DallE to create...\nPrompt: ${prompt}\nNumber of images: ${numImages}\nSize of images: ${size}\nPlease hold while we create..."
     }
