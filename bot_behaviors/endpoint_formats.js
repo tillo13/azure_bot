@@ -9,8 +9,8 @@ const helpMessage = {
     ]
 };
 
-function generateAdaptiveCardResponse(textStyling, version) {
-    const adaptiveCardContent = {
+function generateAdaptiveCardContent(textStyling) {
+    return {
         type: "AdaptiveCard",
         body: [{
                 type: "TextBlock",
@@ -32,15 +32,8 @@ function generateAdaptiveCardResponse(textStyling, version) {
             }))
         ],
         $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-        version: version,
     };
 
-    return {
-        type: "attachment",
-        contentType: "application/vnd.microsoft.card.adaptive",
-        contentUrl: null,
-        content: adaptiveCardContent,
-    };
 }
 module.exports = {
     help_DefaultResponse: function() {
@@ -62,7 +55,15 @@ module.exports = {
             listItemEnd: ""
         };
 
-        return generateAdaptiveCardResponse(textStyling, "1.3");
+        let cardContent = generateAdaptiveCardContent(textStyling);
+        cardContent.version = "1.3"; // Webchat specific version
+
+        return {
+            type: "attachment",
+            contentType: "application/vnd.microsoft.card.adaptive",
+            contentUrl: null,
+            content: cardContent,
+        };
     },
 
     help_msteamsResponse: function() {
@@ -75,7 +76,15 @@ module.exports = {
             listItemEnd: ""
         };
 
-        return generateAdaptiveCardResponse(textStyling, "1.4");
+        let cardContent = generateAdaptiveCardContent(textStyling);
+        cardContent.version = "1.4"; // MSTeams specific version
+
+        return {
+            type: "attachment",
+            contentType: "application/vnd.microsoft.card.adaptive",
+            contentUrl: null,
+            content: cardContent
+        };
     },
 
     help_SlackResponse: function() {
