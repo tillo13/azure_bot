@@ -49,27 +49,26 @@ module.exports = {
     },
   
     help_msteamsResponse: function () {
-      // format helpMessage array into adaptive card for MS Teams
-      const adaptiveCardContent = {
-        type: "AdaptiveCard",
-        body: helpMessage.map((msg) => ({
-          type: "TextBlock",
-          text: msg,
-          wrap: true,
-        })),
-        $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-        version: "1.2",
-      };
-  
-      return {
-        type: "message",
-        attachments: [
-          {
-            contentType: "application/vnd.microsoft.card.adaptive",
-            contentUrl: null,
-            content: adaptiveCardContent,
-          },
-        ],
-      };
+        const adaptiveCardContent = {
+            type: "AdaptiveCard",
+            body: helpMessage.map((msg) => ({
+                type: "TextBlock",
+                text: msg,
+                wrap: true,
+            })),
+            $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+            version: "1.2",
+        };
+         
+      
+        return {
+            type: "message",
+            attachments: [
+                {
+                    contentType: "application/vnd.microsoft.card.adaptive",
+                    content: adaptiveCardContent,
+                },
+            ],
+        };
     },
 };
