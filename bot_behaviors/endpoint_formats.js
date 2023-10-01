@@ -58,14 +58,16 @@ module.exports = {
 
     help_SlackResponse: function() {
         return [
-            `*${helpMessage.title}*`,
-            `\n_${helpMessage.note}_\n`,
-            `*${helpMessage.instructions}*`,
-            ...helpMessage.list.map((item, index) => {
-                const isCommand = item.startsWith('$');
-                const listItem = isCommand ? `\n\`${item}\`` : `\n_${item}_`;
-                return `*${index + 1}.* ${listItem}\n`;
-            })
+            `*This is a bold text*`,
+            `_This is an italic text_`,
+            `\`This is an inline code text\``,
+            '```\nThis is a block code text\n```',
+            `> This is a blockquote`,
+            `* Item 1`,
+            `* Item 2`,
+            `1. Ordered Item 1`,
+            `2. Ordered Item 2`,
+            `[This is a link](http://example.com)`,
         ].join('\n');
     },
     
