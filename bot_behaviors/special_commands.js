@@ -9,7 +9,7 @@ const {
 	addReaction,
 	removeReaction
 } = require('./slack_utils');
-const https = require("https"); 
+const https = require("https");
 
 const commands = new Proxy({
 	'$hamburger': addToppings,
@@ -34,62 +34,63 @@ async function addToppings(context) {
 }
 
 async function contactHelp(context) {
-    let message;
+	let message;
 
-    try {
-        switch(context.activity.channelId) {
-            case 'webchat':
-                message = formats.help_WebchatResponse();
-                console.log('\n******SPECIAL_COMMANDS: help path Chose Webchat format');
-                break;
-            case 'slack':
-                message = formats.help_SlackResponse();
-                console.log('\n******SPECIAL_COMMANDS: help path Chose Slack format');
-                break;
-            case 'msteams':
-                message = formats.help_msteamsResponse();
-                console.log('\n******SPECIAL_COMMANDS:help path Chose MSTeams format');
-                break;
-            default:
-                message = formats.help_DefaultResponse();
-                console.log('\n******SPECIAL_COMMANDS: help path Chose default format');
-        }
-    } catch (error) {
-        console.error('\n******SPECIAL_COMMANDS: help path Failed to format the message:', error);
-        message = formats.help_DefaultResponse();
-    }
-    
-    return sendMessageResponse(context, message);
+	try {
+		switch (context.activity.channelId) {
+			case 'webchat':
+				message = formats.help_WebchatResponse();
+				console.log('\n******SPECIAL_COMMANDS: help path Chose Webchat format');
+				break;
+			case 'slack':
+				message = formats.help_SlackResponse();
+				console.log('\n******SPECIAL_COMMANDS: help path Chose Slack format');
+				break;
+			case 'msteams':
+				message = formats.help_msteamsResponse();
+				console.log('\n******SPECIAL_COMMANDS:help path Chose MSTeams format');
+				break;
+			default:
+				message = formats.help_DefaultResponse();
+				console.log('\n******SPECIAL_COMMANDS: help path Chose default format');
+		}
+	} catch (error) {
+		console.error('\n******SPECIAL_COMMANDS: help path Failed to format the message:', error);
+		message = formats.help_DefaultResponse();
+	}
+
+	return sendMessageResponse(context, message);
 }
 
 async function sendMessageResponse(context, messageOrAttachment) {
-    let replyActivity;
+	let replyActivity;
 
-    if (typeof messageOrAttachment === 'string') {
-        replyActivity = MessageFactory.text(messageOrAttachment);
-    } else {
-        // Assume it's an attachment (AdaptiveCard, image etc.)
-        replyActivity = {
-            type: 'message',
-            attachments: [ messageOrAttachment ]
-        };
-    }
+	if (typeof messageOrAttachment === 'string') {
+		replyActivity = MessageFactory.text(messageOrAttachment);
+	} else {
+		// Assume it's an attachment (AdaptiveCard, image etc.)
+		replyActivity = {
+			type: 'message',
+			attachments: [messageOrAttachment]
+		};
+	}
 
-    try {
-        replyActivity.conversation = context.activity.conversation;
+	try {
+		replyActivity.conversation = context.activity.conversation;
 
-        if (context.activity.channelId === 'slack') {
-            const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
-                context.activity.channelData?.SlackMessage?.event?.ts;
-            if (!replyActivity.conversation.id.includes(thread_ts)) {
-                replyActivity.conversation.id += ':' + thread_ts;
-            }
-        }
-    } catch (error) {
-        console.error('\n******SPECIAL_COMMANDS: Error occurred while trying to reply in the thread:', error);
-    }
+		if (context.activity.channelId === 'slack') {
+			const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
+				context.activity.channelData?.SlackMessage?.event?.ts;
+			if (!replyActivity.conversation.id.includes(thread_ts)) {
+				replyActivity.conversation.id += ':' + thread_ts;
+			}
+		}
+	} catch (error) {
+		console.error('\n******SPECIAL_COMMANDS: Error occurred while trying to reply in the thread:', error);
+	}
 
-    return await context.sendActivity(replyActivity);}
+	return await context.sendActivity(replyActivity);
+}
 
 async function createDalleImages(context) {
 	let messageText = context.activity.text.replace('$dalle', '').trim();
@@ -220,44 +221,36 @@ async function createDalleImages(context) {
 		await sendMessageResponse(context, message);
 
 	} else if (context.activity.channelId === 'slack') {
-        const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
-        
-        let slackMessage = {
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": `Your Image Request Summary:\nPrompt: ${prompt}\nNumber of Images: ${numImages}\nImage Size: ${imageSize}\nTime elapsed:  ${seconds} seconds.`
-                    }
-                }
-            ],
-            "thread_ts": thread_ts // Here we specify the thread_ts in the payload
-        };
-        let replyActivity = { type: 'message', 
-                              text: '',
-                              channelData: slackMessage }; 
-    try {
-        await context.sendActivity(replyActivity);
-        console.log('\n******SPECIAL_COMMANDS: Slack summary message sent successfully');
-    } catch (error) {
-        console.error('\n******SPECIAL_COMMANDS: Failed to send Slack summary message:', error);
-    }
-
-	if (context.activity.channelId === 'msteams') {
+		const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
+	
+		let slackMessage = formats.dalle_SlackResponse(prompt, numImages, imageSize, seconds);
+		slackMessage.thread_ts = thread_ts; // Add thread_ts to the slackMessage
+		let replyActivity = {
+			type: 'message',
+			text: '',
+			channelData: slackMessage
+		};
 		try {
-			let message = formats.dalle_msteamsResponse(numImages, imageSize, seconds);
-			await sendMessageResponse(context, message);
+			await context.sendActivity(replyActivity);
+			console.log('\n******SPECIAL_COMMANDS: Slack summary message sent successfully');
 		} catch (error) {
-			console.error('\n******SPECIAL_COMMANDS: msteams path Failed to format the message:', error);
-			message = formats.help_DefaultResponse();
+			console.error('\n******SPECIAL_COMMANDS: Failed to send Slack summary message:', error);
 		}
-	} else {
-		// This is the default case when none of the above matches
-		let message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
-		await sendMessageResponse(context, message);
+
+		if (context.activity.channelId === 'msteams') {
+			try {
+				let message = formats.dalle_msteamsResponse(numImages, imageSize, seconds);
+				await sendMessageResponse(context, message);
+			} catch (error) {
+				console.error('\n******SPECIAL_COMMANDS: msteams path Failed to format the message:', error);
+				message = formats.help_DefaultResponse();
+			}
+		} else {
+			// This is the default case when none of the above matches
+			let message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
+			await sendMessageResponse(context, message);
+		}
 	}
-}
 	async function sendMessageWithThread(context, message, thread_ts) {
 		const newActivity = MessageFactory.text(message);
 		newActivity.conversation = context.activity.conversation;
