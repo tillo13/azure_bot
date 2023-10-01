@@ -131,9 +131,7 @@ async function parseMessage(context) {
     return { prompt, imageSize, numImages, filenameBase, defaultPromptUsed };
 }
 
-async function handleReactionsAndUpdateMessage(context, prompt, imageSize, numImages, filenameBase, thread_ts, startTime) {    let startTime = new Date().getTime();
-
-    let thread_ts;
+async function handleReactionsAndUpdateMessage(context, prompt, imageSize, numImages, filenameBase, thread_ts) { 
     const apiToken = context.activity.channelData?.ApiToken;
     const channelId = context.activity.channelData?.SlackMessage?.event?.channel;
 
