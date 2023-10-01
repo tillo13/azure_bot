@@ -272,12 +272,16 @@ async function createDalleImages(context) {
             }
         }
        
-        const req = https.request(options, res => {
-            console.log(`statusCode: ${res.statusCode}`)
+        const req = https.request(options, (res) => {
+            console.log(`\n******SPECIAL_COMMANDS: statusCode: ${res.statusCode}`);
+            res.on('data', (d) => {
+              console.log(`\n******SPECIAL_COMMANDS: response data: ${d}`);
+            });
         });
-    
-        req.write(data);
-        req.end();
+          
+        req.on('error', (error) => {
+          console.error(`\n******SPECIAL_COMMANDS: request error: ${error}`);
+        });
     
 		const adaptiveCardFinishMessage = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
