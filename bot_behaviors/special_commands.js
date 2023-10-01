@@ -35,18 +35,23 @@ async function addToppings(context) {
 
 async function contactHelp(context) {
     let message;
-    switch(context.activity.channelId) {
-        case 'webchat':
-            message = formats.help_WebchatResponse();
-            break;
-        case 'slack':
-            message = formats.help_SlackResponse();
-            break;
-        case 'msteams':
-            message = formats.help_msteamsResponse();
-            break;
-        default:
-            message = formats.help_DefaultResponse();
+    try {
+        switch(context.activity.channelId) {
+            case 'webchat':
+                message = formats.help_WebchatResponse();
+                break;
+            case 'slack':
+                message = formats.help_SlackResponse();
+                break;
+            case 'msteams':
+                message = formats.help_msteamsResponse();
+                break;
+            default:
+                message = formats.help_DefaultResponse();
+        }
+    } catch (error) {
+        console.error('Failed to format the message:', error);
+        message = formats.help_DefaultResponse();
     }
 
     return sendMessageResponse(context, message);
