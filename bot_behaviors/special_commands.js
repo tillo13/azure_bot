@@ -71,14 +71,14 @@ async function createDalleImages(context) {
 	}
 
 	if (!messageText) {
-		await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of [a rembrandt-like painting of a dog in a field]! Please wait a moment...`, thread_ts);
+		await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of [a rembrandt-like painting of a dog in a field using the color palette of Teradata]! Please wait a moment...`, thread_ts);
 	}
 
 	// Split message by space and remove empty strings
 	let splitMessage = messageText.split(" ").filter(Boolean);
 
 	// Initialize default values
-	let prompt = "a rembrandt-like painting of a dog in a field.";
+	let prompt = "a rembrandt-like painting of a dog in a field using the color palette of Teradata.";
 	let defaultPromptUsed = true;
 	let numImages = 3;
 	let imageSize = "1024x1024";
@@ -229,77 +229,27 @@ async function createDalleImages(context) {
 	} else if (context.activity.channelId === 'slack') {
         const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
         
-        const slackMessage = {
+        let slackMessage = {
             "blocks": [
                 {
-                    "type": "header",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "Dall-E Summary"
-                    }
-                },
-                {
                     "type": "section",
-                    "fields": [
-                        {
-                            "type": "mrkdwn",
-                            "text": "*Prompt:*"
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": `${prompt}`
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": "*Number of images:*"
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": `${numImages.toString()}`
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": "*Size of images:*"
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": `${imageSize}`
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": "*Time to complete:*"
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": `${seconds} seconds.`
-                        }
-                    ]
-                },
-                {
-                    "type": "context",
-                    "elements": [
-                        {
-                            "type": "mrkdwn",
-                            "text": "*Please hold while we create...*"
-                        }
-                    ]
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": `Your Image Request Summary:\nPrompt: ${prompt}\nNumber of Images: ${numImages}\nImage Size: ${imageSize}\nTime elapsed:  ${seconds} seconds.`
+                    }
                 }
             ]
         };
-        
-        // Constuct the Block message in channelData property
-        const replyActivity = MessageFactory.text('');
-        replyActivity.channelData = {
-          "blocks": slackMessage.blocks
-        };
-        replyActivity.conversation = context.activity.conversation;
-        
-        if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
-            replyActivity.conversation.id += ':' + thread_ts;
-        }
-    
+    let replyActivity = { type: 'message', 
+                          text: '',
+                          channelData: slackMessage };
+    try {
         await context.sendActivity(replyActivity);
-        
+        console.log('Summary message sent successfully');
+    } catch (error) {
+        console.error('Failed to send Slack summary message:', error);
+    }
+
 	} else if (context.activity.channelId === 'msteams') {
 		const adaptiveCardFinishMessage = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
