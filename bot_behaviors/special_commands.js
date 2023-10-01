@@ -79,9 +79,7 @@ async function sendMessageResponse(context, messageOrAttachment) {
         console.error('Error occurred while trying to reply in the thread:', error);
     }
 
-    return await context.sendActivity(replyActivity);
-}return await context.sendActivity(replyActivity);
-}
+    return await context.sendActivity(replyActivity);}
 
 async function createDalleImages(context) {
 	let messageText = context.activity.text.replace('$dalle', '').trim();
