@@ -66,16 +66,38 @@ module.exports = {
     },
     
     help_msteamsResponse: function() {
-        let message = [
-            `**${helpMessage.title}**`,
-            helpMessage.note,
-            `**${helpMessage.instructions}**`,
-            ...helpMessage.list.map((item, index) => `**${index + 1}.** ${item}`)
-        ].join('\n');
-    
-        // Replace single newlines with a space and a newline to give spacing
-        message = message.replace(/\n(?!\n)/g, ' \n');
-    
-        return message;
+        const adaptiveCardContent = {
+            type: "AdaptiveCard",
+            body: [
+                {
+                    type: "TextBlock",
+                    text: `**${helpMessage.title}**`,
+                    wrap: true,
+                },
+                {
+                    type: "TextBlock",
+                    text: helpMessage.note,
+                    wrap: true,
+                },
+                {
+                    type: "TextBlock",
+                    text: `**${helpMessage.instructions}**`,
+                    wrap: true,
+                },
+                ...helpMessage.list.map((item, index) => ({
+                    type: "TextBlock",
+                    text: `**${index + 1}.** ${item}`,
+                    wrap: true,
+                }))
+            ],
+            $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+            version: "1.4",
+        };
+        return {
+            type: "attachment",
+            contentType: "application/vnd.microsoft.card.adaptive",
+            contentUrl: null,
+            content: adaptiveCardContent,
+        };
     }
 };
