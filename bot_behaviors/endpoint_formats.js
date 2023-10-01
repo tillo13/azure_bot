@@ -58,11 +58,11 @@ module.exports = {
 
     help_SlackResponse: function() {
         return [
-            `:robot_face:_${helpMessage.title}_`,
+            `:robot_face:_${helpMessage.title}_\n`,
             `\n\n${helpMessage.note}\n`,
-            `\n\n:information_source: ${helpMessage.instructions}\n`,
+            `\n\n:information_source: ${helpMessage.instructions}\n\n`,
             ...helpMessage.list.map((item, index) => {
-                return item.startsWith('$') ? `_${index + 1}. ${item}_` : `${index + 1}. ${item}`;
+                return `_${index + 1}. ${item}_`;
             })
         ].join('\n\n');
     },
