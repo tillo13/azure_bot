@@ -146,7 +146,7 @@ class EchoBot extends ActivityHandler {
                     } 
                     
                     //handled = await handleMessageFromSlack(context, chatMessagesUser, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality);                   
-					handled = await handleMessageFromSlack(context, chatMessagesUser, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality,PATH_CONFIGS['slack'],);
+					handled = await handleMessageFromSlack(context, chatMessagesUser, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality,PATH_CONFIGS['slack']);
 					if (handled) {
 						
                           await this.chatMessagesProperty.set(context, chatMessagesUser);

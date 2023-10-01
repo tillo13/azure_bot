@@ -12,6 +12,7 @@ const {
 const chatCompletion = require('./chat_helper');
 
 async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
+
     if (isFromMSTeams(context)) {
         const assistantResponse = await handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig);
         await context.sendActivity(MessageFactory.text(assistantResponse));
@@ -20,7 +21,10 @@ async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstIntera
     return false;
 }
 
-async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts, botInvokedFlag, threadproperty, personality) {
+
+async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts, botInvokedFlag, threadproperty, personality, pathConfig) { 
+
+
 	
     const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
         context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
@@ -66,6 +70,10 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 
         //await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
         await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, pathConfig);
+
+        
+
+
         return true;
     }
     return false;

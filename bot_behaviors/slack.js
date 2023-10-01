@@ -43,6 +43,8 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, pa
 
     let slackMessageResponse = processSlackResponseMessage(assistantResponse, pathConfig);
 
+
+
     
     const apiToken = context.activity.channelData?.ApiToken;
     const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
