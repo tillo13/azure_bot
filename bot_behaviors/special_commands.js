@@ -43,11 +43,12 @@ async function contactHelp(context) {
 }
 
 async function createDalleImages(context) {
+    let startTime = new Date().getTime();
+
     let thread_ts = await initializeThreadIfSlack(context);
     let { prompt, imageSize, numImages, defaultPromptUsed, filenameBase } = parseMessage(context);
 
-    thread_ts = await handleReactionsAndUpdateMessage(context, prompt, imageSize, numImages, defaultPromptUsed, thread_ts, filenameBase);
-
+    thread_ts = await handleReactionsAndUpdateMessage(context, prompt, imageSize, numImages, defaultPromptUsed, thread_ts, filenameBase, startTime); // <--- Add startTime as an argument to the function call
     let endTime = new Date().getTime();
     let difference = endTime - startTime;
     let seconds = (difference / 1000).toFixed(3);
@@ -130,8 +131,7 @@ async function parseMessage(context) {
     return { prompt, imageSize, numImages, filenameBase, defaultPromptUsed };
 }
 
-async function handleReactionsAndUpdateMessage(context, prompt, imageSize, numImages, filenameBase) {
-    let startTime = new Date().getTime();
+async function handleReactionsAndUpdateMessage(context, prompt, imageSize, numImages, filenameBase, thread_ts, startTime) {    let startTime = new Date().getTime();
 
     let thread_ts;
     const apiToken = context.activity.channelData?.ApiToken;
