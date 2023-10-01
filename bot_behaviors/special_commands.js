@@ -215,54 +215,10 @@ async function createDalleImages(context) {
 	let seconds = (difference / 1000).toFixed(3);
 
 	if (context.activity.channelId === 'webchat') {
-		// Create the Adaptive Card for the finish message
-		const adaptiveCardFinishMessage = {
-			$schema: "http://adaptivecards.io/schemas/1.2/adaptive-card.json",
-			type: "AdaptiveCard",
-			version: "1.2",
-			body: [{
-					"type": "TextBlock",
-					"text": "Summary:",
-					"wrap": true,
-					"size": "large",
-					"weight": "bolder"
-				},
-				{
-					"type": "FactSet",
-					"facts": [{
-							"title": "We used DallE to create...",
-							"value": ""
-						},
-						{
-							"title": "Prompt:",
-							"value": `${prompt}`
-						},
-						{
-							"title": "Number of Images:",
-							"value": `${numImages}`
-						},
-						{
-							"title": "Size of Images:",
-							"value": `${imageSize}`
-						},
-						{
-							"title": "Time to complete:",
-							"value": `${seconds} seconds.`
-						}
-					]
-				}
-			]
-		};
+		// send to endpoint_formats.js
+		let message = formats.dalle_WebchatResponse(numImages, imageSize, seconds);
+		await sendMessageResponse(context, message);
 
-		// Send the Adaptive Card as the attachment
-		var reply = {
-			type: 'message',
-			attachments: [{
-				contentType: 'application/vnd.microsoft.card.adaptive',
-				content: adaptiveCardFinishMessage
-			}]
-		};
-		return await context.sendActivity(reply);
 	} else if (context.activity.channelId === 'slack') {
         const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
         
@@ -365,18 +321,9 @@ async function createDalleImages(context) {
 		});
 	} else {
 		// This is the default case when none of the above matches
-		let endTime = new Date().getTime();
-		let difference = endTime - startTime;
-		let seconds = (difference / 1000).toFixed(3);
-
-		const finishMessage = `Summary: We used DallE to create...
-    Prompt: ${prompt}
-    Number of images: ${numImages}
-    Size of images: ${imageSize}
-    Time to complete: ${seconds} seconds. Thank you.`;
-
-		await sendMessageWithThread(context, finishMessage, thread_ts);
-	}
+    let message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
+    await sendMessageResponse(context, message);
+}
 	async function sendMessageWithThread(context, message, thread_ts) {
 		const newActivity = MessageFactory.text(message);
 		newActivity.conversation = context.activity.conversation;

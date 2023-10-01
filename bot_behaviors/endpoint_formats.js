@@ -112,5 +112,48 @@ module.exports = {
             contentUrl: null,
             content: adaptiveCardContent
         };
-    }
+    },
+
+        // new formatting functions:
+        dalle_DefaultResponse: function(numImages, imageSize, duration) {
+            return `Summary: We used DallE to create...\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${duration} seconds. Thank you.`;
+        },
+    
+        dalle_WebchatResponse: function(numImages, imageSize, duration) {
+            const adaptiveCardContent = {
+                $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+                type: "AdaptiveCard",
+                version: "1.3",
+                body: [
+                    {
+                        type: "TextBlock",
+                        text: "Summary: We used DallE to create...",
+                        wrap: true
+                    },
+                    {
+                        type: "FactSet",
+                        facts: [
+                            {
+                                title: "Number of images",
+                                value: numImages.toString()
+                            },
+                            {
+                                title: "Size of images",
+                                value: imageSize
+                            },
+                            {
+                                title: "Time to complete",
+                                value: `${duration} seconds`
+                            }
+                        ]
+                    }
+                ]
+            };
+            return {
+                type: "attachment",
+                contentType: "application/vnd.microsoft.card.adaptive",
+                contentUrl: null,
+                content: adaptiveCardContent,
+            };
+        }
 };
