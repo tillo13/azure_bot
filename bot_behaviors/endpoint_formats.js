@@ -60,7 +60,9 @@ module.exports = {
             version: "1.2",
         };
     
-        // Return only the content, not the contentType
-        return adaptiveCardContent;
+        return {
+            contentType: 'application/vnd.microsoft.card.adaptive',
+            content: adaptiveCardContent
+        };
     },
 };
