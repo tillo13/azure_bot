@@ -45,7 +45,13 @@ async function contactHelp(context) {
         case 'msteams':
             message = {
                 type: 'message',
-                attachments: [ formats.help_msteamsResponse() ]
+                text: '',
+                attachments: [
+                    {
+                        contentType: 'application/vnd.microsoft.card.adaptive', // Try setting contentType here
+                        content: formats.help_msteamsResponse()
+                    }
+                ]
             };
             break;
         default:

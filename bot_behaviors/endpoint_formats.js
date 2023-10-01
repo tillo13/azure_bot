@@ -59,15 +59,8 @@ module.exports = {
             $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
             version: "1.2",
         };
-
-        return {
-            type: "message",
-            attachments: [
-                {
-                    contentType: "application/vnd.microsoft.card.adaptive",
-                    content: adaptiveCardContent,
-                },
-            ],
-        };
+    
+        // Return only the content, not the contentType
+        return adaptiveCardContent;
     },
 };
