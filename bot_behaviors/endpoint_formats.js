@@ -9,6 +9,39 @@ const helpMessage = {
     ]
 };
 
+function generateAdaptiveCardResponse(textStyling, version) {
+    const adaptiveCardContent = {
+        type: "AdaptiveCard",
+        body: [{
+                type: "TextBlock",
+                text: `${textStyling.helpTitle}${helpMessage.title}${textStyling.helpTitleEnd}`,
+                wrap: true,
+            }, {
+                type: "TextBlock",
+                text: helpMessage.note,
+                wrap: true,
+            }, {
+                type: "TextBlock",
+                text: `${textStyling.listTitle}${helpMessage.instructions}${textStyling.listTitleEnd}`,
+                wrap: true,
+            },
+            ...helpMessage.list.map((item) => ({
+                type: "TextBlock",
+                text: `${textStyling.listItem}${item}${textStyling.listItemEnd}`,
+                wrap: true,
+            }))
+        ],
+        $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+        version: version,
+    };
+
+    return {
+        type: "attachment",
+        contentType: "application/vnd.microsoft.card.adaptive",
+        contentUrl: null,
+        content: adaptiveCardContent,
+    };
+}
 module.exports = {
     help_DefaultResponse: function() {
         return [
@@ -18,62 +51,48 @@ module.exports = {
             ...helpMessage.list.map((item, index) => `${index + 1}. ${item}`)
         ].join('\n');
     },
-     
-    help_WebchatResponse: function () {
-        const adaptiveCardContent = {
-            type: "AdaptiveCard",
-            body: [
-                {
-                    type: "TextBlock",
-                    text: `*${helpMessage.title}*`,
-                    wrap: true,
-                },
-                {
-                    type: "TextBlock",
-                    text: helpMessage.note,
-                    wrap: true,
-                },
-                {
-                    type: "TextBlock",
-                    text: `*${helpMessage.instructions}*`,
-                    wrap: true,
-                },
-                ...helpMessage.list.map((item, index) => ({
-                    type: "TextBlock",
-                    text: `${index + 1}. ${item}`,
-                    wrap: true
-                }))
-            ],
-            $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-            version: "1.3",
+
+    help_WebchatResponse: function() {
+        const textStyling = {
+            helpTitle: "*",
+            helpTitleEnd: "*",
+            listTitle: "*",
+            listTitleEnd: "*",
+            listItem: "• ",
+            listItemEnd: ""
         };
-    
-        return {
-            type: "attachment",
-            contentType: "application/vnd.microsoft.card.adaptive",
-            contentUrl: null,
-            content: adaptiveCardContent,
+
+        return generateAdaptiveCardResponse(textStyling, "1.3");
+    },
+
+    help_msteamsResponse: function() {
+        const textStyling = {
+            helpTitle: "**",
+            helpTitleEnd: "**",
+            listTitle: "**",
+            listTitleEnd: "**",
+            listItem: "**1.** ",
+            listItemEnd: ""
         };
+
+        return generateAdaptiveCardResponse(textStyling, "1.4");
     },
 
     help_SlackResponse: function() {
         return {
-            "blocks": [
-                {
+            "blocks": [{
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
                         "text": `*${helpMessage.title}*`
                     }
-                },
-                {
+                }, {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
                         "text": `_${helpMessage.note}_`
                     }
-                },
-                {
+                }, {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
@@ -90,51 +109,4 @@ module.exports = {
             ]
         };
     },
-    
-    help_msteamsResponse: function() {
-        const adaptiveCardContent = {
-            type: "AdaptiveCard",
-            body: [
-                {
-                    type: "TextBlock",
-                    text: `**${helpMessage.title}**`,
-                    wrap: true
-                },
-                {
-                    type: "TextBlock",
-                    text: helpMessage.note,
-                    wrap: true
-                },
-                {
-                    type: "TextBlock",
-                    text: `**${helpMessage.instructions}**`,
-                    wrap: true
-                },
-                {
-                    type: "TextBlock",
-                    text: `**1.**  Ask basic questions, no keywords necessary!`,
-                    wrap: true
-                },
-                {
-                    type: "TextBlock",
-                    text: `**2.**  Use **$dalle** command to create images via DALL·E`,
-                    wrap: true
-                },
-                {
-                    type: "TextBlock",
-                    text: `**3.** Type **$hamburger** for a fun surprise`,
-                    wrap: true
-                }
-            ],
-            $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-            version: "1.4",
-        };
-    
-        return {
-            type: "attachment",
-            contentType: "application/vnd.microsoft.card.adaptive",
-            contentUrl: null,
-            content: adaptiveCardContent
-        };
-    }
 };
