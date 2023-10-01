@@ -59,9 +59,18 @@ module.exports = {
     help_SlackResponse: function() {
         return [
             `*${helpMessage.title}*\n\n`,
-            `${helpMessage.note}\n`,
+            `${helpMessage.note}\n\n`,
             `*${helpMessage.instructions}*\n\n`,
-            ...helpMessage.list.map((item, index) => `*${index + 1}.* ${item}`)
+            ...helpMessage.list.map((item, index) => {
+                // Check for commands starting with $
+                if (item.includes('$')) {
+                    const command = item.split(' ')[0]; // Get the command
+                    const rest = item.replace(command, ''); // Get the rest of the text
+                    return `*${index + 1}.* \`${command}\`${rest}`; // Wrap command in backticks
+                } else {
+                    return `*${index + 1}.* ${item}`
+                }
+            })
         ].join('\n');
     },
     
