@@ -76,7 +76,7 @@ async function sendMessageResponse(context, messageOrAttachment) {
             }
         }
     } catch (error) {
-        console.error('Error occurred while trying to reply in the thread:', error);
+        console.error('\n******SPECIAL_COMMANDS: Error occurred while trying to reply in the thread:', error);
     }
 
     return await context.sendActivity(replyActivity);}
@@ -302,7 +302,7 @@ async function createDalleImages(context) {
         }
        
         const req = https.request(options, (res) => {
-            console.log(`\n*****SPECIAL_COMMANDS: statusCode: ${res.statusCode}`)
+            console.log(`\n******SPECIAL_COMMANDS: statusCode: ${res.statusCode}`)
         });
         req.write(data);
         req.end();

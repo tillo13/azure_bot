@@ -24,18 +24,14 @@ module.exports = {
                 wrap: true,
             })),
             $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-            version: "1.2",
+            version: "1.3",
         };
     
         return {
-            type: "message",
-            attachments: [
-                {
-                    contentType: "application/vnd.microsoft.card.adaptive",
-                    contentUrl: null,
-                    content: adaptiveCardContent,
-                },
-            ],
+            type: "attachment",
+            contentType: "application/vnd.microsoft.card.adaptive",
+            contentUrl: null,
+            content: adaptiveCardContent,
         };
     },
 
