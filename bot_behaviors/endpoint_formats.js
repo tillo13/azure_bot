@@ -57,42 +57,47 @@ module.exports = {
     },
 
     help_SlackResponse: function() {
-        return {
-            text: helpMessage.title,
-            blocks: [
-                {
-                    type: "section",
-                    text: {
-                        type: "mrkdwn",
-                        text: `*${helpMessage.title}*`
-                    }
-                },
-                {
-                    type: "section",
-                    text: {
-                        type: "mrkdwn",
-                        text: `${helpMessage.note}`
-                    }
-                },
-                {
-                    type: "section",
-                    text: {
-                        type: "mrkdwn",
-                        text: `*${helpMessage.instructions}*`
-                    }
-                },
-                ...helpMessage.list.map((item, index) => ({
-                    type: "section",
-                    text: {
-                        type: "mrkdwn",
-                        text: item.includes('$') ? 
-                              `*${index + 1}.* \`${item}\`` : 
-                              `*${index + 1}.* ${item}`
-                    }
-                }))
-            ]
-        };
-    },
+        try {
+            return {
+                "type" : "application/vnd.microsoft.card.adaptive",
+                "name": "blocks",
+                "content": [
+                    {
+                        type: "section",
+                        text: {
+                            type: "mrkdwn",
+                            text: `*${helpMessage.title}*`
+                        }
+                    },
+                    {
+                        type: "section",
+                        text: {
+                            type: "mrkdwn",
+                            text: `${helpMessage.note}`
+                        }
+                    },
+                    {
+                        type: "section",
+                        text: {
+                            type: "mrkdwn",
+                            text: `*${helpMessage.instructions}*`
+                        }
+                    },
+                    ...helpMessage.list.map((item, index) => ({
+                        type: "section",
+                        text: {
+                            type: "mrkdwn",
+                            text: item.includes('$') ? 
+                                  `*${index + 1}.* \`${item}\`` : 
+                                  `*${index + 1}.* ${item}`
+                        }
+                    }))
+                ]
+            };
+        } catch (error) {
+            console.error('\n******ENDPOINT_FORMATS.JS: Slack->An error occurred while formatting the Slack response:', error);
+        }
+    }
     
     help_msteamsResponse: function() {
         const adaptiveCardContent = {
