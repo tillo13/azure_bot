@@ -38,16 +38,16 @@ module.exports = {
                     text: `*${helpMessage.instructions}*`,
                     wrap: true,
                 },
-                ...helpMessage.list.map((item, index) => ({
+                ...helpMessage.list.map((item) => ({
                     type: "TextBlock",
-                    text: `${index + 1}. ${item}`,
+                    text: `\u2022 ${item}`,
                     wrap: true
                 }))
             ],
             $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
             version: "1.3",
-        };
-    
+         };
+        
         return {
             type: "attachment",
             contentType: "application/vnd.microsoft.card.adaptive",
@@ -59,8 +59,11 @@ module.exports = {
     help_SlackResponse: function() {
         return [
             `*${helpMessage.title}*`,
+            '',
             helpMessage.note,
+            '',
             `*${helpMessage.instructions}*`,
+            '',
             ...helpMessage.list.map((item, index) => `*${index + 1}.* \`${item}\``)
         ].join('\n');
     },
