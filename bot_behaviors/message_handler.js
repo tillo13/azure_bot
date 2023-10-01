@@ -64,7 +64,8 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
             content: chatResponse.assistantResponse
         });
 
-        await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
+        //await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
+        await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, pathConfig);
         return true;
     }
     return false;

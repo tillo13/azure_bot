@@ -3,8 +3,8 @@ const { fetchConversationHistory, getBotId, executeHttpPostRequest, postMessageT
 
 const activeThreads = {};
 
-function processSlackResponseMessage(assistantResponse, pathPrefix) {
-    return `${pathPrefix}: ${assistantResponse}`;
+function processSlackResponseMessage(assistantResponse, pathConfig) {
+    return `${pathConfig.messagePrefix}: ${assistantResponse}`;
 }
 
 function isFromSlack(context) {
@@ -40,7 +40,9 @@ function cleanChatRecord(chatRecord) {
         .trim();
 }
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, pathConfig) {
-    let slackMessageResponse = processSlackResponseMessage(assistantResponse, pathConfig.messagePrefix);
+
+    let slackMessageResponse = processSlackResponseMessage(assistantResponse, pathConfig);
+
     
     const apiToken = context.activity.channelData?.ApiToken;
     const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
