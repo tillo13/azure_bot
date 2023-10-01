@@ -1,4 +1,4 @@
-const formats = require('endpoint_formats.js');
+const formats = require('./endpoint_formats.js');
 
 
 const {
