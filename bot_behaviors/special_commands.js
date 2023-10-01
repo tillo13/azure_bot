@@ -231,8 +231,8 @@ else {
       Size of images: ${imageSize}
       Time to complete: ${seconds} seconds. Thank you.`;
 
-      console.log(context, finishMessage, thread_ts);
-    await sendMessageWithThread(context, finishMessage, thread_ts);
+      console.log("\n\n**SPECIAL_COMMANDS.JS: context, finishMessage, thread_ts values:", context, finishMessage, thread_ts);
+      await sendMessageWithThread(context, finishMessage, thread_ts);
 }
 
 await sendMessageWithThread(context, finishMessage, thread_ts);}
