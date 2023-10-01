@@ -66,11 +66,16 @@ module.exports = {
     },
     
     help_msteamsResponse: function() {
-        return [
+        let message = [
             `**${helpMessage.title}**`,
             helpMessage.note,
             `**${helpMessage.instructions}**`,
             ...helpMessage.list.map((item, index) => `**${index + 1}.** ${item}`)
         ].join('\n');
+    
+        // Replace single newlines with a space and a newline to give spacing
+        message = message.replace(/\n(?!\n)/g, ' \n');
+    
+        return message;
     }
 };
