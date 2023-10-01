@@ -35,6 +35,7 @@ async function addToppings(context) {
 
 async function contactHelp(context) {
     let message;
+
     try {
         switch(context.activity.channelId) {
             case 'webchat':
@@ -52,11 +53,12 @@ async function contactHelp(context) {
             default:
                 message = formats.help_DefaultResponse();
                 console.log('\n******SPECIAL_COMMANDS: help path Chose default format');
+        }
     } catch (error) {
         console.error('\n******SPECIAL_COMMANDS: help path Failed to format the message:', error);
         message = formats.help_DefaultResponse();
     }
-
+    
     return sendMessageResponse(context, message);
 }
 
