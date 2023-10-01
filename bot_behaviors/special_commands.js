@@ -34,10 +34,13 @@ async function sendMessageResponse(context, message) {
     
     try {
         replyActivity.conversation = context.activity.conversation;
-        const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || 
-                          context.activity.channelData?.SlackMessage?.event?.ts;
-        if (!replyActivity.conversation.id.includes(thread_ts)) {
-            replyActivity.conversation.id += ':' + thread_ts;
+    
+        if (context.activity.channelId === 'slack') {
+            const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || 
+                              context.activity.channelData?.SlackMessage?.event?.ts;
+            if (!replyActivity.conversation.id.includes(thread_ts)) {
+                replyActivity.conversation.id += ':' + thread_ts;
+            }
         }
     } catch (error) {
         console.error('Error occurred while trying to reply in the thread:', error);
