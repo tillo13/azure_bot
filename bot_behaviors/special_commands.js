@@ -238,11 +238,12 @@ async function createDalleImages(context) {
                         "text": `Your Image Request Summary:\nPrompt: ${prompt}\nNumber of Images: ${numImages}\nImage Size: ${imageSize}\nTime elapsed:  ${seconds} seconds.`
                     }
                 }
-            ]
+            ],
+            "thread_ts": thread_ts // Here we specify the thread_ts in the payload
         };
-    let replyActivity = { type: 'message', 
-                          text: '',
-                          channelData: slackMessage };
+        let replyActivity = { type: 'message', 
+                              text: '',
+                              channelData: slackMessage }; 
     try {
         await context.sendActivity(replyActivity);
         console.log('Summary message sent successfully');
