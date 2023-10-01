@@ -1,24 +1,33 @@
-const helpMessage = [
-    "*Welcome to $help!*",
-    "Please remember that outside of individual sessions, our interaction history isn't stored. This means if you ask me what we discussed a year, a month, or even a day ago, I wouldn't know.",
-    "However, during a single session, I will remember and build upon our conversation. Give it a try!",
-    "Here are few things you can do here:",
-    "1. Ask basic questions, no keywords necessary!",
-    "2. Use `$dalle` command to create images via DALL·E.",
-    "3. Type `$hamburger` for a fun surprise."
-];
+const helpMessage = {
+    title: "Welcome to $help!",
+    note: "Please remember that outside of individual sessions, our interaction history isn't stored. This means if you ask me what we discussed a year, a month, or even a day ago, I wouldn't know. However, during a single session, I will remember and build upon our conversation. Give it a try!",
+    list: [
+        "Ask basic questions, no keywords necessary!",
+        "Use `$dalle` command to create images via DALL·E",
+        "Type `$hamburger` for a fun surprise"
+    ]
+};
 
 module.exports = {
     help_DefaultResponse: function() {
-        // Join each string in the helpMessage array with a newline character to format your default help message
-        return helpMessage.join('\n');
+        return [
+            `*${helpMessage.title}*`,
+            helpMessage.note,
+            "Here are few things you can do here:",
+            ...helpMessage.list.map((item, index) => `${index + 1}. ${item}`)
+        ].join('\n');
     },
      
     help_WebchatResponse: function () {
-        // format helpMessage array into adaptive card for WebChat
+        // Provide the same text as default response but in AdaptiveCard format for Webchat
         const adaptiveCardContent = {
             type: "AdaptiveCard",
-            body: helpMessage.map((msg) => ({
+            body: [
+                `*${helpMessage.title}*`,
+                helpMessage.note,
+                "Here are few things you can do here:",
+                ...helpMessage.list.map((item, index) => `${index + 1}. ${item}`)
+            ].map((msg) => ({
                 type: "TextBlock",
                 text: msg,
                 wrap: true,
@@ -36,12 +45,22 @@ module.exports = {
     },
 
     help_SlackResponse: function() {
-        // Combine the help messages into a single string
-        return helpMessage.join('\n');
+        // Provide the same text as default response
+        return [
+            `*${helpMessage.title}*`,
+            helpMessage.note,
+            "Here are few things you can do here:",
+            ...helpMessage.list.map((item, index) => `${index + 1}. ${item}`)
+        ].join('\n');
     },
     
     help_msteamsResponse: function() {
-        // Combine the help messages into a single string
-        return helpMessage.join('\n');
+        // Return same content but with markdown formatting
+        return [
+            `**${helpMessage.title}**`,
+            helpMessage.note,
+            "**Here are few things you can do here:**",
+            ...helpMessage.list.map((item, index) => `**${index + 1}.** ${item}`)
+        ].join('\n');
     }
 };
