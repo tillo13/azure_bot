@@ -36,33 +36,12 @@ module.exports = {
     },
 
     help_SlackResponse: function() {
-        // Format the help message for Slack
-        return {
-            "blocks": helpMessage.map(text => ({
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": text
-                }
-            }))
-        };
+        // Combine the help messages into a single string
+        return helpMessage.join('\n');
     },
-  
-    help_msteamsResponse: function () {
-        const adaptiveCardContent = {
-            type: "AdaptiveCard",
-            body: helpMessage.map((msg) => ({
-                type: "TextBlock",
-                text: msg,
-                wrap: true,
-            })),
-            $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-            version: "1.2",
-        };
     
-        return {
-            contentType: 'application/vnd.microsoft.card.adaptive',
-            content: adaptiveCardContent
-        };
-    },
+    help_msteamsResponse: function() {
+        // Combine the help messages into a single string
+        return helpMessage.join('\n');
+    }
 };
