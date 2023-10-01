@@ -246,12 +246,39 @@ async function createDalleImages(context) {
                               channelData: slackMessage }; 
     try {
         await context.sendActivity(replyActivity);
-        console.log('Summary message sent successfully');
+        console.log('\n******SPECIAL_COMMANDS: Slack summary message sent successfully');
     } catch (error) {
-        console.error('Failed to send Slack summary message:', error);
+        console.error('\n******SPECIAL_COMMANDS: Failed to send Slack summary message:', error);
     }
 
 	} else if (context.activity.channelId === 'msteams') {
+        let teamId = context.activity.channelData.tenant.id;
+        let channelId = context.activity.conversation.id;
+        thread_ts = context.activity.id
+    
+        const data = JSON.stringify({
+            reactionType: "🔄"
+        });
+          
+        const options = {
+            hostname: 'graph.microsoft.com',
+            port: 443,
+            path: `/beta/teams/${teamId}/channels/${channelId}/messages/${thread_ts}/reactions`,
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiToken}`,
+                'Content-Type': 'application/json',
+                'Content-Length': data.length
+            }
+        }
+    
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+        });
+    
+        req.write(data);
+        req.end();
+    
 		const adaptiveCardFinishMessage = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			type: "AdaptiveCard",
