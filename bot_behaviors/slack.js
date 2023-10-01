@@ -3,15 +3,15 @@ const { fetchConversationHistory, getBotId, executeHttpPostRequest, postMessageT
 
 const activeThreads = {};
 
-function processSlackResponseMessage(assistantResponse) {
-    return `slack_chat_path: ${assistantResponse}`;
+function processSlackResponseMessage(assistantResponse, pathPrefix) {
+    return `${pathPrefix}: ${assistantResponse}`;
 }
 
 function isFromSlack(context) {
     return context.activity.channelId === 'slack';
 }
 
-async function postChatHistoryToSlack(channel_id, thread_ts, apiToken) {
+async function postChatHistoryToSlack(slack_channel_id, thread_ts, apiToken) {
     const conversationHistory = await fetchConversationHistory(slack_channel_id, thread_ts, apiToken);
     const messages = conversationHistory.messages.filter(msg => !msg.hasOwnProperty('bot_id'));
     
@@ -73,7 +73,7 @@ async function handleSlackMessage(context, assistantResponse, letMeCheckFlag) {
 }
 
 async function respondToSlackThread(context, assistantResponse, thread_ts) {
-    let slackMessageResponse = processSlackResponseMessage(assistantResponse);
+    let slackMessageResponse = processSlackResponseMessage(assistantResponse, pathConfig.messagePrefix);
     const replyActivity = MessageFactory.text(slackMessageResponse);
   
     try {
