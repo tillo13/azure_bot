@@ -43,7 +43,7 @@ async function contactHelp(context) {
 }
 
 async function createDalleImages(context) {
-    const thread_ts = await initializeThreadIfSlack(context);
+    let thread_ts = await initializeThreadIfSlack(context);
     let { prompt, imageSize, numImages, defaultPromptUsed, filenameBase } = parseMessage(context);
 
     thread_ts = await handleReactionsAndUpdateMessage(context, prompt, imageSize, numImages, defaultPromptUsed, thread_ts, filenameBase);
