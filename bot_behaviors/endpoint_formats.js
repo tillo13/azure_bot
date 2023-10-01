@@ -65,7 +65,7 @@ module.exports = {
             ...helpMessage.list.map((item, index) => `*${index + 1}.* ${item}`),
             '```'
         ].join('\n');
-    }
+    },
     
     help_msteamsResponse: function() {
         const adaptiveCardContent = {
