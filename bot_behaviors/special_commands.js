@@ -242,8 +242,8 @@ else if (context.activity.channelId === 'msteams') {
               "value": `${numImages}`
             },
             {
-              "name": "Size of images",
-              "value": `${size}`
+              "name": "Size of images",  
+              "value": `${imageSize}` 
             },
             {
               "name": "Time to Complete",
