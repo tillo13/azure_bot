@@ -25,9 +25,9 @@ function generateAdaptiveCardContent(textStyling) {
             text: `${textStyling.listTitle}${helpMessage.instructions}${textStyling.listTitleEnd}`,
             wrap: true,
         },
-        ...helpMessage.list.map((item, index) => ({
+        ...helpMessage.list.map((index) => ({
             type: "TextBlock",
-            text: `${typeof textStyling.listItem === 'function' ? textStyling.listItem(index) : textStyling.listItem}${item}${textStyling.listItemEnd}`,
+            text: `${typeof textStyling.listItem === 'function' ? textStyling.listItem(index) : textStyling.listItem}${textStyling.listItemEnd}`,
             wrap: true,
         }))
         ],
@@ -35,13 +35,13 @@ function generateAdaptiveCardContent(textStyling) {
     };
 }
 
-const sharedWebAndTeamsStyling = {
+const teamsStyling = {
     helpTitle: "**",
     helpTitleEnd: "**",
     listTitle: "**",
     listTitleEnd: "**",
-    listItem: "• ",
-    listItemEnd: ""
+    listItem: index => `**${index + 1}.** ${helpMessage.list[index]}`,
+    listItemEnd: "",
 };
 module.exports = {
     help_DefaultResponse: function() {
