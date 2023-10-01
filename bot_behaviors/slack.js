@@ -40,7 +40,6 @@ function cleanChatRecord(chatRecord) {
         .trim();
 }
 async function handleSlackMessage(context, assistantResponse, letMeCheckFlag, pathConfig) {
-    let pathConfig = PATH_CONFIGS[context.activity.channelId];
     let slackMessageResponse = processSlackResponseMessage(assistantResponse, pathConfig.messagePrefix);
     
     const apiToken = context.activity.channelData?.ApiToken;
