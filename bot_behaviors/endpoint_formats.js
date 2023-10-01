@@ -57,14 +57,38 @@ module.exports = {
     },
 
     help_SlackResponse: function() {
-        return [
-            `*${helpMessage.title}*`,
-            `\`${helpMessage.note}\``,
-            `*${helpMessage.instructions}*`,
-            '```',
-            ...helpMessage.list.map((item, index) => `*${index + 1}.* ${item}`),
-            '```'
-        ].join('\n');
+        return {
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": `*${helpMessage.title}*`
+                    }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": `_${helpMessage.note}_`
+                    }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": `*${helpMessage.instructions}*`
+                    }
+                },
+                ...helpMessage.list.map((item, index) => ({
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": `*${index + 1}.* ${item}`
+                    }
+                })),
+            ]
+        };
     },
     
     help_msteamsResponse: function() {
