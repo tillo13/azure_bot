@@ -59,8 +59,7 @@ module.exports = {
             $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
             version: "1.2",
         };
-         
-      
+
         return {
             type: "message",
             attachments: [
