@@ -41,7 +41,7 @@ module.exports = {
                 ...helpMessage.list.map((item, index) => ({
                     type: "TextBlock",
                     text: `${index + 1}. ${item}`,
-                    wrap: true,
+                    wrap: true
                 }))
             ],
             $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
