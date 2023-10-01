@@ -42,30 +42,31 @@ async function contactHelp(context) {
   return sendMessageResponse(context, 'Please contact the Help Desk.');
 }
 
-async function sendMessageResponse(context, message) {
-  const replyActivity = MessageFactory.text(message);
+async function createDalleImages(context) {
+    const thread_ts = await initializeThreadIfSlack(context);
+    let { prompt, imageSize, numImages, defaultPromptUsed, filenameBase } = parseMessage(context);
 
-  replyActivity.conversation = context.activity.conversation;
-  await modifyReplyActivity(context, replyActivity);
+    thread_ts = await handleReactionsAndUpdateMessage(context, prompt, imageSize, numImages, defaultPromptUsed, thread_ts, filenameBase);
 
-  return await context.sendActivity(replyActivity);
+    let endTime = new Date().getTime();
+    let difference = endTime - startTime;
+    let seconds = (difference / 1000).toFixed(3);
+
+    const finishMessage = `Summary: We used DallE to create...
+    Prompt: ${prompt}
+    Number of images: ${numImages}
+    Size of images: ${imageSize}
+    Time to complete: ${seconds} seconds. Thank you.`;    
+
+    await sendMessageWithThread(context, finishMessage, thread_ts);
 }
 
-async function createDalleImages(context) {
-  let { prompt, imageSize, numImages, defaultPromptUsed, filenameBase } = parseMessage(context);
-  await handleReactionsAndUpdateMessage(context, prompt, imageSize, numImages, defaultPromptUsed, thread_ts, filenameBase);
-
-  let endTime = new Date().getTime();
-  let difference = endTime - startTime;
-  let seconds = (difference / 1000).toFixed(3);
-
-  const finishMessage = `Summary: We used DallE to create...
-  Prompt: ${prompt}
-  Number of images: ${numImages}
-  Size of images: ${imageSize}
-  Time to complete: ${seconds} seconds. Thank you.`;    
-
-  await sendMessageWithThread(context, finishMessage, thread_ts);
+async function initializeThreadIfSlack(context) {
+    let thread_ts;
+    if (context.activity.channelId === 'slack') {
+        thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
+    }
+    return thread_ts;
 }
 
 async function parseMessage(context) {
@@ -185,6 +186,14 @@ async function handleReactionsAndUpdateMessage(context, prompt, imageSize, numIm
         await addReaction(channelId, thread_ts, 'white_check_mark', apiToken);
     }
 }
+async function sendMessageResponse(context, message) {
+    const replyActivity = MessageFactory.text(message);
+  
+    replyActivity.conversation = context.activity.conversation;
+    await modifyReplyActivity(context, replyActivity);
+  
+    return await context.sendActivity(replyActivity);
+  }
 
 async function sendMessageWithThread(context, message, thread_ts) {
   const newActivity = MessageFactory.text(message);
