@@ -177,21 +177,37 @@ if(context.activity.channelId === 'webchat') {
         type: "AdaptiveCard",
         version: "1.2",
         body: [
-            {
-                "type": "Image",
-                "url": `${context.activity.attachments[0].contentUrl}`,
-                "altText": "Generated Image",
-                "size": "Stretch"
-            },
             { 
                 "type": "TextBlock",
-                "text": `Summary: We used DallE to create...
-                          Prompt: ${prompt}
-                          Number of images: ${numImages}
-                          Size of images: ${imageSize}
-                          Time to complete: ${seconds} seconds. Thank you.`,
+                "text": "Summary:",
                 "wrap": true,
-                "size": "medium"
+                "size": "large",
+                "weight": "bolder"
+            },
+            {  
+                "type": "FactSet",
+                "facts": [
+                    {
+                        "title": "We used DallE to create...",
+                        "value": ""
+                    },
+                    {
+                        "title": "Prompt:",
+                        "value": `${prompt}`
+                    },
+                    {
+                        "title": "Number of Images:",
+                        "value": `${numImages}`
+                    },
+                    {
+                        "title": "Size of Images:",
+                        "value": `${imageSize}`
+                    },
+                    {
+                        "title": "Time to complete:",
+                        "value": `${seconds} seconds.`
+                    }
+                ]
             }
         ]
     };
@@ -215,6 +231,7 @@ else {
       Size of images: ${imageSize}
       Time to complete: ${seconds} seconds. Thank you.`;
 
+      console.log(context, finishMessage, thread_ts);
     await sendMessageWithThread(context, finishMessage, thread_ts);
 }
 
