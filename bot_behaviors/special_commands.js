@@ -273,9 +273,10 @@ async function createDalleImages(context) {
         }
        
         const req = https.request(options, (res) => {
-            console.log(`\n******SPECIAL_COMMANDS: beta-emoji statusCode: ${res.statusCode}`);
-            console.log(`\n******SPECIAL_COMMANDS: beta-emoji response headers: ${JSON.stringify(res.headers)}`);
+            console.log(`\n*****SPECIAL_COMMANDS: statusCode: ${res.statusCode}`)
         });
+        req.write(data);
+        req.end();
         
         req.on('error', (error) => {
           console.error(`\n******SPECIAL_COMMANDS: beta-emoji request error: ${error}`);
