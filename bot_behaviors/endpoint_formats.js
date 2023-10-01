@@ -57,18 +57,22 @@ module.exports = {
     },
 
     help_SlackResponse: function() {
-        return [
-            `*This is a bold text*`,
-            `_This is an italic text_`,
-            `\`This is an inline code text\``,
-            '```\nThis is a block code text\n```',
-            `> This is a blockquote`,
-            `* Item 1`,
-            `* Item 2`,
-            `1. Ordered Item 1`,
-            `2. Ordered Item 2`,
-            `[This is a link](http://example.com)`,
-        ].join('\n');
+        return  `*Bold text*\n\n` +
+                `_Italic text_\n\n` +
+                `\`Inline code text\`\n\n` +
+                '```\nBlock of code text\n```\n\n' +
+                `> Blockquote text\n\n` +
+                `- Unordered list item 1\n\n` +
+                `- Unordered list item 2\n\n` +
+                `1. Ordered list item 1\n\n` +
+                `2. Ordered list item 2\n\n` +
+                `[Link to Google](http://google.com)\n\n`+
+                `~Strikethrough text~\n\n` +
+                `# Heading 1\n\n` +
+                `## Heading 2\n\n` +
+                `###### Heading 6\n\n` +
+                `<http://www.example.com|Inline displayed link>\n\n` +
+                `Lines\n---\nDivided\n`
     },
     
     help_msteamsResponse: function() {
