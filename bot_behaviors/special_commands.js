@@ -1,7 +1,7 @@
 const { MessageFactory } = require('botbuilder');
 const generateImages = require('./dalle_utils');
 const { addReaction, removeReaction } = require('./slack_utils');
-
+const dalleMessageFormats = require('./dalle_message_formats');
 
 const commands = new Proxy({
     '$hamburger': addToppings,
@@ -49,61 +49,42 @@ async function sendMessageResponse(context, message) {
     return await context.sendActivity(replyActivity);
 }
 
-async function createDalleImages(context) {
-    let messageText = context.activity.text.replace('$dalle', '').trim();
-    let startTime = new Date().getTime();
-
-    let thread_ts;
-    const apiToken = context.activity.channelData?.ApiToken;
-    const channelId = context.activity.channelData?.SlackMessage?.event?.channel;
-
-    if (context.activity.channelId === 'slack') {
-        thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
-        context.activity.channelData?.SlackMessage?.event?.ts;
-
-        // Add the :hourglass: emoji to the parent message
-        await addReaction(channelId, thread_ts, 'hourglass_flowing_sand', apiToken);
-    }
-
-    if (!messageText) {
-        await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of [a rembrandt-like painting of a dog in a field]! Please wait a moment...`, thread_ts);
-    }
+function parseMessage(text) {
+    const defaultPrompt = "a rembrandt-like painting of a dog in a field.";
+    let prompt = defaultPrompt;
+    let numImages = 3;
+    let imageSize = "1024x1024";
+    let defaultPromptUsed = true;
 
     // Split message by space and remove empty strings
-    let splitMessage = messageText.split(" ").filter(Boolean);
+    let splitMessage = text.replace('$dalle', '').trim().split(" ").filter(Boolean);
 
-// Initialize default values
-let prompt = "a rembrandt-like painting of a dog in a field.";
-let defaultPromptUsed = true;
-let numImages = 3;
-let imageSize = "1024x1024";
+    // Parse arguments
+    splitMessage.forEach((arg, index) => {
+        if (arg.startsWith("--")) {
+            let nextArg = splitMessage[index + 1];
+            if (parseInt(arg.slice(2))) {
+                // If a number follows "--", it's the number of images
+                numImages = parseInt(arg.slice(2));
+            } else if (["full", "medium", "small"].includes(arg.slice(2))) {
+                // If "full", "medium", or "small" follow "--", it's the image size
+                imageSize = arg.slice(2);
+            }
+        } else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
+            // If an argument does not start with "--" and is not directly following an argument that starts with "--", it's part of the prompt
+            if (defaultPromptUsed) {
+                prompt = arg;
+                defaultPromptUsed = false;
+            } else {
+                prompt = `${prompt} ${arg}`;
+            }
+        }
+    });
 
-// Parse arguments
-splitMessage.forEach((arg, index) => {
-  if (arg.startsWith("--")) {
-        let nextArg = splitMessage[index + 1];
-        if (parseInt(arg.slice(2))) {
-            // If a number follows "--", it's the number of images
-            numImages = parseInt(arg.slice(2));
-        } else if (["full", "medium", "small"].includes(arg.slice(2))) {
-            // If "full", "medium", or "small" follow "--", it's the image size
-            imageSize = arg.slice(2);
-        }
-    } else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
-        // If an argument does not start with "--" and is not directly following an argument that starts with "--", it's part of the prompt
-        if (defaultPromptUsed) {
-            prompt = arg;
-            defaultPromptUsed = false;
-        } else {
-            prompt = `${prompt} ${arg}`;
-        }
+    // If prompt is still empty, set the default value back
+    if (!prompt.trim()) {
+        prompt = defaultPrompt;
     }
-  });
-  
-  // If prompt is still empty, set the default value back
-  if (!prompt.trim()) {
-    prompt = "a rembrandt-like painting of a dog in a field.";
-  }
 
     // Process imageSize
     switch (imageSize) {
@@ -121,71 +102,78 @@ splitMessage.forEach((arg, index) => {
             break;
     }
 
-    let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s+/g, '').replace(/_+/g, "_").substring(0, 15);
-    filenameBase = filenameBase !== '_' ? filenameBase.trim('_') : filenameBase;
+    return { prompt, numImages, imageSize };
+}
 
-    if (numImages > 10) {
-        await sendMessageWithThread(context, `You've asked for more than 10 images. We are going to generate the maximum allowed of 10. Please wait...`, thread_ts);
-        numImages = 10;
-    }
+async function createDalleImages(context) {
+    let startTime = new Date().getTime();  
 
-      // Before generating images, notify the user about their specifications
-      const initialMessage = `Summary: We are going to use DallE to create...
-      Prompt: ${prompt}
-      Number of images: ${numImages}
-      Size of images: ${imageSize}\nPlease hold while we create...`;   
-      
-      await sendMessageWithThread(context, initialMessage, thread_ts);
+    const { prompt, numImages, imageSize } = parseMessage(context.activity.text);
+    
+    await sendStartMessage(context, prompt, numImages, imageSize);
+    
+    const images = await generateDalleImages(context, prompt, numImages, imageSize);
 
-    for(let i=0; i<numImages; i++){
-        let filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
-        await sendMessageWithThread(context, `Creating ${filename}...`, thread_ts);
+    await sendFinishMessage(context, prompt, numImages, imageSize, images, startTime);  // Pass startTime to the function
+}
 
-        await context.sendActivity({ type: 'typing' });
-        await generateImages(prompt, 1, imageSize, async (imageUrl) => {
-            const replyActivity = MessageFactory.attachment({
-                contentType: 'image/png',
-                contentUrl: imageUrl,
+async function sendStartMessage(context, prompt, numImages, imageSize) {
+    const startMessage = `Summary: We are going to use DallE to create... 
+    Prompt: ${prompt} 
+    Number of images: ${numImages} 
+    Size of images: ${imageSize}\nPlease hold while we create...`;
+
+    await sendMessageResponse(context, startMessage);
+}
+
+async function generateDalleImages(context, prompt, numImages, imageSize) {
+    const images = [];
+    for (let i = 0; i < numImages; i++) {
+        let filename = `${prompt}_${(i + 1).toString().padStart(2, '0')}.png`;
+        await sendMessageResponse(context, `Creating ${filename}...`);
+
+        try {
+            // Keep the "typing" activity indication
+            await context.sendActivity({ type: 'typing' });
+
+            // Generate the image
+            await generateImages(prompt, 1, imageSize, async (imageUrl) => {
+                images.push(imageUrl);  // Add the image URL to the list
+
+                // Create the reply activity with the image
+                const replyActivity = MessageFactory.attachment({
+                    contentType: 'image/png',
+                    contentUrl: imageUrl,
+                });
+
+                // Send the reply activity
+                await context.sendActivity(replyActivity);
             });
-
-            if (context.activity.channelId === 'slack') {
-                
-                replyActivity.conversation = replyActivity.conversation || context.activity.conversation;  
-                if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
-                    replyActivity.conversation.id += ':' + thread_ts;
-                }
-            }
-        
-            await context.sendActivity(replyActivity);
-        });
+        } catch (error) {
+            imgErrorHandler(context, error, filename);
+        }
     }
 
+    return images;
+}
 
-    if (context.activity.channelId === 'slack') {
-        // Upon completion, remove the :hourglass: emoji and add the :white_check_mark: emoji to the parent message
-        await removeReaction(channelId, thread_ts, 'hourglass_flowing_sand', apiToken);
-        await addReaction(channelId, thread_ts, 'white_check_mark', apiToken);
-    }
+async function sendFinishMessage(context, prompt, numImages, imageSize, images, startTime) {
     let endTime = new Date().getTime();
-let difference = endTime - startTime;
-let seconds = (difference / 1000).toFixed(3);
+    let difference = endTime - startTime;  // Use startTime here
+    let seconds = (difference / 1000).toFixed(3);
 
-const finishMessage = `Summary: We used DallE to create...
-Prompt: ${prompt}
-Number of images: ${numImages}
-Size of images: ${imageSize}
-Time to complete: ${seconds} seconds. Thank you.`;    
+    const finishMessage = `Summary: We used DallE to create... 
+    Prompt: ${prompt} 
+    Number of images: ${numImages} 
+    Size of images: ${imageSize} 
+    Time to complete: ${seconds} seconds. Thank you.`;
 
-await sendMessageWithThread(context, finishMessage, thread_ts);}
-async function sendMessageWithThread(context, message, thread_ts) {
-    const newActivity = MessageFactory.text(message);
-    newActivity.conversation = context.activity.conversation; 
-
-    if (thread_ts && !newActivity.conversation.id.includes(thread_ts)) {
-        newActivity.conversation.id += ':' + thread_ts;
-    }
-
-    await context.sendActivity(newActivity);
+    await sendMessageResponse(context, finishMessage);
+}
+async function imgErrorHandler(context, error, filename) {
+    const errMessage = `An error occurred while creating the image "${filename}".`;
+    console.error(errMessage, error);
+    await sendMessageResponse(context, errMessage);
 }
 
 module.exports = commands;
