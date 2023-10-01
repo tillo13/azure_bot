@@ -61,7 +61,7 @@ module.exports = {
             `*${helpMessage.title}*`,
             helpMessage.note,
             `*${helpMessage.instructions}*`,
-            ...helpMessage.list.map((item, index) => `${index + 1}. ${item}`)
+            ...helpMessage.list.map((item, index) => `*${index + 1}.* \`${item}\``)
         ].join('\n');
     },
     
