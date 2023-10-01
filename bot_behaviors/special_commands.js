@@ -1,3 +1,6 @@
+const formats = require('endpoint_formats.js');
+
+
 const {
 	MessageFactory
 } = require('botbuilder');
@@ -31,7 +34,23 @@ async function addToppings(context) {
 }
 
 async function contactHelp(context) {
-	return sendMessageResponse(context, 'Please contact the Help Desk.');
+    // Context message goes from static to dynamic
+    let message;
+    switch(context.activity.channelId) {
+        case 'webchat':
+            message = formats.help_WebchatResponse();
+            break;
+        case 'slack':
+            message = formats.help_SlackResponse();
+            break;
+        case 'msteams':
+            message = formats.help_msteamsResponse();
+            break;
+        default:
+            message = 'Context not supported';
+    }
+
+    return sendMessageResponse(context, message);
 }
 
 async function sendMessageResponse(context, message) {
@@ -252,6 +271,8 @@ async function createDalleImages(context) {
     }
 
 	} else if (context.activity.channelId === 'msteams') {
+
+        ///////start trying to post reactions to mstreams posts...
         let teamId = context.activity.channelData.tenant.id;
         let channelId = context.activity.conversation.id;
         thread_ts = context.activity.id
@@ -281,7 +302,7 @@ async function createDalleImages(context) {
         req.on('error', (error) => {
           console.error(`\n******SPECIAL_COMMANDS: beta-emoji request error: ${error}`);
         });
-    
+            ///////end trying to post reactions to mstreams posts...
 		const adaptiveCardFinishMessage = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			type: "AdaptiveCard",
