@@ -1,18 +1,20 @@
 const PATH_CONFIGS = {
-    'msteams': {
-        personality: "You talk like an old cowboy.",
-        welcomeMessage: "Howdy partner, welcome to our Microsoft Teams chat!"
-    },
-    'slack': {
-        personality: "You talk like a Space Merchant.",
-        welcomeMessage: "Greetings earthling, welcome to our Slack channel!"
-    },
+	'msteams': {
+	  personality: "You talk like an old cowboy.", 
+	  welcomeMessage: "Howdy partner, welcome to our Microsoft Teams chat!",
+	  messagePrefix: "teams_path:"
+	},
+	'slack': {
+	  personality: "You talk like a Space Merchant.",
+	  welcomeMessage: "Greetings earthling, welcome to our Slack channel!", 
+	  messagePrefix: "slack_path:"
+	},
 	'webchat': {
-        personality: "You talk like a salty pirate.",
-        welcomeMessage: "Ahoy! , welcome to our webchat channel!"
-    },
-    // add more paths as required
-};
+	  personality: "You talk like a salty pirate.",
+	  welcomeMessage: "Ahoy! , welcome to our webchat channel!",
+	  messagePrefix: "default_path:" 
+	}
+  };
 
 const {
 	ActivityHandler,
@@ -129,19 +131,13 @@ class EchoBot extends ActivityHandler {
 					});
 
 					let isFirstInteraction = await this.isFirstInteraction.get(context, true);
-					
+
+
+
 					let handled = false;
-                    //handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, personality) || handled;
-					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, this.isFirstInteraction, pathConfig.personality) || handled;
-					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, pathConfig.personality) || handled;
-					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, pathConfig.personality) || handled;
-					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, personality) || handled;
-					handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, personality) || handled;
-
-
-					
-
-
+					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, personality) || handled;	
+					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, pathConfig) || handled;
+					handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, PATH_CONFIGS['msteams']) || handled;	
 
 
                     if (handled) {
