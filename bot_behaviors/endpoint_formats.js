@@ -97,7 +97,7 @@ module.exports = {
         } catch (error) {
             console.error('\n******ENDPOINT_FORMATS.JS: Slack->An error occurred while formatting the Slack response:', error);
         }
-    }
+    },
     
     help_msteamsResponse: function() {
         const adaptiveCardContent = {
