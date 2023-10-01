@@ -244,85 +244,19 @@ async function createDalleImages(context) {
         console.error('\n******SPECIAL_COMMANDS: Failed to send Slack summary message:', error);
     }
 
-	} else if (context.activity.channelId === 'msteams') {
-
-        ///////start trying to post reactions to mstreams posts...
-        let teamId = context.activity.channelData.tenant.id;
-        let channelId = context.activity.conversation.id;
-        thread_ts = context.activity.id
-    
-        const data = JSON.stringify({
-            reactionType: "🔄"
-        });
-          
-        const options = {
-            hostname: 'graph.microsoft.com',
-            port: 443,
-            path: `/beta/teams/${teamId}/channels/${channelId}/messages/${thread_ts}/reactions`,
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiToken}`,
-                'Content-Type': 'application/json',
-                'Content-Length': data.length
-            }
-        }
-       
-        const req = https.request(options, (res) => {
-            console.log(`\n******SPECIAL_COMMANDS: statusCode: ${res.statusCode}`)
-        });
-        req.write(data);
-        req.end();
-        
-        req.on('error', (error) => {
-          console.error(`\n******SPECIAL_COMMANDS: beta-emoji request error: ${error}`);
-        });
-            ///////end trying to post reactions to mstreams posts...
-		const adaptiveCardFinishMessage = {
-			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-			type: "AdaptiveCard",
-			version: "1.4",
-			body: [{
-					type: "TextBlock",
-					text: "Summary: We used DallE to create...",
-					wrap: true,
-					size: "medium",
-					weight: "bolder"
-				},
-				{
-					type: "TextBlock",
-					text: `Prompt: ${prompt}`,
-					wrap: true
-				},
-				{
-					type: "TextBlock",
-					text: `Number of images: ${numImages}`,
-					wrap: true
-				},
-				{
-					type: "TextBlock",
-					text: `Size of images: ${imageSize}`,
-					wrap: true
-				},
-				{
-					type: "TextBlock",
-					text: `Time to complete: ${seconds} seconds.`,
-					wrap: true
-				}
-			]
-		};
-
-		const activityPreviewCard = {
-			contentType: 'application/vnd.microsoft.card.adaptive',
-			content: adaptiveCardFinishMessage
-		};
-
-		return await context.sendActivity({
-			attachments: [activityPreviewCard]
-		});
+	if (context.activity.channelId === 'msteams') {
+		try {
+			let message = formats.dalle_msteamsResponse(numImages, imageSize, seconds);
+			await sendMessageResponse(context, message);
+		} catch (error) {
+			console.error('\n******SPECIAL_COMMANDS: msteams path Failed to format the message:', error);
+			message = formats.help_DefaultResponse();
+		}
 	} else {
 		// This is the default case when none of the above matches
-    let message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
-    await sendMessageResponse(context, message);
+		let message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
+		await sendMessageResponse(context, message);
+	}
 }
 	async function sendMessageWithThread(context, message, thread_ts) {
 		const newActivity = MessageFactory.text(message);

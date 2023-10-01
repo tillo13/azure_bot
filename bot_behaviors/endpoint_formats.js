@@ -155,5 +155,42 @@ module.exports = {
                 contentUrl: null,
                 content: adaptiveCardContent,
             };
+        },
+        dalle_msteamsResponse: function(numImages, imageSize, duration) {
+            const adaptiveCardContent = {
+                $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+                type: "AdaptiveCard",
+                version: "1.4",
+                body: [
+                    {
+                        type: "TextBlock",
+                        text: "Summary: We used DallE to create...",
+                        wrap: true
+                    },
+                    {
+                        type: "FactSet",
+                        facts: [
+                            {
+                                title: "Number of images",
+                                value: numImages.toString()
+                            },
+                            {
+                                title: "Size of images",
+                                value: imageSize
+                            },
+                            {
+                                title: "Time to complete",
+                                value: `${duration} seconds`
+                            }
+                        ]
+                    }
+                ]
+            };
+            return {
+                type: "attachment",
+                contentType: "application/vnd.microsoft.card.adaptive",
+                contentUrl: null,
+                content: adaptiveCardContent
+            };
         }
 };
