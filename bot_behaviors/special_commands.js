@@ -224,15 +224,56 @@ if(context.activity.channelId === 'webchat') {
     };
     return await context.sendActivity(reply);
 } 
-else {
-    const finishMessage = `Summary: We used DallE to create...
-      Prompt: ${prompt}
-      Number of images: ${numImages}
-      Size of images: ${imageSize}
-      Time to complete: ${seconds} seconds. Thank you.`;
+else if (context.activity.channelId === 'msteams') {
+    // Create the MessageCard for Microsoft Teams
+    const messageCardFinishMessage = {
+      "@type": "MessageCard",
+      "@context": "http://schema.org/extensions",
+      "summary": "Dall-E Summary",
+      "sections": [
+        {
+          "facts": [
+            {
+              "name": "Prompt",
+              "value": `${prompt}`
+            },
+            {
+              "name": "Number of images",
+              "value": `${numImages}`
+            },
+            {
+              "name": "Size of images",
+              "value": `${size}`
+            },
+            {
+              "name": "Time to Complete",
+              "value": `${seconds} seconds`
+            }
+          ],
+          "text": "Summary: We used DallE to create..."
+        }
+      ]
+    }
 
-      console.log("\n\n**SPECIAL_COMMANDS.JS: context, finishMessage, thread_ts values:", context, finishMessage, thread_ts);
-      await sendMessageWithThread(context, finishMessage, thread_ts);
+    // Send the MessageCard as the attachment
+    var reply = { 
+      type: 'message', 
+      attachments: [
+        { 
+          contentType: 'application/vnd.microsoft.teams.card.list',
+          content: messageCardFinishMessage 
+        }
+      ]
+    };
+    return await context.sendActivity(reply);
+} else {
+    const finishMessage = `Summary: We used DallE to create...
+    Prompt: ${prompt}
+    Number of images: ${numImages}
+    Size of images: ${imageSize}
+    Time to complete: ${seconds} seconds. Thank you.`;
+
+    // Finish message for other channels
 }
 
 await sendMessageWithThread(context, finishMessage, thread_ts);}
