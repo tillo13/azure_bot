@@ -227,66 +227,79 @@ async function createDalleImages(context) {
 		};
 		return await context.sendActivity(reply);
 	} else if (context.activity.channelId === 'slack') {
-		const slackMessage = {
-			"blocks": [{
-					"type": "header",
-					"text": {
-						"type": "plain_text",
-						"text": "Dall-E Summary"
-					}
-				},
-				{
-					"type": "section",
-					"fields": [{
-							"type": "mrkdwn",
-							"text": "*Prompt:*"
-						},
-						{
-							"type": "mrkdwn",
-							"text": `${prompt}`
-						},
-						{
-							"type": "mrkdwn",
-							"text": "*Number of images:*"
-						},
-						{
-							"type": "mrkdwn",
-							"text": `${numImages.toString()}`
-						},
-						{
-							"type": "mrkdwn",
-							"text": "*Size of images:*"
-						},
-						{
-							"type": "mrkdwn",
-							"text": `${imageSize}`
-						},
-						{
-							"type": "mrkdwn",
-							"text": "*Time to complete:*"
-						},
-						{
-							"type": "mrkdwn",
-							"text": `${seconds} seconds.`
-						}
-					]
-				},
-				{
-					"type": "context",
-					"elements": [{
-						"type": "mrkdwn",
-						"text": "Please hold while we create..."
-					}]
-				}
-			]
-		};
-		const replyActivity = MessageFactory.attachment(slackMessage);
-		replyActivity.conversation = context.activity.conversation;
-		const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
-		if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
-			replyActivity.conversation.id += ':' + thread_ts;
-		}
-		await context.sendActivity(replyActivity);
+        const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
+        
+        const slackMessage = {
+            "blocks": [
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Dall-E Summary"
+                    }
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Prompt:*"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": `${prompt}`
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Number of images:*"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": `${numImages.toString()}`
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Size of images:*"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": `${imageSize}`
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Time to complete:*"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": `${seconds} seconds.`
+                        }
+                    ]
+                },
+                {
+                    "type": "context",
+                    "elements": [
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Please hold while we create...*"
+                        }
+                    ]
+                }
+            ]
+        };
+        
+        // Constuct the Block message in channelData property
+        const replyActivity = MessageFactory.text('');
+        replyActivity.channelData = {
+          "blocks": slackMessage.blocks
+        };
+        replyActivity.conversation = context.activity.conversation;
+        
+        if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
+            replyActivity.conversation.id += ':' + thread_ts;
+        }
+    
+        await context.sendActivity(replyActivity);
+        
 	} else if (context.activity.channelId === 'msteams') {
 		const adaptiveCardFinishMessage = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
