@@ -59,20 +59,21 @@ module.exports = {
     help_SlackResponse: function() {
         return  `*Bold text*\n\n` +
                 `_Italic text_\n\n` +
+                `~Strikethrough text~\n\n` +
+				`<@U12345678|username> - mention a user\n\n` +
+                `<#C12345678|general> - mention a channel\n\n` +
                 `\`Inline code text\`\n\n` +
                 '```\nBlock of code text\n```\n\n' +
                 `> Blockquote text\n\n` +
                 `- Unordered list item 1\n\n` +
                 `- Unordered list item 2\n\n` +
+		`:smile: - an emoji\n\n` +
+		`[Link to Google](http://google.com)\n\n` +
                 `1. Ordered list item 1\n\n` +
                 `2. Ordered list item 2\n\n` +
-                `[Link to Google](http://google.com)\n\n`+
-                `~Strikethrough text~\n\n` +
-                `# Heading 1\n\n` +
-                `## Heading 2\n\n` +
-                `###### Heading 6\n\n` +
                 `<http://www.example.com|Inline displayed link>\n\n` +
-                `Lines\n---\nDivided\n`
+                `Lines\n---\nDivided\n` +
+		`<!date^1392734382^{date} at {time}|February 18th, 2014 at 6:39 AM PST>\n`
     },
     
     help_msteamsResponse: function() {
