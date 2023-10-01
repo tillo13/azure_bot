@@ -176,15 +176,16 @@ Time to complete: ${seconds} seconds. Thank you.`;
 await sendMessageWithThread(context, finishMessage, thread_ts);}
 async function sendMessageWithThread(context, message, thread_ts) {
     const newActivity = MessageFactory.text(message);
-    newActivity.conversation = context.activity.conversation; 
 
     if (context.activity.channelId === 'slack') {
-        const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || 
-                          context.activity.channelData?.SlackMessage?.event?.ts;
         if (!newActivity.conversation.id.includes(thread_ts)) {
             newActivity.conversation.id += ':' + thread_ts;
         }
     }
+
+    newActivity.conversation = {
+        tenantId: context.activity.conversation.tenantId
+    };
 
     await context.sendActivity(newActivity);
 }
