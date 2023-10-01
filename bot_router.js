@@ -89,27 +89,27 @@ class EchoBot extends ActivityHandler {
 				}
 
 				const slackBlocks = {
-				"blocks": [
-					{
-					"type": "section",
-					"text": {
-						"type": "mrkdwn", 
-						"text": `:information_source: *Incoming interaction:*\n*Source:* \`${context.activity.channelId}\`\n*User ID:* \`${id}\`\n*Username:* \`${username}\`\n*User Payload:* \`${context.activity.text}\``  
-					}
-					},
-					{
-					"type": "divider" 
-					},
-					{
-					"type": "context",
-					"elements": [
+					"blocks": [
 						{
-						"type": "mrkdwn",
-						"text": `:robot_face: _Message ID: ${context.activity.id}_` 
+							"type": "section",
+							"text": {
+								"type": "mrkdwn", 
+								"text": `:information_source: *Incoming interaction:*\n*Source:* \`${context.activity.channelId}\`\n*User ID:* \`${id}\`\n*Username:* \`${username}\`\n*User Payload:* \`${context.activity.text}\``  
+							}
+						},
+						{
+							"type": "context",
+							"elements": [
+								{
+									"type": "mrkdwn",
+									"text": `:robot_face: _Message ID: ${context.activity.id}_` 
+								}
+							]
+						},
+						{
+							"type": "divider" 
 						}
 					]
-					}
-				]
 				};
 
 				// Send message to Slack 
