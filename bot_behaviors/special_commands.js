@@ -224,7 +224,7 @@ if(context.activity.channelId === 'webchat') {
     };
     return await context.sendActivity(reply);
 } 
-else if (context.activity.channelId === 'msteams') {
+if(context.activity.channelId === 'msteams') {
     // Create the MessageCard for Microsoft Teams
     const messageCardFinishMessage = {
       "@type": "MessageCard",
@@ -265,6 +265,7 @@ else if (context.activity.channelId === 'msteams') {
         }
       ]
     };
+    // Returns the response to the user
     return await context.sendActivity(reply);
 } else {
     const finishMessage = `Summary: We used DallE to create...
@@ -274,6 +275,7 @@ else if (context.activity.channelId === 'msteams') {
     Time to complete: ${seconds} seconds. Thank you.`;
 
     // Finish message for other channels
+    return await context.sendActivity(finishMessage);
 }
 
 await sendMessageWithThread(context, finishMessage, thread_ts);}
