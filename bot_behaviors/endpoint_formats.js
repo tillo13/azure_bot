@@ -57,7 +57,7 @@ module.exports = {
     },
 
     help_SlackResponse: function() {
-        return {
+        return  {
             "blocks": [
                 {
                     "type": "section",
