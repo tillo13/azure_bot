@@ -8,32 +8,30 @@ const helpMessage = {
         "Type `$hamburger` for a fun surprise"
     ]
 };
-
 function generateAdaptiveCardContent(textStyling) {
     return {
         type: "AdaptiveCard",
         body: [{
-                type: "TextBlock",
-                text: `${textStyling.helpTitle}${helpMessage.title}${textStyling.helpTitleEnd}`,
-                wrap: true,
-            }, {
-                type: "TextBlock",
-                text: helpMessage.note,
-                wrap: true,
-            }, {
-                type: "TextBlock",
-                text: `${textStyling.listTitle}${helpMessage.instructions}${textStyling.listTitleEnd}`,
-                wrap: true,
-            },
-            ...helpMessage.list.map((item) => ({
-                type: "TextBlock",
-                text: `${textStyling.listItem}${item}${textStyling.listItemEnd}`,
-                wrap: true,
-            }))
+            type: "TextBlock",
+            text: `${textStyling.helpTitle}${helpMessage.title}${textStyling.helpTitleEnd}`,
+            wrap: true,
+        }, {
+            type: "TextBlock",
+            text: helpMessage.note,
+            wrap: true,
+        }, {
+            type: "TextBlock",
+            text: `${textStyling.listTitle}${helpMessage.instructions}${textStyling.listTitleEnd}`,
+            wrap: true,
+        },
+        ...helpMessage.list.map((item, index) => ({
+            type: "TextBlock",
+            text: `${typeof textStyling.listItem === 'function' ? textStyling.listItem(index) : textStyling.listItem}${item}${textStyling.listItemEnd}`,
+            wrap: true,
+        }))
         ],
         $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
     };
-
 }
 module.exports = {
     help_DefaultResponse: function() {
@@ -72,13 +70,13 @@ module.exports = {
             helpTitleEnd: "**",
             listTitle: "**",
             listTitleEnd: "**",
-            listItem: "**1.** ",
+            listItem: index => `**${index + 1}.** `,
             listItemEnd: ""
         };
-
+    
         let cardContent = generateAdaptiveCardContent(textStyling);
-        cardContent.version = "1.4"; // MSTeams specific version
-
+        cardContent.version = "1.4";
+    
         return {
             type: "attachment",
             contentType: "application/vnd.microsoft.card.adaptive",
