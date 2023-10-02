@@ -229,7 +229,7 @@ async function postProcess(context, thread_ts, channelId, apiToken) {
 	}
 }
 function formatSummary(prompt, numImages, imageSize, seconds) {
-    return `Summary: We used DallE to create [${prompt}]\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${duration} seconds. Thank you.`;
+    return `Summary: We used DallE to create [${prompt}]\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${seconds} seconds. Thank you.`;
 }
 
 async function sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts) {
