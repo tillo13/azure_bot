@@ -138,10 +138,16 @@ async function createDalleImages(context) {
 }
 
 function parseArguments(messageText, channelId) {
-    const defaultSettings = {
-		prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled humans working alongside robots actively engaged operating Teradata's secure and trustworthy AI hub, with sprockets and springs in motion",        
-        numImages: 3,
-        imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
+    const defaultSettings = channelId === 'slack' ? 
+    {
+            prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled humans working alongside robots actively engaged operating Teradata's secure and trustworthy AI hub, with sprockets and springs in motion",        
+            numImages: 3,
+            imageSize: '512x512'
+    } :
+    {
+            prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled humans working alongside robots actively engaged operating Teradata's secure and trustworthy AI hub, with sprockets and springs in motion",        
+            numImages: 3,
+            imageSize: '1024x1024'
     }
 
     // Split message by space and remove empty strings
@@ -158,8 +164,8 @@ function parseArguments(messageText, channelId) {
             if (parseInt(arg.slice(2))) {
                 // If a number follows "--", it's the number of images
                 numImages = parseInt(arg.slice(2));
-            } else if (["full", "medium", "small"].includes(arg.slice(2)) && channelId !== 'slack') {
-                // If "full", "medium", or "small" follow "--", it's the image size
+            } else if (["large", "medium", "small"].includes(arg.slice(2)) && channelId !== 'slack') {
+                // If "large", "medium", or "small" follow "--", it's the image size
                 imageSize = arg.slice(2);
             }
         } else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
@@ -171,7 +177,8 @@ function parseArguments(messageText, channelId) {
     let settings = {
         prompt: promptPieces.join(" ") || defaultSettings.prompt,
         numImages: numImages,
-        imageSize: imageSize === 'medium' ? "512x512" : imageSize === 'small' ? "256x256" : imageSize
+
+		imageSize: imageSize === 'medium' ? "512x512" : imageSize === 'small' ? "256x256" : imageSize === 'large' ? "1024x1024" : imageSize
     }
 
     return settings;
