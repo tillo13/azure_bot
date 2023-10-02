@@ -114,32 +114,34 @@ module.exports = {
 
 	// new formatting functions:
 	dalle_DefaultResponse: function(prompt, numImages, imageSize, duration) {
-		return `Summary: We used DallE to create: _${prompt}_\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${duration} seconds. Thank you.`;
+		return `Summary: We used DallE to create: _${prompt}_\nNumber of images: ${(numImages) ? numImages.toString() : "N/A"}\nSize of images: ${(imageSize) ? imageSize : "N/A"}\nTime to complete: ${(duration) ? `${duration} seconds` : "N/A"}. Thank you.`;
 	},
-
+	
 	dalle_WebchatResponse: function(prompt, numImages, imageSize, duration) {
 		const adaptiveCardContent = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			type: "AdaptiveCard",
 			version: "1.3",
-			body: [{
+			body: [
+				{
 					type: "TextBlock",
 					text: `Summary: We used DallE to create: _${prompt}_`,
 					wrap: true
 				},
 				{
 					type: "FactSet",
-					facts: [{
+					facts: [
+						{
 							title: "Number of images",
-							value: numImages.toString()
+							value: (numImages) ? numImages.toString() : "N/A"
 						},
 						{
 							title: "Size of images",
-							value: imageSize
+							value: (imageSize) ? imageSize : "N/A"
 						},
 						{
 							title: "Time to complete",
-							value: `${duration} seconds`
+							value: (duration) ? `${duration} seconds` : "N/A"
 						}
 					]
 				}
@@ -152,29 +154,32 @@ module.exports = {
 			content: adaptiveCardContent,
 		};
 	},
+	
 	dalle_msteamsResponse: function(prompt, numImages, imageSize, duration) {
 		const adaptiveCardContent = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			type: "AdaptiveCard",
 			version: "1.4",
-			body: [{
+			body: [
+				{
 					type: "TextBlock",
 					text: `Summary: We used DallE to create: _${prompt}_`,
 					wrap: true
 				},
 				{
 					type: "FactSet",
-					facts: [{
+					facts: [
+						{
 							title: "Number of images",
-							value: numImages.toString()
+							value: (numImages) ? numImages.toString() : "N/A"
 						},
 						{
 							title: "Size of images",
-							value: imageSize
+							value: (imageSize) ? imageSize : "N/A"
 						},
 						{
 							title: "Time to complete",
-							value: `${duration} seconds`
+							value: (duration) ? `${duration} seconds` : "N/A"
 						}
 					]
 				}
@@ -187,17 +192,18 @@ module.exports = {
 			content: adaptiveCardContent
 		};
 	},
-    dalle_SlackResponse: function(prompt, numImages, imageSize, duration) {
-        let slackMessage = {
-          "blocks": [{
-            "type": "section",
-            "text": {
-              "type": "mrkdwn",
-              "text": `Your Image Request Summary:\nPrompt: ${prompt}\nNumber of Images: ${numImages}\nImage Size: ${imageSize}\nTime elapsed:  ${duration} seconds.`
-            }
-          }]
-        };
-      
-        return slackMessage;
-      },
+	
+	dalle_SlackResponse: function(prompt, numImages, imageSize, duration) {
+		let slackMessage = {
+		  "blocks": [{
+			"type": "section",
+			"text": {
+			  "type": "mrkdwn",
+			  "text": `Your Image Request Summary:\nPrompt: ${prompt}\nNumber of Images: ${(numImages) ? numImages.toString() : "N/A"}\nImage Size: ${(imageSize) ? imageSize : "N/A"}\nTime elapsed: ${(duration) ? `${duration} seconds` : "N/A"}.`
+			}
+		  }]
+		};
+	  
+		return slackMessage;
+	  },
 };
