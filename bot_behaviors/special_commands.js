@@ -97,15 +97,14 @@ global.current_dalle_prompt = '';
 async function createDalleImages(context) {
     const messageText = context.activity.text.replace('$dalle', '').trim();
     const startTime = new Date().getTime();
-
     const channelId = context.activity.channelId;
-    const { prompt, numImages, imageSize } = parseArguments(messageText, channelId);
+    const { prompt, numImages, imageSize, originalRequestedImages } = parseArguments(messageText, channelId);
     global.current_dalle_prompt = prompt;
 	
-	// Check if requested number of images is more than 10
-	if (numImages !== parseInt(messageText)) {
-		await sendMessageWithThread(context, `_You've asked for more than than max of 10 images, but worry not we'll still create 10 rad images for you_.`, thread_ts);
-	}
+    // Check if requested number of images is more than 10
+    if (originalRequestedImages > 10) {
+        await sendMessageWithThread(context, `_I think you've asked for_ ${originalRequestedImages} _images. The maximum is 10, because 10 seems like a decent max, right? However, worry not we'll still create 10 rad images. Coming right up..._`, thread_ts);
+    }
 
     const apiToken = context.activity.channelData?.ApiToken;
     const slackChannelId = context.activity.channelData?.SlackMessage?.event?.channel;
@@ -155,6 +154,7 @@ function parseArguments(messageText, channelId) {
     let numImages = defaultSettings.numImages;
     let imageSize = defaultSettings.imageSize;
     let promptPieces = []
+    let originalRequestedImages;
 
     // Parse arguments
     splitMessage.forEach((arg, index) => {
@@ -162,13 +162,14 @@ function parseArguments(messageText, channelId) {
             let nextArg = splitMessage[index + 1];
             if (parseInt(arg.slice(2))) {
                 // If a number follows "--", it's the number of images
-                numImages = parseInt(arg.slice(2));
+                originalRequestedImages = parseInt(arg.slice(2));
+                numImages = originalRequestedImages;
 
                 // Enforce max of 10 images
                 if (numImages > 10) {
                     numImages = 10;
                 }
-            } else if (["large", "medium", "small"].includes(arg.slice(2)) && channelId !== 'slack') {
+            }  else if (["large", "medium", "small"].includes(arg.slice(2)) && channelId !== 'slack') {
                 // If "large", "medium", or "small" follow "--", it's the image size
                 imageSize = arg.slice(2);
             }
@@ -181,6 +182,7 @@ function parseArguments(messageText, channelId) {
     let settings = {
         prompt: promptPieces.join(" ") || defaultSettings.prompt,
         numImages: numImages,
+		originalRequestedImages: originalRequestedImages,
 
 		imageSize: imageSize === 'medium' ? "512x512" : imageSize === 'small' ? "256x256" : imageSize === 'large' ? "1024x1024" : imageSize
     }
