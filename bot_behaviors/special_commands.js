@@ -228,19 +228,15 @@ async function postProcess(context, thread_ts, channelId, apiToken) {
 		await addReaction(channelId, thread_ts, 'white_check_mark', apiToken);
 	}
 }
-function formatSummary(prompt, numImages, imageSize, seconds) {
-    return `Summary: We used DallE to create [${prompt}]\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${seconds} seconds. Thank you.`;
-}
-
-async function sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts) {
-    const summary = formatSummary(prompt, numImages, imageSize, seconds);
+async function sendSummary(context, prompt, numImages, imageSize, seconds) {
     switch (context.activity.channelId) {
-        case 'webchat':
-            // send to endpoint_formats.js
-            let message = formats.dalle_WebchatResponse(numImages, imageSize, seconds);
-            await sendMessageResponse(context, `${summary}\n${message}`);
+        case 'webchat': {
+            let message = formats.dalle_WebchatResponse(prompt, numImages, imageSize, seconds);
+            await sendMessageResponse(context, message);
             break;
-        case 'slack':
+        }
+        case 'slack': {
+            const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
             let slackMessage = formats.dalle_SlackResponse(prompt, numImages, imageSize, seconds);
             slackMessage.thread_ts = thread_ts; // Add thread_ts to the slackMessage
             let replyActivity = {
@@ -255,19 +251,23 @@ async function sendSummary(context, prompt, numImages, imageSize, seconds, threa
                 console.error('\n******SPECIAL_COMMANDS: Failed to send Slack summary message:', error);
             }
             break;
-        case 'msteams':
+        }
+        case 'msteams': {
             try {
-                let msteamsMessage = formats.dalle_msteamsResponse(numImages, imageSize, seconds);
-                await sendMessageResponse(context, `${summary}\n${msteamsMessage}`);
+                let message = formats.dalle_msteamsResponse(prompt, numImages, imageSize, seconds);
+                await sendMessageResponse(context, message);
             } catch (error) {
                 console.error('\n******SPECIAL_COMMANDS: msteams path Failed to format the message:', error);
-                message = formats.help_DefaultResponse();
+                let message = formats.help_DefaultResponse();
+                await sendMessageResponse(context, message);
             }
             break;
-        default:
+        }
+        default: {
             // This is the default case when none of the above matches
-            let defaultMsg = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
-            await sendMessageResponse(context, `${summary}\n${defaultMsg}`);
+            let message = formats.dalle_DefaultResponse(prompt, numImages, imageSize, seconds);
+            await sendMessageResponse(context, message);
+		}
     }
 }
 
