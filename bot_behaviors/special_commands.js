@@ -156,55 +156,40 @@ function parseArguments(messageText, channelId) {
 		prompt: "A painting reminiscent of Rembrandt, with various sprockets and springs in motion while steampunk-styled humans work alongside robots actively engaged operating Teradata's secure and trustworthy A.I. hub!",
 		numImages: 3,
 		imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
-	}
+	};
 
 	// Split message by space and remove empty strings
 	let splitMessage = messageText.split(" ").filter(Boolean);
 
 	let numImages = defaultSettings.numImages;
 	let imageSize = defaultSettings.imageSize;
-	let promptPieces = []
+	let promptPieces = [];
 	let originalRequestedImages;
 
 	// Parse arguments
-	splitMessage.forEach((arg, index) => {
+	for (let i = 0; i < splitMessage.length; i++) {
+		const arg = splitMessage[i];
 		if (arg.startsWith("--")) {
-			let nextArg = splitMessage[index + 1];
-			if (!isNaN(parseInt(arg.slice(2), 10))) {
+			const nextArg = splitMessage[i + 1];
+			if (arg.slice(2).match(/^\d+$/)) {
 				// If a number follows "--", it's the number of images
 				originalRequestedImages = parseInt(arg.slice(2), 10);
-				numImages = originalRequestedImages;
-				// Enforce max of 10 images
-				if (numImages > 10) {
-					numImages = 10;
-				}
+				numImages = Math.min(originalRequestedImages, 10); // Limit to 10 images
 			} else if (["large", "medium", "small"].includes(arg.slice(2))) {
-				switch (arg.slice(2)) {
-					case 'large':
-						imageSize = '1024x1024';
-						break;
-					case 'medium':
-						imageSize = '512x512';
-						break;
-					case 'small':
-						imageSize = '256x256';
-						break;
-				}
+				// If the argument is a size keyword, set the size
+				imageSize = imageSizeMapping[arg.slice(2)];
 			}
-		} else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
-			// If an argument does not start with "--" and is not directly following an argument that starts with "--", it's part of the prompt
+		} else {
 			promptPieces.push(arg);
 		}
-	});
+	}
 
 	let settings = {
 		prompt: promptPieces.join(" ") || defaultSettings.prompt,
 		numImages: numImages,
 		originalRequestedImages: originalRequestedImages,
-	  
-		// only use defaultSettings if "--size" arg is not provided in the command  
-		imageSize: imageSize ? imageSize : defaultSettings.imageSize,
-	  }
+		imageSize: imageSize || defaultSettings.imageSize, 
+	};
 
 	if (channelId === 'slack' && !settings.imageSize)
 		settings.imageSize = '512x512';
@@ -212,7 +197,7 @@ function parseArguments(messageText, channelId) {
 }
 
 function defaultMessage(prompt, numImages, imageSize) {
-	return `Summary: We are going to use Dall-E to create: ${prompt}||Number of images: ${numImages}||Size of images: ${imageSize}||Please hold while we align 1s and 0s...`;
+	return `Summary: We are going to use Dall-E to create: ${prompt} | Number of images: ${numImages} | Size of images: ${imageSize} | Please hold while we align 1s and 0s...`;
 }
 
 function getFileName(prompt) {
