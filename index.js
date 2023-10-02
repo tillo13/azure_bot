@@ -42,9 +42,6 @@ adapter.onTurnError = onTurnErrorHandler;
 // Server start
 server.listen(process.env.port || process.env.PORT || 3978, () => {
     console.log("\n\n*INDEX.JS: Server is starting up...\n");
-    console.log("\n\n*INDEX.JS: Server is now listening to " + server.url + "\n");
-    console.log("\n\n*INDEX.JS: Get Bot Framework Emulator at https://aka.ms/botframework-emulator \n");
-    console.log("\n\n*INDEX.JS: To talk to your bot, open the emulator and select 'Open Bot'\n");
 });
 
 // EchoBot initialization
@@ -64,7 +61,7 @@ server.post('/api/messages', async (req, res) => {
 // Add a GET endpoint to receive the Azure Function health check created in Azure portal to keepalive.
 server.get('/ping', async (req, res) => {
   res.send(200, 'Tell KeepAzureBotAlive function that I am alive!');
-  console.log("\n\n*INDEX.JS: Received 5min Azure KeepAzureBotAlive request...\n");
+  console.log("\n\n*INDEX.JS: Received Azure KeepAzureBotAlive request...\n");
 });
 
 // Listen for SIGTERM and SIGINT signals
