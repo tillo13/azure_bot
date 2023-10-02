@@ -135,7 +135,7 @@ async function createDalleImages(context) {
 
 function parseArguments(messageText) {
     const defaultSettings = {
-        prompt: "a rembrandt-like painting, of a steampunk styled robot party, in a futuristic world, using the color palette of Teradata.",
+        prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled robots actively engaged in operations within a futuristic computer factory, with vivid sprockets, screens and springs in motion, all brought to life through the color palette reminiscent of Teradata",
         numImages: 3,
         imageSize: "1024x1024"
     }
@@ -257,7 +257,7 @@ async function sendSummary(context, prompt, numImages, imageSize, seconds, threa
         }
     } else {
         // This is the default case when none of the above matches
-        let message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
+        let message = formats.dalle_DefaultResponse(prompt, numImages, imageSize, seconds);
         await sendMessageResponse(context, message);
 
     }
