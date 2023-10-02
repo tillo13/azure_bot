@@ -30,7 +30,10 @@ const commands = new Proxy({
 });
 
 async function addToppings(context) {
-	return sendMessageResponse(context, 'Ketchup!');
+    var randNum = Math.random()*102;
+    randNum = randNum.toFixed(3); // truncates to 3 decimal places.
+
+    return sendMessageResponse(context,  `${randNum} Ketchup!`); // concatenation of the random number with the string
 }
 
 async function contactHelp(context) {
@@ -100,7 +103,8 @@ async function createDalleImages(context) {
     const channelId = context.activity.channelId;
     const { prompt, numImages, imageSize, originalRequestedImages } = parseArguments(messageText, channelId);
     global.current_dalle_prompt = prompt;
-	
+    let thread_ts;
+    
     // Check if requested number of images is more than 10
     if (originalRequestedImages > 10) {
         await sendMessageWithThread(context, `_I think you've asked for_ ${originalRequestedImages} _images. The maximum is 10, because 10 seems like a decent max, right? However, worry not we'll still create 10 rad images. Coming right up..._`, thread_ts);
@@ -108,10 +112,11 @@ async function createDalleImages(context) {
 
     const apiToken = context.activity.channelData?.ApiToken;
     const slackChannelId = context.activity.channelData?.SlackMessage?.event?.channel;
-    let thread_ts;
+
+    //Define thread_ts only if platform is slack
     if (channelId === 'slack') {
         thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
-            context.activity.channelData?.SlackMessage?.event?.ts
+                      context.activity.channelData?.SlackMessage?.event?.ts;
         await addReaction(slackChannelId, thread_ts, 'hourglass_flowing_sand', apiToken);
     }
 
@@ -121,24 +126,24 @@ async function createDalleImages(context) {
         await sendMessageWithThread(context, defaultMessage(prompt, numImages, imageSize), thread_ts);
     }
 
-	const filenameBase = getFileName(prompt);
+    const filenameBase = getFileName(prompt);
 
-	for (let i = 0; i < numImages; i++) {
-		const filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
-		await sendMessageWithThread(context, `Creating ${filename}...`, thread_ts);
-		await sendTypingIndicator(context);
+    for (let i = 0; i < numImages; i++) {
+        const filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
+        await sendMessageWithThread(context, `Creating ${filename}...`, thread_ts);
+        await sendTypingIndicator(context);
 
-		await generateImages(prompt, 1, imageSize, async (imageUrl) => {
-			const replyActivity = getReplyActivity(context, thread_ts, imageUrl);
-			await context.sendActivity(replyActivity);
-		});
-	}
+        await generateImages(prompt, 1, imageSize, async (imageUrl) => {
+            const replyActivity = getReplyActivity(context, thread_ts, imageUrl);
+            await context.sendActivity(replyActivity);
+        });
+    }
 
-	await postProcess(context, thread_ts, channelId, apiToken);
+    await postProcess(context, thread_ts, channelId, apiToken);
 
-	const endTime = new Date().getTime();
-	const seconds = getElapsedTime(startTime, endTime);
-	await sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts);
+    const endTime = new Date().getTime();
+    const seconds = getElapsedTime(startTime, endTime);
+    await sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts);
 }
 
 function parseArguments(messageText, channelId) {
@@ -205,15 +210,16 @@ function sendTypingIndicator(context) {
 	});
 }
 async function sendMessageWithThread(context, message, thread_ts) {
-	const newActivity = MessageFactory.text(message);
-	newActivity.conversation = context.activity.conversation;
+    const newActivity = MessageFactory.text(message);
+    newActivity.conversation = context.activity.conversation;
 
-	if (thread_ts && !newActivity.conversation.id.includes(thread_ts)) {
-		 newActivity.conversation.id += ':' + thread_ts;
-	}
+    if (context.activity.channelId === 'slack' && thread_ts && !newActivity.conversation.id.includes(thread_ts)) {
+        newActivity.conversation.id += ':' + thread_ts;
+    }
 
-	await context.sendActivity(newActivity);
+    await context.sendActivity(newActivity);
 }
+
 function getReplyActivity(context, thread_ts, imageUrl) {
 	const replyActivity = MessageFactory.attachment({
 		 contentType: 'image/png',
