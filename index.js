@@ -67,6 +67,25 @@ server.get('/ping', async (req, res) => {
   console.log("\n\n*INDEX.JS: Received 5min Azure KeepAzureBotAlive request...\n");
 });
 
+// Listen for SIGTERM and SIGINT signals
+process.on('SIGTERM', () => {
+    console.log('\n*INDEX.JS: Received SIGTERM, shutting down gracefully...');
+    server.close(() => {
+      console.log('\n*INDEX.JS: Closed out remaining connections');
+      // Here you can do other cleanup actions before your app is actually terminated, if needed
+      process.exit(0);
+    });
+});
+  
+process.on('SIGINT', () => {
+    console.log('\n*INDEX.JS: Received SIGINT, shutting down gracefully...');
+    server.close(() => {
+      console.log('\n*INDEX.JS: Closed out remaining connections');
+      // Here you can do other cleanup actions before your app is actually terminated, if needed
+      process.exit(0);
+    });
+});
+
 // Upgrade request handling
 server.on('upgrade', async (req, socket, head) => {
     console.log("\n\n*INDEX.JS: Handling upgrade request\n");
@@ -77,4 +96,5 @@ server.on('upgrade', async (req, socket, head) => {
     console.log("\n\n*INDEX.JS: Processing upgrade request...\n");
     await streamingAdapter.process(req, socket, head, (context) => myBot.run(context));
     console.log("\n\n*INDEX.JS: Finished handling upgrade request\n");
+
 });
