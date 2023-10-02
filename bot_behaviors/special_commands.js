@@ -135,7 +135,7 @@ async function createDalleImages(context) {
 
 function parseArguments(messageText) {
     const defaultSettings = {
-        prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled robots actively engaged in operations within Teradata's futuristic computer factory, with vivid sprockets, screens and springs in motion.",
+        prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled robots actively engaged in operations within Teradata's futuristic computer factory, with sprockets and springs in motion",
         numImages: 3,
         imageSize: "1024x1024"
     }
@@ -231,7 +231,7 @@ async function postProcess(context, thread_ts, channelId, apiToken) {
 async function sendSummary(context, prompt, numImages, imageSize, seconds) {
     switch (context.activity.channelId) {
         case 'webchat': {
-            let message = formats.dalle_WebchatResponse(numImages, imageSize, seconds);
+            let message = formats.dalle_WebchatResponse(prompt, numImages, imageSize, seconds);
             await sendMessageResponse(context, message);
             break;
         }
@@ -254,7 +254,7 @@ async function sendSummary(context, prompt, numImages, imageSize, seconds) {
         }
         case 'msteams': {
             try {
-                let message = formats.dalle_msteamsResponse(numImages, imageSize, seconds);
+                let message = formats.dalle_msteamsResponse(prompt, numImages, imageSize, seconds);
                 await sendMessageResponse(context, message);
             } catch (error) {
                 console.error('\n******SPECIAL_COMMANDS: msteams path Failed to format the message:', error);
@@ -265,7 +265,7 @@ async function sendSummary(context, prompt, numImages, imageSize, seconds) {
         }
         default: {
             // This is the default case when none of the above matches
-            let message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
+            let message = formats.dalle_DefaultResponse(prompt, numImages, imageSize, seconds);
             await sendMessageResponse(context, message);
 		}
     }
