@@ -135,7 +135,7 @@ async function createDalleImages(context) {
 
 function parseArguments(messageText) {
     const defaultSettings = {
-        prompt: "a rembrandt-like painting of a dog in a field using the color palette of Teradata.",
+        prompt: "a rembrandt-like painting of a steampunk styled dog in a futuristic world using the color palette of Teradata.",
         numImages: 3,
         imageSize: "1024x1024"
     }
