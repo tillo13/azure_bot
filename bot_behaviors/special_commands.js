@@ -228,36 +228,38 @@ async function postProcess(context, thread_ts, channelId, apiToken) {
 		await addReaction(channelId, thread_ts, 'white_check_mark', apiToken);
 	}
 }
-async function sendSummary(context, settings, duration, thread_ts) {
-    const { prompt, numImages, imageSize } = settings;
-
+async function sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts) {
     if (context.activity.channelId === 'webchat') {
-        const message = formats.dalle_WebchatResponse(prompt, numImages, imageSize, duration);
+        // send to endpoint_formats.js
+        let message = formats.dalle_WebchatResponse(numImages, imageSize, seconds);
         await sendMessageResponse(context, message);
     } else if (context.activity.channelId === 'slack') {
-        const slackMessage = formats.dalle_SlackResponse(prompt, numImages, imageSize, duration);
-        slackMessage.thread_ts = thread_ts;
-        const replyActivity = {
+        let slackMessage = formats.dalle_SlackResponse(prompt, numImages, imageSize, seconds);
+        slackMessage.thread_ts = thread_ts; // Add thread_ts to the slackMessage
+        let replyActivity = {
             type: 'message',
             text: '',
             channelData: slackMessage
         };
         try {
             await context.sendActivity(replyActivity);
-            console.log('Slack summary message sent successfully');
+            console.log('\n******SPECIAL_COMMANDS: Slack summary message sent successfully');
         } catch (error) {
-            console.error('Failed to send Slack summary message:', error);
+            console.error('\n******SPECIAL_COMMANDS: Failed to send Slack summary message:', error);
         }
     } else if (context.activity.channelId === 'msteams') {
         try {
-            const message = formats.dalle_msteamsResponse(prompt, numImages, imageSize, duration);
+            let message = formats.dalle_msteamsResponse(numImages, imageSize, seconds);
             await sendMessageResponse(context, message);
         } catch (error) {
-            console.error('msteams path Failed to format the message:', error);
+            console.error('\n******SPECIAL_COMMANDS: msteams path Failed to format the message:', error);
+            message = formats.help_DefaultResponse();
         }
     } else {
-        const message = formats.dalle_DefaultResponse(prompt, numImages, imageSize, duration);
+        // This is the default case when none of the above matches
+        let message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
         await sendMessageResponse(context, message);
+
     }
 }
 
