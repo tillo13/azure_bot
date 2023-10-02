@@ -124,21 +124,21 @@ module.exports = {
 			version: "1.3",
 			body: [{
 				type: "TextBlock",
-				text: `**Summary**: Using [OpenAI's DALL·E](https://openai.com/research/dall-e) we created: _${global.current_dalle_prompt}_`,
+				text: `**Summary**: Using [OpenAI's DALL·E](https://openai.com/research/dall-e) we created: \n_${global.current_dalle_prompt}_`,
 				wrap: true
 			},
 			{
 				type: "FactSet",
 				facts: [{
-					title: "Number of images",
+					title: "Number of images:",
 					value: numImages.toString()
 				},
 				{
-					title: "Size of images",
+					title: "Size of images:",
 					value: imageSize
 				},
 				{
-					title: "Time to complete",
+					title: "Time to complete:",
 					value: `${duration} seconds`
 				}
 				]
@@ -159,21 +159,21 @@ module.exports = {
 			version: "1.4",
 			body: [{
 				type: "TextBlock",
-				text: `**Summary**: Using [OpenAI's DALL·E](https://openai.com/research/dall-e) we created: _${global.current_dalle_prompt}_`,
+				text: `**Summary**: Using [OpenAI's DALL·E](https://openai.com/research/dall-e) we created: \n_${global.current_dalle_prompt}_`,
 				wrap: true
 			},
 			{
 				type: "FactSet",
 				facts: [{
-					title: "Number of images",
+					title: "Number of images:",
 					value: numImages.toString()
 				},
 				{
-					title: "Size of images",
+					title: "Size of images:",
 					value: imageSize
 				},
 				{
-					title: "Time to complete",
+					title: "Time to complete:",
 					value: `${duration} seconds`
 				}
 				]
