@@ -105,12 +105,16 @@ async function createDalleImages(context) {
         thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
             context.activity.channelData?.SlackMessage?.event?.ts
         await addReaction(channelId, thread_ts, 'hourglass_flowing_sand', apiToken);
-	}
+    }
 
-	await sendMessageWithThread(context, defaultMessage(prompt, numImages), thread_ts);
+    if (!messageText) {
+		await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of [${prompt}]! Please wait a moment...`, thread_ts);
+	} else {
+        await sendMessageWithThread(context, defaultMessage(prompt, numImages, imageSize), thread_ts);
+    }
 
 	const filenameBase = getFileName(prompt);
-	
+
 	for (let i = 0; i < numImages; i++) {
 		const filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
 		await sendMessageWithThread(context, `Creating ${filename}...`, thread_ts);
@@ -170,10 +174,7 @@ function parseArguments(messageText) {
 }
 
 function defaultMessage(prompt, numImages, imageSize) {
-     return `Summary: We are going to use DallE to create...
-     Prompt: ${prompt}
-     Number of images: ${numImages}
-     Size of images: ${imageSize}\nPlease hold while we create...`;
+     return `Summary: We are going to use DallE to create...      Prompt: ${prompt}      Number of images: ${numImages}      Size of images: ${imageSize} Please hold while we create...`;
 }
 
 function getFileName(prompt) {
