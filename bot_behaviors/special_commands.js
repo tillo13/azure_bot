@@ -138,8 +138,7 @@ async function createDalleImages(context) {
 
 function parseArguments(messageText) {
     const defaultSettings = {
-        prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled robots actively engaged in operations within Teradata's futuristic computer factory, with sprockets and springs in motion",
-        numImages: 3,
+		prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled humans working alongside robots actively engaged operating Teradata's secure and trustworthy AI hub, with sprockets and springs in motion",        numImages: 3,
         imageSize: "1024x1024"
     }
 
