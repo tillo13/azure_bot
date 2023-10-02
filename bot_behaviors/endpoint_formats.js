@@ -117,14 +117,14 @@ module.exports = {
 		return `Summary: We used DallE to create...\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${duration} seconds. Thank you.`;
 	},
 
-	dalle_WebchatResponse: function(numImages, imageSize, duration) {
+	dalle_WebchatResponse: function(prompt, numImages, imageSize, duration) {
 		const adaptiveCardContent = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			type: "AdaptiveCard",
 			version: "1.3",
 			body: [{
 					type: "TextBlock",
-					text: "Summary: We used DallE to create...",
+					text: `Summary: We used DallE to create: <i>${prompt}</i>`,
 					wrap: true
 				},
 				{
