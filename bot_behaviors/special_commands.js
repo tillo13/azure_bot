@@ -219,10 +219,8 @@ async function createDalleImages(context) {
 		// send to endpoint_formats.js
 		let message = formats.dalle_WebchatResponse(numImages, imageSize, seconds);
 		await sendMessageResponse(context, message);
-
 	} else if (context.activity.channelId === 'slack') {
 		const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
-	
 		let slackMessage = formats.dalle_SlackResponse(prompt, numImages, imageSize, seconds);
 		slackMessage.thread_ts = thread_ts; // Add thread_ts to the slackMessage
 		let replyActivity = {
@@ -236,20 +234,19 @@ async function createDalleImages(context) {
 		} catch (error) {
 			console.error('\n******SPECIAL_COMMANDS: Failed to send Slack summary message:', error);
 		}
-
-		if (context.activity.channelId === 'msteams') {
-			try {
-				let message = formats.dalle_msteamsResponse(numImages, imageSize, seconds);
-				await sendMessageResponse(context, message);
-			} catch (error) {
-				console.error('\n******SPECIAL_COMMANDS: msteams path Failed to format the message:', error);
-				message = formats.help_DefaultResponse();
-			}
-		} else {
-			// This is the default case when none of the above matches
-			let message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
+	} else if (context.activity.channelId === 'msteams') {
+		try {
+			let message = formats.dalle_msteamsResponse(numImages, imageSize, seconds);
 			await sendMessageResponse(context, message);
+		} catch (error) {
+			console.error('\n******SPECIAL_COMMANDS: msteams path Failed to format the message:', error);
+			message = formats.help_DefaultResponse();
 		}
+	} else {
+		// This is the default case when none of the above matches
+		let message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
+		await sendMessageResponse(context, message);
+
 	}
 	async function sendMessageWithThread(context, message, thread_ts) {
 		const newActivity = MessageFactory.text(message);
