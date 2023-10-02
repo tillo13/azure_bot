@@ -98,14 +98,13 @@ async function createDalleImages(context) {
 
 	const { prompt, numImages, imageSize } = parseArguments(messageText);
 
-	let thread_ts = '';
-	const channelId = '';
-	const apiToken = '';
-	if (context.activity.channelId === 'slack') {
-		thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
-		channelId = context.activity.channelData?.SlackMessage?.event?.channel;
-		apiToken = context.activity.channelData?.ApiToken;
-		await addReaction(channelId, thread_ts, 'hourglass_flowing_sand', apiToken);
+    const apiToken = context.activity.channelData?.ApiToken;
+    const channelId = context.activity.channelData?.SlackMessage?.event?.channel;
+    let thread_ts;
+    if (context.activity.channelId === 'slack') {
+        thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
+            context.activity.channelData?.SlackMessage?.event?.ts
+        await addReaction(channelId, thread_ts, 'hourglass_flowing_sand', apiToken);
 	}
 
 	await sendMessageWithThread(context, defaultMessage(prompt, numImages), thread_ts);
@@ -177,6 +176,11 @@ function defaultMessage(prompt, numImages, imageSize) {
      Size of images: ${imageSize}\nPlease hold while we create...`;
 }
 
+function getFileName(prompt) {
+	let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s+/g, '').replace(/_+/g, "_").substring(0, 15);
+	return filenameBase !== '_' ? filenameBase.trim('_') : filenameBase;
+}
+
 function sendTypingIndicator(context) {
 	return context.sendActivity({
 		 type: 'typing'
@@ -223,15 +227,45 @@ async function postProcess(context, thread_ts, channelId, apiToken) {
 		await addReaction(channelId, thread_ts, 'white_check_mark', apiToken);
 	}
 }
+async function sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts) {
+    if (context.activity.channelId === 'webchat') {
+        // send to endpoint_formats.js
+        let message = formats.dalle_WebchatResponse(numImages, imageSize, seconds);
+        await sendMessageResponse(context, message);
+    } else if (context.activity.channelId === 'slack') {
+        let slackMessage = formats.dalle_SlackResponse(prompt, numImages, imageSize, seconds);
+        slackMessage.thread_ts = thread_ts; // Add thread_ts to the slackMessage
+        let replyActivity = {
+            type: 'message',
+            text: '',
+            channelData: slackMessage
+        };
+        try {
+            await context.sendActivity(replyActivity);
+            console.log('\n******SPECIAL_COMMANDS: Slack summary message sent successfully');
+        } catch (error) {
+            console.error('\n******SPECIAL_COMMANDS: Failed to send Slack summary message:', error);
+        }
+    } else if (context.activity.channelId === 'msteams') {
+        try {
+            let message = formats.dalle_msteamsResponse(numImages, imageSize, seconds);
+            await sendMessageResponse(context, message);
+        } catch (error) {
+            console.error('\n******SPECIAL_COMMANDS: msteams path Failed to format the message:', error);
+            message = formats.help_DefaultResponse();
+        }
+    } else {
+        // This is the default case when none of the above matches
+        let message = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
+        await sendMessageResponse(context, message);
+
+    }
+}
 
 function getElapsedTime(startTime, endTime) {
 	const difference = endTime - startTime;
 	return (difference / 1000).toFixed(3);
 }
 
-function getFileName(prompt) {
-	let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s+/g, '').replace(/_+/g, "_").substring(0, 15);
-	return filenameBase !== '_' ? filenameBase.trim('_') : filenameBase;
-}
 
 module.exports = commands;
