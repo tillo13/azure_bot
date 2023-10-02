@@ -1,7 +1,6 @@
 // Load environment variables at the top-most level
 require('dotenv').config();
 
-
 const { UserState, MemoryStorage, CloudAdapter, ConfigurationServiceClientCredentialFactory, createBotFrameworkAuthenticationFromConfiguration } = require('botbuilder');
 
 const path = require('path');
@@ -46,7 +45,6 @@ server.listen(process.env.port || process.env.PORT || 3978, () => {
     console.log("\n\n*INDEX.JS: Server is now listening to " + server.url + "\n");
     console.log("\n\n*INDEX.JS: Get Bot Framework Emulator at https://aka.ms/botframework-emulator \n");
     console.log("\n\n*INDEX.JS: To talk to your bot, open the emulator and select 'Open Bot'\n");
-    
 });
 
 // EchoBot initialization
@@ -63,6 +61,10 @@ server.post('/api/messages', async (req, res) => {
     console.log("\n\n*INDEX.JS: Finished processing request\n");
 });
 
+// Add a GET endpoint to receive the Azure Function health check created in Azure portal to keepalive.
+server.get('/ping', async (req, res) => {
+  res.send(200, 'Received 5min Azure KeepAzureBotAlive request');
+});
 
 // Upgrade request handling
 server.on('upgrade', async (req, socket, head) => {
