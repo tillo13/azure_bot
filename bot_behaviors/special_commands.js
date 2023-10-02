@@ -95,23 +95,24 @@ async function sendMessageResponse(context, messageOrAttachment) {
 global.current_dalle_prompt = '';
 
 async function createDalleImages(context) {
-	const messageText = context.activity.text.replace('$dalle', '').trim();
-	const startTime = new Date().getTime();
+    const messageText = context.activity.text.replace('$dalle', '').trim();
+    const startTime = new Date().getTime();
 
-	const { prompt, numImages, imageSize } = parseArguments(messageText);
-	global.current_dalle_prompt = prompt;
+    const channelId = context.activity.channelId;
+    const { prompt, numImages, imageSize } = parseArguments(messageText, channelId);
+    global.current_dalle_prompt = prompt;
 
     const apiToken = context.activity.channelData?.ApiToken;
-    const channelId = context.activity.channelData?.SlackMessage?.event?.channel;
+    const slackChannelId = context.activity.channelData?.SlackMessage?.event?.channel;
     let thread_ts;
-    if (context.activity.channelId === 'slack') {
+    if (channelId === 'slack') {
         thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
             context.activity.channelData?.SlackMessage?.event?.ts
-        await addReaction(channelId, thread_ts, 'hourglass_flowing_sand', apiToken);
+        await addReaction(slackChannelId, thread_ts, 'hourglass_flowing_sand', apiToken);
     }
 
     if (!messageText) {
-		await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of: \n\n_${prompt}_\n\nPlease wait a moment...`, thread_ts);	
+		await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of... \n\n_${prompt}_\n\n\nPlease wait a moment while we wire it up...`, thread_ts);	
 	} else {
         await sendMessageWithThread(context, defaultMessage(prompt, numImages, imageSize), thread_ts);
     }
@@ -136,10 +137,11 @@ async function createDalleImages(context) {
 	await sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts);
 }
 
-function parseArguments(messageText) {
+function parseArguments(messageText, channelId) {
     const defaultSettings = {
-		prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled humans working alongside robots actively engaged operating Teradata's secure and trustworthy AI hub, with sprockets and springs in motion",        numImages: 3,
-        imageSize: "1024x1024"
+		prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled humans working alongside robots actively engaged operating Teradata's secure and trustworthy AI hub, with sprockets and springs in motion",        
+        numImages: 3,
+        imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
     }
 
     // Split message by space and remove empty strings
@@ -156,7 +158,7 @@ function parseArguments(messageText) {
             if (parseInt(arg.slice(2))) {
                 // If a number follows "--", it's the number of images
                 numImages = parseInt(arg.slice(2));
-            } else if (["full", "medium", "small"].includes(arg.slice(2))) {
+            } else if (["full", "medium", "small"].includes(arg.slice(2)) && channelId !== 'slack') {
                 // If "full", "medium", or "small" follow "--", it's the image size
                 imageSize = arg.slice(2);
             }
@@ -169,7 +171,7 @@ function parseArguments(messageText) {
     let settings = {
         prompt: promptPieces.join(" ") || defaultSettings.prompt,
         numImages: numImages,
-        imageSize: imageSize === 'medium' ? "512x512" : imageSize === 'small' ? "256x256" : "1024x1024"
+        imageSize: imageSize === 'medium' ? "512x512" : imageSize === 'small' ? "256x256" : imageSize
     }
 
     return settings;
