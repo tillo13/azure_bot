@@ -201,10 +201,10 @@ function parseArguments(messageText, channelId) {
 		prompt: promptPieces.join(" ") || defaultSettings.prompt,
 		numImages: numImages,
 		originalRequestedImages: originalRequestedImages,
-
-		// only use defaultSettings if "--size" arg is not provided in the command	
-		imageSize: imageSize || defaultSettings.imageSize,
-	}
+	  
+		// only use defaultSettings if "--size" arg is not provided in the command  
+		imageSize: imageSize ? imageSize : defaultSettings.imageSize,
+	  }
 
 	if (channelId === 'slack' && !settings.imageSize)
 		settings.imageSize = '512x512';
