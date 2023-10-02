@@ -162,7 +162,7 @@ class EchoBot extends ActivityHandler {
                     }
 				}
 			} catch (error) {
-				console.error("**BOT_ROUTER.JS: An error occurred:", error);
+				console.error("\n\n**BOT_ROUTER.JS: An error occurred:", error);
 			}
 		});
 	}

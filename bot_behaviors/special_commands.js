@@ -106,9 +106,9 @@ async function createDalleImages(context) {
     let thread_ts;
     
     // Check if requested number of images is more than 10
-    if (originalRequestedImages > 10) {
-        await sendMessageWithThread(context, `_I think you've asked for_ ${originalRequestedImages} _images. The maximum is 10, because 10 seems like a decent max, right? However, worry not we'll still create 10 rad images. Coming right up..._`, thread_ts);
-    }
+	if (originalRequestedImages > 10) {
+		await sendMessageWithThread(context, `_I think you've asked for_ ${originalRequestedImages} _images. The maximum is 10, because 10 seems like a decent max, right? However, worry not we'll still create 10 rad images. Coming right up..._`, thread_ts);
+	}
 
     const apiToken = context.activity.channelData?.ApiToken;
     const slackChannelId = context.activity.channelData?.SlackMessage?.event?.channel;
@@ -175,9 +175,10 @@ function parseArguments(messageText, channelId) {
                     numImages = 10;
                 }
             }  else if (["large", "medium", "small"].includes(arg.slice(2)) && channelId !== 'slack') {
-                // If "large", "medium", or "small" follow "--", it's the image size
-                imageSize = arg.slice(2);
-            }
+				// If "large", "medium", or "small" follow "--", it's the image size
+				imageSize = arg.slice(2);
+			}
+
         } else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
             // If an argument does not start with "--" and is not directly following an argument that starts with "--", it's part of the prompt
             promptPieces.push(arg);
@@ -191,7 +192,9 @@ function parseArguments(messageText, channelId) {
 
 		imageSize: imageSize === 'medium' ? "512x512" : imageSize === 'small' ? "256x256" : imageSize === 'large' ? "1024x1024" : imageSize
     }
-
+	
+	if(channelId === 'slack' && !settings.imageSize)
+    settings.imageSize = '512x512';
     return settings;
 }
 
