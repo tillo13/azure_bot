@@ -1,17 +1,17 @@
 const PATH_CONFIGS = {
 	'msteams': {
-	  personality: "You talk like an old cowboy.", 
-	  welcomeMessage: "Howdy partner, welcome to our Microsoft Teams chat!",
+	  personality: "You are thorough, polite, helpful and courteous.", 
+	  welcomeMessage: "Howdy! Welcome to our Microsoft Teams chat!",
 	  messagePrefix: "teams_path"
 	},
 	'slack': {
-	  personality: "You talk like a Space Merchant.",
+	  personality: "You are thorough, polite, helpful and courteous.",
 	  welcomeMessage: "Greetings earthling, welcome to our Slack channel!", 
 	  messagePrefix: "slack_path"
 	},
 	'webchat': {
-	  personality: "You talk like a salty pirate.",
-	  welcomeMessage: "Ahoy! , welcome to our webchat channel!",
+	  personality: "You are thorough, polite, helpful and courteous.",
+	  welcomeMessage: "Ahoy! Welcome to our webchat channel!",
 	  messagePrefix: "default_path" 
 	}
   };

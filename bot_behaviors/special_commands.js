@@ -98,16 +98,47 @@ async function sendMessageResponse(context, messageOrAttachment) {
 global.current_dalle_prompt = '';
 
 async function createDalleImages(context) {
-	const messageText = context.activity.text.replace('$dalle', '').trim();
-	const startTime = new Date().getTime();
-	const channelId = context.activity.channelId;
-	const {
-		prompt,
-		imageSize,
-		originalRequestedImages
-	} = parseArguments(messageText, channelId);
+	const numberOfImagesRegEx = /^\-\-(\d+)$/;
+	const sizeRegEx = /^\-\-(large|medium|small)$/;
+	const messageArgs = context.activity.text.replace('$dalle', '').split(" ").filter(Boolean);
 
-	global.current_dalle_prompt = prompt;
+	const defaultSettings = {
+		prompt: "A painting reminiscent of Rembrandt, with various sprockets and springs in motion while steampunk-styled humans work alongside robots actively engaged operating Teradata's secure and trustworthy A.I. hub!",
+		numImages: 3,
+		imageSize: context.activity.channelId === 'slack' ? '512x512' : '1024x1024'
+  };
+  
+  let settings = { ...defaultSettings };
+  let promptPieces = [];
+  const setSize = size => {
+    settings.imageSize = {
+      'large': '1024x1024',
+      'medium': '512x512',
+      'small': '256x256'
+    }[size];
+  };
+  
+  const setNumImages = num => {
+    settings.numImages = parseInt(num, 10);
+    if (settings.numImages > 10) {
+      settings.numImages = 10;
+    }
+  };
+  
+	for (let i = 0; i < messageArgs.length; i++) {
+    if (numberOfImagesRegEx.test(messageArgs[i])) {
+      setNumImages(RegExp.$1);
+    } else if (sizeRegEx.test(messageArgs[i])) {
+      setSize(RegExp.$1);
+		} else {
+      promptPieces.push(messageArgs[i]);
+    }
+  }
+  
+  const isPromptExists = promptPieces.length > 0;
+	settings.prompt = isPromptExists ? promptPieces.join(" ") : settings.prompt;
+
+	global.current_dalle_prompt = settings.prompt;
 
 	// Use "let" to declare numImages as its value is modified later
 	let numImages = defaultSettings.numImages;
