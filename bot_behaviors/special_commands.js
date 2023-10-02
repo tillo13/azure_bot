@@ -236,11 +236,12 @@ async function sendSummary(context, prompt, numImages, imageSize, seconds, threa
     switch (context.activity.channelId) {
 		case 'webchat':
 			let webchatMessage = formats.dalle_WebchatResponse(numImages, imageSize, seconds);
+			webchatMessage = `Summary: We used DallE to create... ${prompt}\n${webchatMessage}`;
 			await sendMessageResponse(context, webchatMessage);
 			break;
 		case 'slack':
 			let slackMessage = {
-				text: `Summary: We used DallE to create [${prompt}]\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${seconds} seconds. Thank you.`,
+				text: `Summary: We used DallE to create... ${prompt}\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${seconds} seconds. Thank you.`,
 				thread_ts: thread_ts // Add thread_ts to the slackMessage
 			};
 			let replyActivity = {
@@ -258,6 +259,7 @@ async function sendSummary(context, prompt, numImages, imageSize, seconds, threa
 		case 'msteams':
 			try {
 				let msteamsMessage = formats.dalle_msteamsResponse(numImages, imageSize, seconds);
+				msteamsMessage = `Summary: We used DallE to create... ${prompt}\n${msteamsMessage}`;
 				await sendMessageResponse(context, msteamsMessage);
 			} catch (error) {
 				console.error('\n******SPECIAL_COMMANDS: msteams path Failed to format the message:', error);
@@ -267,6 +269,7 @@ async function sendSummary(context, prompt, numImages, imageSize, seconds, threa
 			break;
 		default:
 			let defaultMsg = formats.dalle_DefaultResponse(numImages, imageSize, seconds);
+			defaultMsg = `Summary: We used DallE to create... ${prompt}\n${defaultMsg}`;
 			await sendMessageResponse(context, defaultMsg);
 	}
 }
