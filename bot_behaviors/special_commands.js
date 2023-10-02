@@ -96,7 +96,7 @@ async function createDalleImages(context) {
 	const messageText = context.activity.text.replace('$dalle', '').trim();
 	const startTime = new Date().getTime();
 
-	const { prompt, numImages, imageSize } = parseArguments(messageText);
+	const { prompt, numImages, imageSize } = parseArguments(messageText, channelId); 
 
     const apiToken = context.activity.channelData?.ApiToken;
     const channelId = context.activity.channelData?.SlackMessage?.event?.channel;
@@ -133,8 +133,8 @@ async function createDalleImages(context) {
 	await sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts);
 }
 
-function parseArguments(messageText) {
-    const defaultSettings = {
+function parseArguments(messageText, channelId) {
+	const defaultSettings = {
         prompt: "a painting reminiscent of Rembrandt, with various steampunk-styled robots actively engaged in operations within Teradata's futuristic computer factory, with sprockets and springs in motion",
         numImages: 3,
         imageSize: "1024x1024"
