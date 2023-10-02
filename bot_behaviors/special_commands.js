@@ -111,7 +111,7 @@ async function createDalleImages(context) {
     }
 
     if (!messageText) {
-		await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of [${prompt}]! Please wait a moment...`, thread_ts);
+		await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of: \n\n_${prompt}_\n\nPlease wait a moment...`, thread_ts);	
 	} else {
         await sendMessageWithThread(context, defaultMessage(prompt, numImages, imageSize), thread_ts);
     }
