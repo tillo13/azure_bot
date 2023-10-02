@@ -103,11 +103,14 @@ async function createDalleImages(context) {
 	const channelId = context.activity.channelId;
 	const {
 		prompt,
-		numImages,
 		imageSize,
 		originalRequestedImages
 	} = parseArguments(messageText, channelId);
+
 	global.current_dalle_prompt = prompt;
+
+	// Use "let" to declare numImages as its value is modified later
+	let numImages = defaultSettings.numImages;
 
 	const apiToken = context.activity.channelData?.ApiToken;
 
@@ -117,12 +120,12 @@ async function createDalleImages(context) {
 		thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
 			context.activity.channelData?.SlackMessage?.event?.ts;
 	}
-	
-	// Check if requested number of images is more than 10
-	if (originalRequestedImages > 10) {
-		await sendMessageWithThread(context, `_I think you've asked for_ ${originalRequestedImages} _images. The maximum is 10, because 10 seems like a decent max, right? However, worry not we'll still create 10 rad images. Coming right up..._`, thread_ts);
-		numImages = 10;
-	}
+
+// Check if requested number of images is more than 10
+if (originalRequestedImages > 10) {
+    await sendMessageWithThread(context, `_I think you've asked for_ ${originalRequestedImages} _images. The maximum is 10, because 10 seems like a decent max, right? However, worry not we'll still create 10 rad images. Coming right up..._`, thread_ts);
+    numImages = 10; // Update is successful because numImages is not a constant
+}
 	
 	if (channelId === 'slack' && thread_ts) {
 		await addReaction(context.activity.channelData?.SlackMessage?.event?.channel, thread_ts, 'hourglass_flowing_sand', apiToken);
