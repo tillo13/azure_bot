@@ -177,7 +177,17 @@ function parseArguments(messageText, channelId) {
 				numImages = Math.min(originalRequestedImages, 10); // Limit to 10 images
 			} else if (["large", "medium", "small"].includes(arg.slice(2))) {
 				// If the argument is a size keyword, set the size
-				imageSize = imageSizeMapping[arg.slice(2)];
+				switch (arg.slice(2)) {
+					case 'large':
+						imageSize = '1024x1024';
+						break;
+					case 'medium':
+						imageSize = '512x512';
+						break;
+					case 'small':
+						imageSize = '256x256';
+						break;
+				}
 			}
 		} else {
 			promptPieces.push(arg);
