@@ -91,12 +91,15 @@ async function sendMessageResponse(context, messageOrAttachment) {
 
 	return await context.sendActivity(replyActivity);
 }
+//set prompt globally
+global.current_dalle_prompt = '';
 
 async function createDalleImages(context) {
 	const messageText = context.activity.text.replace('$dalle', '').trim();
 	const startTime = new Date().getTime();
 
 	const { prompt, numImages, imageSize } = parseArguments(messageText);
+	global.current_dalle_prompt = prompt;
 
     const apiToken = context.activity.channelData?.ApiToken;
     const channelId = context.activity.channelData?.SlackMessage?.event?.channel;
