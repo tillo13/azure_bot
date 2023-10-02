@@ -12,7 +12,7 @@ const {
 const https = require("https");
 
 const commands = new Proxy({
-	'$dig': findSomething,
+	'$dig': useShovel,
 	'$help': contactHelp,
 	'$dalle': createDalleImages,
 }, {
@@ -29,11 +29,11 @@ const commands = new Proxy({
 	}
 });
 
-async function findSomething(context) {
+async function useShovel(context) {
     var randNum = Math.random()*102;
     randNum = randNum.toFixed(3); // truncates to 3 decimal places.
 
-    return sendMessageResponse(context,  `Hmm... you just dug up something of interest, worth _${randNum}_ Tera-coins...`); // concatenation of the random number with the string
+    return sendMessageResponse(context,  `Hmm... well look at that, you just unearthed _${randNum}_ Tera-gems...`); // concatenation of the random number with the string
 }
 
 async function contactHelp(context) {
@@ -148,7 +148,7 @@ async function createDalleImages(context) {
 
 function parseArguments(messageText, channelId) {
     const defaultSettings = {
-        prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled humans working alongside robots actively engaged operating Teradata's secure and trustworthy AI hub, with sprockets and springs in motion.",        
+        prompt: "A painting reminiscent of Rembrandt, with various sprockets and springs in motion while steampunk-styled humans work alongside robots actively engaged operating Teradata's secure and trustworthy A.I. hub!",        
         numImages: 3,
         imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
     }
@@ -165,21 +165,28 @@ function parseArguments(messageText, channelId) {
     splitMessage.forEach((arg, index) => {
         if (arg.startsWith("--")) {
             let nextArg = splitMessage[index + 1];
-            if (parseInt(arg.slice(2))) {
-                // If a number follows "--", it's the number of images
-                originalRequestedImages = parseInt(arg.slice(2));
-                numImages = originalRequestedImages;
-
-                // Enforce max of 10 images
-                if (numImages > 10) {
-                    numImages = 10;
-                }
-            }  else if (["large", "medium", "small"].includes(arg.slice(2)) && channelId !== 'slack') {
-				// If "large", "medium", or "small" follow "--", it's the image size
-				imageSize = arg.slice(2);
+			if (!isNaN(parseInt(arg.slice(2), 10))) {
+				// If a number follows "--", it's the number of images
+				originalRequestedImages = parseInt(arg.slice(2), 10);
+				numImages = originalRequestedImages;
+				// Enforce max of 10 images
+				if (numImages > 10) {
+					numImages = 10;
+				}
+			} else if (["large", "medium", "small"].includes(arg.slice(2))) {
+				switch(arg.slice(2)){
+					case 'large':
+						imageSize = '1024x1024';
+						break;
+					case 'medium':
+						imageSize = '512x512';
+						break;
+					case 'small':
+						imageSize = '256x256';
+						break;
+				}
 			}
-
-        } else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
+		} else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
             // If an argument does not start with "--" and is not directly following an argument that starts with "--", it's part of the prompt
             promptPieces.push(arg);
         }
@@ -190,7 +197,8 @@ function parseArguments(messageText, channelId) {
         numImages: numImages,
 		originalRequestedImages: originalRequestedImages,
 
-		imageSize: imageSize === 'medium' ? "512x512" : imageSize === 'small' ? "256x256" : imageSize === 'large' ? "1024x1024" : imageSize
+        // only use defaultSettings if "--size" arg is not provided in the command	
+        imageSize: imageSize || defaultSettings.imageSize,
     }
 
 	if(channelId === 'slack' && !settings.imageSize)
