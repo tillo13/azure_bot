@@ -63,7 +63,7 @@ server.post('/api/messages', async (req, res) => {
 
 // Add a GET endpoint to receive the Azure Function health check created in Azure portal to keepalive.
 server.get('/ping', async (req, res) => {
-  res.send(200, 'anything');
+  res.send(200, 'Tell KeepAzureBotAlive function that I am alive!');
   console.log("\n\n*INDEX.JS: Received 5min Azure KeepAzureBotAlive request...\n");
 });
 
