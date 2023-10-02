@@ -98,69 +98,31 @@ async function sendMessageResponse(context, messageOrAttachment) {
 global.current_dalle_prompt = '';
 
 async function createDalleImages(context) {
-    const channelId = context.activity.channelId;
-	const numberOfImagesRegEx = /^\-\-(\d+)$/;
-	const sizeRegEx = /^\-\-(large|medium|small)$/;
-	const messageArgs = context.activity.text.replace('$dalle', '').split(" ").filter(Boolean);
+	const messageText = context.activity.text.replace('$dalle', '').trim();
+	const startTime = new Date().getTime();
+	const channelId = context.activity.channelId;
+	const {
+		prompt,
+		numImages,
+		imageSize,
+		originalRequestedImages
+	} = parseArguments(messageText, channelId);
+	global.current_dalle_prompt = prompt;
+	let thread_ts;
 
-	const defaultSettings = {
-		prompt: "A painting reminiscent of Rembrandt, with various sprockets and springs in motion while steampunk-styled humans work alongside robots actively engaged operating Teradata's secure and trustworthy A.I. hub!",
-		numImages: 3,
-		imageSize: context.activity.channelId === 'slack' ? '512x512' : '1024x1024'
-  };
-  
-  let settings = { ...defaultSettings };
-  let promptPieces = [];
-  const setSize = size => {
-    settings.imageSize = {
-      'large': '1024x1024',
-      'medium': '512x512',
-      'small': '256x256'
-    }[size];
-  };
-  
-  const setNumImages = num => {
-    settings.numImages = parseInt(num, 10);
-    if (settings.numImages > 10) {
-      settings.numImages = 10;
-    }
-  };
-  
-	for (let i = 0; i < messageArgs.length; i++) {
-    if (numberOfImagesRegEx.test(messageArgs[i])) {
-      setNumImages(RegExp.$1);
-    } else if (sizeRegEx.test(messageArgs[i])) {
-      setSize(RegExp.$1);
-		} else {
-      promptPieces.push(messageArgs[i]);
-    }
-  }
-  
-  const isPromptExists = promptPieces.length > 0;
-	settings.prompt = isPromptExists ? promptPieces.join(" ") : settings.prompt;
-
-	global.current_dalle_prompt = settings.prompt;
-
-	// Use "let" to declare numImages as its value is modified later
-	let numImages = defaultSettings.numImages;
+	// Check if requested number of images is more than 10
+	if (originalRequestedImages > 10) {
+		await sendMessageWithThread(context, `_I think you've asked for_ ${originalRequestedImages} _images. The maximum is 10, because 10 seems like a decent max, right? However, worry not we'll still create 10 rad images. Coming right up..._`, thread_ts);
+	}
 
 	const apiToken = context.activity.channelData?.ApiToken;
+	const slackChannelId = context.activity.channelData?.SlackMessage?.event?.channel;
 
 	//Define thread_ts only if platform is slack
-	let thread_ts;
 	if (channelId === 'slack') {
 		thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
 			context.activity.channelData?.SlackMessage?.event?.ts;
-	}
-
-// Check if requested number of images is more than 10
-if (originalRequestedImages > 10) {
-    await sendMessageWithThread(context, `_I think you've asked for_ ${originalRequestedImages} _images. The maximum is 10, because 10 seems like a decent max, right? However, worry not we'll still create 10 rad images. Coming right up..._`, thread_ts);
-    numImages = 10; // Update is successful because numImages is not a constant
-}
-	
-	if (channelId === 'slack' && thread_ts) {
-		await addReaction(context.activity.channelData?.SlackMessage?.event?.channel, thread_ts, 'hourglass_flowing_sand', apiToken);
+		await addReaction(slackChannelId, thread_ts, 'hourglass_flowing_sand', apiToken);
 	}
 
 	if (!messageText) {
@@ -194,27 +156,29 @@ function parseArguments(messageText, channelId) {
 		prompt: "A painting reminiscent of Rembrandt, with various sprockets and springs in motion while steampunk-styled humans work alongside robots actively engaged operating Teradata's secure and trustworthy A.I. hub!",
 		numImages: 3,
 		imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
-	};
+	}
 
 	// Split message by space and remove empty strings
 	let splitMessage = messageText.split(" ").filter(Boolean);
 
 	let numImages = defaultSettings.numImages;
 	let imageSize = defaultSettings.imageSize;
-	let promptPieces = [];
+	let promptPieces = []
 	let originalRequestedImages;
 
 	// Parse arguments
-	for (let i = 0; i < splitMessage.length; i++) {
-		const arg = splitMessage[i];
+	splitMessage.forEach((arg, index) => {
 		if (arg.startsWith("--")) {
-			const nextArg = splitMessage[i + 1];
-			if (arg.slice(2).match(/^\d+$/)) {
+			let nextArg = splitMessage[index + 1];
+			if (!isNaN(parseInt(arg.slice(2), 10))) {
 				// If a number follows "--", it's the number of images
 				originalRequestedImages = parseInt(arg.slice(2), 10);
-				numImages = Math.min(originalRequestedImages, 10); // Limit to 10 images
+				numImages = originalRequestedImages;
+				// Enforce max of 10 images
+				if (numImages > 10) {
+					numImages = 10;
+				}
 			} else if (["large", "medium", "small"].includes(arg.slice(2))) {
-				// If the argument is a size keyword, set the size
 				switch (arg.slice(2)) {
 					case 'large':
 						imageSize = '1024x1024';
@@ -227,17 +191,20 @@ function parseArguments(messageText, channelId) {
 						break;
 				}
 			}
-		} else {
+		} else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
+			// If an argument does not start with "--" and is not directly following an argument that starts with "--", it's part of the prompt
 			promptPieces.push(arg);
 		}
-	}
+	});
 
 	let settings = {
 		prompt: promptPieces.join(" ") || defaultSettings.prompt,
 		numImages: numImages,
 		originalRequestedImages: originalRequestedImages,
-		imageSize: imageSize || defaultSettings.imageSize, 
-	};
+	  
+		// only use defaultSettings if "--size" arg is not provided in the command  
+		imageSize: imageSize ? imageSize : defaultSettings.imageSize,
+	  }
 
 	if (channelId === 'slack' && !settings.imageSize)
 		settings.imageSize = '512x512';
@@ -245,7 +212,7 @@ function parseArguments(messageText, channelId) {
 }
 
 function defaultMessage(prompt, numImages, imageSize) {
-	return `Summary: We are going to use Dall-E to create: ${prompt} | Number of images: ${numImages} | Size of images: ${imageSize} | Please hold while we align 1s and 0s...`;
+	return `Summary: We are going to use Dall-E to create: ${prompt}||Number of images: ${numImages}||Size of images: ${imageSize}||Please hold while we align 1s and 0s...`;
 }
 
 function getFileName(prompt) {
