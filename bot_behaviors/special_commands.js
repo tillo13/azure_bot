@@ -101,6 +101,11 @@ async function createDalleImages(context) {
     const channelId = context.activity.channelId;
     const { prompt, numImages, imageSize } = parseArguments(messageText, channelId);
     global.current_dalle_prompt = prompt;
+	
+	// Check if requested number of images is more than 10
+	if (numImages !== parseInt(messageText)) {
+		await sendMessageWithThread(context, `_You've asked for more than than max of 10 images, but worry not we'll still create 10 rad images for you_.`, thread_ts);
+	}
 
     const apiToken = context.activity.channelData?.ApiToken;
     const slackChannelId = context.activity.channelData?.SlackMessage?.event?.channel;
@@ -138,16 +143,10 @@ async function createDalleImages(context) {
 }
 
 function parseArguments(messageText, channelId) {
-    const defaultSettings = channelId === 'slack' ? 
-    {
-            prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled humans working alongside robots actively engaged operating Teradata's secure and trustworthy AI hub, with sprockets and springs in motion",        
-            numImages: 3,
-            imageSize: '512x512'
-    } :
-    {
-            prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled humans working alongside robots actively engaged operating Teradata's secure and trustworthy AI hub, with sprockets and springs in motion",        
-            numImages: 3,
-            imageSize: '1024x1024'
+    const defaultSettings = {
+        prompt: "A painting reminiscent of Rembrandt, with various steampunk-styled humans working alongside robots actively engaged operating Teradata's secure and trustworthy AI hub, with sprockets and springs in motion.",        
+        numImages: 3,
+        imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
     }
 
     // Split message by space and remove empty strings
@@ -164,6 +163,11 @@ function parseArguments(messageText, channelId) {
             if (parseInt(arg.slice(2))) {
                 // If a number follows "--", it's the number of images
                 numImages = parseInt(arg.slice(2));
+
+                // Enforce max of 10 images
+                if (numImages > 10) {
+                    numImages = 10;
+                }
             } else if (["large", "medium", "small"].includes(arg.slice(2)) && channelId !== 'slack') {
                 // If "large", "medium", or "small" follow "--", it's the image size
                 imageSize = arg.slice(2);
