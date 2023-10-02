@@ -124,7 +124,7 @@ module.exports = {
 			version: "1.3",
 			body: [{
 				type: "TextBlock",
-				text: `Summary: We used DallE to create: ${global.current_dalle_prompt}`,
+				text: `**Summary**: We used [OpenAI Dall-E](https://openai.com/research/dall-e) to create: _${global.current_dalle_prompt}_`,
 				wrap: true
 			},
 			{
@@ -159,7 +159,7 @@ module.exports = {
 			version: "1.4",
 			body: [{
 				type: "TextBlock",
-				text: `Summary: We used DallE to create: ${global.current_dalle_prompt}`,
+				text: `**Summary**: We used [OpenAI Dall-E](https://openai.com/research/dall-e) to create: _${global.current_dalle_prompt}_`,
 				wrap: true
 			},
 			{
