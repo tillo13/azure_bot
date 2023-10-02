@@ -58,7 +58,7 @@ server.post('/api/messages', async (req, res) => {
     console.log("\n\n*INDEX.JS: Request source IP: \n", req.socket.remoteAddress, "\n");// Logs the origin IP address
     console.log("\n\n*INDEX.JS: Processing the request...\n");
     await adapter.process(req, res, (context) => myBot.run(context));
-    console.log("\n\n*INDEX.JS: Finished processing request\n");
+    console.log("\n\n*INDEX.JS: Finished processing most recent api/messages request!\n");
 });
 
 // Add a GET endpoint to receive the Azure Function health check created in Azure portal to keepalive.
