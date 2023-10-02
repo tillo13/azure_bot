@@ -98,10 +98,14 @@ async function createDalleImages(context) {
 
 	const { prompt, numImages, imageSize } = parseArguments(messageText);
 
-	let thread_ts;
+	let thread_ts = '';
+	const channelId = '';
+	const apiToken = '';
 	if (context.activity.channelId === 'slack') {
-		 thread_ts = getThreadTimestamp(context);
-		 await reactToMessage(context, thread_ts, 'hourglass_flowing_sand');
+		thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts || context.activity.channelData?.SlackMessage?.event?.ts;
+		channelId = context.activity.channelData?.SlackMessage?.event?.channel;
+		apiToken = context.activity.channelData?.ApiToken;
+		await addReaction(channelId, thread_ts, 'hourglass_flowing_sand', apiToken);
 	}
 
 	await sendMessageWithThread(context, defaultMessage(prompt, numImages), thread_ts);
@@ -109,16 +113,17 @@ async function createDalleImages(context) {
 	const filenameBase = getFileName(prompt);
 	
 	for (let i = 0; i < numImages; i++) {
-		 const filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
-		 await sendMessageWithThread(context, `Creating ${filename}...`, thread_ts);
-		 await sendTypingIndicator(context);
+		const filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
+		await sendMessageWithThread(context, `Creating ${filename}...`, thread_ts);
+		await sendTypingIndicator(context);
 
-		 await generateImages(prompt, 1, imageSize, async (imageUrl) => {
-			  const replyActivity = getReplyActivity(context, thread_ts, imageUrl);
-			  await context.sendActivity(replyActivity);
-		 });
+		await generateImages(prompt, 1, imageSize, async (imageUrl) => {
+			const replyActivity = getReplyActivity(context, thread_ts, imageUrl);
+			await context.sendActivity(replyActivity);
+		});
 	}
-	await postProcess(context, thread_ts);
+
+	await postProcess(context, thread_ts, channelId, apiToken);
 
 	const endTime = new Date().getTime();
 	const seconds = getElapsedTime(startTime, endTime);
@@ -212,10 +217,10 @@ async function reactToMessage(context, thread_ts, emoji) {
 		 removeReaction(channelId, thread_ts, emoji, apiToken);
 }
 
-async function postProcess(context, thread_ts) {
+async function postProcess(context, thread_ts, channelId, apiToken) {
 	if (context.activity.channelId === 'slack') {
-		 await reactToMessage(context, thread_ts, 'hourglass_flowing_sand');
-		 await reactToMessage(context, thread_ts, 'white_check_mark');
+		await removeReaction(channelId, thread_ts, 'hourglass_flowing_sand', apiToken);
+		await addReaction(channelId, thread_ts, 'white_check_mark', apiToken);
 	}
 }
 
