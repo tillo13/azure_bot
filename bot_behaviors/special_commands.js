@@ -135,7 +135,7 @@ async function createDalleImages(context) {
 
 function parseArguments(messageText) {
     const defaultSettings = {
-        prompt: "a rembrandt-like painting of a steampunk styled dog in a futuristic world using the color palette of Teradata.",
+        prompt: "a rembrandt-like painting, of a steampunk styled robot party, in a futuristic world, using the color palette of Teradata.",
         numImages: 3,
         imageSize: "1024x1024"
     }
@@ -231,7 +231,7 @@ async function postProcess(context, thread_ts, channelId, apiToken) {
 async function sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts) {
     if (context.activity.channelId === 'webchat') {
         // send to endpoint_formats.js
-        let message = formats.dalle_WebchatResponse(numImages, imageSize, seconds);
+        let message = formats.dalle_WebchatResponse(prompt, numImages, imageSize, seconds);
         await sendMessageResponse(context, message);
     } else if (context.activity.channelId === 'slack') {
         let slackMessage = formats.dalle_SlackResponse(prompt, numImages, imageSize, seconds);
@@ -249,7 +249,7 @@ async function sendSummary(context, prompt, numImages, imageSize, seconds, threa
         }
     } else if (context.activity.channelId === 'msteams') {
         try {
-            let message = formats.dalle_msteamsResponse(numImages, imageSize, seconds);
+            let message = formats.dalle_msteamsResponse(prompt, numImages, imageSize, seconds);
             await sendMessageResponse(context, message);
         } catch (error) {
             console.error('\n******SPECIAL_COMMANDS: msteams path Failed to format the message:', error);
