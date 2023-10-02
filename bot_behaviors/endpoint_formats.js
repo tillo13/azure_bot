@@ -5,7 +5,7 @@ const helpMessage = {
 	list: [
 		"Ask basic questions, no keywords necessary!",
 		"Use `$dalle` command to create images via DALL·E",
-		"Type `$hamburger` for a fun surprise"
+		"Type `$dig` for a fun game..."
 	]
 };
 
@@ -96,7 +96,7 @@ module.exports = {
 				},
 				{
 					type: "TextBlock",
-					text: `**3.** Type **$hamburger** for a fun surprise`,
+					text: `**3.** Type **$dig** for a fun game...`,
 					wrap: true
 				}
 			],

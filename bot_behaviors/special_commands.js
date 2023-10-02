@@ -12,7 +12,7 @@ const {
 const https = require("https");
 
 const commands = new Proxy({
-	'$hamburger': addToppings,
+	'$dig': findSomething,
 	'$help': contactHelp,
 	'$dalle': createDalleImages,
 }, {
@@ -29,11 +29,11 @@ const commands = new Proxy({
 	}
 });
 
-async function addToppings(context) {
+async function findSomething(context) {
     var randNum = Math.random()*102;
     randNum = randNum.toFixed(3); // truncates to 3 decimal places.
 
-    return sendMessageResponse(context,  `${randNum} Ketchup!`); // concatenation of the random number with the string
+    return sendMessageResponse(context,  `Hmm... you just dug up something of interest, worth _${randNum}_ Tera-coins...`); // concatenation of the random number with the string
 }
 
 async function contactHelp(context) {
@@ -192,7 +192,7 @@ function parseArguments(messageText, channelId) {
 
 		imageSize: imageSize === 'medium' ? "512x512" : imageSize === 'small' ? "256x256" : imageSize === 'large' ? "1024x1024" : imageSize
     }
-	
+
 	if(channelId === 'slack' && !settings.imageSize)
     settings.imageSize = '512x512';
     return settings;
