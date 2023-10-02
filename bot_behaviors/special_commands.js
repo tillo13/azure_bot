@@ -98,6 +98,7 @@ async function sendMessageResponse(context, messageOrAttachment) {
 global.current_dalle_prompt = '';
 
 async function createDalleImages(context) {
+    const channelId = context.activity.channelId;
 	const numberOfImagesRegEx = /^\-\-(\d+)$/;
 	const sizeRegEx = /^\-\-(large|medium|small)$/;
 	const messageArgs = context.activity.text.replace('$dalle', '').split(" ").filter(Boolean);
