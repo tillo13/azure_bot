@@ -224,4 +224,9 @@ function getElapsedTime(startTime, endTime) {
 	return (difference / 1000).toFixed(3);
 }
 
+function getFileName(prompt) {
+	let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s+/g, '').replace(/_+/g, "_").substring(0, 15);
+	return filenameBase !== '_' ? filenameBase.trim('_') : filenameBase;
+}
+
 module.exports = commands;
