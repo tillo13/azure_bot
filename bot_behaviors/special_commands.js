@@ -108,21 +108,24 @@ async function createDalleImages(context) {
 		originalRequestedImages
 	} = parseArguments(messageText, channelId);
 	global.current_dalle_prompt = prompt;
-	let thread_ts;
-
-	// Check if requested number of images is more than 10
-	if (originalRequestedImages > 10) {
-		await sendMessageWithThread(context, `_I think you've asked for_ ${originalRequestedImages} _images. The maximum is 10, because 10 seems like a decent max, right? However, worry not we'll still create 10 rad images. Coming right up..._`, thread_ts);
-	}
 
 	const apiToken = context.activity.channelData?.ApiToken;
-	const slackChannelId = context.activity.channelData?.SlackMessage?.event?.channel;
 
 	//Define thread_ts only if platform is slack
+	let thread_ts;
 	if (channelId === 'slack') {
 		thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
 			context.activity.channelData?.SlackMessage?.event?.ts;
-		await addReaction(slackChannelId, thread_ts, 'hourglass_flowing_sand', apiToken);
+	}
+	
+	// Check if requested number of images is more than 10
+	if (originalRequestedImages > 10) {
+		await sendMessageWithThread(context, `_I think you've asked for_ ${originalRequestedImages} _images. The maximum is 10, because 10 seems like a decent max, right? However, worry not we'll still create 10 rad images. Coming right up..._`, thread_ts);
+		numImages = 10;
+	}
+	
+	if (channelId === 'slack' && thread_ts) {
+		await addReaction(context.activity.channelData?.SlackMessage?.event?.channel, thread_ts, 'hourglass_flowing_sand', apiToken);
 	}
 
 	if (!messageText) {
