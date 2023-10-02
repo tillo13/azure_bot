@@ -33,7 +33,7 @@ async function useShovel(context) {
 	var randNum = Math.random() * 102;
 	randNum = randNum.toFixed(3); // truncates to 3 decimal places.
 
-	return sendMessageResponse(context, `Hmm... well look at that, you just unearthed _${randNum}_ Tera-gems...`); // concatenation of the random number with the string
+	return sendMessageResponse(context, `Hmm... well look at that, you just unearthed _${randNum}_ Tera-bits...`); // concatenation of the random number with the string
 }
 
 async function contactHelp(context) {
@@ -135,7 +135,7 @@ async function createDalleImages(context) {
 
 	for (let i = 0; i < numImages; i++) {
 		const filename = `${filenameBase}_${(i+1).toString().padStart(2, '0')}.png`;
-		await sendMessageWithThread(context, `Creating ${filename}...`, thread_ts);
+		await sendMessageWithThread(context, `Hold please, creating something neat and calling it: ${filename}...`, thread_ts);
 		await sendTypingIndicator(context);
 
 		await generateImages(prompt, 1, imageSize, async (imageUrl) => {
@@ -212,7 +212,7 @@ function parseArguments(messageText, channelId) {
 }
 
 function defaultMessage(prompt, numImages, imageSize) {
-	return `Summary: We are going to use DallE to create...      Prompt: ${prompt}      Number of images: ${numImages}      Size of images: ${imageSize} Please hold while we create...`;
+	return `Summary: We are going to use Dall-E to create: ${prompt}||Number of images: ${numImages}||Size of images: ${imageSize}||Please hold while we align 1s and 0s...`;
 }
 
 function getFileName(prompt) {

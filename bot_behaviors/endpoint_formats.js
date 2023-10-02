@@ -1,6 +1,6 @@
 const helpMessage = {
 	title: "Welcome to $help!",
-	note: "Please remember that outside of individual sessions, our interaction history isn't stored. This means if you ask me what we discussed a year, a month, or even a day ago, I wouldn't know. However, during a single session, I will remember and build upon our conversation. Give it a try!",
+	note: "Please remember that outside of individual sessions, our interaction history isn't stored. This means if you ask me what we discussed a year, a month, or even a day ago, I wouldn't know, by design. However, during a single session, I will remember and build upon our conversation. Give it a try!",
 	instructions: "Here are a few things you can do here:",
 	list: [
 		"Ask basic questions, no keywords necessary!",
