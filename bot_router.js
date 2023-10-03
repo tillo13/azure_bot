@@ -173,12 +173,16 @@ class EchoBot extends ActivityHandler {
                           return;
                     }
 				}
-			} catch (error) {
+				let reply = MessageFactory.text(assistantResponse, assistantResponse);
+				console.log('\n\n***MSTEAMS.JS: Reply being sent to Teams: ', JSON.stringify(reply));
+				
+				let response = await context.sendActivity(reply);
+				console.log('\n\n***MSTEAMS.JS: MS Teams\' reply to the post: ', JSON.stringify(response));
+			  } catch (error) {
 				console.error("\n\n**BOT_ROUTER.JS: An error occurred:", error);
-			}
-			console.log(`\n\n****BOT_ROUTER.JS: Full MSTeams activity context: ${JSON.stringify(context.activity, null, 2)}`);
-
-		});
+			  }
+			  console.log(`\n\n****BOT_ROUTER.JS: Full MSTeams activity context: ${JSON.stringify(context.activity, null, 2)}`);
+			});
 	}
     async handleMsTeamsReaction(context) {
         try {
