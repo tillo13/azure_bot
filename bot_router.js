@@ -180,54 +180,56 @@ class EchoBot extends ActivityHandler {
 
 		});
 	}
-	async handleMsTeamsReaction(context) {
-		try {
-			if (context.activity.channelId === 'msteams') {
-				// Validate reactionsAdded is not empty
-				if (context.activity.reactionsAdded && context.activity.reactionsAdded.length > 0) {
-					// Get the reaction added by the user
-					const userReaction = context.activity.reactionsAdded[0];
-		
-					// Extract information from the reaction
-					const userId = context.activity.from?.id;
-					const emoji = userReaction?.type;
-					const messageId = context.activity.replyToId;
-		
-					// Fetch the posts and find the one that was reacted to
-					const posts = await this.MSteamsPostsProperty.get(context, {});
-					const post = posts[messageId];
-		
-					let payload;
-					let timediff;
-					//Check if the post was found.
-					if (post) {
-						//Get the first 100 characters of the post content
-						payload = post.content.substring(0, 100);
-		
-						// Calculate the time difference
-						const postDate = new Date(post.created);
-						const reactionDate = new Date(context.activity.timestamp);
-						timediff = reactionDate - postDate; // result in milliseconds
-		
-						// Note this is a simple difference, for more human-readable format consider using moment.js library
-					} else {
-						payload = 'unknown';
-						timediff = 'unknown';        
-					}
-		
-					console.log(`\n\n**BOT_ROUTER.JS: Someone reacted to a MSteams post! Here are the details:
-					\n-Userid: ${userId}
-					\n-Emoji: ${emoji}
-					\n-MessageID they reacted to: ${messageId}
-					\n-Post content: ${payload}
-					\n-Time diff (ms): ${timediff}`);
-					console.log(`\n\n**BOT_ROUTER.JS: Full MSTeams reaction activity: ${JSON.stringify(context.activity, null, 2)}`);
-				} else {
-					throw new Error('No reactions detected');
-				}
-			}
-		} catch (error) {
-			console.error('\n\n**BOT_ROUTER.JS: Failed to handle reaction:', error);
+    async handleMsTeamsReaction(context) {
+        try {
+            if (context.activity.channelId === 'msteams') {
+                // Validate reactionsAdded is not empty
+                if (context.activity.reactionsAdded && context.activity.reactionsAdded.length > 0) {
+                    // Get the reaction added by the user
+                    const userReaction = context.activity.reactionsAdded[0];
+    
+                    // Extract information from the reaction
+                    const userId = context.activity.from?.id;
+                    const emoji = userReaction?.type;
+                    const messageId = context.activity.replyToId;
+                    
+                    // Fetch the posts and find the one that was reacted to
+                    const posts = await this.MSteamsPostsProperty.get(context, {});
+                    const post = posts[messageId];
+    
+                    // Check if the post was found.
+                    let payload, timediff, reactionTimediff;;
+                    if (post) {
+                        // Get the post content
+                        payload = post.content;
+    
+                        // Calculate the time difference
+                        const postDate = new Date(post.created);
+                        const reactionDate = new Date(context.activity.timestamp);
+                        timediff = reactionDate - postDate; // result in milliseconds
+    
+                        // Now we also calculate the reactionTimediff for additional context
+                        reactionTimediff = new Date() - reactionDate;
+                    } else {
+                        payload = 'unknown';
+                        timediff = 'unknown';
+                        reactionTimediff = 'unknown';        
+                    }
+    
+                    console.log(`\n\n**BOT_ROUTER.JS: Someone reacted to a MSteams post! Here are the details:
+                    \n-Userid: ${userId}
+                    \n-Emoji: ${emoji}
+                    \n-MessageID they reacted to: ${messageId}
+                    \n-Post content: ${payload}
+                    \n-Time diff (ms): ${timediff}
+                    \n-Reaction Time diff (ms): ${reactionTimediff}`);
+                    console.log(`\n\n**BOT_ROUTER.JS: Full MSTeams reaction activity: ${JSON.stringify(context.activity, null, 2)}`);
+                } else {
+                    throw new Error('No reactions detected');
+                }
+            }
+        } catch (error) {
+            console.error('\n\n**BOT_ROUTER.JS: Failed to handle reaction:', error);
 		}
 	}
 	async run(context) {
