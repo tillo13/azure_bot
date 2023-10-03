@@ -28,19 +28,27 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
     if (isFirstInteraction) {
         console.log('\n*****MSTEAMS.JS: This is the first user interaction');
         assistantResponse = `${pathConfig.messagePrefix}: Welcome ${username} from @bot in MS Teams!`;
-
+    
         // set isFirstInteraction to false, after responding on user's first message
         propertyAccessor.set(context, false);
-
+    
     } else {
         console.log('\n*****MSTEAMS.JS: This is not the first interaction. Calling OpenAI...');
         const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
         console.log('\n*****MSTEAMS.JS: Received response from OpenAI');
         assistantResponse = `${pathConfig.messagePrefix}:${chatResponse.assistantResponse}`;
     }
-
+    
     console.log('\n*****MSTEAMS.JS: Assistant Response: ', assistantResponse);
-    return assistantResponse;
+    
+    let reply = MessageFactory.text(assistantResponse, assistantResponse);
+    console.log('\n*****MSTEAMS.JS: Reply being sent to Teams: ', JSON.stringify(reply));
+    
+    let sendReplyResponse = await context.sendActivity(reply);
+    console.log('\n*****MSTEAMS.JS: MS Teams reply to the post: ', JSON.stringify(sendReplyResponse));
+    
+    // Return Void here instead of assistantResponse 
+    return;
 }
 
 module.exports = { isFromMSTeams, handleTeamsMessage };
