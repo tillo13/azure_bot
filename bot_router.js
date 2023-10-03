@@ -43,6 +43,8 @@ class EchoBot extends ActivityHandler {
 		this.userState = userState;
 		// During bot initialization via msteams addition
 		this.isFirstInteraction = userState.createProperty('isFirstInteraction');
+		this.onReactionsAdded(this.handleMsTeamsReaction.bind(this));
+
 
 		this.onMembersAdded(async (context, next) => {
 			console.log("\n\n**BOT_ROUTER.JS: A member(s) has been added to the chat");
@@ -166,7 +168,27 @@ class EchoBot extends ActivityHandler {
 			}
 		});
 	}
-
+	async handleMsTeamsReaction(context) {
+		try {
+			if (context.activity.channelId === 'msteams') {
+				// Get the reaction added by the user
+				const userReaction = context.activity.reactionsAdded[0];
+	
+				// Extract information from the reaction
+				const userId = context.activity.from?.id;
+				const emoji = userReaction?.type;
+				const messageId = context.activity.replyToId;
+	
+				// Log the details to the console
+				console.log(`\n\n**BOT_ROUTER.JS: Someone reacted to a MSteams post! Here are the details:
+				\nThe userid is: ${userId}
+				\nThe emoji is: ${emoji}
+				\nThe messageID they reacted to is: ${messageId}`);
+			}
+		} catch (error) {
+			console.error('\n\n**BOT_ROUTER.JS:Failed to handle reaction:', error);
+		}
+	}
 	async run(context) {
 		console.log('\n\n**BOT_ROUTER.JS: Running the bot...');
 		await super.run(context);
