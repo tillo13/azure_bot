@@ -44,6 +44,8 @@ class EchoBot extends ActivityHandler {
 		// During bot initialization via msteams addition
 		this.isFirstInteraction = userState.createProperty('isFirstInteraction');
 		this.onReactionsAdded(this.handleMsTeamsReaction.bind(this));
+		//this stores the msteams specific post data
+		this.MSteamsPostsProperty = userState.createProperty('posts');
 
 
 		this.onMembersAdded(async (context, next) => {
@@ -68,6 +70,14 @@ class EchoBot extends ActivityHandler {
                 const messageContent = context.activity.text.trim();
 				console.log('\n\n**BOT_ROUTER.JS: onMessage triggered!');
 				console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
+
+				//log reaction interaction msteams
+				const posts = await this.MSteamsPostsProperty.get(context, {});
+				posts[context.activity.id] = {
+					content: context.activity.text,
+					created: new Date(context.activity.timestamp),
+				};
+				await this.MSteamsPostsProperty.set(context, posts);
 
 				// Log interaction to Slack
 				const slackApiToken = process.env.SLACK_BOT_TOKEN;
@@ -173,23 +183,51 @@ class EchoBot extends ActivityHandler {
 	async handleMsTeamsReaction(context) {
 		try {
 			if (context.activity.channelId === 'msteams') {
-				// Get the reaction added by the user
-				const userReaction = context.activity.reactionsAdded[0];
-	
-				// Extract information from the reaction
-				const userId = context.activity.from?.id;
-				const emoji = userReaction?.type;
-				const messageId = context.activity.replyToId;
-	
-				// Log the details to the console
-				console.log(`\n\n**BOT_ROUTER.JS: Someone reacted to a MSteams post! Here are the details:
-				\nThe userid is: ${userId}
-				\nThe emoji is: ${emoji}
-				\nThe messageID they reacted to is: ${messageId}`);
-				console.log(`\n\n**BOT_ROUTER.JS: Full MSTeams reaction activity: ${JSON.stringify(context.activity, null, 2)}`);
+				// Validate reactionsAdded is not empty
+				if (context.activity.reactionsAdded && context.activity.reactionsAdded.length > 0) {
+					// Get the reaction added by the user
+					const userReaction = context.activity.reactionsAdded[0];
+		
+					// Extract information from the reaction
+					const userId = context.activity.from?.id;
+					const emoji = userReaction?.type;
+					const messageId = context.activity.replyToId;
+		
+					// Fetch the posts and find the one that was reacted to
+					const posts = await this.MSteamsPostsProperty.get(context, {});
+					const post = posts[messageId];
+		
+					let payload;
+					let timediff;
+					//Check if the post was found.
+					if (post) {
+						//Get the first 100 characters of the post content
+						payload = post.content.substring(0, 100);
+		
+						// Calculate the time difference
+						const postDate = new Date(post.created);
+						const reactionDate = new Date(context.activity.timestamp);
+						timediff = reactionDate - postDate; // result in milliseconds
+		
+						// Note this is a simple difference, for more human-readable format consider using moment.js library
+					} else {
+						payload = 'unknown';
+						timediff = 'unknown';        
+					}
+		
+					console.log(`\n\n**BOT_ROUTER.JS: Someone reacted to a MSteams post! Here are the details:
+					\n-Userid: ${userId}
+					\n-Emoji: ${emoji}
+					\n-MessageID they reacted to: ${messageId}
+					\n-Post content: ${payload}
+					\n-Time diff (ms): ${timediff}`);
+					console.log(`\n\n**BOT_ROUTER.JS: Full MSTeams reaction activity: ${JSON.stringify(context.activity, null, 2)}`);
+				} else {
+					throw new Error('No reactions detected');
+				}
 			}
 		} catch (error) {
-			console.error('\n\n**BOT_ROUTER.JS:Failed to handle reaction:', error);
+			console.error('\n\n**BOT_ROUTER.JS: Failed to handle reaction:', error);
 		}
 	}
 	async run(context) {
