@@ -30,7 +30,8 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
 
     } else {
         console.log('*****MSTEAMS.JS: This is not the first interaction. Calling OpenAI...');
-        const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
+        //const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
+        const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, this.responseIdsProperty);
         console.log('*****MSTEAMS.JS: Received response from OpenAI');
         assistantResponse = `${pathConfig.messagePrefix}:${chatResponse.assistantResponse}`;
     }
