@@ -46,6 +46,9 @@ class EchoBot extends ActivityHandler {
 		this.onReactionsAdded(this.handleMsTeamsReaction.bind(this));
 		//this stores the msteams specific post data
 		this.MSteamsPostsProperty = userState.createProperty('posts');
+		//this will store the messageids:         
+		this.responseIdsProperty = userState.createProperty('responseIds');
+
 
 
 		this.onMembersAdded(async (context, next) => {
@@ -196,6 +199,10 @@ class EchoBot extends ActivityHandler {
                     // Fetch the posts and find the one that was reacted to
                     const posts = await this.MSteamsPostsProperty.get(context, {});
                     const post = posts[messageId];
+
+					let responseIds = await this.responseIdsProperty.get(context, []);
+					responseIds.push(responseIds);
+					await this.responseIdsProperty.set(context, responseIds);
     
                     // Check if the post was found.
                     let payload, timediff, reactionTimediff;;
