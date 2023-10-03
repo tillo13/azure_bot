@@ -91,7 +91,7 @@ async function sendMessageResponse(context, messageOrAttachment) {
 	} catch (error) {
 		console.error('\n******SPECIAL_COMMANDS: Error occurred while trying to reply in the thread:', error);
 	}
-
+	console.log('\n******SPECIAL_COMMANDS: Payload we will send on:\n', replyActivity);  
 	return await context.sendActivity(replyActivity);
 }
 //set prompt globally
