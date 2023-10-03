@@ -91,7 +91,7 @@ const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
 const userMessages = chatMessages.filter((msg) => msg.role === 'user');
 console.log('\n\n***CHAT_HELPER.JS -> USER MESSAGES SO FAR via chatmessages:\n');
 userMessages.forEach((msg, index) => {
-    console.log(`\n${index + 1}. ${msg.content} [bot responded with this messageid ${responseIds[index]}]\n`);
+    console.log(`\n${index + 1}. ${msg.content}\n`);
 });
 const oldChatMessages = JSON.stringify(chatMessages);
 
