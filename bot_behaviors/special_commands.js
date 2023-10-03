@@ -267,12 +267,12 @@ async function reactToMessage(context, thread_ts, emoji) {
 		removeReaction(channelId, thread_ts, emoji, apiToken);
 }
 
-async function postProcess(context, thread_ts, channelId, apiToken) {
-	if (context.activity.channelId === 'slack') {
-		await removeReaction(channelId, thread_ts, 'hourglass_flowing_sand', apiToken);
-		await addReaction(channelId, thread_ts, 'white_check_mark', apiToken);
-	}
-}
+// async function postProcess(context, thread_ts, channelId, apiToken) {
+// 	if (context.activity.channelId === 'slack') {
+// 		await removeReaction(channelId, thread_ts, 'hourglass_flowing_sand', apiToken);
+// 		await addReaction(channelId, thread_ts, 'white_check_mark', apiToken);
+// 	}
+// }
 async function sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts) {
 	if (context.activity.channelId === 'webchat') {
 		// send to endpoint_formats.js
