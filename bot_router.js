@@ -174,10 +174,10 @@ class EchoBot extends ActivityHandler {
                     }
 				}
 				let reply = MessageFactory.text(assistantResponse, assistantResponse);
-				console.log('\n\n***MSTEAMS.JS: Reply being sent to Teams: ', JSON.stringify(reply));
+				console.log('\n\n**!!!!*BOT_ROUTER.JS: Reply being sent to Teams: ', JSON.stringify(reply));
 				
 				let response = await context.sendActivity(reply);
-				console.log('\n\n***MSTEAMS.JS: MS Teams\' reply to the post: ', JSON.stringify(response));
+				console.log('\n\n***!!!!BOT_ROUTER.JS: MS Teams reply to the post: ', JSON.stringify(response));
 			  } catch (error) {
 				console.error("\n\n**BOT_ROUTER.JS: An error occurred:", error);
 			  }
