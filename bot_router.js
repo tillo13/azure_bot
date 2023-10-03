@@ -166,6 +166,8 @@ class EchoBot extends ActivityHandler {
 			} catch (error) {
 				console.error("\n\n**BOT_ROUTER.JS: An error occurred:", error);
 			}
+			console.log(`\n\n****BOT_ROUTER.JS: Full MSTeams activity context: ${JSON.stringify(context.activity, null, 2)}`);
+
 		});
 	}
 	async handleMsTeamsReaction(context) {
@@ -184,6 +186,7 @@ class EchoBot extends ActivityHandler {
 				\nThe userid is: ${userId}
 				\nThe emoji is: ${emoji}
 				\nThe messageID they reacted to is: ${messageId}`);
+				console.log(`\n\n**BOT_ROUTER.JS: Full MSTeams reaction activity: ${JSON.stringify(context.activity, null, 2)}`);
 			}
 		} catch (error) {
 			console.error('\n\n**BOT_ROUTER.JS:Failed to handle reaction:', error);
