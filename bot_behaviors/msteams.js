@@ -29,18 +29,8 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
         propertyAccessor.set(context, false);
 
     } else {
-        if(typeof isActiveThread === 'undefined') {
-            isActiveThread = false;
-        }
         console.log('*****MSTEAMS.JS: This is not the first interaction. Calling OpenAI...');
-        //const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
-        //const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, this.isActiveThread, this.responseIdsProperty);
-        //const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, isActiveThread, this.responseIdsProperty);
-        const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, this.responseIdsProperty);
-
-
-
-
+        const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
         console.log('*****MSTEAMS.JS: Received response from OpenAI');
         assistantResponse = `${pathConfig.messagePrefix}:${chatResponse.assistantResponse}`;
     }

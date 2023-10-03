@@ -58,7 +58,7 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
     return chatMessages;
 }
 
-async function chatCompletion(chatTexts, roleMessage, channelId, responseIdsProperty) {
+async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 
   console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
   console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
@@ -89,12 +89,9 @@ const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
 
 // Print out the user messages so far via chat messages
 const userMessages = chatMessages.filter((msg) => msg.role === 'user');
-//const responseIds = await this.responseIdsProperty.get(context, []);
-const responseIds = await responseIdsProperty.get(context, []);
-
 console.log('\n\n***CHAT_HELPER.JS -> USER MESSAGES SO FAR via chatmessages:\n');
 userMessages.forEach((msg, index) => {
- console.log(`\n${index + 1}. ${msg.content} [bot responded with this messageid ${responseIds[index]}]\n`);
+    console.log(`\n${index + 1}. ${msg.content} [bot responded with this messageid ${responseIds[index]}]\n`);
 });
 const oldChatMessages = JSON.stringify(chatMessages);
 
