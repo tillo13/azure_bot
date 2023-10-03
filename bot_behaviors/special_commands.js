@@ -144,11 +144,17 @@ async function createDalleImages(context) {
 		});
 	}
 
-	await postProcess(context, thread_ts, channelId, apiToken);
+  // Reaction code after image generation and before endTime
+  if(channelId === 'slack') {
+    const slackChannelId = context.activity.channelData?.SlackMessage?.event?.channel;
+    await removeReaction(slackChannelId, thread_ts, 'hourglass_flowing_sand', apiToken);
+    await addReaction(slackChannelId, thread_ts, 'white_check_mark', apiToken);
+  }
 
-	const endTime = new Date().getTime();
-	const seconds = getElapsedTime(startTime, endTime);
-	await sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts);
+  // Existing code after images generation
+  const endTime = new Date().getTime();
+  const seconds = getElapsedTime(startTime, endTime);
+  await sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts);
 }
 
 function parseArguments(messageText, channelId) {
