@@ -22,16 +22,22 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
         assistantResponse = `Welcome ${username} from @bot in MS Teams!\n----------------------\n`;
         const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
         assistantResponse += `${chatResponse.assistantResponse}`;
-        chatMessagesUser = chatResponse.chats; // Add this line
+        chatMessagesUser = chatResponse.chats; // 
     }
     else {
         const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, false);
-        assistantResponse = `${chatResponse.assistantResponse}`;
-        chatMessagesUser = chatResponse.chats; // Add this line
+
+        console.log('****MSTEAMS.JS: chatResponse:', chatResponse); 
     
-        if (chatResponse.letMeCheckFlag) { // If you want it only to trigger on 'checkFlag' instances
-            const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
+        assistantResponse = `${chatResponse.assistantResponse}`;
+        chatMessagesUser = chatResponse.chats;
+    
+        if (chatResponse.letMeCheckFlag) {
+            const checkMessage = "Let me check our past conversations in this exact thread vis msteams.js, one moment...";
             let checkMessageActivity = MessageFactory.text(checkMessage);
+    
+            console.log('\n*****MSTEAMS.JS: Sending Check Message:', checkMessageActivity); 
+    
             await context.sendActivity(checkMessageActivity);
             
             chatMessagesUser.push({
