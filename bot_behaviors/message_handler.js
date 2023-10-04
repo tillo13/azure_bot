@@ -53,28 +53,23 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
     } 
 
     if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
-        let chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
-
-        if (chatResponse.requery && chatResponse.isActiveThread) {
-            const chatResponses = await chatCompletion(chatMessagesUser, personality, context.activity.channelId, result.isActiveThread);
-            chatMessagesUser.push({
-                role: "assistant",
-                content: chatResponses.assistantResponse
-            });
+  
+        let chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId); 
+    
+        // Add this check to determine if it's a Slack message before adding to payload
+        if (context.activity.channelId === 'slack') {
+            if (chatResponse.requery && chatResponse.isActiveThread) {
+                const chatResponses = await chatCompletion(chatMessagesUser, personality, context.activity.channelId, result.isActiveThread);
+                chatMessagesUser.push({ role: "assistant", content: chatResponses.assistantResponse });
+            }
+    
+            chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
         }
-
-        chatMessagesUser.push({
-            role: "assistant",
-            content: chatResponse.assistantResponse
-        });
-
-        //await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, chatCompletion);
+    
         await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, pathConfig);
-
-        
-
-
+    
         return true;
+    
     }
     return false;
 }

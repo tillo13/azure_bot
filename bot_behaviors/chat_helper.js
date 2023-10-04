@@ -89,9 +89,15 @@ const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
 
 // Print out the user messages so far via chat messages
 const userMessages = chatMessages.filter((msg) => msg.role === 'user');
-console.log('\n\n***CHAT_HELPER.JS -> USER MESSAGES SO FAR via chatmessages:\n');
+console.log('\n\n***CHAT_HELPER.JS -> Only USER messages so far via chatmessages:\n');
 userMessages.forEach((msg, index) => {
     console.log(`\n${index + 1}. ${msg.content}\n`);
+});
+
+console.log('\n\n***CHAT_HELPER.JS -> Entire conversation so far via chatmessages:\n');
+chatMessages.forEach((msg, index) => {
+  const role = msg.role.toUpperCase();
+  console.log(`\n${index + 1}. ${role} : ${msg.content}\n`);
 });
 
 const oldChatMessages = JSON.stringify(chatMessages);
