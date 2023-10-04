@@ -15,42 +15,17 @@ const helpMessage = {
 	]
 };
 
-/*
-Formats a list into a string for message display.
-Handles sub-bullets when an item itself is a {text, subList} object.
-*/
-function formatList(list, platform = '' /* allowed values: 'slack', 'msteams', 'webchat' */) {
-	const bullet = platform === 'slack' ? '_' : '-';
-	return list.map((item, index) => {
-		let output = `${platform === 'msteams' ? '**' : ''}${index + 1}. `;
-		if (typeof(item) === 'string') {
-			output += item;
-		} else {
-			// The item has a sub-bullet list
-			output += `${item.text}\n` + item.subList.map(subItem => `${bullet} ${subItem}`).join('\n');
-		}
-		if (platform === 'slack') {
-            output = "_" + output.replace(/\n/g, "\n_") + "_";
-        } else if (platform === 'msteams' || platform === 'webchat') {
-            output = output.replace(/\$/g, '**$').replace(/\n/g, "\n**") + '**';
-        }
-		return output;
-	}).join('\n');
-}
-
 module.exports = {
 	help_DefaultResponse: function() {
 		return [
 			`*${helpMessage.title}*`,
 			helpMessage.note,
 			`*${helpMessage.instructions}*`,
-			formatList(helpMessage.list)
+			...helpMessage.list.map((item, index) => `${index + 1}. ${item}`)
 		].join('\n');
 	},
 
 	help_WebchatResponse: function() {
-		let formattedList = formatList(helpMessage.list, 'webchat')
-	
 		const adaptiveCardContent = {
 			type: "AdaptiveCard",
 			body: [{
@@ -68,16 +43,16 @@ module.exports = {
 					text: `*${helpMessage.instructions}*`,
 					wrap: true,
 				},
-				{
+				...helpMessage.list.map((item) => ({
 					type: "TextBlock",
-					text: formattedList,
+					text: `\u2022 ${item}`,
 					wrap: true
-				}
+				}))
 			],
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			version: "1.3",
 		};
-	
+
 		return {
 			type: "attachment",
 			contentType: "application/vnd.microsoft.card.adaptive",
@@ -88,18 +63,19 @@ module.exports = {
 
 	help_SlackResponse: function() {
 		return [
-			`:robot_face:_${helpMessage.title}_`,
-			`${helpMessage.note}`,
-			`:information_source: ${helpMessage.instructions}`,
-			formatList(helpMessage.list, 'slack') // pass 'slack' to signify a SlackFormat
+			`:robot_face:_${helpMessage.title}_\n`,
+			`\n\n${helpMessage.note}\n`,
+			`\n\n:information_source: ${helpMessage.instructions}\n\n`,
+			...helpMessage.list.map((item, index) => {
+				return `_${index + 1}. ${item}_`;
+			})
 		].join('\n\n');
 	},
 
 	help_msteamsResponse: function() {
 		const adaptiveCardContent = {
 			type: "AdaptiveCard",
-			body: [
-				{
+			body: [{
 					type: "TextBlock",
 					text: `**${helpMessage.title}**`,
 					wrap: true
@@ -116,14 +92,24 @@ module.exports = {
 				},
 				{
 					type: "TextBlock",
-					text: formatList(helpMessage.list, 'msteams'), // pass 'msteams' to signify a MSTeamsFormat
+					text: `**1.**  Ask basic questions, no keywords necessary!`,
 					wrap: true
 				},
+				{
+					type: "TextBlock",
+					text: `**2.**  Use **$dalle** command to create images via DALL·E`,
+					wrap: true
+				},
+				{
+					type: "TextBlock",
+					text: `**3.** Type **$dig** for a fun game...`,
+					wrap: true
+				}
 			],
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			version: "1.4",
 		};
-	
+
 		return {
 			type: "attachment",
 			contentType: "application/vnd.microsoft.card.adaptive",

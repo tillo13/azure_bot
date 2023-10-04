@@ -31,15 +31,16 @@ const commands = new Proxy({
 });
 
 async function teaseUpgrade(context) {
-    return sendMessageResponse(context, "Hm, interesting, that rusty shovel could use an $upgrade... TBD...");
+    const formattedMessage = "Hm, interesting, <i>that rusty shovel</i> could use an <b>$upgrade</b>...\n\nI wonder if you could use the items you've <b>$dug</b> up to <b>$upgrade</b>...";
+    return sendMessageResponse(context, formattedMessage);
 }
 
 async function useShovel(context) {
     const items = ["bits", "gems", "stones", "jewels", "coins", "artifacts", "fossils", "space rocks", "relics", "diamonds"]; 
     const adjectives = ["shiny", "sparkly", "glowing", "ancient", "gleaming", "mysterious", "shimmering", "aged", "pristine", "ornate"];
     const actions = ["unearthed", "discovered", "dug up", "found", "stumbled upon", "uncovered", "revealed", "extracted", "excavated", "exhumed"];
-    const initialMessage = "You and your rusty shovel...";
     const upgradeTeaser = "\n\n_If only you could **$upgrade** your rusty shovel, think how much more efficient your digging could be..._";
+    
     const randItem = items[Math.floor(Math.random()*items.length)];
     const randAdj = adjectives[Math.floor(Math.random()*adjectives.length)];
     const randAction = actions[Math.floor(Math.random()*actions.length)];
@@ -59,11 +60,10 @@ async function useShovel(context) {
         findMessage = "A stupendous find!";
     }
 
-    // Send initial message on digging activity.
-    await sendMessageResponse(context, initialMessage);
+    const combinedMessage = `You and your <i>rusty shovel</i> just ${randAction} <b>${randAmount}</b> <i>${randAdj} ${randItem}</i>. ${findMessage}.${upgradeTeaser}`;
 
-    // Return find message along with upgrade teaser at the end.
-    return sendMessageResponse(context, `You just ${randAction} ${randAmount} ${randAdj} ${randItem}. ${findMessage}.${upgradeTeaser}`);
+    // Return the combined message
+    return sendMessageResponse(context, combinedMessage);
 }
 
 async function contactHelp(context) {
