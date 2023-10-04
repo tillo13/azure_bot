@@ -118,7 +118,12 @@ module.exports = {
 		};
 	},
 
-	// new formatting functions:
+
+
+
+
+//////////dalle formatting///////
+
 	dalle_DefaultResponse: function(numImages, imageSize, duration) {
 		return `Summary: We used DallE to create...\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${duration} seconds.\n\nTo request a standard 3 image large size set, just type \`$dalle a dog drawn like a renaissance painter\`.\nYou can also use calls like \`--num [image number here]\` and \`--size [large/medium/small]\` in your command.\nSo for example, \`$dalle a dog drawn like a renaissance painter --num 7 --size small\` would generate 7 images in small size for the same prompt.\nThank you.`;
 	},
@@ -173,7 +178,7 @@ module.exports = {
 		};
 	},
 
-	help_msteamsResponse: function(numImages, imageSize, duration) {
+	dalle_msteamsResponse: function(numImages, imageSize, duration) {
 		const adaptiveCardContent = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			type: "AdaptiveCard",
