@@ -123,6 +123,102 @@ module.exports = {
 
 
 //////////dalle formatting///////
+//////precursory message format/////////
+dalle_precursor_DefaultResponse: function(prompt, numImages, imageSize) {
+	return `Summary: We are going to use Dall-E to create: ${prompt}\nNumber of images: ${numImages}\nSize of images: ${imageSize}\n\nPlease hold while we align 1s and 0s...`;
+},
+
+dalle_precursor_WebchatResponse: function(prompt, numImages, imageSize) {
+const adaptiveCardContent = {
+		$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+  type: "AdaptiveCard",
+		version: "1.3",
+  body: [
+	{
+	  type: "TextBlock",
+				text: `**Summary:** We are going to use DALL·E to create:\n_${prompt}_`,
+				wrap: true,
+	},
+	{
+				type: "FactSet",
+				facts: [
+					{
+						title: "Number of images:",
+						value: numImages
+					},
+					{
+						title: "Size of images:",
+						value: imageSize
+					}
+				]
+			},
+	{
+				type: "TextBlock",
+				text: "`Please hold while we align 1s and 0s...`",
+				wrap: true
+			}
+  ],
+};
+
+	return {
+		type: "attachment",
+		contentType: "application/vnd.microsoft.card.adaptive",
+		contentUrl: null,
+		content: adaptiveCardContent,
+	};
+},
+
+dalle_precursor_SlackResponse: function(prompt, numImages, imageSize) {
+	return [
+		`:art: *Summary:* We are going to use DALL·E to create: \`${prompt}\``,
+		`*Number of Images:* ${numImages}`,
+		`*Size of Images:* ${imageSize}`,
+		`*Please hold while we align 1s and 0s...*`
+	].join('\n');
+},
+
+dalle_precursor_msteamsResponse: function(prompt, numImages, imageSize) {
+	const adaptiveCardContent = {
+		$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+		type: "AdaptiveCard",
+		version: "1.4",
+		body: [
+		{
+			type: "TextBlock",
+			text: `**Summary:** We are going to use DALL·E to create: _${prompt}_`,
+			wrap: true,
+		},
+		{
+			type: "FactSet",
+			facts: [
+				{
+					title: "Number of Images:",
+					value: numImages
+				},
+				{
+					title: "Size of Images:",
+					value: imageSize
+				}
+			]
+		},
+		{
+			type: "TextBlock",
+			text: "_Please hold while we align 1s and 0s..._",
+			wrap: true
+		}
+		],
+	};
+
+	return {
+		type: "attachment",
+		contentType: "application/vnd.microsoft.card.adaptive",
+		contentUrl: null,
+		content: adaptiveCardContent
+	};
+},
+
+
+//////post processing dalle message format/////
 
 	dalle_DefaultResponse: function(numImages, imageSize, duration) {
 		return `Summary: We used DallE to create...\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${duration} seconds.\n\nTo request a standard 3 image large size set, just type \`$dalle a dog drawn like a renaissance painter\`.\nYou can also use calls like \`--num [image number here]\` and \`--size [large/medium/small]\` in your command.\nSo for example, \`$dalle a dog drawn like a renaissance painter --num 7 --size small\` would generate 7 images in small size for the same prompt.\nThank you.`;
@@ -158,7 +254,7 @@ module.exports = {
 			},
 			{
 				type: "TextBlock",
-				text: "**Instructions to request images:**",
+				text: "**Specializing your DallE calls:**",
 				wrap: true,
 				weight: "bolder"
 			},
@@ -207,7 +303,7 @@ module.exports = {
 			},
 			{
 				type: "TextBlock",
-				text: "_How to make a request:_ ",
+				text: "_Specializing your DallE calls:_ ",
 				wrap: true,
 				size: "medium",
 				weight: "bolder"
