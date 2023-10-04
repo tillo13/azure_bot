@@ -50,7 +50,8 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
   const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
 
   if (lastIndex > -1) {
-    chatMessages.push(
+    console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
+    const newResponses = [
       {
         role: 'assistant', 
         content: `I could not find a suitable response to your latest message of: ${lastUserMessage}. Please respond with your conversation history to this point and I will investigate.`
@@ -59,10 +60,26 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
         role: 'user', 
         content: `Certainly, here is what I have said so far. Here are your past conversations: ${cleanedFormattedMessages}. Based on this, can you answer this question: ${lastUserMessage}? If not, suggest a topic based on this exact thread.`
       }
-      );
+    ];
+    console.log('New responses: ', newResponses);
+    chatMessages.push(...newResponses);
   }  
+  
   return chatMessages;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 
@@ -153,6 +170,7 @@ try {
   
       let looped_through_payload = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(', ');
       newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_payload, lastUserMessage);
+
       
       console.log('\n\n***CHAT_HELPER.JS: After running formatChatPayload(), newCleanChatMessages is now: ', newCleanChatMessages);
       
