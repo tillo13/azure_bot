@@ -38,6 +38,7 @@ const bot_response_patterns = [
 
 function shouldRequery(responseContent) {
     const lowerCasedResponse = responseContent.toLowerCase();
+    console.log('\n\n***CHAT_HELPER.JS: Running shouldRequery() with responseContent:', responseContent);
     
     return bot_response_patterns.some(pattern =>
        lowerCasedResponse.includes(pattern.toLowerCase())
@@ -141,23 +142,26 @@ try {
     let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
 
     if (letMeCheckFlag) {
-      // If so, update payload and requery
-      console.log("\n***CHAT_HELPER.JS: Entering the letMeCheckFlag if statement block.");
-
+      console.log('\n\n***CHAT_HELPER.JS: Entered the letMeCheckFlag "true" condition.');
+  
       let looped_through_payload = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(', ');
       newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_payload, lastUserMessage);
-      console.log("\n***CHAT_HELPER.JS: Completed the formatChatPayload function.");
-
-      console.log('\n\n***CHAT_HELPER.JS: Sending Payload to OpenAI via 2nd branch: ', newCleanChatMessages);
-
-
-      if(JSON.stringify(newCleanChatMessages) !== oldChatMessages)
-        console.log('\n\n!!!IMPORTANT!!!! CHAT_HELPER.JS: *** Payload was updated after removing duplicates. This was triggered by the letMeCheckFlag from the handleSlackMessage() function in slack.js. The new payload: \n', newCleanChatMessages);
-
-      result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
-      console.log("\n***CHAT_HELPER.JS: Finished second call to the OpenAI API.");
-
-    }
+      
+      console.log('\n\n***CHAT_HELPER.JS: After running formatChatPayload(), newCleanChatMessages is now: ', newCleanChatMessages);
+      
+      if(JSON.stringify(newCleanChatMessages) !== oldChatMessages){
+          console.log('\n\n***CHAT_HELPER.JS: The payloads before and after running formatChatPayload() are different. The newCleanChatMessages after re-formatting is now: ', newCleanChatMessages);
+      } 
+  
+      try {
+          console.log('\n\n***CHAT_HELPER.JS: Making a secondary request to OpenAI with the modified payload.');
+          result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+          console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
+      } catch (error) {
+          console.error("\n\n***CHAT_HELPER.JS: An error occurred during the secondary request to OpenAI ", error);
+          throw error;
+      }
+  }
 
     console.log('\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n', JSON.stringify(result));
     console.log('\n\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
