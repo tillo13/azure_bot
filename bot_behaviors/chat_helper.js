@@ -225,14 +225,16 @@ try {
     return {
       'assistantResponse': result.choices[0].message.content,
       'requery': letMeCheckFlag,
-      'letMeCheckFlag': letMeCheckFlag
-    };
+      'letMeCheckFlag': letMeCheckFlag,
+      'chats': newCleanChatMessages
+  };
   } else {
     console.log('\n\n***CHAT_HELPER.JS: No content in API response');
     return {
       'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
       'requery': false,
-      'letMeCheckFlag': false
+      'letMeCheckFlag': false,
+      'chats': newCleanChatMessages
     };
   }
 } catch (error) {
