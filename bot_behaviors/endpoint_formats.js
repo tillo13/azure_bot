@@ -15,20 +15,42 @@ const helpMessage = {
 	]
 };
 
+/*
+Formats a list into a string for message display.
+Handles sub-bullets when an item itself is a {text, subList} object.
+*/
+function formatList(list, isSlackFormat = false) {
+	const bullet = isSlackFormat ? '_' : '-';
+    return list.map((item, index) => {
+		let output = `${index + 1}. `;
+		if (typeof(item) === 'string') {
+			output += item;
+		} else {
+			// The item has a sub-bullet list
+			output += `${item.text}\n` + item.subList.map(subItem => `${bullet} ${subItem}`).join('\n');
+		}
+		if (isSlackFormat) {
+            output = "_" + output.replace(/\n/g, "\n_") + "_";
+        }
+		return output;
+	}).join('\n');
+}
+
 module.exports = {
 	help_DefaultResponse: function() {
 		return [
 			`*${helpMessage.title}*`,
 			helpMessage.note,
 			`*${helpMessage.instructions}*`,
-			...helpMessage.list.map((item, index) => `${index + 1}. ${item}`)
+			formatList(helpMessage.list)
 		].join('\n');
 	},
 
 	help_WebchatResponse: function() {
 		const adaptiveCardContent = {
 			type: "AdaptiveCard",
-			body: [{
+			body: [
+                {
 					type: "TextBlock",
 					text: `*${helpMessage.title}*`,
 					wrap: true,
@@ -43,12 +65,23 @@ module.exports = {
 					text: `*${helpMessage.instructions}*`,
 					wrap: true,
 				},
-				...helpMessage.list.map((item) => ({
-					type: "TextBlock",
-					text: `\u2022 ${item}`,
-					wrap: true
-				}))
-			],
+                {
+                    type: "FactSet",
+                    facts: helpMessage.list.map((item, index) => {
+                        if (typeof item === 'string') {
+                            return {
+                                title: `${index+1}. `,
+                                value: item
+                            };
+                        } else {
+                            return {
+                                title: `${index+1}. ${item.text}`,
+                                value: item.subList.join('\n')
+                            };
+                        }
+                    })
+                }
+            ],
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			version: "1.3",
 		};
@@ -66,9 +99,7 @@ module.exports = {
 			`:robot_face:_${helpMessage.title}_\n`,
 			`\n\n${helpMessage.note}\n`,
 			`\n\n:information_source: ${helpMessage.instructions}\n\n`,
-			...helpMessage.list.map((item, index) => {
-				return `_${index + 1}. ${item}_`;
-			})
+			formatList(helpMessage.list, true) // pass true to signify a SlackFormat
 		].join('\n\n');
 	},
 
@@ -92,17 +123,7 @@ module.exports = {
 				},
 				{
 					type: "TextBlock",
-					text: `**1.**  Ask basic questions, no keywords necessary!`,
-					wrap: true
-				},
-				{
-					type: "TextBlock",
-					text: `**2.**  Use **$dalle** command to create images via DALL·E`,
-					wrap: true
-				},
-				{
-					type: "TextBlock",
-					text: `**3.** Type **$dig** for a fun game...`,
+					text: formatList(helpMessage.list),
 					wrap: true
 				}
 			],
