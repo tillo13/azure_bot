@@ -169,77 +169,73 @@ try {
     // Check if assistant wants to requery message
     let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
 
-
-
-
-
-
-
-    
+    //set this as the golden copy here as this creates a deep copy that won't be affected as we modify newCleanChatMessages later.
+    const originalPayload = JSON.parse(JSON.stringify(newCleanChatMessages)); 
 
     if (letMeCheckFlag) {
       console.log('\n\n***CHAT_HELPER.JS: Entered the letMeCheckFlag "true" condition.');
-  
-      if(newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage){
+      if(newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) { 
+        let newPayload = newCleanChatMessages.filter(item => !item.content.startsWith('Certainly')); 
+        let uniquePayload = new Set(newCleanChatMessages.map(JSON.stringify)); 
+        newCleanChatMessages = Array.from(uniquePayload).map(JSON.parse); 
+
+        if(newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) { 
           console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
           const newResponses = [
-              {
-                  role: 'assistant',
-                  content: `Let me check our past conversations in this exact thread, one moment...`
-              },
+            {
+              role: 'assistant',
+              content: `Let me check our past conversations in this exact thread, one moment...`
+            },
           ];
           console.log('New responses: ', newResponses);
           newCleanChatMessages.push(...newResponses);
-          
-          console.log("\n\n***CHAT_HELPER.JS: 'Let me check our past conversations...' added to messages since it's not present in previous message");
+
+      console.log("\n\n***CHAT_HELPER.JS: 'Let me check our past conversations...' added to newCleanChatMessages since it's not present in previous message");
+      } else {
+        console.log("\n\n***CHAT_HELPER.JS: 'Let me check our past conversations...' detected in previous message, not adding it to newCleanChatMessages");
       }
-      else {
-          console.log("\n\n***CHAT_HELPER.JS: 'Let me check our past conversations...' detected in previous message, not adding it to messages");
+
+      let looped_through_newCleanChatMessages = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(',');
+      newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_newCleanChatMessages, lastUserMessage); 
+      console.log('\n\n***CHAT_HELPER.JS: After running formatChatPayload(), newCleanChatMessages is now: ', newCleanChatMessages); 
+
+      if(JSON.stringify(newCleanChatMessages) !== oldChatMessages) { 
+        console.log('\n\n***CHAT_HELPER.JS: The newCleanChatMessages before and after running formatChatPayload() are different. The newCleanChatMessages after re-formatting is now: ', newCleanChatMessages);
       }
-  
-      let looped_through_payload = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(', ');
-      newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_payload, lastUserMessage);
-  
-      console.log('\n\n***CHAT_HELPER.JS: After running formatChatPayload(), newCleanChatMessages is now: ', newCleanChatMessages);
-  
-      if(JSON.stringify(newCleanChatMessages) !== oldChatMessages){
-          console.log('\n\n***CHAT_HELPER.JS: The payloads before and after running formatChatPayload() are different. The newCleanChatMessages after re-formatting is now: ', newCleanChatMessages);
-      }
-  
+
       try {
-          console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages);
-          result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
-          console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
-          console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
+        console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages); 
+        result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens }); 
+        console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
+        console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
       } catch (error) {
-          console.error("\n\n***CHAT_HELPER.JS: An error occurred during the secondary request to OpenAI ", error);
-          throw error;
+        console.error("\n\n***CHAT_HELPER.JS: An error occurred during the secondary request to OpenAI ", error);
+        throw error;
       }
-  }
+    }
+  } 
+  console.log('\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n', JSON.stringify(result));
+  console.log('\n\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
+  console.log('\n\n***CHAT_HELPER.JS: Is the response from chatGPT including one of the [bot_response] patterns?', bot_response_patterns.some(pattern => result.choices[0].message.content.toLowerCase().includes(pattern.toLowerCase())));
 
-    console.log('\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n', JSON.stringify(result));
-    console.log('\n\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
-    console.log('\n\n***CHAT_HELPER.JS: Is the response from chatGPT including one of the [bot_response] patterns?', bot_response_patterns.some(pattern => result.choices[0].message.content.toLowerCase().includes(pattern.toLowerCase())));
-
-    // Send response back
-    return {
-      'assistantResponse': result.choices[0].message.content,
-      'requery': letMeCheckFlag,
-      'letMeCheckFlag': letMeCheckFlag,
-      'chats': newCleanChatMessages
+  // Send response back
+  return {
+    'assistantResponse': result.choices[0].message.content,
+    'requery': letMeCheckFlag,
+    'letMeCheckFlag': letMeCheckFlag,
+    'chats': newCleanChatMessages
   };
-  } else {
-    console.log('\n\n***CHAT_HELPER.JS: No content in API response');
-    return {
-      'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
-      'requery': false,
-      'letMeCheckFlag': false,
-      'chats': newCleanChatMessages
-    };
-  }
-} catch (error) {
-  console.error("\n\n***CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
-  throw error;
+} else {
+  console.log('\n\n***CHAT_HELPER.JS: No content in API response');
+  return {
+    'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
+    'requery': false,
+    'letMeCheckFlag': false,
+    'chats': newCleanChatMessages
+  };
 }
-        }
+} catch (error) {
+console.error("\n\n***CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
+throw error;
+}}
 module.exports = chatCompletion;
