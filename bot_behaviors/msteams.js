@@ -10,35 +10,34 @@ function isFromMSTeams(context) {
 async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
     console.log('\n*****MSTEAMS.JS: Preparing to handle a message from MS Teams');
     
-    // Log the entire activity object
-    console.log('\n*****MSTEAMS.JS: Teams Activity:', JSON.stringify(context.activity, null, 2));
-
-    // Log Teams-specific data
-    console.log('\n*****MSTEAMS.JS: Teams Channel Data:', JSON.stringify(context.activity.channelData, null, 2));
-     
+    // Push the user's current message into the chat history
+    chatMessagesUser.push({
+        role: "user",
+        content: context.activity.text
+    });
+    
     // Get user's name from the Team's context
     const username = context.activity.from.name;
     
     let assistantResponse = '';
     
     if (isFirstInteraction) {
-        console.log('*****MSTEAMS.JS: This is the first user interaction');
+        console.log('\n*****MSTEAMS.JS: This is the first user interaction');
         assistantResponse = `Welcome ${username} from @bot in MS Teams!\n----------------------\n`;
-
-        // Don't set the isFirstInteraction flag to false here.
-        // propertyAccessor.set(context, false);
+        // Process the user's message with OpenAI
+        const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
+        assistantResponse += `${chatResponse.assistantResponse}`;
+    } else {
+        const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
+        assistantResponse = `${chatResponse.assistantResponse}`;
     }
-    console.log('*****MSTEAMS.JS: This is not the first interaction. Or the first interaction includes a question, Calling OpenAI...');
-    const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
-    console.log('*****MSTEAMS.JS: Received response from OpenAI');
-    assistantResponse = `${assistantResponse}${chatResponse.assistantResponse}`;
-
-    // Only after replying to the first interaction (greeting + answer), then set the flag to false
+    
+    // Change the flag to false after the first interaction
     if (isFirstInteraction) {
         propertyAccessor.set(context, false);
     }
-
-    console.log('*****MSTEAMS.JS: Assistant Response: ', assistantResponse);
+    
+    console.log('\n*****MSTEAMS.JS: Assistant Response: ', assistantResponse);
     return assistantResponse;
 }
 
