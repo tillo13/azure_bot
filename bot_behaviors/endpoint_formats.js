@@ -4,8 +4,14 @@ const helpMessage = {
 	instructions: "Here are a few things you can do here:",
 	list: [
 		"Ask basic questions, no keywords necessary!",
-		"Use `$dalle` command to create images via DALL·E",
-		"Type `$dig` for a fun game..."
+		{
+			text: "Use `$dalle` command to create images via DALL·E. It allows you to specify image size and number of images:",
+			subList: [
+				"`--size`: specifies the image size. Options are 'large', 'medium', 'small'. Example: `$dalle a nice painting --size large`",
+				"`--num`: specifies the number of images to be generated. Maximum is 10. Example: `$dalle a nice painting --num 3`"
+			]
+		},
+		"Type `$dig` for intrigue..."
 	]
 };
 
