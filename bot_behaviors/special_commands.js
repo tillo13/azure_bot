@@ -171,11 +171,12 @@ function parseArguments(messageText, channelId) {
     let numImages;
     if (numMatch) {
         numImages = parseInt(numMatch[0].split(' ')[1], 10);
+        numImages = numImages > 10 ? 10 : numImages; // Set to 10 if requested number is more than 10
     } else {
 	    numImages = defaultSettings.numImages;
     }
 
-    // Remove the instances of --num and number following it from messageText
+    // Remove the instances of --num from messageText
     messageText = messageText.replace(numRegEx, '').trim();
 
     let imageSize;
