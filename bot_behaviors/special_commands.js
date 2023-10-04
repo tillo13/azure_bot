@@ -31,7 +31,7 @@ const commands = new Proxy({
 });
 
 async function teaseUpgrade(context) {
-    const formattedMessage = "Hm, interesting, <i>that rusty shovel</i> could use an <b>$upgrade</b>...\n\nI wonder if you could use the items you've <b>$dug</b> up to <b>$upgrade</b>...";
+    const formattedMessage = "Hm, interesting, <i>that rusty shovel</i> could use an <b>$upgrade</b>...\n\nI wonder if you could use the items discovered via <b>$dig</b> up to <b>$upgrade</b>...";
     return sendMessageResponse(context, formattedMessage);
 }
 
