@@ -27,7 +27,7 @@ const {
 } = require('./bot_behaviors/message_handler');
 const { postMessageToSlack } = require('./bot_behaviors/slack_utils');
 const specialCommands = require('./bot_behaviors/special_commands');
-const { handleTeamsMessage } = require('./msteams.js');
+const { handleTeamsMessage } = require('./bot_behaviors/msteams');
 
 const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
