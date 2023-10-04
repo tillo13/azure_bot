@@ -81,8 +81,10 @@ async function handleDefault(context, chatMessagesUser, personality) {
 
     // Continue with the rest of the function
     const chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
-
     console.log(`\n\n***MESSAGE_HANDLER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
+
+    // Add the assistant's response to chatMessagesUser
+    chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
 
     await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
 
