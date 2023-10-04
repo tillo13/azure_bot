@@ -9,13 +9,10 @@ function isFromMSTeams(context) {
 
 async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
 
-
     console.log('\n*****MSTEAMS.JS: Preparing to handle a message from MS Teams');
-
+     
     // Log the entire activity object
     console.log('\n*****MSTEAMS.JS: Teams Activity:', JSON.stringify(context.activity, null, 2));
-        // Log the entire activity object
-        console.log('\n*****MSTEAMS.JS: Teams Activity:', JSON.stringify(context.activity, null, 2));
 
     // Log Teams-specific data
     console.log('\n*****MSTEAMS.JS: Teams Channel Data:', JSON.stringify(context.activity.channelData, null, 2));
@@ -28,23 +25,19 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
     if (isFirstInteraction) {
         console.log('\n*****MSTEAMS.JS: This is the first user interaction');
         assistantResponse = `${pathConfig.messagePrefix}: Welcome ${username} from @bot in MS Teams!`;
-    
+
         // set isFirstInteraction to false, after responding on user's first message
         propertyAccessor.set(context, false);
+
     } else {
         console.log('\n*****MSTEAMS.JS: This is not the first interaction. Calling OpenAI...');
         const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
         console.log('\n*****MSTEAMS.JS: Received response from OpenAI');
         assistantResponse = `${pathConfig.messagePrefix}:${chatResponse.assistantResponse}`;
     }
-    
-    if (typeof assistantResponse !== 'undefined') {
-        console.log('\n*****MSTEAMS.JS: Assistant Response: ', assistantResponse);
-        return assistantResponse;
-    } else {
-        // Return Void here instead of assistantResponse 
-        return;
-    }
+
+    console.log('\n*****MSTEAMS.JS: Assistant Response: ', assistantResponse);
+    return assistantResponse;;
 }
 
 module.exports = { isFromMSTeams, handleTeamsMessage };
