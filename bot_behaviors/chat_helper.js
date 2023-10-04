@@ -63,7 +63,7 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
       },
       {
         role: 'user', 
-        content: `Certainly, here is what I have said so far. Here are your past conversations: ${cleanedFormattedMessages}. Based on this, can you answer this question: ${lastUserMessage}? If not, suggest a topic based on this exact thread.`
+        content: `Certainly, here is what I have said so far. Here are your past conversations: ${cleanedFormattedMessages}. Based on this, can you answer this question: ${lastUserMessage}? If not, suggest a topic we have discussed already.`
       }
     ];
     console.log('New responses: ', newResponses);
@@ -128,36 +128,31 @@ chatMessages.forEach((msg, index) => {
   console.log(`\n${index + 1}. ${role} : ${msg.content}\n`);
 });
 
+// Count cleaned messages first
 const oldChatMessages = JSON.stringify(chatMessages);
-
-// Track original length of conversation
-const originalLength = chatMessages.length;
 
 // Separate out each kind of message
 let newCleanChatMessages = chatMessages.filter(item => !item.content.startsWith('Certainly, here is what I have said so far'));
-console.log('\n\n***CHAT_HELPER.JS: Sending Payload to OpenAI via first call: ', newCleanChatMessages);
-
-const certainlyMessages = chatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far'));
-
-if (certainlyMessages.length > 0) {
-  // If there are any 'Certainly' messages, only keep the last one
-  newCleanChatMessages.push(certainlyMessages[certainlyMessages.length - 1]);
-}
 
 // More efficient deduplication by converting to JSON (prevents issues with object references)
-let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
+let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify)); 
 
 // Remove duplicate messages
-newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
+newCleanChatMessages = Array.from(seenMessages).map(JSON.parse); 
+
+// Fetch the certainlyMessages from the **newCleanChatMessages**
+const certainlyMessages = newCleanChatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far'));
 
 // How many duplicates were removed
-const duplicatesRemoved = originalLength - newCleanChatMessages.length;
+const duplicatesRemoved = oldChatMessages.length - newCleanChatMessages.length;
 
 if (duplicatesRemoved > 0) {
-  console.log(`\n\n***CHAT_HELPER.JS: CLEANED CODE OF THIS MANY DUPLICATES: ${duplicatesRemoved}`);
-  console.log('\n\n***CHAT_HELPER.JS: AFTER DUPLICATES REMOVED, CLEANED PAYLOAD: \n', newCleanChatMessages);
-} else {
-  console.log('\n\n***CHAT_HELPER.JS: CLEAN PAYLOAD, NO DUPLICATION.');
+    console.log(`\n\n***CHAT_HELPER.JS: CLEANED CODE OF THIS MANY DUPLICATES: ${duplicatesRemoved}`);
+    
+    if (certainlyMessages.length > 0) {
+      // If there are any 'Certainly' messages, only keep the last one
+      newCleanChatMessages.push(certainlyMessages[certainlyMessages.length - 1]);
+    }
 }
 
 // Start interacting with OpenAI
