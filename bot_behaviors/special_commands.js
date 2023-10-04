@@ -31,10 +31,12 @@ const commands = new Proxy({
 
 async function useShovel(context) {
     const items = ["bits", "gems", "stones", "jewels", "coins", "artifacts", "fossils", "space rocks", "relics", "diamonds"]; 
-    const actions = ["unearthed", "discovered", "dug up", "found", "stumbled upon", "uncovered", "revealed", "extracted", "excavated", "exhumed"]; 
+    const adjectives = ["shiny", "sparkly", "glowing", "ancient", "gleaming", "mysterious", "shimmering", "aged", "pristine", "ornate"];
+    const actions = ["unearthed", "discovered", "dug up", "found", "stumbled upon", "uncovered", "revealed", "extracted", "excavated", "exhumed"];
     const randItem = items[Math.floor(Math.random()*items.length)];
-    const randAction = actions[Math.floor(Math.random()*actions.length)]; 
-    const randAmount = Math.floor(Math.random() * 100) + 1; // Random amount between 1 and 100
+    const randAdj = adjectives[Math.floor(Math.random()*adjectives.length)];
+    const randAction = actions[Math.floor(Math.random()*actions.length)];
+    const randAmount = Math.floor(Math.random() * 100) + 1;
 
     let findMessage = '';
 
@@ -50,7 +52,7 @@ async function useShovel(context) {
         findMessage = "a stupendous find!";
     }
 
-    return sendMessageResponse(context, `You just ${randAction} ${randAmount} ${randItem}. ${findMessage}`); 
+    return sendMessageResponse(context, `You just ${randAction} ${randAmount} ${randAdj} ${randItem}. ${findMessage}`); 
 }
 
 async function contactHelp(context) {
