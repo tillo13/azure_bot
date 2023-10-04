@@ -120,7 +120,7 @@ module.exports = {
 
 	// new formatting functions:
 	dalle_DefaultResponse: function(numImages, imageSize, duration) {
-		return `Summary: We used DallE to create...\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${duration} seconds. Thank you.`;
+		return `Summary: We used DallE to create...\nNumber of images: ${numImages}\nSize of images: ${imageSize}\nTime to complete: ${duration} seconds.\n\nTo request a standard 3 image large size set, just type \`$dalle a dog drawn like a renaissance painter\`.\nYou can also use calls like \`--num [image number here]\` and \`--size [large/medium/small]\` in your command.\nSo for example, \`$dalle a dog drawn like a renaissance painter --num 7 --size small\` would generate 7 images in small size for the same prompt.\nThank you.`;
 	},
 
 	dalle_WebchatResponse: function(numImages, imageSize, duration) {
@@ -146,6 +146,11 @@ module.exports = {
 				{
 					title: "Time to complete:",
 					value: `${duration} seconds`
+				},
+				{
+					type: "TextBlock",
+					text: "\n\nTo request a standard 3 image large size set, just type `$dalle a dog drawn like a renaissance painter`.\nYou can also use calls like `--num [image number here]` and `--size [large/medium/small]` in your command.\nSo, for example, `$dalle a dog drawn like a renaissance painter --num 7 --size small` would generate 7 images in small size for the same.",
+					wrap: true
 				}
 				]
 			}
@@ -181,6 +186,10 @@ module.exports = {
 				{
 					title: "Time to complete:",
 					value: `${duration} seconds`
+				},{
+					type: "TextBlock",
+					text: "\n\nTo request a standard 3 image large size set, just type `$dalle a dog drawn like a renaissance painter`.\nYou can also use calls like `--num [image number here]` and `--size [large/medium/small]` in your command.\nSo, for example, `$dalle a dog drawn like a renaissance painter --num 7 --size small` would generate 7 images in small size for the same.",
+					wrap: true
 				}
 				]
 			}
@@ -193,17 +202,17 @@ module.exports = {
 			content: adaptiveCardContent
 		};
 	},
-    dalle_SlackResponse: function(prompt, numImages, imageSize, duration) {
-        let slackMessage = {
-          "blocks": [{
-            "type": "section",
-            "text": {
-              "type": "mrkdwn",
-              "text": `Your Image Request Summary:\nPrompt: ${prompt}\nNumber of Images: ${numImages}\nImage Size: ${imageSize}\nTime elapsed:  ${duration} seconds.`
-            }
-          }]
-        };
-      
-        return slackMessage;
-      },
+	dalle_SlackResponse: function(prompt, numImages, imageSize, duration) {
+		let slackMessage = {
+		  "blocks": [{
+			"type": "section",
+			"text": {
+			  "type": "mrkdwn",
+			  "text": `Your Image Request Summary:\nPrompt: ${prompt}\nNumber of Images: ${numImages}\nImage Size: ${imageSize}\nTime elapsed:  ${duration} seconds.\n>To request a standard 3 image large size set, just type \`$dalle a dog drawn like a renaissance painter\`.\nYou can also use calls like \`--num [image number here]\` and \`--size [large/medium/small]\` in your command.\nSo for example, \`$dalle a dog drawn like a renaissance painter --num 7 --size small\` would generate 7 images in small size for the same.`
+			}
+		  }]
+		};
+	  
+		return slackMessage;
+	},
 };
