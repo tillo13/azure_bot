@@ -23,7 +23,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
     
     if (isFirstInteraction) {
         console.log('*****MSTEAMS.JS: This is the first user interaction');
-        assistantResponse = `${pathConfig.messagePrefix}: Welcome ${username} from @bot in MS Teams! `;
+        assistantResponse = `Welcome ${username} from @bot in MS Teams!\n----------------------\n`;
 
         // Don't set the isFirstInteraction flag to false here.
         // propertyAccessor.set(context, false);
@@ -31,7 +31,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
     console.log('*****MSTEAMS.JS: This is not the first interaction. Or the first interaction includes a question, Calling OpenAI...');
     const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
     console.log('*****MSTEAMS.JS: Received response from OpenAI');
-    assistantResponse = `${assistantResponse}${pathConfig.messagePrefix}:${chatResponse.assistantResponse}`;
+    assistantResponse = `${assistantResponse}${chatResponse.assistantResponse}`;
 
     // Only after replying to the first interaction (greeting + answer), then set the flag to false
     if (isFirstInteraction) {
