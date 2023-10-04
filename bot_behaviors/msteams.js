@@ -19,7 +19,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
     
     if (isFirstInteraction) {
         console.log('\n*****MSTEAMS.JS: This is the first user interaction');
-        assistantResponse = `Welcome ${username} from @bot in MS Teams! Type *$help* for more info!\n----------------------\n`;
+        assistantResponse = `Welcome [${username}] from @bot in MS Teams! Type *$help* for more info!\n----------------------\n`;
         const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
         assistantResponse += `${chatResponse.assistantResponse}`;
         chatMessagesUser = chatResponse.chats; // 
