@@ -25,6 +25,14 @@ const adapter = new CloudAdapter(botFrameworkAuthentication);
 // Create User State
 let userState = new UserState(new MemoryStorage());
 
+// Add outgoing activity logger middleware to the adapter
+adapter.use({
+    onTurn: async (context, next) => {
+        await next();
+        console.log('\n\n**INDEX.JS - OUTGOING ACTIVITY:', JSON.stringify(context.activity));
+    }
+});
+
 // Catch-all for errors.
 const onTurnErrorHandler = async (context, error) => {
     console.error("\n[onTurnError]", error);
