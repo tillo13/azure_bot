@@ -13,6 +13,7 @@ const https = require("https");
 
 const commands = new Proxy({
 	'$dig': useShovel,
+	'$upgrade': teaseUpgrade,
 	'$help': contactHelp,
 	'$dalle': createDalleImages,
 }, {
@@ -29,10 +30,16 @@ const commands = new Proxy({
 	}
 });
 
+async function teaseUpgrade(context) {
+    return sendMessageResponse(context, "Hm, interesting, that rusty shovel could use an $upgrade... TBD...");
+}
+
 async function useShovel(context) {
     const items = ["bits", "gems", "stones", "jewels", "coins", "artifacts", "fossils", "space rocks", "relics", "diamonds"]; 
     const adjectives = ["shiny", "sparkly", "glowing", "ancient", "gleaming", "mysterious", "shimmering", "aged", "pristine", "ornate"];
     const actions = ["unearthed", "discovered", "dug up", "found", "stumbled upon", "uncovered", "revealed", "extracted", "excavated", "exhumed"];
+    const initialMessage = "You and your rusty shovel...";
+    const upgradeTeaser = "\n\n_If only you could **$upgrade** your rusty shovel, think how much more efficient your digging could be..._";
     const randItem = items[Math.floor(Math.random()*items.length)];
     const randAdj = adjectives[Math.floor(Math.random()*adjectives.length)];
     const randAction = actions[Math.floor(Math.random()*actions.length)];
@@ -41,18 +48,22 @@ async function useShovel(context) {
     let findMessage = '';
 
     if (randAmount <= 10) {
-        findMessage = "a decent find!";
+        findMessage = "A decent find!";
     } else if (randAmount > 10 && randAmount <= 30) {
-        findMessage = "a better than average find!";
+        findMessage = "A better than average find!";
     } else if (randAmount > 30 && randAmount <= 60) {
-        findMessage = "an impressive find!";
+        findMessage = "An impressive find!";
     } else if (randAmount > 60 && randAmount <= 90) {
-        findMessage = "an amazing find!";
+        findMessage = "An amazing find!";
     } else {
-        findMessage = "a stupendous find!";
+        findMessage = "A stupendous find!";
     }
 
-    return sendMessageResponse(context, `You just ${randAction} ${randAmount} ${randAdj} ${randItem}. ${findMessage}`); 
+    // Send initial message on digging activity.
+    await sendMessageResponse(context, initialMessage);
+
+    // Return find message along with upgrade teaser at the end.
+    return sendMessageResponse(context, `You just ${randAction} ${randAmount} ${randAdj} ${randItem}. ${findMessage}.${upgradeTeaser}`);
 }
 
 async function contactHelp(context) {

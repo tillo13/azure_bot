@@ -34,7 +34,8 @@ const bot_response_patterns = [
     "access to the conversation",
     "have access to personal data",
     "not privy to that information", 
-    "just a helpful assistant"   
+    "just a helpful assistant",
+    "just an ai"
     // Include any more patterns...
 ];
 
