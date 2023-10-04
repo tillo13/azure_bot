@@ -27,6 +27,7 @@ const {
 } = require('./bot_behaviors/message_handler');
 const { postMessageToSlack } = require('./bot_behaviors/slack_utils');
 const specialCommands = require('./bot_behaviors/special_commands');
+const { handleTeamsMessage } = require('./msteams.js');
 
 const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
@@ -141,12 +142,17 @@ class EchoBot extends ActivityHandler {
 						role: "user",
 						content: context.activity.text
 					});
-
 					let isFirstInteraction = await this.isFirstInteraction.get(context, true);
 
-
-
 					let handled = false;
+					
+					const result = await handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, PATH_CONFIGS['msteams'])
+					
+					if (result && result.handled) {
+						console.log('\n*****MSTEAMS.JS: Assistant Response: ', result.assistantResponse);
+						await context.sendActivity(MessageFactory.text(result.assistantResponse));
+						handled = true;  // Set this to true if the message was handled.
+					}
 					///handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, personality) || handled;	
 					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, pathConfig) || handled;
 					handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, PATH_CONFIGS['msteams']) || handled;	
@@ -173,16 +179,12 @@ class EchoBot extends ActivityHandler {
                           return;
                     }
 				}
-				let reply = MessageFactory.text(assistantResponse, assistantResponse);
-				console.log('\n\n**!!!!*BOT_ROUTER.JS: Reply being sent to Teams: ', JSON.stringify(reply));
-				
-				let response = await context.sendActivity(reply);
-				console.log('\n\n***!!!!BOT_ROUTER.JS: MS Teams reply to the post: ', JSON.stringify(response));
-			  } catch (error) {
+			} catch (error) {
 				console.error("\n\n**BOT_ROUTER.JS: An error occurred:", error);
-			  }
-			  console.log(`\n\n****BOT_ROUTER.JS: Full MSTeams activity context: ${JSON.stringify(context.activity, null, 2)}`);
-			});
+			}
+			console.log(`\n\n****BOT_ROUTER.JS: Full MSTeams activity context: ${JSON.stringify(context.activity, null, 2)}`);
+
+		});
 	}
     async handleMsTeamsReaction(context) {
         try {
