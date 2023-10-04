@@ -93,6 +93,7 @@ console.log('\n\n***CHAT_HELPER.JS -> USER MESSAGES SO FAR via chatmessages:\n')
 userMessages.forEach((msg, index) => {
     console.log(`\n${index + 1}. ${msg.content}\n`);
 });
+
 const oldChatMessages = JSON.stringify(chatMessages);
 
 // Track original length of conversation
