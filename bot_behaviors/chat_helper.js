@@ -60,8 +60,8 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 
 async function chatCompletion(context, chatTexts, roleMessage, channelId, isActiveThread) {
 
-
   console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
+  console.log('\n\n***CHAT_HELPER.JS: current context?:', context);
   console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
 
   console.log('\n\n***CHAT_HELPER.JS: OpenAI API Base URL: ', process.env.OPENAI_API_BASE_URL);
