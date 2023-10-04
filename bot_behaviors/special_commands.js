@@ -157,68 +157,64 @@ async function createDalleImages(context) {
   await sendSummary(context, prompt, numImages, imageSize, seconds, thread_ts);
 }
 
-async function parseArguments(messageText, channelId) {
-    const defaultSettings = {
-        prompt: "A painting reminiscent of Rembrandt, with various sprockets and springs in motion while steampunk-styled humans work alongside robots actively engaged operating Teradata's secure and trustworthy A.I. hub!",
-        numImages: 3,
-        imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
-    };
-    
-    let numImages, originalRequestedImages;
-    let imageSize;
-    let promptPieces = [];
+function parseArguments(messageText, channelId) {
+	const defaultSettings = {
+		prompt: "A painting reminiscent of Rembrandt, with various sprockets and springs in motion while steampunk-styled humans work alongside robots actively engaged operating Teradata's secure and trustworthy A.I. hub!",
+		numImages: 3,
+		imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
+	}
 
-	try {
-		let args = messageText.split(" ");
-		let numImages, originalRequestedImages;
-		let imageSize;
-		let promptPieces = [];
-		
-		for (let i = 0; i < args.length; i++) {
-			if (args[i] === "--num" && !isNaN(Number(args[i+1]))) {
-				originalRequestedImages = Number(args[i+1]);
-				numImages = Math.min(originalRequestedImages, 10);
-				i++; 
-			}
-			else if (args[i] === "--size") {
-				const nextArg = args[i+1]?.toLowerCase();
-				if (["small", "medium", "large"].includes(nextArg)) {
-					switch (nextArg) {
-						case 'large':
-							imageSize = '1024x1024';
-							break;
-						case 'medium':
-							imageSize = '512x512';
-							break;
-						case 'small':
-							imageSize = '256x256';
-							break;
-					}
-					i++;
+	// Split message by space and remove empty strings
+	let splitMessage = messageText.split(" ").filter(Boolean);
+
+	let numImages = defaultSettings.numImages;
+	let imageSize = defaultSettings.imageSize;
+	let promptPieces = []
+	let originalRequestedImages;
+
+	// Parse arguments
+	splitMessage.forEach((arg, index) => {
+		if (arg.startsWith("--")) {
+			let nextArg = splitMessage[index + 1];
+			if (!isNaN(parseInt(arg.slice(2), 10))) {
+				// If a number follows "--", it's the number of images
+				originalRequestedImages = parseInt(arg.slice(2), 10);
+				numImages = originalRequestedImages;
+				// Enforce max of 10 images
+				if (numImages > 10) {
+					numImages = 10;
+				}
+			} else if (["large", "medium", "small"].includes(arg.slice(2))) {
+				switch (arg.slice(2)) {
+					case 'large':
+						imageSize = '1024x1024';
+						break;
+					case 'medium':
+						imageSize = '512x512';
+						break;
+					case 'small':
+						imageSize = '256x256';
+						break;
 				}
 			}
-			else {
-				promptPieces.push(args[i]);
-		  }
+		} else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
+			// If an argument does not start with "--" and is not directly following an argument that starts with "--", it's part of the prompt
+			promptPieces.push(arg);
 		}
-	  } 
-	  catch (error) { 
-		console.error('\n******SPECIAL_COMMANDS: Failed to parse arguments:', error);
-		promptPieces = [messageText];
-		await context.sendActivity("Encountered an issue when parsing your inputs. Could not identify '--num' or '--size' parameters. Proceeding with defaults by taking entire input as prompt.");
+	});
+
+	let settings = {
+		prompt: promptPieces.join(" ") || defaultSettings.prompt,
+		numImages: numImages,
+		originalRequestedImages: originalRequestedImages,
+	  
+		// only use defaultSettings if "--size" arg is not provided in the command  
+		imageSize: imageSize ? imageSize : defaultSettings.imageSize,
 	  }
 
-    let settings = {
-        prompt: promptPieces.join(" ") || defaultSettings.prompt,
-        numImages: numImages || defaultSettings.numImages,
-        originalRequestedImages: originalRequestedImages,
-        imageSize: imageSize || defaultSettings.imageSize,
-    };
-    
-    if (channelId === 'slack' && !settings.imageSize)
-        settings.imageSize = '512x512';
-    
-    return settings;
+	if (channelId === 'slack' && !settings.imageSize)
+		settings.imageSize = '512x512';
+	return settings;
 }
 
 function defaultMessage(prompt, numImages, imageSize) {
