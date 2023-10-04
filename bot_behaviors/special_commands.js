@@ -31,7 +31,7 @@ const commands = new Proxy({
 });
 
 async function teaseUpgrade(context) {
-    const formattedMessage = "Hm, interesting, <i>that rusty shovel</i> could use an <b>$upgrade</b>...\n\nI wonder if you could use the items discovered via <b>$dig</b> up to <b>$upgrade</b>...";
+    const formattedMessage = "Hm, interesting idea <i>that rusty shovel</i> does appear near end of life...\n\n\nI wonder if you could use the items discovered via <b>$dig</b> to trade for an <b>$upgrade</b>...";
     return sendMessageResponse(context, formattedMessage);
 }
 
@@ -39,7 +39,7 @@ async function useShovel(context) {
     const items = ["bits", "gems", "stones", "jewels", "coins", "artifacts", "fossils", "space rocks", "relics", "diamonds"]; 
     const adjectives = ["shiny", "sparkly", "glowing", "ancient", "gleaming", "mysterious", "shimmering", "aged", "pristine", "ornate"];
     const actions = ["unearthed", "discovered", "dug up", "found", "stumbled upon", "uncovered", "revealed", "extracted", "excavated", "exhumed"];
-    const upgradeTeaser = "\n\n_If only you could **$upgrade** your rusty shovel, think how much more efficient your digging could be..._";
+    const upgradeTeaser = "\n\n\n_If only you could **$upgrade** your rusty shovel, think how much more efficient your digging could be..._";
     
     const randItem = items[Math.floor(Math.random()*items.length)];
     const randAdj = adjectives[Math.floor(Math.random()*adjectives.length)];
