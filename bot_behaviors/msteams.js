@@ -10,11 +10,14 @@ function isFromMSTeams(context) {
 async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
     console.log('\n*****MSTEAMS.JS: Preparing to handle a message from MS Teams');
     
-    // Push the user's current message into the chat history
-    chatMessagesUser.push({
-        role: "user",
-        content: context.activity.text
-    });
+    if (!chatMessagesUser.some(item => item.role === "user" && item.content === context.activity.text)) {
+        chatMessagesUser.push({
+            role: "user",
+            content: context.activity.text
+        });
+    } else {
+        console.log('\n*****MSTEAMS.JS: Duplicate user message found, not adding to the chatgpt thread...:', context.activity.text);
+    }
     
     // Get user's name from the Team's context
     const username = context.activity.from.name;
