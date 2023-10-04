@@ -158,8 +158,8 @@ async function createDalleImages(context) {
 }
 
 async function parseArguments(messageText, channelId) {
-	const defaultSettings = {
-		prompt: "A painting reminiscent of Rembrandt, with various sprockets and springs in motion while steampunk-styled humans work alongside robots actively engaged operating Teradata's secure and trustworthy A.I. hub!",
+    const defaultSettings = {
+        prompt: "A painting reminiscent of Rembrandt, with various sprockets and springs in motion while steampunk-styled humans work alongside robots actively engaged operating Teradata's secure and trustworthy A.I. hub!",
         numImages: 3,
         imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
     };
@@ -178,7 +178,20 @@ async function parseArguments(messageText, channelId) {
                 i++;
             }
             else if (args[i] === "--size") {
-                imageSize = args[i+1];
+                const sizeArgument = (args[i+1] || '').toLowerCase();
+                switch (sizeArgument) {
+                    case "small":
+                        imageSize = "256x256";
+                        break;
+                    case "medium":
+                        imageSize = "512x512";
+                        break;
+                    case "large":
+                        imageSize = "1024x1024";
+                        break;
+                    default:
+                        break;
+                }
                 i++;
             }
             else {
