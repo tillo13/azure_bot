@@ -143,11 +143,9 @@ class EchoBot extends ActivityHandler {
 						content: context.activity.text
 					});
 					let isFirstInteraction = await this.isFirstInteraction.get(context, true);
-
+					
 					let handled = false;
-					
 					const result = await handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, PATH_CONFIGS['msteams'])
-					
 					if (result && result.handled) {
 						console.log('\n*****MSTEAMS.JS: Assistant Response: ', result.assistantResponse);
 						await context.sendActivity(MessageFactory.text(result.assistantResponse));
