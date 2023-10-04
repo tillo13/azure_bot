@@ -169,11 +169,12 @@ function parseArguments(messageText, channelId) {
     const numMatch = messageText.match(numRegEx);
     
     let numImages;
+    let originalRequestedImages;
     if (numMatch) {
-        numImages = parseInt(numMatch[0].split(' ')[1], 10);
-        numImages = numImages > 10 ? 10 : numImages; // Set to 10 if requested number is more than 10
+        originalRequestedImages = parseInt(numMatch[0].split(' ')[1], 10);
+        numImages = originalRequestedImages > 10 ? 10 : originalRequestedImages;
     } else {
-	    numImages = defaultSettings.numImages;
+        numImages = defaultSettings.numImages;
     }
 
     // Remove the instances of --num from messageText
@@ -196,14 +197,15 @@ function parseArguments(messageText, channelId) {
                 break;
         }
         messageText = messageText.replace(sizeRegEx, '').trim();
-	} else {
-		imageSize = defaultSettings.imageSize;
-	}
+    } else {
+        imageSize = defaultSettings.imageSize;
+    }
 
     let settings = {
         prompt: messageText || defaultSettings.prompt,
         numImages: numImages,
-        imageSize: imageSize
+        imageSize: imageSize,
+        originalRequestedImages: originalRequestedImages
     }
 
     if (channelId === 'slack') {
