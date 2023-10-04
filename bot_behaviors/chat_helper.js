@@ -1,6 +1,8 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 
 const MAX_OPENAI_TOKENS = 400;
+const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
+
 
 function validateOpenAITokens(tokens) {
     if (tokens <= 0 || tokens > 4096) {
@@ -46,7 +48,7 @@ function shouldRequery(responseContent) {
 }
 
 function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage) {
-  const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
+  //make this a global --> const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
   const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
 
   console.log('\n\n***CHAT_HELPER.JS: Value of lastIndex variable: ', lastIndex); // This will show if we're even getting here...
