@@ -25,14 +25,6 @@ const adapter = new CloudAdapter(botFrameworkAuthentication);
 // Create User State
 let userState = new UserState(new MemoryStorage());
 
-
-// Approved user IDs
-const approvedUsers = {
-  msteams: ['no_62ac1db2-f244-4609-b7ac-54bfd504d430'], // Your aadObjectId in msteams
-  webchat: ['582d61fc-24bd-4a3e-b79c-d138ac474db3'], // Your id in webchat
-  slack: ['U05SPUT1WQ0:T3PKF164B'], // Your id in slack
-};
-
 // Catch-all for errors.
 const onTurnErrorHandler = async (context, error) => {
     console.error("\n[onTurnError]", error);
@@ -59,27 +51,11 @@ const myBot = new EchoBot(userState);
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
     console.log("\n\n*INDEX.JS: Incoming request to /api/messages endpoint\n");
-
-    const channelId = req.body.channelId;
-    const userId = req.body.from.id;
-
-    // Check if the user is in the approved list
-    if (approvedUsers[channelId].includes(userId)) {
-        console.log("\n\n*INDEX.JS: Processing the request...\n");
-        await adapter.process(req, res, (context) => myBot.run(context));
-        console.log("\n\n*INDEX.JS: Finished processing most recent api/messages request!\n");
-    } else {
-        console.log("\n\n*INDEX.JS: User not in the approved list...\n");
-        // The user is not approved. Send a response indicating that.
-        const unauthorizedMessage = {
-            type: 'message',
-            from: req.body.recipient, // assuming 'from' is a properly formatted 'from' object
-            recipient: req.body.from,
-            text: 'Permission Denied - Contact Andy Tillo if you think this is incorrect.',
-            channelId: req.body.channelId
-        };
-        await adapter.sendActivities(req.body.serviceUrl, unauthorizedMessage, [unauthorizedMessage]);
-    }
+    console.log("\n\n*INDEX.JS: Request payload: \n", req.body, "\n"); // Logs the entire request payload
+    console.log("\n\n*INDEX.JS: Request source IP: \n", req.socket.remoteAddress, "\n");// Logs the origin IP address
+    console.log("\n\n*INDEX.JS: Processing the request...\n");
+    await adapter.process(req, res, (context) => myBot.run(context));
+    console.log("\n\n*INDEX.JS: Finished processing most recent api/messages request!\n");
 });
 
 // Add a GET endpoint to receive the Azure Function health check created in Azure portal to keepalive.
