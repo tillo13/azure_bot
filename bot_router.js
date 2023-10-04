@@ -27,7 +27,6 @@ const {
 } = require('./bot_behaviors/message_handler');
 const { postMessageToSlack } = require('./bot_behaviors/slack_utils');
 const specialCommands = require('./bot_behaviors/special_commands');
-const { handleTeamsMessage } = require('./bot_behaviors/msteams');
 
 const WELCOMED_USER = 'welcomedUserProperty';
 const CHAT_MESSAGES = 'chatMessagesProperty';
@@ -142,15 +141,12 @@ class EchoBot extends ActivityHandler {
 						role: "user",
 						content: context.activity.text
 					});
+
 					let isFirstInteraction = await this.isFirstInteraction.get(context, true);
-					
+
+
+
 					let handled = false;
-					const result = await handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, PATH_CONFIGS['msteams'])
-					if (result && result.handled) {
-						console.log('\n*****MSTEAMS.JS: Assistant Response: ', result.assistantResponse);
-						await context.sendActivity(MessageFactory.text(result.assistantResponse));
-						handled = true;  // Set this to true if the message was handled.
-					}
 					///handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, personality) || handled;	
 					//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, pathConfig) || handled;
 					handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, PATH_CONFIGS['msteams']) || handled;	
