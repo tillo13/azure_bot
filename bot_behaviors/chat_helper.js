@@ -132,7 +132,8 @@ chatMessages.forEach((msg, index) => {
 const oldChatMessages = JSON.stringify(chatMessages);
 
 // Separate out each kind of message
-let newCleanChatMessages = chatMessages.filter(item => !item.content.startsWith('Certainly, here is what I have said so far'));
+let newCleanChatMessages = chatMessages.filter(item => 
+  !item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
 
 // More efficient deduplication by converting to JSON (prevents issues with object references)
 let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify)); 
@@ -157,7 +158,7 @@ if (duplicatesRemoved > 0) {
 
 // Start interacting with OpenAI
 try {
-  console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI: ', newCleanChatMessages);
+  //console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI: ', newCleanChatMessages);
   let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
   console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI: ', newCleanChatMessages);
 
@@ -200,9 +201,9 @@ try {
       }
 
       try {
-        console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages); 
+        //console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages); 
         result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens }); 
-        console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
+        //console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
         console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
       } catch (error) {
         console.error("\n\n***CHAT_HELPER.JS: An error occurred during the secondary request to OpenAI ", error);
