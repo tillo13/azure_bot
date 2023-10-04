@@ -275,19 +275,25 @@ dalle_precursor_msteamsResponse: function(prompt, numImages, imageSize) {
 	},
 
 	dalle_msteamsResponse: function(numImages, imageSize, duration) {
+		// Card content specifications
 		const adaptiveCardContent = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			type: "AdaptiveCard",
 			version: "1.4",
-			body: [
-			{
-				type: "TextBlock",
-				text: `**Summary:** Using [OpenAI's DALL·E](https://openai.com/research/dall-e) we created:\n _${global.current_dalle_prompt}_`,
-				wrap: true
-			},
-			{
-				type: "FactSet",
-				facts: [
+			body: []
+		};
+		// Text block for summary
+		let summaryBlock = {
+			type: "TextBlock",
+			text: `**Summary:** Using [OpenAI's DALL·E](https://openai.com/research/dall-e) we created:\n _${global.current_dalle_prompt}_`,
+			wrap: true
+		};
+		adaptiveCardContent.body.push(summaryBlock);
+	
+		// Fact set for data
+		let factSet = {
+			type: "FactSet",
+			facts: [
 				{
 					title: "Number of images:",
 					value: numImages.toString()
@@ -300,22 +306,29 @@ dalle_precursor_msteamsResponse: function(prompt, numImages, imageSize) {
 					title: "Time to complete:",
 					value: `${duration} seconds`
 				}]
-			},
-			{
-				type: "TextBlock",
-				text: "_Specializing your DallE calls:_ ",
-				wrap: true,
-				size: "medium",
-				weight: "bolder"
-			},
-			{
-				type: "TextBlock",
-				text: "To request a standard 3 image large size set, just type `$dalle a dog drawn like a renaissance painter`.\nYou can also use commands like `--num [image number here]` and `--size [large/medium/small]`.\nSo, for example, `$dalle a dog drawn like a renaissance painter --num 7 --size small` would generate 7 images in small size for the same.",
-				wrap: true,
-				size: "default",
-				weight: "lighter"
-			}]
 		};
+		adaptiveCardContent.body.push(factSet);
+	
+		// Text block for instructions
+		let instructionBlock = {
+			type: "TextBlock",
+			text: "_Specializing your DallE calls:_ ",
+			wrap: true,
+			size: "medium",
+			weight: "bolder"
+		};
+		adaptiveCardContent.body.push(instructionBlock);
+	
+		// Text block for command example
+		let commandExampleBlock = {
+			type: "TextBlock",
+			text: "To request a standard 3 image large size set, just type `$dalle a dog drawn like a renaissance painter`.\nYou can also use commands like `--num [image number here]` and `--size [large/medium/small]`.\nSo, for example, `$dalle a dog drawn like a renaissance painter --num 7 --size small` would generate 7 images in small size for the same.",
+			wrap: true,
+			size: "default",
+			weight: "lighter"
+		};
+		adaptiveCardContent.body.push(commandExampleBlock);
+	
 		return {
 			type: "attachment",
 			contentType: "application/vnd.microsoft.card.adaptive",

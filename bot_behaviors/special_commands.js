@@ -156,23 +156,9 @@ async function createDalleImages(context) {
 	}
 
 	if (!messageText) {
-		let message = formats.dalle_precursor_DefaultResponse(defaultSettings.prompt, defaultSettings.numImages, defaultSettings.imageSize)
-		await sendMessageWithThread(context, message, thread_ts);
+		await sendMessageWithThread(context, `You did not ask for any image in particular, so get the default of... \n\n_${prompt}_\n\n\nPlease wait a moment while we wire it up...`, thread_ts);
 	} else {
-		switch (context.activity.channelId) {
-			case 'webchat':
-				message = formats.dalle_precursor_WebchatResponse(prompt, numImages, imageSize);
-				break;
-			case 'slack':
-				message = formats.dalle_precursor_SlackResponse(prompt, numImages, imageSize);
-				break;
-			case 'msteams':
-				message = formats.dalle_precursor_msteamsResponse(prompt, numImages, imageSize);
-				break;
-			default:
-				message = formats.dalle_precursor_DefaultResponse(prompt, numImages, imageSize);
-		}
-		await sendMessageWithThread(context, message, thread_ts);
+		await sendMessageWithThread(context, defaultMessage(prompt, numImages, imageSize), thread_ts);
 	}
 
 	const filenameBase = getFileName(prompt);
