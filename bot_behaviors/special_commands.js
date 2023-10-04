@@ -158,63 +158,58 @@ async function createDalleImages(context) {
 }
 
 function parseArguments(messageText, channelId) {
-	const defaultSettings = {
-		prompt: "A painting reminiscent of Rembrandt, with various sprockets and springs in motion while steampunk-styled humans work alongside robots actively engaged operating Teradata's secure and trustworthy A.I. hub!",
-		numImages: 3,
-		imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
+    const defaultSettings = {
+        prompt: "A painting reminiscent of Rembrandt, with various sprockets and springs in motion while steampunk-styled humans work alongside robots actively engaged operating Teradata's secure and trustworthy A.I. hub!",
+        numImages: 3,
+        imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
+    }
+
+    // Regex to find --num followed by a number
+    const numRegEx = /--num [0-9]+/g;
+    const numMatch = messageText.match(numRegEx);
+    
+    let numImages;
+    if (numMatch) {
+        numImages = parseInt(numMatch[0].split(' ')[1], 10);
+    } else {
+	    numImages = defaultSettings.numImages;
+    }
+
+    // Remove the instances of --num and number following it from messageText
+    messageText = messageText.replace(numRegEx, '').trim();
+
+    let imageSize;
+    const sizeRegEx = /--size (large|medium|small)/g;
+    const sizeMatch = messageText.match(sizeRegEx);
+
+    if (sizeMatch) {
+        switch (sizeMatch[0].split(' ')[1]) {
+            case 'large':
+                imageSize = '1024x1024';
+                break;
+            case 'medium':
+                imageSize = '512x512';
+                break;
+            case 'small':
+                imageSize = '256x256';
+                break;
+        }
+        messageText = messageText.replace(sizeRegEx, '').trim();
+	} else {
+		imageSize = defaultSettings.imageSize;
 	}
 
-	// Split message by space and remove empty strings
-	let splitMessage = messageText.split(" ").filter(Boolean);
+    let settings = {
+        prompt: messageText || defaultSettings.prompt,
+        numImages: numImages,
+        imageSize: imageSize
+    }
 
-	let numImages = defaultSettings.numImages;
-	let imageSize = defaultSettings.imageSize;
-	let promptPieces = []
-	let originalRequestedImages;
+    if (channelId === 'slack') {
+        settings.imageSize = '512x512';
+    }
 
-	// Parse arguments
-	splitMessage.forEach((arg, index) => {
-		if (arg.startsWith("--")) {
-			let nextArg = splitMessage[index + 1];
-			if (!isNaN(parseInt(arg.slice(2), 10))) {
-				// If a number follows "--", it's the number of images
-				originalRequestedImages = parseInt(arg.slice(2), 10);
-				numImages = originalRequestedImages;
-				// Enforce max of 10 images
-				if (numImages > 10) {
-					numImages = 10;
-				}
-			} else if (["large", "medium", "small"].includes(arg.slice(2))) {
-				switch (arg.slice(2)) {
-					case 'large':
-						imageSize = '1024x1024';
-						break;
-					case 'medium':
-						imageSize = '512x512';
-						break;
-					case 'small':
-						imageSize = '256x256';
-						break;
-				}
-			}
-		} else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
-			// If an argument does not start with "--" and is not directly following an argument that starts with "--", it's part of the prompt
-			promptPieces.push(arg);
-		}
-	});
-
-	let settings = {
-		prompt: promptPieces.join(" ") || defaultSettings.prompt,
-		numImages: numImages,
-		originalRequestedImages: originalRequestedImages,
-	  
-		// only use defaultSettings if "--size" arg is not provided in the command  
-		imageSize: imageSize ? imageSize : defaultSettings.imageSize,
-	  }
-
-	if (channelId === 'slack' && !settings.imageSize)
-		settings.imageSize = '512x512';
-	return settings;
+    return settings;
 }
 
 function defaultMessage(prompt, numImages, imageSize) {
