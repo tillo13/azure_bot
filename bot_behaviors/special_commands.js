@@ -144,7 +144,7 @@ async function createDalleImages(context) {
 		});
 	}
 
-  // Reaction code after image generation and before endTime
+  // Reaction code after image generation and before endTime.
   if(channelId === 'slack') {
     const slackChannelId = context.activity.channelData?.SlackMessage?.event?.channel;
     await removeReaction(slackChannelId, thread_ts, 'hourglass_flowing_sand', apiToken);
