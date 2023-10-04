@@ -168,42 +168,45 @@ async function parseArguments(messageText, channelId) {
     let imageSize;
     let promptPieces = [];
 
-    try {
-        let args = messageText.split(" ");
-
-        for (let i = 0; i < args.length; i++) {
-            if (args[i] === "--num") {
-                originalRequestedImages = Number(args[i+1]);
-                numImages = Math.min(originalRequestedImages, 10);
-                i++;
-            }
-            else if (args[i] === "--size") {
-                const sizeArgument = (args[i+1] || '').toLowerCase();
-                switch (sizeArgument) {
-                    case "small":
-                        imageSize = "256x256";
-                        break;
-                    case "medium":
-                        imageSize = "512x512";
-                        break;
-                    case "large":
-                        imageSize = "1024x1024";
-                        break;
-                    default:
-                        break;
-                }
-                i++;
-            }
-            else {
-                promptPieces.push(args[i]);
-            }
-        }
-
-    } catch (error) {
-        console.error('\n******SPECIAL_COMMANDS: Failed to parse arguments:', error);
-        promptPieces = [messageText];
-        await sendMessageResponse(context, `Encountered an issue parsing your input. Could not identify '--num' or '--size' parameters. Proceeding with defaults by taking entire input as prompt.`);
-    }
+	try {
+		let args = messageText.split(" ");
+		let numImages, originalRequestedImages;
+		let imageSize;
+		let promptPieces = [];
+		
+		for (let i = 0; i < args.length; i++) {
+			if (args[i] === "--num" && !isNaN(Number(args[i+1]))) {
+				originalRequestedImages = Number(args[i+1]);
+				numImages = Math.min(originalRequestedImages, 10);
+				i++; 
+			}
+			else if (args[i] === "--size") {
+				const nextArg = args[i+1]?.toLowerCase();
+				if (["small", "medium", "large"].includes(nextArg)) {
+					switch (nextArg) {
+						case 'large':
+							imageSize = '1024x1024';
+							break;
+						case 'medium':
+							imageSize = '512x512';
+							break;
+						case 'small':
+							imageSize = '256x256';
+							break;
+					}
+					i++;
+				}
+			}
+			else {
+				promptPieces.push(args[i]);
+		  }
+		}
+	  } 
+	  catch (error) { 
+		console.error('\n******SPECIAL_COMMANDS: Failed to parse arguments:', error);
+		promptPieces = [messageText];
+		await context.sendActivity("Encountered an issue when parsing your inputs. Could not identify '--num' or '--size' parameters. Proceeding with defaults by taking entire input as prompt.");
+	  }
 
     let settings = {
         prompt: promptPieces.join(" ") || defaultSettings.prompt,
@@ -223,8 +226,16 @@ function defaultMessage(prompt, numImages, imageSize) {
 }
 
 function getFileName(prompt) {
-	let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s+/g, '').replace(/_+/g, "_").substring(0, 15);
-	return filenameBase !== '_' ? filenameBase.trim('_') : filenameBase;
+    // If prompt is not defined, return a default filename
+    if (!prompt) {
+        return 'default_filename';
+    }
+    
+    // Replace all non-alphanumeric characters with underscore
+    let filenameBase = prompt.replace(/[^a-z0-9_]/gi, '_').replace(/\s+/g, '').replace(/_+/g, "_").substring(0, 25);
+    
+    // Ensure the filename does not only consist of underscores
+    return filenameBase !== '_' ? filenameBase.trim('_') : filenameBase;
 }
 
 function sendTypingIndicator(context) {
