@@ -67,13 +67,13 @@ async function postMessageToSlack(slack_channel_id, thread_ts, message, apiToken
   };
 
   // log the data and options objects
-  console.log("\n*****SLACK_UTILS.JS: postMessageToSlack sending slack payload:\n", data);
+  console.log("\n*****SLACK_UTILS.JS: postMessageToSlack sending slack logging payload:\n", data);
   console.log("\n*****SLACK_UTILS.JS: postMessageToSlack using Options:\n", options);
   
   return executeHttpPostRequest(options, data)
       .then(response => {
           // log the response object
-          console.log("\n*****SLACK_UTILS.JS: postMessageToSlack received Response:\n", response);
+          console.log("\n*****SLACK_UTILS.JS: postMessageToSlack validation of posting received response:\n", response);
           return response;
       })
       .catch(error => {

@@ -142,8 +142,12 @@ try {
 
     if (letMeCheckFlag) {
       // If so, update payload and requery
+      console.log("\n***CHAT_HELPER.JS: Entering the letMeCheckFlag if statement block.");
+
       let looped_through_payload = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(', ');
       newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_payload, lastUserMessage);
+      console.log("\n***CHAT_HELPER.JS: Completed the formatChatPayload function.");
+
       console.log('\n\n***CHAT_HELPER.JS: Sending Payload to OpenAI via 2nd branch: ', newCleanChatMessages);
 
 
@@ -151,6 +155,8 @@ try {
         console.log('\n\n!!!IMPORTANT!!!! CHAT_HELPER.JS: *** Payload was updated after removing duplicates. This was triggered by the letMeCheckFlag from the handleSlackMessage() function in slack.js. The new payload: \n', newCleanChatMessages);
 
       result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+      console.log("\n***CHAT_HELPER.JS: Finished second call to the OpenAI API.");
+
     }
 
     console.log('\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n', JSON.stringify(result));
