@@ -146,16 +146,16 @@ module.exports = {
 				{
 					title: "Time to complete:",
 					value: `${duration} seconds`
-				},
-				{
-					type: "TextBlock",
-					text: "\n\nTo request a standard 3 image large size set, just type `$dalle a dog drawn like a renaissance painter`.\nYou can also use calls like `--num [image number here]` and `--size [large/medium/small]` in your command.\nSo, for example, `$dalle a dog drawn like a renaissance painter --num 7 --size small` would generate 7 images in small size for the same.",
-					wrap: true
-				}
-				]
+				}]
+			},
+			{
+				type: "TextBlock",
+				text: "\n\nTo request a standard 3 image large size set, just type `$dalle a dog drawn like a renaissance painter`.\nYou can also use calls like `--num [image number here]` and `--size [large/medium/small]` in your command.\nFor example, `$dalle a dog drawn like a renaissance painter --num 7 --size small` would generate 7 small images for the same.",
+				wrap: true
 			}
 			]
 		};
+	
 		return {
 			type: "attachment",
 			contentType: "application/vnd.microsoft.card.adaptive",
@@ -163,6 +163,7 @@ module.exports = {
 			content: adaptiveCardContent,
 		};
 	},
+
 	dalle_msteamsResponse: function(numImages, imageSize, duration) {
 		const adaptiveCardContent = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
@@ -186,12 +187,12 @@ module.exports = {
 				{
 					title: "Time to complete:",
 					value: `${duration} seconds`
-				},{
-					type: "TextBlock",
-					text: "\n\nTo request a standard 3 image large size set, just type `$dalle a dog drawn like a renaissance painter`.\nYou can also use calls like `--num [image number here]` and `--size [large/medium/small]` in your command.\nSo, for example, `$dalle a dog drawn like a renaissance painter --num 7 --size small` would generate 7 images in small size for the same.",
-					wrap: true
-				}
-				]
+				}]
+			},
+			{
+				type: "TextBlock",
+				text: "\n\nTo request a standard 3 image large size set, just type `$dalle a dog drawn like a renaissance painter`.\nYou can also use calls like `--num [image number here]` and `--size [large/medium/small]` in your command.\nSo, for example, `$dalle a dog drawn like a renaissance painter --num 7 --size small` would generate 7 images in small size for the same.",
+				wrap: true
 			}
 			]
 		};
@@ -202,6 +203,7 @@ module.exports = {
 			content: adaptiveCardContent
 		};
 	},
+
 	dalle_SlackResponse: function(prompt, numImages, imageSize, duration) {
 		let slackMessage = {
 		  "blocks": [{
