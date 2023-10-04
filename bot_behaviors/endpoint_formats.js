@@ -128,32 +128,41 @@ module.exports = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			type: "AdaptiveCard",
 			version: "1.3",
-			body: [{
+			body: [
+			{
 				type: "TextBlock",
 				text: `**Summary**: Using [OpenAI's DALL·E](https://openai.com/research/dall-e) we created:\n _${global.current_dalle_prompt}_`,
 				wrap: true
 			},
 			{
 				type: "FactSet",
-				facts: [{
-					title: "Number of images:",
-					value: numImages.toString()
-				},
-				{
-					title: "Size of images:",
-					value: imageSize
-				},
-				{
-					title: "Time to complete:",
-					value: `${duration} seconds`
-				}]
+				facts: [
+					{
+						title: "Number of images:",
+						value: numImages.toString()
+					},
+					{
+						title: "Size of images:",
+						value: imageSize
+					},
+					{
+						title: "Time to complete:",
+						value: `${duration} seconds`
+					}
+				]
 			},
 			{
 				type: "TextBlock",
-				text: "\n\nTo request a standard 3 image large size set, just type `$dalle a dog drawn like a renaissance painter`.\nYou can also use calls like `--num [image number here]` and `--size [large/medium/small]` in your command.\nFor example, `$dalle a dog drawn like a renaissance painter --num 7 --size small` would generate 7 small images for the same.",
+				text: "**Instructions to request images:**",
+				wrap: true,
+				weight: "bolder"
+			},
+			{
+				type: "TextBlock",
+				text: "To request a standard 3 image large size set, just type `$dalle a dog drawn like a renaissance painter`.\nYou can also use calls like `--num [image number here]` and `--size [large/medium/small]` in your command.\nFor example, `$dalle a dog drawn like a renaissance painter --num 7 --size small` would generate 7 small images for the same.",
 				wrap: true
 			}
-			]
+		   ]
 		};
 	
 		return {
@@ -164,19 +173,21 @@ module.exports = {
 		};
 	},
 
-	dalle_msteamsResponse: function(numImages, imageSize, duration) {
+	help_msteamsResponse: function(numImages, imageSize, duration) {
 		const adaptiveCardContent = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			type: "AdaptiveCard",
 			version: "1.4",
-			body: [{
+			body: [
+			{
 				type: "TextBlock",
-				text: `**Summary**: Using [OpenAI's DALL·E](https://openai.com/research/dall-e) we created:\n _${global.current_dalle_prompt}_`,
+				text: `**Summary:** Using [OpenAI's DALL·E](https://openai.com/research/dall-e) we created:\n _${global.current_dalle_prompt}_`,
 				wrap: true
 			},
 			{
 				type: "FactSet",
-				facts: [{
+				facts: [
+				{
 					title: "Number of images:",
 					value: numImages.toString()
 				},
@@ -191,10 +202,18 @@ module.exports = {
 			},
 			{
 				type: "TextBlock",
-				text: "\n\nTo request a standard 3 image large size set, just type `$dalle a dog drawn like a renaissance painter`.\nYou can also use calls like `--num [image number here]` and `--size [large/medium/small]` in your command.\nSo, for example, `$dalle a dog drawn like a renaissance painter --num 7 --size small` would generate 7 images in small size for the same.",
-				wrap: true
-			}
-			]
+				text: "_How to make a request:_ ",
+				wrap: true,
+				size: "medium",
+				weight: "bolder"
+			},
+			{
+				type: "TextBlock",
+				text: "To request a standard 3 image large size set, just type `$dalle a dog drawn like a renaissance painter`.\nYou can also use commands like `--num [image number here]` and `--size [large/medium/small]`.\nSo, for example, `$dalle a dog drawn like a renaissance painter --num 7 --size small` would generate 7 images in small size for the same.",
+				wrap: true,
+				size: "default",
+				weight: "lighter"
+			}]
 		};
 		return {
 			type: "attachment",
@@ -206,15 +225,27 @@ module.exports = {
 
 	dalle_SlackResponse: function(prompt, numImages, imageSize, duration) {
 		let slackMessage = {
-		  "blocks": [{
-			"type": "section",
-			"text": {
-			  "type": "mrkdwn",
-			  "text": `Your Image Request Summary:\nPrompt: ${prompt}\nNumber of Images: ${numImages}\nImage Size: ${imageSize}\nTime elapsed:  ${duration} seconds.\n>To request a standard 3 image large size set, just type \`$dalle a dog drawn like a renaissance painter\`.\nYou can also use calls like \`--num [image number here]\` and \`--size [large/medium/small]\` in your command.\nSo for example, \`$dalle a dog drawn like a renaissance painter --num 7 --size small\` would generate 7 images in small size for the same.`
+		  "blocks": [
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": `*Your Image Request Summary:*\nPrompt: \`${prompt}\`\nNumber of Images: \`${numImages}\`\nImage Size: \`${imageSize}\`\nTime elapsed: \`${duration} seconds.\``
+				}
+			},
+			{
+				"type": "divider",
+			},
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": `To request a standard 3 image large size set, just type \`\$dalle a dog drawn like a renaissance painter\`.\n\nYou can also use amplifiers like \`--num [image number here]\` and \`--size [large/medium/small]\` in your command.\n\nSo for example, \`\$dalle a dog drawn like a renaissance painter --num 7 --size small\` would generate 7 images in small size for the same.`
+				}
 			}
-		  }]
+		]
 		};
-	  
+		  
 		return slackMessage;
 	},
 };
