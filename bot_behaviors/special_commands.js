@@ -160,62 +160,43 @@ async function createDalleImages(context) {
 function parseArguments(messageText, channelId) {
 	const defaultSettings = {
 		prompt: "A painting reminiscent of Rembrandt, with various sprockets and springs in motion while steampunk-styled humans work alongside robots actively engaged operating Teradata's secure and trustworthy A.I. hub!",
-		numImages: 3,
-		imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
+	  	numImages: 3,
+	  	imageSize: channelId === 'slack' ? '512x512' : '1024x1024'
 	}
-
-	// Split message by space and remove empty strings
-	let splitMessage = messageText.split(" ").filter(Boolean);
-
-	let numImages = defaultSettings.numImages;
-	let imageSize = defaultSettings.imageSize;
-	let promptPieces = []
-	let originalRequestedImages;
-
-	// Parse arguments
-	splitMessage.forEach((arg, index) => {
-		if (arg.startsWith("--")) {
-			let nextArg = splitMessage[index + 1];
-			if (!isNaN(parseInt(arg.slice(2), 10))) {
-				// If a number follows "--", it's the number of images
-				originalRequestedImages = parseInt(arg.slice(2), 10);
-				numImages = originalRequestedImages;
-				// Enforce max of 10 images
-				if (numImages > 10) {
-					numImages = 10;
-				}
-			} else if (["large", "medium", "small"].includes(arg.slice(2))) {
-				switch (arg.slice(2)) {
-					case 'large':
-						imageSize = '1024x1024';
-						break;
-					case 'medium':
-						imageSize = '512x512';
-						break;
-					case 'small':
-						imageSize = '256x256';
-						break;
-				}
-			}
-		} else if (!arg.startsWith("--") && (!splitMessage[index - 1] || !splitMessage[index - 1].startsWith("--"))) {
-			// If an argument does not start with "--" and is not directly following an argument that starts with "--", it's part of the prompt
-			promptPieces.push(arg);
-		}
-	});
-
-	let settings = {
-		prompt: promptPieces.join(" ") || defaultSettings.prompt,
-		numImages: numImages,
-		originalRequestedImages: originalRequestedImages,
-	  
-		// only use defaultSettings if "--size" arg is not provided in the command  
-		imageSize: imageSize ? imageSize : defaultSettings.imageSize,
+  
+	let args = messageText.split(" ");
+	let numImages, originalRequestedImages;
+	let imageSize;
+	let promptPieces = [];
+	
+	for (let i = 0; i < args.length; i++) {
+	  if (args[i] === "--num" || args[i].startsWith('--') && !isNaN(Number(args[i].slice(2)))) {
+		originalRequestedImages = Number(args[i].startsWith('--') ? args[i].slice(2) : args[i+1]);
+		numImages = Math.min(originalRequestedImages, 10);
+		i += args[i] === "--num" ? 1 : 0;   // we consume the next piece if it we found "--num"
 	  }
-
+	  else if (args[i] === "--size") {
+		imageSize = args[i+1];
+		i++; // we also consume the next piece here
+	  }
+	  else {
+		// if it's not a flag or a flag value, it's part of the prompt
+		promptPieces.push(args[i]);
+	  }
+	}
+	
+	let settings = {
+	  prompt: promptPieces.join(" ") || defaultSettings.prompt,
+	  numImages: numImages || defaultSettings.numImages,
+	  originalRequestedImages: originalRequestedImages,
+	  imageSize: imageSize ? imageSize : defaultSettings.imageSize,
+	}
+	
 	if (channelId === 'slack' && !settings.imageSize)
 		settings.imageSize = '512x512';
+	
 	return settings;
-}
+  }
 
 function defaultMessage(prompt, numImages, imageSize) {
 	return `Summary: We are going to use Dall-E to create: ${prompt}||Number of images: ${numImages}||Size of images: ${imageSize}||Please hold while we align 1s and 0s...`;

@@ -183,7 +183,7 @@ class EchoBot extends ActivityHandler {
 				console.log(`\n\n**BOT_ROUTER.JS: Someone reacted to a MSteams post! Here are the details:
 				\nThe userid is: ${userId}
 				\nThe emoji is: ${emoji}
-				\nThe messageID they reacted to is: ${messageId}`);
+				\nThe messageID of the emoji is: ${messageId}`);
 			}
 		} catch (error) {
 			console.error('\n\n**BOT_ROUTER.JS:Failed to handle reaction:', error);
