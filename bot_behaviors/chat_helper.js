@@ -58,7 +58,8 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
     return chatMessages;
 }
 
-async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
+async function chatCompletion(context, chatTexts, roleMessage, channelId, isActiveThread) {
+
 
   console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
   console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
