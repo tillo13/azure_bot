@@ -30,10 +30,27 @@ const commands = new Proxy({
 });
 
 async function useShovel(context) {
-	var randNum = Math.random() * 102;
-	randNum = randNum.toFixed(3); // truncates to 3 decimal places.
+    const items = ["bits", "gems", "stones", "jewels", "coins", "artifacts", "fossils", "space rocks", "relics", "diamonds"]; 
+    const actions = ["unearthed", "discovered", "dug up", "found", "stumbled upon", "uncovered", "revealed", "extracted", "excavated", "exhumed"]; 
+    const randItem = items[Math.floor(Math.random()*items.length)];
+    const randAction = actions[Math.floor(Math.random()*actions.length)]; 
+    const randAmount = Math.floor(Math.random() * 100) + 1; // Random amount between 1 and 100
 
-	return sendMessageResponse(context, `Hmm... well look at that, you just unearthed _${randNum}_ Tera-bits...`); // concatenation of the random number with the string
+    let findMessage = '';
+
+    if (randAmount <= 10) {
+        findMessage = "a decent find!";
+    } else if (randAmount > 10 && randAmount <= 30) {
+        findMessage = "a better than average find!";
+    } else if (randAmount > 30 && randAmount <= 60) {
+        findMessage = "an impressive find!";
+    } else if (randAmount > 60 && randAmount <= 90) {
+        findMessage = "an amazing find!";
+    } else {
+        findMessage = "a stupendous find!";
+    }
+
+    return sendMessageResponse(context, `You just ${randAction} ${randAmount} ${randItem}. ${findMessage}`); 
 }
 
 async function contactHelp(context) {
