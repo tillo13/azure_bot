@@ -12,9 +12,10 @@ const {
 const chatCompletion = require('./chat_helper');
 
 async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
-
     if (isFromMSTeams(context)) {
         const assistantResponse = await handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig);
+        // Add the assistant's response to chatMessagesUser
+        chatMessagesUser.push({ role: "assistant", content: assistantResponse });
         await context.sendActivity(MessageFactory.text(assistantResponse));
         return true;
     }
@@ -22,10 +23,7 @@ async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstIntera
 }
 
 
-async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts, botInvokedFlag, threadproperty, personality, pathConfig) { 
-
-
-	
+async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts, botInvokedFlag, threadproperty, personality, pathConfig) { 	
     const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
         context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
     console.log("\n\n**MESSAGE_HANDLER.JS: Current Slack thread timestamp: ", current_thread_ts);
