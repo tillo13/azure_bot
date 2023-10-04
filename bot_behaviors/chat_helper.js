@@ -49,6 +49,8 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
   const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
   const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
 
+  console.log('\n\n***CHAT_HELPER.JS: Value of lastIndex variable: ', lastIndex); // This will show if we're even getting here...
+
   if (lastIndex > -1) {
     console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
     const newResponses = [
