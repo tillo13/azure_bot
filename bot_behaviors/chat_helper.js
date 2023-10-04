@@ -167,24 +167,48 @@ try {
     // Check if assistant wants to requery message
     let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
 
+
+
+
+
+
+
+    
+
     if (letMeCheckFlag) {
       console.log('\n\n***CHAT_HELPER.JS: Entered the letMeCheckFlag "true" condition.');
   
+      if(newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage){
+          console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
+          const newResponses = [
+              {
+                  role: 'assistant',
+                  content: `Let me check our past conversations in this exact thread, one moment...`
+              },
+          ];
+          console.log('New responses: ', newResponses);
+          newCleanChatMessages.push(...newResponses);
+          
+          console.log("\n\n***CHAT_HELPER.JS: 'Let me check our past conversations...' added to messages since it's not present in previous message");
+      }
+      else {
+          console.log("\n\n***CHAT_HELPER.JS: 'Let me check our past conversations...' detected in previous message, not adding it to messages");
+      }
+  
       let looped_through_payload = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(', ');
       newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_payload, lastUserMessage);
-
-      
+  
       console.log('\n\n***CHAT_HELPER.JS: After running formatChatPayload(), newCleanChatMessages is now: ', newCleanChatMessages);
-      
+  
       if(JSON.stringify(newCleanChatMessages) !== oldChatMessages){
           console.log('\n\n***CHAT_HELPER.JS: The payloads before and after running formatChatPayload() are different. The newCleanChatMessages after re-formatting is now: ', newCleanChatMessages);
-      } 
+      }
   
       try {
-        console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages);
-        result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
-        console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
-        console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
+          console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages);
+          result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+          console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
+          console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
       } catch (error) {
           console.error("\n\n***CHAT_HELPER.JS: An error occurred during the secondary request to OpenAI ", error);
           throw error;
