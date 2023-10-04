@@ -59,9 +59,7 @@ const myBot = new EchoBot(userState);
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
     console.log("\n\n*INDEX.JS: Incoming request to /api/messages endpoint\n");
-    console.log("\n\n*INDEX.JS: Request payload: \n", req.body, "\n"); // Logs the entire request payload
-    console.log("\n\n*INDEX.JS: Request source IP: \n", req.socket.remoteAddress, "\n");// Logs the origin IP address
-    
+
     const channelId = req.body.channelId;
     const userId = req.body.from.id;
 
@@ -72,7 +70,15 @@ server.post('/api/messages', async (req, res) => {
         console.log("\n\n*INDEX.JS: Finished processing most recent api/messages request!\n");
     } else {
         console.log("\n\n*INDEX.JS: User not in the approved list...\n");
-        res.send(403, 'Permission Denied - Contact Andy Tillo if you think this is incorrect.');
+        // The user is not approved. Send a response indicating that.
+        const unauthorizedMessage = {
+            type: 'message',
+            from: req.body.recipient, // assuming 'from' is a properly formatted 'from' object
+            recipient: req.body.from,
+            text: 'Permission Denied - Contact Andy Tillo if you think this is incorrect.',
+            channelId: req.body.channelId
+        };
+        await adapter.sendActivities(req.body.serviceUrl, unauthorizedMessage, [unauthorizedMessage]);
     }
 });
 
