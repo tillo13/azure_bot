@@ -140,7 +140,9 @@ if (duplicatesRemoved > 0) {
 
 // Start interacting with OpenAI
 try {
+  console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI: ', newCleanChatMessages);
   let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+  console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI: ', newCleanChatMessages);
 
   if (result && result.choices[0]?.message?.content) {
     // Check if assistant wants to requery message
@@ -159,9 +161,10 @@ try {
       } 
   
       try {
-          console.log('\n\n***CHAT_HELPER.JS: Making a secondary request to OpenAI with the modified payload.');
-          result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
-          console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
+        console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages);
+        result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+        console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
+        console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
       } catch (error) {
           console.error("\n\n***CHAT_HELPER.JS: An error occurred during the secondary request to OpenAI ", error);
           throw error;
