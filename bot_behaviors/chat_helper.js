@@ -162,6 +162,13 @@ if (duplicatesRemoved > 0) {
 try {
   //console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI: ', newCleanChatMessages);
   let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+
+  // did it hit a content policy violation?
+  if (result && result.code === "content_filter" && result.innererror && result.innererror.code === 'ResponsibleAIPolicyViolation') {
+    let error = new Error('The response was filtered due to the prompt triggering Azure OpenAI’s content management policy. Please modify your prompt and retry.');
+    error.type = 'content_filter';
+    throw error;
+  }
   
   if (result && result.choices[0]?.message?.content) {
     // Check if assistant wants to requery message

@@ -77,7 +77,7 @@ async function useShovel(context) {
         findMessage = "A stupendous find!";
     }
 
-    const combinedMessage = `You and your <i>rusty shovel</i> just ${randAction} <b>${randAmount}</b> <i>${randAdj} ${randItem}</i>. ${findMessage}.${upgradeTeaser}`;
+    const combinedMessage = `You and your <i>rusty shovel</i> just ${randAction} <b>${randAmount}</b> <i>${randAdj} ${randItem}</i> ${findMessage}.${upgradeTeaser}`;
 
     // Return the combined message
     return sendMessageResponse(context, combinedMessage);

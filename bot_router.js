@@ -165,6 +165,9 @@ class EchoBot extends ActivityHandler {
 				}
 			} catch (error) {
 				console.error("\n\n**BOT_ROUTER.JS: An error occurred:", error);
+				if (error.type === 'content_filter') {
+					await context.sendActivity(error.message); // Send error message to user only for content_filter errors
+				  }
 			}
 		});
 	}
