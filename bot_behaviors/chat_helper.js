@@ -181,13 +181,32 @@ try {
     // Get total tokens used so far
     let totalTokens = result.usage.totalTokens;
     
-    // Calculate costs
+
+    // Calculate costs thus far of the transaction
     let turboCost = (totalTokens / 1000) * turboCostPerToken;
     let gpt4Cost = (totalTokens / 1000) * gpt4CostPerToken;
 
+    // Function to format cost
+    function formatCost(cost) {
+      // Convert cost to string
+      let costStr = cost.toString();
+
+      // Split costStr at decimal point
+      let [_, frac] = costStr.split('.');
+
+      // Find index of first non-zero digit in frac
+      let firstNonZeroIndex = [...frac].findIndex(char => char !== '0');
+
+      // Calculate n
+      let n = firstNonZeroIndex + 3;
+
+      // Return cost formatted to n decimal places
+      return `$${cost.toFixed(n)}`;
+    }
+
     console.log('\n\n***CHAT_HELPER.JS: Total tokens used so far in this chat:', totalTokens);
-    console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', turboCost);
-    console.log('\n\n***CHAT_HELPER.JS: if GPT-4, the cost is:', gpt4Cost);
+    console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', formatCost(turboCost));
+    console.log('\n\n***CHAT_HELPER.JS: if GPT-4, the cost is:', formatCost(gpt4Cost));
 
     if (letMeCheckFlag) {
       console.log('\n\n***CHAT_HELPER.JS: Entered the letMeCheckFlag "true" condition.');
