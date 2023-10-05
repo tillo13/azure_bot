@@ -13,6 +13,7 @@ const https = require("https");
 
 const commands = new Proxy({
 	'$dig': useShovel,
+	'$reset': resetChatPayload,
 	'$upgrade': teaseUpgrade,
 	'$help': contactHelp,
 	'$dalle': createDalleImages,
@@ -29,6 +30,22 @@ const commands = new Proxy({
 		}
 	}
 });
+
+async function resetChatPayload(context) {
+    const resetMessage = 'You are thorough, polite, helpful and courteous.';
+    
+    // Set the payload to initial state
+    const chats = [{ role: 'system', content: resetMessage }];
+    
+    // Pass to chatCompletion function; assuming chatCompletion is imported from chat_helper.js
+    const response = chatCompletion(chats, '', context.activity.channelId, false);
+    
+    // process the response and send message accordingly
+    await sendMessageResponse(context, response);
+    
+    // After the reset operation has been completed, notify the user with a new activity
+    await context.sendActivity('Let us start a new conversation, shall we?');
+}
 
 async function teaseUpgrade(context) {
     const formattedMessage = "Hm, interesting idea <i>that rusty shovel</i> does appear near end of life...\n\n\nI wonder if you could use the items discovered via <b>$dig</b> to trade for an <b>$upgrade</b>...";
