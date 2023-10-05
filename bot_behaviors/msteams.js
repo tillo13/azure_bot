@@ -27,7 +27,11 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
     else {
         const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, false);
 
-        console.log('\n****MSTEAMS.JS: chatResponse:', chatResponse); 
+        console.log('\n****MSTEAMS.JS: chatResponse:', {
+            assistantResponse: chatResponse.assistantResponse,
+            requery: chatResponse.requery,
+            letMeCheckFlag: chatResponse.letMeCheckFlag
+        });
     
         assistantResponse = `${chatResponse.assistantResponse}`;
         chatMessagesUser = chatResponse.chats;
@@ -36,7 +40,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
             const checkMessage = "Let me check our past conversations in this exact thread vis msteams.js, one moment...";
             let checkMessageActivity = MessageFactory.text(checkMessage);
     
-            console.log('\n*****MSTEAMS.JS: Sending Check Message:', checkMessageActivity); 
+            //console.log('\n*****MSTEAMS.JS: Sending Check Message:', checkMessageActivity); 
     
             await context.sendActivity(checkMessageActivity);
             
