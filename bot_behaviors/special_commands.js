@@ -41,7 +41,7 @@ async function resetChatPayload(context, chatMessagesProperty) {
 	// Define the user message (new prompt to start a conversation)
 	const userMessage = {
 	  role: "user",
-	  content: "Let's start a new conversation, shall we?"
+	  content: "Let's start a new conversation, shall we?  Respond back with a greeting stating you are ready to start a new conversation with me."
 	};
   
 	// Create the new chat array with the system and user messages
