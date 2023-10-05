@@ -35,6 +35,7 @@ const commands = new Proxy({
 
 
 async function getJiraIssues(context) {
+    let jira_server = process.env['2023sept8_JIRA_SERVER'];
     let JiraIssues;
     try {
         // Call the function to get Jira issues
