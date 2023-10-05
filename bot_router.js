@@ -69,6 +69,15 @@ class EchoBot extends ActivityHandler {
 				console.log('\n\n**BOT_ROUTER.JS: onMessage triggered!');
 				console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
 
+				        // Insert the following block here.
+						if (specialCommands[messageContent]) {
+							console.log("\n\n**BOT_ROUTER.JS: A special command has been detected.");
+							console.log("\n\n**BOT_ROUTER.JS: Command content: ", context.activity.text);
+				
+							// If the command exists in our special commands, execute it.
+							await specialCommands[messageContent](context, this.chatMessagesProperty);
+						} else {
+
 				// Log interaction to Slack
 				const slackApiToken = process.env.SLACK_BOT_TOKEN;
 				const slackChannelId = 'C05UMRHSLR2';
@@ -162,7 +171,7 @@ class EchoBot extends ActivityHandler {
                           await next();
                           return;
                     }
-				}
+				}}
 			} catch (error) {
 				console.error("\n\n**BOT_ROUTER.JS: An error occurred:", error);
 				if (error.type === 'content_filter') {

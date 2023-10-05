@@ -31,7 +31,7 @@ const commands = new Proxy({
 	}
 });
 
-async function resetChatPayload(context) {
+async function resetChatPayload(context, chatMessagesProperty) {
 	// Define the system message (personality setup)
 	const systemMessage = {
 	  role: "system",
