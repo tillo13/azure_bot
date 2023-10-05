@@ -160,11 +160,16 @@ if (duplicatesRemoved > 0) {
 try {
   //console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI: ', newCleanChatMessages);
   let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
-  console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI: ', newCleanChatMessages);
-
+  
   if (result && result.choices[0]?.message?.content) {
     // Check if assistant wants to requery message
     let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
+    let assistantResponse = result.choices[0].message.content;
+    
+    // Add the assistant response to newCleanChatMessages array
+    newCleanChatMessages.push({ role: 'assistant', content: assistantResponse });
+
+    console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI: ', newCleanChatMessages);
 
     //set this as the golden copy here as this creates a deep copy that won't be affected as we modify newCleanChatMessages later.
     const originalPayload = JSON.parse(JSON.stringify(newCleanChatMessages)); 
