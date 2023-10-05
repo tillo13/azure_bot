@@ -84,7 +84,21 @@ async function createJiraTask(summary, description) {
                 "key": projectName // using the one from .env as might have some proprietary-ness...
             },
             "summary": summary,
-            "description": description,
+            "description": {
+                "type": "doc",
+                "version": 1,
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": description
+                            }
+                        ]
+                    }
+                ]
+            },
             "issuetype": {
                 "name": issueType // can be public, nothing secret
             },
