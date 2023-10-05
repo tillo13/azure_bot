@@ -81,12 +81,12 @@ async function createJiraTask(summary, description) {
     const taskData = {
         "fields": {
             "project": {
-                "key": projectId // using the one from .env
+                "key": projectName // using the one from .env as might have some proprietary-ness...
             },
             "summary": summary,
             "description": description,
             "issuetype": {
-                "name": issueType // using the one from .env
+                "name": issueType // can be public, nothing secret
             },
             "parent": {
                 "id": parentId   
