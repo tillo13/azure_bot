@@ -51,7 +51,7 @@ async function makeJiraRequest(url, payload, method = 'GET') {
 }
 
 /**
- Retrieves all issues assigned to the current user.
+ Retrieves all issues assigned to the current user..
 */
 async function getIssuesAssignedToCurrentUser() {
     try {
