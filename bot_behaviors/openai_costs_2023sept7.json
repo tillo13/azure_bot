@@ -1,0 +1,64 @@
+{
+    "Language Models": {
+        "GPT-4": {
+            "8K context": {
+                "Input": 0.03,
+                "Output": 0.06
+            },
+            "32K context": {
+                "Input": 0.06,
+                "Output": 0.12
+            }
+        },
+        "GPT-3.5 Turbo": {
+            "4K context": {
+                "Input": 0.0015,
+                "Output": 0.002
+            },
+            "16K context": {
+                "Input": 0.003,
+                "Output": 0.004
+            }
+        }
+    },
+    "Fine-tuning Models": {
+        "babbage-002": {
+            "Training": 0.0004,
+            "Input usage": 0.0016,
+            "Output usage": 0.0016
+        },
+        "davinci-002": {
+            "Training": 0.0060,
+            "Input usage": 0.0120,
+            "Output usage": 0.0120
+        },
+        "GPT-3.5 Turbo": {
+            "Training": 0.0080,
+            "Input usage": 0.0120,
+            "Output usage": 0.0160
+        }
+    },
+    "Embedding Models": {
+        "Ada v2": {
+            "Usage": 0.0001
+        }
+    },
+    "Base Models": {
+        "babbage-002": {
+            "Usage": 0.0004
+        },
+        "davinci-002": {
+            "Usage": 0.0020
+        }
+    },
+    "Other Models": {
+        "Image Models": {
+            "1024×1024": 0.020,
+            "512×512": 0.018,
+            "256×256": 0.016
+        },
+        "Audio Models": {
+            "Whisper": 0.006
+        }
+    }
+}

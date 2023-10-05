@@ -1,4 +1,6 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+const modelCosts = require('./openai_costs_2023sept7.json');
+
 
 const MAX_OPENAI_TOKENS = 400;
 const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
@@ -171,8 +173,21 @@ try {
 
     console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI: ', newCleanChatMessages);
 
-    //set this as the golden copy here as this creates a deep copy that won't be affected as we modify newCleanChatMessages later.
-    const originalPayload = JSON.parse(JSON.stringify(newCleanChatMessages)); 
+    // This is where we're going to add the code for cost calculation
+    // Prices per token for GPT-3.5 Turbo and GPT-4
+    const turboCostPerToken = modelCosts['Language Models']['GPT-3.5 Turbo']['4K context']['Output'];
+    const gpt4CostPerToken = modelCosts['Language Models']['GPT-4']['8K context']['Output'];
+
+    // Get total tokens used so far
+    let totalTokens = result.usage.totalTokens;
+    
+    // Calculate costs
+    let turboCost = totalTokens * turboCostPerToken;
+    let gpt4Cost = totalTokens * gpt4CostPerToken;
+
+    console.log('\n\n***CHAT_HELPER.JS: Total tokens used so far in this chat:', totalTokens);
+    console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', turboCost);
+    console.log('\n\n***CHAT_HELPER.JS: if GPT-4, the cost is:', gpt4Cost);
 
     if (letMeCheckFlag) {
       console.log('\n\n***CHAT_HELPER.JS: Entered the letMeCheckFlag "true" condition.');
@@ -210,6 +225,8 @@ try {
         result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens }); 
         //console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
         console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
+
+        
       } catch (error) {
         console.error("\n\n***CHAT_HELPER.JS: An error occurred during the secondary request to OpenAI ", error);
         throw error;
