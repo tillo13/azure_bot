@@ -182,8 +182,8 @@ try {
     let totalTokens = result.usage.totalTokens;
     
     // Calculate costs
-    let turboCost = totalTokens * turboCostPerToken;
-    let gpt4Cost = totalTokens * gpt4CostPerToken;
+    let turboCost = (totalTokens / 1000) * turboCostPerToken;
+    let gpt4Cost = (totalTokens / 1000) * gpt4CostPerToken;
 
     console.log('\n\n***CHAT_HELPER.JS: Total tokens used so far in this chat:', totalTokens);
     console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', turboCost);
