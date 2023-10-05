@@ -1,5 +1,6 @@
 const formats = require('./endpoint_formats');
 const chatCompletion = require('./chat_helper');
+const jira_utils = require('./jira_utils');
 
 const {
 	MessageFactory
@@ -13,6 +14,7 @@ const https = require("https");
 
 const commands = new Proxy({
 	'$dig': useShovel,
+	'$jira': getJiraIssues,
 	'$reset': resetChatPayload,
 	'$upgrade': teaseUpgrade,
 	'$help': contactHelp,
@@ -30,6 +32,25 @@ const commands = new Proxy({
 		}
 	}
 });
+
+
+async function getJiraIssues(context) {
+    let JiraIssues;
+    try {
+        // Call the function to get Jira issues
+        JiraIssues = await jira_utils.getIssuesAssignedToCurrentUser();
+    } catch(error) {
+        console.log(error);
+        return sendMessageResponse(context, `Error retrieving JIRA issues: ${error.message}`);
+    }
+
+    // Format the retrieved issues for sending
+    let formatted_issues = JiraIssues.issues.map(issue =>
+        `*${issue.key}* ${issue.fields.summary}\n<${jira_server}/browse/${issue.key}|Go to Issue>`
+    ).join("\n-----------------\n");
+
+    return sendMessageResponse(context, formatted_issues);
+}
 
 async function resetChatPayload(context, chatMessagesProperty) {
 	// Define the system message (personality setup)
@@ -87,7 +108,7 @@ async function useShovel(context) {
         findMessage = "A stupendous find!";
     }
 
-    const combinedMessage = `You and your <i>rusty shovel</i> just ${randAction} <b>${randAmount}</b> <i>${randAdj} ${randItem}</i> ${findMessage}.${upgradeTeaser}`;
+    const combinedMessage = `You and your <i>rusty shovel</i> just ${randAction} <b>${randAmount}</b> <i>${randAdj} ${randItem}</i> ${findMessage}${upgradeTeaser}`;
 
     // Return the combined message
     return sendMessageResponse(context, combinedMessage);
