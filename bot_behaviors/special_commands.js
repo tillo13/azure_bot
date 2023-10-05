@@ -15,6 +15,7 @@ const https = require("https");
 const commands = new Proxy({
 	'$dig': useShovel,
 	'$jira': getJiraIssues,
+	'$createjira': createJiraTask,
 	'$reset': resetChatPayload,
 	'$upgrade': teaseUpgrade,
 	'$help': contactHelp,
@@ -33,23 +34,18 @@ const commands = new Proxy({
 	}
 });
 
+async function createJiraTask(context) {
+    const description = context.activity.text.replace('$createjira ', '');
+    const summary = 'Test from teams';
+    
+    // we're removing the projectKey and issueType here.
+    const responseMessage = await jira_utils.createJiraTask(summary, description);
+    return sendMessageResponse(context, responseMessage);
+}
 
 async function getJiraIssues(context) {
-    let JiraIssues;
-    try {
-        // Call the function to get Jira issues
-        JiraIssues = await jira_utils.getIssuesAssignedToCurrentUser();
-    } catch(error) {
-        console.log(error);
-        return sendMessageResponse(context, `Error retrieving JIRA issues: ${error.message}`);
-    }
-
-    // Format the retrieved issues for sending
-    let formatted_issues = JiraIssues.issues.map(issue =>
-        `*${issue.key}* ${issue.fields.summary}\n<${jira_server}/browse/${issue.key}|Go to Issue>`
-    ).join("\n-----------------\n");
-
-    return sendMessageResponse(context, formatted_issues);
+    const responseMessage = await jira_utils.getIssuesAssignedToCurrentUser();
+    return sendMessageResponse(context, responseMessage);
 }
 
 async function resetChatPayload(context, chatMessagesProperty) {
