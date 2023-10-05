@@ -38,7 +38,7 @@ async function createJiraTask(context) {
     const summary = 'Test from teams';
     
     if (!description || description.length === 0) {
-        console.warn(`${context.activity.from.name} attempted to issue $jira command without a description payload.`);
+		console.log('\n******SPECIAL_COMMANDS: $jira command issued without a description payload by:\n', context.activity.from.name);
         const adviceMessage = "Usage: `$jira [description]`. You need to provide a description after `$jira` to create a ticket.";
         return sendMessageResponse(context, adviceMessage);
     }
