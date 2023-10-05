@@ -55,7 +55,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
         propertyAccessor.set(context, false);
     }
     
-    console.log('\n*****MSTEAMS.JS: Assistant Response: ', assistantResponse);
+    //console.log('\n*****MSTEAMS.JS: Assistant Response: ', assistantResponse);
     return assistantResponse;
 }
 function isFromMSTeams(context) {
