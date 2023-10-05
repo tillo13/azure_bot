@@ -19,6 +19,7 @@ async function makeJiraRequest(url, payload, method = 'GET') {
         console.log('\n*******JIRA_UTILS: Request URL:', url); // logging the URL
         console.log('\n*******JIRA_UTILS: Request Method:', method); // logging the HTTP Method
         console.log('\n*******JIRA_UTILS: Request Payload:', JSON.stringify(payload, null, 2)); // logging the payload
+        console.log('\n*******JIRA_UTILS: Request Config:', JSON.stringify(config, null, 2)); 
 
         const response = await axios(config);
         
@@ -58,12 +59,12 @@ async function createJiraTask(summary, description) {
     const taskData = {
         "fields": {
             "project": {
-                "key": "ADD"
+                "id": "22595"
             },
             "summary": summary,
             "description": description,
             "issuetype": {
-                "name": "Task"
+                "id": "3"
             },
             "parent": {
                 "key": "ADD-615"
