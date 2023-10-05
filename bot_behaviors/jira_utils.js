@@ -3,6 +3,18 @@ const jira_server = process.env['2023sept8_JIRA_SERVER'];
 const username = process.env['2023sept8_JIRA_USERNAME'];
 const api_token = process.env['2023sept8_JIRA_TOKEN'];
 
+let parentKey = 'ADD-615'; // You can change this value anytime you want
+
+async function getIssueId(issueKey) {
+    try {
+        const issue = await makeJiraRequest(`/rest/api/3/issue/${issueKey}`);
+        return issue.id;
+    } catch (err) {
+        console.error(err.message);
+        throw err;
+    }
+}
+
 async function makeJiraRequest(url, payload, method = 'GET') {
     const config = {
         method,
@@ -55,6 +67,8 @@ async function getIssuesAssignedToCurrentUser() {
 }
 
 async function createJiraTask(summary, description) {
+    const parentId = await getIssueId(parentKey);
+    
     const url = `/rest/api/3/issue/`;
     const taskDataKey = {
         "fields": {
@@ -67,7 +81,7 @@ async function createJiraTask(summary, description) {
                 "name": "Task"
             },
             "parent": {
-                "key": "ADD-615"
+                "id": parentId    // use parentId here
             }
         }
     };
@@ -83,7 +97,7 @@ async function createJiraTask(summary, description) {
                 "id": "3"
             },
             "parent": {
-                "key": "ADD-615"
+                "id": parentId    // and here
             }
         }
     };
