@@ -81,7 +81,7 @@ async function createJiraTask(summary, description) {
     const taskData = {
         "fields": {
             "project": {
-                "key": projectKey // using the one from .env
+                "key": projectId // using the one from .env
             },
             "summary": summary,
             "description": description,
