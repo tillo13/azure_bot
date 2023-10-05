@@ -74,14 +74,14 @@ async function getIssuesAssignedToCurrentUser() {
     }
 }
 
-async function createJiraTask(summary, description) {
-    const parentId = await getIssueId(parentKey);
-   
-    const url = `/rest/api/3/issue/`;
-    const taskDataKey = {
+async function createJiraTask(projectKey, issueType, summary, description) {
+    const parentId = await getIssueId(parentKey); 
+    const url = '/rest/api/3/issue/';
+
+    const taskData = {
         "fields": {
             "project": {
-                "key": projectName
+                "key": projectKey
             },
             "summary": summary,
             "description": description,
@@ -89,40 +89,21 @@ async function createJiraTask(summary, description) {
                 "name": issueType
             },
             "parent": {
-                "id": parentId    
-            }
-        }
-    };
-    
-    const taskDataId = {
-        "fields": {
-            "project": {
-                "id": projectId
-            },
-            "summary": summary,
-            "description": description,
-            "issuetype": {
-                "id": issueTypeId
-            },
-            "parent": {
                 "id": parentId   
             }
         }
     };
-
+    
     try {
-        const responseKey = await makeJiraRequest(url, taskDataKey, 'POST');
+        const response = await makeJiraRequest(url, taskData, 'POST');
         console.log('\n*******JIRA_UTILS: Task created successfully using project key and issue type name');
-        return `Task ${responseKey.key} has been created under ${parentKey} with the description: ${description}`;
+        return `Task ${response.key} has been created under ${parentKey} with the description: ${description}`;
     } catch (err) {
         console.error('\n*******JIRA_UTILS: Error creating JIRA task using project key and issue type name:', err.message);
-        try {
-            const responseId = await makeJiraRequest(url, taskDataId, 'POST');
-            console.log('\n*******JIRA_UTILS: Task created successfully using project id and issue type id');
-            return `Task ${responseId.key} has been created under ${parentKey} with the description: ${description}`;
-        } catch (err) {
-            console.error('\n*******JIRA_UTILS: Error creating JIRA task using project id and issue type id:', err.message);
-            return `Error creating JIRA task: ${err.message}`;
-        }
+        return `Error creating JIRA task: ${err.message}`;
     }
+}
+module.exports = {
+    getIssuesAssignedToCurrentUser,
+    createJiraTask
 }
