@@ -56,7 +56,23 @@ async function getIssuesAssignedToCurrentUser() {
 
 async function createJiraTask(summary, description) {
     const url = `/rest/api/3/issue/`;
-    const taskData = {
+    const taskDataKey = {
+        "fields": {
+            "project": {
+                "key": "ADD"
+            },
+            "summary": summary,
+            "description": description,
+            "issuetype": {
+                "name": "Task"
+            },
+            "parent": {
+                "key": "ADD-615"
+            }
+        }
+    };
+    
+    const taskDataId = {
         "fields": {
             "project": {
                 "id": "22595"
@@ -73,11 +89,21 @@ async function createJiraTask(summary, description) {
     };
 
     try {
-        const response = await makeJiraRequest(url, taskData, 'POST');
-        return response;
+        // Try to create a task using the project key and issue type name
+        const responseKey = await makeJiraRequest(url, taskDataKey, 'POST');
+        console.log('\n*******JIRA_UTILS: Task created successfully using project key and issue type name');
+        return responseKey;
     } catch (err) {
-        console.error('\n*******JIRA_UTILS: No server response:',err.message);              
-        throw err;
+        console.error('\n*******JIRA_UTILS: Error creating JIRA task using project key and issue type name:', err.message);
+        try {
+            // If the first attempt fails, try to create a task using the project id and issue type id
+            const responseId = await makeJiraRequest(url, taskDataId, 'POST');
+            console.log('\n*******JIRA_UTILS: Task created successfully using project id and issue type id');
+            return responseId;
+        } catch (err) {
+            console.error('\n*******JIRA_UTILS: Error creating JIRA task using project id and issue type id:', err.message);
+            throw err;
+        }
     }
 }
 
