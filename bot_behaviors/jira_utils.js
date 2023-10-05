@@ -16,10 +16,29 @@ async function makeJiraRequest(url, payload, method = 'GET') {
     };
     
     try {
+        console.log('\n*******JIRA_UTILS: Request URL:', url); // logging the URL
+        console.log('\n*******JIRA_UTILS: Request Method:', method); // logging the HTTP Method
+        console.log('\n*******JIRA_UTILS: Request Payload:', JSON.stringify(payload, null, 2)); // logging the payload
+
         const response = await axios(config);
+        
+        console.log('\n*******JIRA_UTILS: Response Status:', response.status); // logging the Response status
+        console.log('\n*******JIRA_UTILS: Response Data:', response.data); // logging the Response data
+
         return response.data;
     } catch (error) {
-        console.error(error.message);
+        console.error('Error:', error.message);
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            console.error('\n*******JIRA_UTILS: Server Response:', error.response.data);
+            console.error('\n*******JIRA_UTILS: Response Status:', error.response.status);
+            console.error('\n*******JIRA_UTILS: Response Headers:', error.response.headers);
+        } else if (error.request) {
+            // The request was made but no response was received
+            console.error('\n*******JIRA_UTILS: No server response:', error.request);
+        }
+
         throw error;
     }
 }
@@ -56,7 +75,7 @@ async function createJiraTask(summary, description) {
         const response = await makeJiraRequest(url, taskData, 'POST');
         return response;
     } catch (err) {
-        console.error(err.message);
+        console.error('\n*******JIRA_UTILS: No server response:',err.message);              
         throw err;
     }
 }
