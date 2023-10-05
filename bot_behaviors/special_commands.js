@@ -1,5 +1,5 @@
-const formats = require('./endpoint_formats.js');
-
+const formats = require('./endpoint_formats');
+const chatCompletion = require('./chat_helper');
 
 const {
 	MessageFactory
