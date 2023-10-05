@@ -3,18 +3,6 @@ const jira_server = process.env['2023sept8_JIRA_SERVER'];
 const username = process.env['2023sept8_JIRA_USERNAME'];
 const api_token = process.env['2023sept8_JIRA_TOKEN'];
 
-let parentKey = 'ADD-615'; // You can change this value anytime you want
-
-async function getIssueId(issueKey) {
-    try {
-        const issue = await makeJiraRequest(`/rest/api/3/issue/${issueKey}`);
-        return issue.id;
-    } catch (err) {
-        console.error(err.message);
-        throw err;
-    }
-}
-
 async function makeJiraRequest(url, payload, method = 'GET') {
     const config = {
         method,
@@ -59,38 +47,66 @@ async function makeJiraRequest(url, payload, method = 'GET') {
 async function getIssuesAssignedToCurrentUser() {
     try {
         const issues = await makeJiraRequest(`/rest/api/3/search?jql=assignee=currentuser()`);
-        let formatted_issues = issues.issues.map(issue =>
-            `*${issue.key}* ${issue.fields.summary}\n<${jira_server}/browse/${issue.key}|Go to Issue>`
-        ).join("\n-----------------\n");
-        return formatted_issues;
+        return issues;
     } catch (err) {
         console.error(err.message);
-        throw `Error retrieving JIRA issues: ${err.message}`;
+        throw err;
     }
 }
 
 async function createJiraTask(summary, description) {
-    const parentId = await getIssueId(parentKey);
-
     const url = `/rest/api/3/issue/`;
-    // existing taskDataKey  and taskDataId here
+    const taskDataKey = {
+        "fields": {
+            "project": {
+                "key": "ADD"
+            },
+            "summary": summary,
+            "description": description,
+            "issuetype": {
+                "name": "Task"
+            },
+            "parent": {
+                "key": "ADD-615"
+            }
+        }
+    };
+    
+    const taskDataId = {
+        "fields": {
+            "project": {
+                "id": "22595"
+            },
+            "summary": summary,
+            "description": description,
+            "issuetype": {
+                "id": "3"
+            },
+            "parent": {
+                "key": "ADD-615"
+            }
+        }
+    };
 
     try {
+        // Try to create a task using the project key and issue type name
         const responseKey = await makeJiraRequest(url, taskDataKey, 'POST');
         console.log('\n*******JIRA_UTILS: Task created successfully using project key and issue type name');
-        return `Task ${responseKey.key} has been created under ${parentKey} with the description: ${description}`;
+        return responseKey;
     } catch (err) {
         console.error('\n*******JIRA_UTILS: Error creating JIRA task using project key and issue type name:', err.message);
         try {
+            // If the first attempt fails, try to create a task using the project id and issue type id
             const responseId = await makeJiraRequest(url, taskDataId, 'POST');
             console.log('\n*******JIRA_UTILS: Task created successfully using project id and issue type id');
-            return `Task ${responseId.key} has been created under ${parentKey} with the description: ${description}`;
+            return responseId;
         } catch (err) {
             console.error('\n*******JIRA_UTILS: Error creating JIRA task using project id and issue type id:', err.message);
-            return `Error creating JIRA task: ${err.message}`;
+            throw err;
         }
     }
 }
+
 module.exports = {
     getIssuesAssignedToCurrentUser,
     createJiraTask
