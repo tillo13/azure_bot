@@ -2,11 +2,11 @@ const axios = require('axios');
 const jira_server = process.env['2023sept8_JIRA_SERVER'];
 const username = process.env['2023sept8_JIRA_USERNAME'];
 const api_token = process.env['2023sept8_JIRA_TOKEN'];
+const parentKey = process.env['2023sept8_JIRA_PARENT_KEY'];
+const projectId = process.env['2023sept8_JIRA_PROJECT_ID'];
+const projectName = process.env['2023sept8_JIRA_PROJECT_NAME'];
 
-//specific to TD jira env
-let parentKey = 'ADD-615'; 
-let projectId = '22595';
-let projectName = 'ADD'; 
+//generic Jira data that can be public
 let issueType = 'Task'; 
 let issueTypeId = '3';
 
@@ -74,19 +74,19 @@ async function getIssuesAssignedToCurrentUser() {
     }
 }
 
-async function createJiraTask(projectKey, issueType, summary, description) {
+async function createJiraTask(summary, description) {
     const parentId = await getIssueId(parentKey); 
     const url = '/rest/api/3/issue/';
 
     const taskData = {
         "fields": {
             "project": {
-                "key": projectKey
+                "key": projectKey // using the one from .env
             },
             "summary": summary,
             "description": description,
             "issuetype": {
-                "name": issueType
+                "name": issueType // using the one from .env
             },
             "parent": {
                 "id": parentId   

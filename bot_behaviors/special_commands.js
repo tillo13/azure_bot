@@ -35,14 +35,13 @@ const commands = new Proxy({
 });
 
 async function createJiraTask(context) {
-	const description = context.activity.text.replace('$createjira ', '');
-	const summary = 'Test from teams';
-	const projectKey = 'ADD'; 
-	const issueType = 'Task'; 
-
-	const responseMessage = await jira_utils.createJiraTask(projectKey, issueType, summary, description);
-	return sendMessageResponse(context, responseMessage);
- }
+    const description = context.activity.text.replace('$createjira ', '');
+    const summary = 'Test from teams';
+    
+    // we're removing the projectKey and issueType here.
+    const responseMessage = await jira_utils.createJiraTask(summary, description);
+    return sendMessageResponse(context, responseMessage);
+}
 
 async function getJiraIssues(context) {
     const responseMessage = await jira_utils.getIssuesAssignedToCurrentUser();
