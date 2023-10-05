@@ -37,8 +37,7 @@ const commands = new Proxy({
 async function createJiraTask(context) {
     const description = context.activity.text.replace('$createjira ', '');
     const summary = 'Test from teams';
-    
-    // we're removing the projectKey and issueType here.
+
     const responseMessage = await jira_utils.createJiraTask(summary, description);
     return sendMessageResponse(context, responseMessage);
 }

@@ -2,13 +2,8 @@ const axios = require('axios');
 const jira_server = process.env['2023sept8_JIRA_SERVER'];
 const username = process.env['2023sept8_JIRA_USERNAME'];
 const api_token = process.env['2023sept8_JIRA_TOKEN'];
-const parentKey = process.env['2023sept8_JIRA_PARENT_KEY'];
-const projectId = process.env['2023sept8_JIRA_PROJECT_ID'];
-const projectName = process.env['2023sept8_JIRA_PROJECT_NAME'];
 
-//generic Jira data that can be public
-let issueType = 'Task'; 
-let issueTypeId = '3';
+let parentKey = 'ADD-615'; // You can change this value anytime you want
 
 async function getIssueId(issueKey) {
     try {
@@ -75,32 +70,25 @@ async function getIssuesAssignedToCurrentUser() {
 }
 
 async function createJiraTask(summary, description) {
-    const parentId = await getIssueId(parentKey); 
-    const url = '/rest/api/3/issue/';
+    const parentId = await getIssueId(parentKey);
 
-    const taskData = {
-        "fields": {
-            "project": {
-                "key": projectKey // using the one from .env
-            },
-            "summary": summary,
-            "description": description,
-            "issuetype": {
-                "name": issueType // using the one from .env
-            },
-            "parent": {
-                "id": parentId   
-            }
-        }
-    };
-    
+    const url = `/rest/api/3/issue/`;
+    // existing taskDataKey  and taskDataId here
+
     try {
-        const response = await makeJiraRequest(url, taskData, 'POST');
+        const responseKey = await makeJiraRequest(url, taskDataKey, 'POST');
         console.log('\n*******JIRA_UTILS: Task created successfully using project key and issue type name');
-        return `Task ${response.key} has been created under ${parentKey} with the description: ${description}`;
+        return `Task ${responseKey.key} has been created under ${parentKey} with the description: ${description}`;
     } catch (err) {
         console.error('\n*******JIRA_UTILS: Error creating JIRA task using project key and issue type name:', err.message);
-        return `Error creating JIRA task: ${err.message}`;
+        try {
+            const responseId = await makeJiraRequest(url, taskDataId, 'POST');
+            console.log('\n*******JIRA_UTILS: Task created successfully using project id and issue type id');
+            return `Task ${responseId.key} has been created under ${parentKey} with the description: ${description}`;
+        } catch (err) {
+            console.error('\n*******JIRA_UTILS: Error creating JIRA task using project id and issue type id:', err.message);
+            return `Error creating JIRA task: ${err.message}`;
+        }
     }
 }
 module.exports = {
