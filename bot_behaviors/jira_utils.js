@@ -45,7 +45,46 @@ async function getIssuesAssignedToCurrentUser() {
         throw err;
     }
 }
+/**
+ * Creates a new JIRA task.
+ * @param {Object} context - The chat context.
+ */
+async function createJiraTask(context) {
+    // Define the URL for the JIRA REST API endpoint
+    const url = `/rest/api/3/issue/`;
+
+    // Extract the task summary from the context
+    const summary = context.activity.text.replace('$createjira ', '');
+
+    // Define the data for the new task
+    const taskData = {
+        "fields": {
+            "project": {
+                "key": "ADD"  // Replace with your project key
+            },
+            "summary": "Test from teams",
+            "description": summary,
+            "issuetype": {
+                "name": "Task"
+            },
+            "parent": {
+                "key": "ADD-615" // Replace with your parent issue key
+            }
+        }
+    };
+
+    try {
+        // Call the makeJiraRequest function to make a POST request to the JIRA API
+        const task = await makeJiraRequest(url, taskData, 'POST');
+
+        // If the request is successful, send a message back to the user
+        return sendMessageResponse(context, `Task ${task.key} has been created under ADD-615 with the description: ${summary}`);
+    } catch (err) {
+        console.error(err.message);
+        return sendMessageResponse(context, `Error creating JIRA task: ${err.message}`);
+    }
+}
 
 module.exports = {
-    getIssuesAssignedToCurrentUser,
+    getIssuesAssignedToCurrentUser, createJiraTask,
 }

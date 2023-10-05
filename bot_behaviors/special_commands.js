@@ -15,6 +15,7 @@ const https = require("https");
 const commands = new Proxy({
 	'$dig': useShovel,
 	'$jira': getJiraIssues,
+	'$createjira': createJiraTask,
 	'$reset': resetChatPayload,
 	'$upgrade': teaseUpgrade,
 	'$help': contactHelp,
