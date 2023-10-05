@@ -50,12 +50,22 @@ const myBot = new EchoBot(userState);
 
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
-    console.log("\n\n*INDEX.JS: Incoming request to /api/messages endpoint\n");
-    console.log("\n\n*INDEX.JS: Request payload: \n", req.body, "\n"); // Logs the entire request payload
-    console.log("\n\n*INDEX.JS: Request source IP: \n", req.socket.remoteAddress, "\n");// Logs the origin IP address
+    let msg_id = req.body.id; // retrieve the message id
+    
+    // if id doesn't exist, set it to an empty string
+    if (typeof msg_id === 'undefined') { 
+        msg_id = '';
+    } else {
+        msg_id = ` Message ID: ${msg_id}`;
+    }
+    
+    console.log(`\n\n*INDEX.JS: Incoming request to /api/messages endpoint.${msg_id}\n`);
+    console.log("\n\n*INDEX.JS: Request payload: \n", req.body, "\n"); // logs the entire request payload
+    console.log("\n\n*INDEX.JS: Request source IP: \n", req.socket.remoteAddress, "\n"); // logs the origin IP address
     console.log("\n\n*INDEX.JS: Processing the request...\n");
+    
     await adapter.process(req, res, (context) => myBot.run(context));
-    console.log("\n\n*INDEX.JS: Finished processing most recent api/messages request!\n");
+    console.log(`\n\n*INDEX.JS: Finished processing most recent api/messages request!${msg_id}\n`);
 });
 
 // Add a GET endpoint to receive the Azure Function health check created in Azure portal to keepalive.

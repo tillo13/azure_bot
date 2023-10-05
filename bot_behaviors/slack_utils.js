@@ -67,7 +67,7 @@ async function postMessageToSlack(slack_channel_id, thread_ts, message, apiToken
   };
 
   // log the data and options objects
-  console.log("\n*****SLACK_UTILS.JS: postMessageToSlack sending slack logging payload:\n", data);
+  console.log("\n*****SLACK_UTILS.JS: postMessageToSlack just sending ingress --can move to db at some point:\n", data);
   console.log("\n*****SLACK_UTILS.JS: postMessageToSlack using Options:\n", options);
   
   return executeHttpPostRequest(options, data)

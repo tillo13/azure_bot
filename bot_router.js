@@ -193,7 +193,7 @@ class EchoBot extends ActivityHandler {
 		console.log('\n\n**BOT_ROUTER.JS: Running the bot...');
 		await super.run(context);
 		await this.userState.saveChanges(context);
-		console.log('\n\n**BOT_ROUTER.JS: State changes have been saved.');
+		//console.log('\n\n**BOT_ROUTER.JS: State changes have been saved.');
 	}
 }
 module.exports.EchoBot = EchoBot;

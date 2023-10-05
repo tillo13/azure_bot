@@ -41,7 +41,7 @@ const bot_response_patterns = [
 
 function shouldRequery(responseContent) {
     const lowerCasedResponse = responseContent.toLowerCase();
-    console.log('\n\n***CHAT_HELPER.JS: Running shouldRequery() with responseContent:', responseContent);
+    //console.log('\n\n***CHAT_HELPER.JS: Running shouldRequery() with responseContent:', responseContent);
     
     return bot_response_patterns.some(pattern =>
        lowerCasedResponse.includes(pattern.toLowerCase())
@@ -91,12 +91,12 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
   console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
   console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
 
-  console.log('\n\n***CHAT_HELPER.JS: OpenAI API Base URL: ', process.env.OPENAI_API_BASE_URL);
-  console.log('\n\n***CHAT_HELPER.JS: OpenAI API Deployment: ', process.env.OPENAI_API_DEPLOYMENT);
+  //console.log('\n\n***CHAT_HELPER.JS: OpenAI API Base URL: ', process.env.OPENAI_API_BASE_URL);
+  //console.log('\n\n***CHAT_HELPER.JS: OpenAI API Deployment: ', process.env.OPENAI_API_DEPLOYMENT);
 
   ///test dalle items showing in .env
-  console.log('\n\n***CHAT_HELPER.JS: OpenAI DallE API Base URL: ', process.env.OPENAI_DALLE_BASE_URL);
-  console.log('\n\n***CHAT_HELPER.JS: OpenAI DallE API Deployment: ', process.env.OPENAI_DALLE_VERSION);
+  //console.log('\n\n***CHAT_HELPER.JS: OpenAI DallE API Base URL: ', process.env.OPENAI_DALLE_BASE_URL);
+  //console.log('\n\n***CHAT_HELPER.JS: OpenAI DallE API Deployment: ', process.env.OPENAI_DALLE_VERSION);
 
 
 
@@ -148,7 +148,7 @@ const certainlyMessages = newCleanChatMessages.filter(item => item.content.start
 const duplicatesRemoved = oldChatMessages.length - newCleanChatMessages.length;
 
 if (duplicatesRemoved > 0) {
-    console.log(`\n\n***CHAT_HELPER.JS: CLEANED CODE OF THIS MANY DUPLICATES: ${duplicatesRemoved}`);
+    console.log(`\n\n***CHAT_HELPER.JS: CLEANED CODE OF THIS MANY character DUPLICATES: ${duplicatesRemoved}`);
     
     if (certainlyMessages.length > 0) {
       // If there are any 'Certainly' messages, only keep the last one
