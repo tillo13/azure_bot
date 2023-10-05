@@ -49,7 +49,7 @@ function shouldRequery(responseContent) {
 }
 
 function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage) {
-  //make this a global --> const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
+  //make this a global --> const checkMessage = "Let me check our past conversations in this exact thread, one moment....";
   const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
 
   console.log('\n\n***CHAT_HELPER.JS: Value of lastIndex variable: ', lastIndex); // This will show if we're even getting here...
