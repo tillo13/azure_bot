@@ -13,40 +13,46 @@ const {
 const https = require("https");
 
 const commands = new Proxy({
-	'$dig': useShovel,
-	'$jira': getJiraIssues,
-	'$createjira': createJiraTask,
-	'$reset': resetChatPayload,
-	'$upgrade': teaseUpgrade,
-	'$help': contactHelp,
-	'$dalle': createDalleImages,
+    '$dig': useShovel,
+    '$jira': createJiraTask,
+    '$reset': resetChatPayload,
+    '$upgrade': teaseUpgrade,
+    '$help': contactHelp,
+    '$dalle': createDalleImages,
 }, {
-	get: function(target, property) {
-		if (property in target) {
-			return target[property];
-		} else {
-			for (let key in target) {
-				if (property.startsWith(key)) {
-					return target[key];
-				}
-			}
-		}
-	}
+    get: function(target, property) {
+        if (property in target) {
+            return target[property];
+        } else {
+            for (let key in target) {
+                if (property.startsWith(key)) {
+                    return target[key];
+                }
+            }
+        }
+    }
 });
 
 async function createJiraTask(context) {
     const description = context.activity.text.replace('$createjira ', '');
     const summary = 'Test from teams';
     
-    // we're removing the projectKey and issueType here.
+    if (!description || description.length === 0) {
+        console.warn(`${context.activity.from.name} attempted to issue $jira command without a description payload.`);
+        const adviceMessage = "Usage: `$jira [description]`. You need to provide a description after `$jira` to create a ticket.";
+        return sendMessageResponse(context, adviceMessage);
+    }
+    
+    // normal ticket creation can proceed if we reach this point
     const responseMessage = await jira_utils.createJiraTask(summary, description);
     return sendMessageResponse(context, responseMessage);
 }
 
-async function getJiraIssues(context) {
-    const responseMessage = await jira_utils.getIssuesAssignedToCurrentUser();
-    return sendMessageResponse(context, responseMessage);
-}
+// pause for now
+//async function getJiraIssues(context) {
+//     const responseMessage = await jira_utils.getIssuesAssignedToCurrentUser();
+//     return sendMessageResponse(context, responseMessage);
+// }
 
 async function resetChatPayload(context, chatMessagesProperty) {
 	// Define the system message (personality setup)

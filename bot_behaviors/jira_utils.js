@@ -111,7 +111,8 @@ async function createJiraTask(summary, description) {
     try {
         const response = await makeJiraRequest(url, taskData, 'POST');
         console.log('\n*******JIRA_UTILS: Task created successfully using project key and issue type name');
-        return `Task ${response.key} has been created under ${parentKey} with the description: ${description}`;
+        const taskUrl = `${jira_server}browse/${response.key}`;
+        return `Task ${response.key} has been created under ${parentKey} with the description: ${description}. You can view the task [here](${taskUrl}).`;
     } catch (err) {
         console.error('\n*******JIRA_UTILS: Error creating JIRA task using project key and issue type name:', err.message);
         return `Error creating JIRA task: ${err.message}`;
