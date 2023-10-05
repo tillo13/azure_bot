@@ -3,7 +3,12 @@ const jira_server = process.env['2023sept8_JIRA_SERVER'];
 const username = process.env['2023sept8_JIRA_USERNAME'];
 const api_token = process.env['2023sept8_JIRA_TOKEN'];
 
-let parentKey = 'ADD-615'; // You can change this value anytime you want
+//specific to TD jira env
+let parentKey = 'ADD-615'; 
+let projectId = '22595';
+let projectName = 'ADD'; 
+let issueType = 'Task'; 
+let issueTypeId = '3';
 
 async function getIssueId(issueKey) {
     try {
@@ -71,9 +76,39 @@ async function getIssuesAssignedToCurrentUser() {
 
 async function createJiraTask(summary, description) {
     const parentId = await getIssueId(parentKey);
-
+   
     const url = `/rest/api/3/issue/`;
-    // existing taskDataKey  and taskDataId here
+    const taskDataKey = {
+        "fields": {
+            "project": {
+                "key": projectName
+            },
+            "summary": summary,
+            "description": description,
+            "issuetype": {
+                "name": issueType
+            },
+            "parent": {
+                "id": parentId    
+            }
+        }
+    };
+    
+    const taskDataId = {
+        "fields": {
+            "project": {
+                "id": projectId
+            },
+            "summary": summary,
+            "description": description,
+            "issuetype": {
+                "id": issueTypeId
+            },
+            "parent": {
+                "id": parentId   
+            }
+        }
+    };
 
     try {
         const responseKey = await makeJiraRequest(url, taskDataKey, 'POST');
@@ -90,8 +125,4 @@ async function createJiraTask(summary, description) {
             return `Error creating JIRA task: ${err.message}`;
         }
     }
-}
-module.exports = {
-    getIssuesAssignedToCurrentUser,
-    createJiraTask
 }
