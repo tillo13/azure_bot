@@ -34,6 +34,23 @@ const commands = new Proxy({
 	}
 });
 
+async function createJiraTask(context) {
+	// Extract the task description from the context
+	const description = context.activity.text.replace('$createjira ', '');
+	// Set the summary to be a constant string
+	const summary = 'Test from teams';
+
+	try {
+		// Call the function to create a Jira task
+		const task = await jira_utils.createJiraTask(summary, description);
+		// If the request is successful, send a message back to the user
+		return sendMessageResponse(context, `Task ${task.key} has been created under ADD-615 with the description: ${description}`);
+	} catch (err) {
+		console.error(err.message);
+		return sendMessageResponse(context, `Error creating JIRA task: ${err.message}`);
+	}
+}
+
 
 async function getJiraIssues(context) {
     let jira_server = process.env['2023sept8_JIRA_SERVER'];
