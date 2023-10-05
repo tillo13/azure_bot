@@ -6,6 +6,7 @@ const MAX_OPENAI_TOKENS = 400;
 const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
 
 
+
 function validateOpenAITokens(tokens) {
     if (tokens <= 0 || tokens > 4096) {
         console.error('Invalid setting for MAX_OPENAI_TOKENS. It should be between 1 and 4096.');
@@ -41,6 +42,41 @@ const bot_response_patterns = [
     // Include any more patterns...
 ];
 
+const frustrationPrompts = [
+  "you're not getting it",
+  "you don't understand",
+  "no",
+  "not right",
+  "incorrect",
+  "wrong",
+  "that's not correct",
+  "try again",
+  "you're not listening",
+  "you're missing the point",
+  // Add more phrases as required...
+];
+
+let frustrationCount = 0; // Frustration counter
+
+// Define the frustrationCounter function
+function frustrationCounter(userMessage) {
+    const lowerCasedMessage = userMessage.toLowerCase();
+  
+    for (let prompt of frustrationPrompts) {
+        if (lowerCasedMessage.includes(prompt.toLowerCase())) { 
+            frustrationCount++;
+            console.log(`\n\n***CHAT_HELPER.JS: Frustration count: ${frustrationCount}`);
+            break;
+        }
+    }
+}
+
+// Check the frustration level for each user message
+const userMessages = chatMessages.filter((msg) => msg.role === 'user');
+userMessages.forEach((msg, index) => {
+    frustrationCounter(msg.content);
+});
+
 function shouldRequery(responseContent) {
     const lowerCasedResponse = responseContent.toLowerCase();
     //console.log('\n\n***CHAT_HELPER.JS: Running shouldRequery() with responseContent:', responseContent);
@@ -75,19 +111,6 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
   return chatMessages;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 
   console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
@@ -99,8 +122,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
   ///test dalle items showing in .env
   //console.log('\n\n***CHAT_HELPER.JS: OpenAI DallE API Base URL: ', process.env.OPENAI_DALLE_BASE_URL);
   //console.log('\n\n***CHAT_HELPER.JS: OpenAI DallE API Deployment: ', process.env.OPENAI_DALLE_VERSION);
-
-
 
     const endpoint = process.env.OPENAI_API_BASE_URL;
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
@@ -128,6 +149,8 @@ console.log('\n\n***CHAT_HELPER.JS -> Entire conversation so far via chatmessage
 chatMessages.forEach((msg, index) => {
   const role = msg.role.toUpperCase();
   console.log(`\n${index + 1}. ${role} : ${msg.content}\n`);
+        // Call frustrationCounter for each user message
+        frustrationCounter(msg.content);
 });
 
 // Count cleaned messages first
