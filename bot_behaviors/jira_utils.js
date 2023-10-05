@@ -91,3 +91,7 @@ async function createJiraTask(summary, description) {
         }
     }
 }
+module.exports = {
+    getIssuesAssignedToCurrentUser,
+    createJiraTask
+}
