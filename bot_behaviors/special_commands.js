@@ -34,7 +34,7 @@ const commands = new Proxy({
 });
 
 async function createJiraTask(context) {
-    const description = context.activity.text.replace('$createjira ', '');
+    const description = context.activity.text.replace('$jira ', '');
     const summary = 'Test from teams';
     
     if (!description || description.length === 0) {

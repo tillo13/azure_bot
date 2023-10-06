@@ -78,10 +78,7 @@ async function getIssuesAssignedToCurrentUser() {
 
 async function createJiraTask(summary, description, channelId) {
     try {
-        // This is the enhanced task data with your specific label and assignee
-        const commentText = `Created by @bot automatically via ${channelId}`; 
-
-        const enhancedTaskData = {
+        const taskData = {
             "fields": {
                 "project": {
                     "key": projectName
@@ -102,15 +99,6 @@ async function createJiraTask(summary, description, channelId) {
                         }
                     ]
                 },
-                "update": {
-                    "comment": [
-                        {
-                            "add": {
-                                "body": commentText
-                            }
-                        }
-                    ]
-                },
                 "issuetype": {
                     "name": issueType
                 },
@@ -126,16 +114,27 @@ async function createJiraTask(summary, description, channelId) {
             }
         };
 
-        const url = '/rest/api/3/issue/';
-        const response = await makeJiraRequest(url, enhancedTaskData, 'POST');
-        console.log('\n*******JIRA_UTILS: Task created successfully with enhanced options');
-        const taskUrl = `${jira_server}/browse/${response.key}`;
-        return `Task ${response.key} has been created under ${parentKey} with the description: ${description}. You can view the task [here](${taskUrl}).`;
+        const createUrl = '/rest/api/3/issue/';
+        const createResponse = await makeJiraRequest(createUrl, taskData, 'POST');
+        console.log('\n*******JIRA_UTILS: Task created successfully');
+        
+        const newIssueId = createResponse.id;
+        const commentUrl = `/rest/api/3/issue/${newIssueId}/comment`;
+        const commentData = {
+            "body": `Created by @bot automatically via ${channelId}`
+        }
+
+        const commentResponse = await makeJiraRequest(commentUrl, commentData, 'POST');
+        console.log('\n*******JIRA_UTILS: Comment added to the task successfully');
+        
+        const taskUrl = `${jira_server}/browse/${createResponse.key}`;
+        return `Task ${createResponse.key} has been created under ${parentKey} with the description: ${description}. You can view the task [here](${taskUrl}).`;
+        
     } catch (err) {
-        console.error('\n*******JIRA_UTILS: Error creating JIRA task with enhanced options:', err.message);
+        console.error('\n*******JIRA_UTILS: Error creating JIRA task or adding comment:', err.message);
         
         // If the above fails, try creating the task with original taskData
-        return createTaskWithFallback(summary, description);
+        return createTaskWithFallback(summary, description, channelId);
     }
 };
 
