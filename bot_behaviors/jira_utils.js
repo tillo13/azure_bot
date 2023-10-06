@@ -76,65 +76,55 @@ async function getIssuesAssignedToCurrentUser() {
 
 async function createJiraTask(summary, description) {
     try {
-        // Try to create task with specific assignee and label
-        const response = await attemptTaskCreation(summary, description, {
-            "assignee": {
-                "name": "Andy Tillo"
-            },
-            "labels": [
-                "ess-arch-metric-misc"
-            ]
-        });
-        return response;
+        // This is the enhanced task data with your specific label and assignee
+        const enhancedTaskData = {
+            "fields": {
+                "project": {
+                    "key": projectName
+                },
+                "summary": summary,
+                "description": {
+                    "type": "doc",
+                    "version": 1,
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": description
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "issuetype": {
+                    "name": issueType
+                },
+                "parent": {
+                    "id": await getIssueId(parentKey)
+                },
+                "assignee": {
+                    "accountId": "712020:dff2c6c3-3e86-47a0-8aa5-3e5ff58fea86"
+                },
+                "labels": [
+                    "ess-arch-metric-misc"
+                ]
+            }
+        };
+
+        const url = '/rest/api/3/issue/';
+        const response = await makeJiraRequest(url, enhancedTaskData, 'POST');
+        console.log('\n*******JIRA_UTILS: Task created successfully with enhanced options');
+        const taskUrl = `${jira_server}/browse/${response.key}`;
+        return `Task ${response.key} has been created under ${parentKey} with the description: ${description}. You can view the task [here](${taskUrl}).`;
     } catch (err) {
         console.error('\n*******JIRA_UTILS: Error creating JIRA task with enhanced options:', err.message);
-
-        // Fallback to creating task without specific assignee and label
-        const responseFallback = await attemptTaskCreation(summary, description, {});
-        return responseFallback;
+        
+        // If the above fails, try creating the task with original taskData
+        return createTaskWithFallback(summary, description);
     }
-}
-
-async function attemptTaskCreation(summary, description, extraFields) {
-    const parentId = await getIssueId(parentKey);
-    const url = '/rest/api/3/issue/';
-
-    const taskData = {
-        "fields": {
-            "project": {
-                "key": projectName
-            },
-            "summary": summary,
-            "description": {
-                "type": "doc",
-                "version": 1,
-                "content": [
-                    {
-                        "type": "paragraph",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": description
-                            }
-                        ]
-                    }
-                ]
-            },
-            "issuetype": {
-                "name": issueType
-            },
-            "parent": {
-                "id": parentId
-            },
-            ...extraFields
-        }
-    };
-
-    const response = await makeJiraRequest(url, taskData, 'POST');
-    console.log('\n*******JIRA_UTILS: Task created successfully');
-    const taskUrl = `${jira_server}/browse/${response.key}`;
-    return `Task ${response.key} has been created under ${parentKey} with the description: ${description}. You can view the task [here](${taskUrl}).`;
-}
+};
 module.exports = {
     getIssuesAssignedToCurrentUser,
     createJiraTask
