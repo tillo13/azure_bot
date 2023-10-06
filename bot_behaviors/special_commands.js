@@ -44,7 +44,7 @@ async function createJiraTask(context) {
     }
     
     // normal ticket creation can proceed if we reach this point
-    const responseMessage = await jira_utils.createJiraTask(summary, description);
+	const responseMessage = await jira_utils.createJiraTask(summary, description, context.activity.channelId);
     return sendMessageResponse(context, responseMessage);
 }
 

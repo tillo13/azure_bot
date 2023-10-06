@@ -79,6 +79,8 @@ async function getIssuesAssignedToCurrentUser() {
 async function createJiraTask(summary, description) {
     try {
         // This is the enhanced task data with your specific label and assignee
+        const commentText = `Created by @bot automatically via ${channelId}`; 
+
         const enhancedTaskData = {
             "fields": {
                 "project": {
@@ -97,6 +99,15 @@ async function createJiraTask(summary, description) {
                                     "text": description
                                 }
                             ]
+                        }
+                    ]
+                },
+                "update": {
+                    "comment": [
+                        {
+                            "add": {
+                                "body": commentText
+                            }
                         }
                     ]
                 },
