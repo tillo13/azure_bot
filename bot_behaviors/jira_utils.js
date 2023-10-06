@@ -3,8 +3,10 @@ const jira_server = process.env['2023sept8_JIRA_SERVER'];
 const username = process.env['2023sept8_JIRA_USERNAME'];
 const api_token = process.env['2023sept8_JIRA_TOKEN'];
 const parentKey = process.env['2023sept8_JIRA_PARENT_KEY'];
-const projectId = process.env['2023sept8_JIRA_PROJECT_ID'];
 const projectName = process.env['2023sept8_JIRA_PROJECT_NAME'];
+const defaultAccountId = process.env['2023oct6_JIRA_DEFAULT_ACCOUNT_ID'];
+const defaultLabelTitle = process.env['2023oct6_JIRA_DEFAULT_LABEL_TITLE'];
+
 
 //generic Jira data that can be public
 let issueType = 'Task'; 
@@ -105,10 +107,10 @@ async function createJiraTask(summary, description) {
                     "id": await getIssueId(parentKey)
                 },
                 "assignee": {
-                    "accountId": "712020:dff2c6c3-3e86-47a0-8aa5-3e5ff58fea86"
+                    "accountId": defaultAccountId
                 },
                 "labels": [
-                    "ess-arch-metric-misc"
+                    defaultLabelTitle
                 ]
             }
         };
