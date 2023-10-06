@@ -1,3 +1,5 @@
+//2023oct6 1219pm moved slack_bot_token into prod env
+
 const https = require('https');
 
 async function executeHttpGetRequest(options) {
