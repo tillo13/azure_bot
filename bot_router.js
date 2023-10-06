@@ -79,10 +79,11 @@ class EchoBot extends ActivityHandler {
 						} else {
 
 				// Log interaction to Slack
-				const slackApiToken = process.env.SLACK_BOT_TOKEN;
-				const slackChannelId = 'C05UMRHSLR2';
-				let username;
-				let id;
+				try {
+					const slackApiToken = process.env.SLACK_BOT_TOKEN;
+					const slackChannelId = 'C05UMRHSLR2';
+					let username;
+					let id;
 
 				if (context.activity.channelId === 'webchat') {
 				username = 'webchat';
@@ -123,8 +124,14 @@ class EchoBot extends ActivityHandler {
 					]
 				};
 
-				// Send message to Slack 
-				await postMessageToSlack(slackChannelId, null, slackBlocks, slackApiToken);
+					// Send message to Slack 
+					await postMessageToSlack(slackChannelId, null, slackBlocks, slackApiToken);
+
+					console.log('\n\n**BOT_ROUTER.JS: Successfully posted message to Slack**');
+				} 
+				catch (error) {
+					console.error('\n\n**BOT_ROUTER.JS: Failed to post message to Slack**', error);
+				}
 
 
                 if (specialCommands[messageContent]) {
