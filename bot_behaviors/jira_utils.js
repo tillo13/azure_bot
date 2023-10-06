@@ -121,8 +121,20 @@ async function createJiraTask(summary, description, channelId) {
         const newIssueId = createResponse.id;
         const commentUrl = `/rest/api/3/issue/${newIssueId}/comment`;
         const commentData = {
-            "body": `Created by @bot automatically via ${channelId}`
-        }
+            "version": 1,
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "text": `Created by @bot automatically via ${channelId}`,
+                    "type": "text"
+                  }
+                ]
+              }
+            ]
+           };
 
         const commentResponse = await makeJiraRequest(commentUrl, commentData, 'POST');
         console.log('\n*******JIRA_UTILS: Comment added to the task successfully');
