@@ -116,7 +116,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
       for (let prompt of frustrationPrompts) {
           if (lowerCasedMessage.includes(prompt.toLowerCase())) { 
               frustrationCount++;
-              console.log(`\n\n***CHAT_HELPER.JS: Frustration count: ${frustrationCount}`);
+              console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT prior to incoming message: ${frustrationCount}`);
               break;
           }
       }
@@ -159,7 +159,7 @@ userMessages.forEach((msg, index) => {
 });
 
 // Print frustration count after each user message is processed
-console.log(`\n\n***CHAT_HELPER.JS: Current frustrationCounter value: ${frustrationCount}`);
+console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT including latest response: ${frustrationCount}`);
 
 console.log('\n\n***CHAT_HELPER.JS -> Entire conversation so far via chatmessages:\n');
 chatMessages.forEach((msg, index) => {
