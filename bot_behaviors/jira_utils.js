@@ -75,13 +75,34 @@ async function getIssuesAssignedToCurrentUser() {
 }
 
 async function createJiraTask(summary, description) {
-    const parentId = await getIssueId(parentKey); 
+    try {
+        // Try to create task with specific assignee and label
+        const response = await attemptTaskCreation(summary, description, {
+            "assignee": {
+                "name": "Andy Tillo"
+            },
+            "labels": [
+                "ess-arch-metric-misc"
+            ]
+        });
+        return response;
+    } catch (err) {
+        console.error('\n*******JIRA_UTILS: Error creating JIRA task with enhanced options:', err.message);
+
+        // Fallback to creating task without specific assignee and label
+        const responseFallback = await attemptTaskCreation(summary, description, {});
+        return responseFallback;
+    }
+}
+
+async function attemptTaskCreation(summary, description, extraFields) {
+    const parentId = await getIssueId(parentKey);
     const url = '/rest/api/3/issue/';
 
     const taskData = {
         "fields": {
             "project": {
-                "key": projectName // using the one from .env as might have some proprietary-ness...
+                "key": projectName
             },
             "summary": summary,
             "description": {
@@ -100,23 +121,19 @@ async function createJiraTask(summary, description) {
                 ]
             },
             "issuetype": {
-                "name": issueType // can be public, nothing secret
+                "name": issueType
             },
             "parent": {
-                "id": parentId   
-            }
+                "id": parentId
+            },
+            ...extraFields
         }
     };
-    
-    try {
-        const response = await makeJiraRequest(url, taskData, 'POST');
-        console.log('\n*******JIRA_UTILS: Task created successfully using project key and issue type name');
-        const taskUrl = `${jira_server}browse/${response.key}`;
-        return `Task ${response.key} has been created under ${parentKey} with the description: ${description}. You can view the task [here](${taskUrl}).`;
-    } catch (err) {
-        console.error('\n*******JIRA_UTILS: Error creating JIRA task using project key and issue type name:', err.message);
-        return `Error creating JIRA task: ${err.message}`;
-    }
+
+    const response = await makeJiraRequest(url, taskData, 'POST');
+    console.log('\n*******JIRA_UTILS: Task created successfully');
+    const taskUrl = `${jira_server}/browse/${response.key}`;
+    return `Task ${response.key} has been created under ${parentKey} with the description: ${description}. You can view the task [here](${taskUrl}).`;
 }
 module.exports = {
     getIssuesAssignedToCurrentUser,
