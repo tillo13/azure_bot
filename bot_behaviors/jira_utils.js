@@ -138,6 +138,56 @@ async function createJiraTask(summary, description, channelId) {
         return createTaskWithFallback(summary, description);
     }
 };
+
+async function createTaskWithFallback(summary, description, channelId) {
+    try {
+        // This is the reduced task data, without comment part
+        const taskData = {
+            "fields": {
+                "project": {
+                    "key": projectName
+                },
+                "summary": summary,
+                "description": {
+                    "type": "doc",
+                    "version": 1,
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": description
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "issuetype": {
+                    "name": issueType
+                },
+                "parent": {
+                    "id": await getIssueId(parentKey)
+                },
+                "assignee": {
+                    "accountId": defaultAccountId
+                },
+                "labels": [
+                    defaultLabelTitle
+                ]
+            }
+        };
+
+        const url = '/rest/api/3/issue/';
+        const response = await makeJiraRequest(url, taskData, 'POST');
+        console.log('\n*******JIRA_UTILS: Task created successfully with fallback options');
+        const taskUrl = `${jira_server}/browse/${response.key}`;
+        return `Task ${response.key} has been created under ${parentKey} with the description: ${description}. You can view the task [here](${taskUrl}).`;
+    } catch (err) {
+        console.error('\n*******JIRA_UTILS: Error creating JIRA task with fallback options:', err.message);
+        throw err;
+    }
+};
 module.exports = {
     getIssuesAssignedToCurrentUser,
     createJiraTask
