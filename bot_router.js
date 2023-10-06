@@ -133,8 +133,7 @@ class EchoBot extends ActivityHandler {
 
 						console.log('\n\n**BOT_ROUTER.JS: Successfully posted message to Slack**');
 					} catch (error) {
-						console.error('\n\n**BOT_ROUTER.JS:Failed to post message to Slack:', error.message);
-						return; // This stops the execution of the onMessage function but the application will still move on
+						console.error('\n\n**BOT_ROUTER.JS:Failed to post message to Slack (but app will continue):', error.message);
 					}
 
 
