@@ -4,7 +4,7 @@ const username = process.env['2023sept8_JIRA_USERNAME'];
 const api_token = process.env['2023sept8_JIRA_TOKEN'];
 const parentKey = process.env['2023sept8_JIRA_PARENT_KEY'];
 const projectName = process.env['2023sept8_JIRA_PROJECT_NAME'];
-const defaultAccountId = process.env['2023oct6_JIRA_DEFAULT_ACCOUNT_ID'];
+const defaultAccountId = process.env['2023oct6_JIRA_DEFAULT_USER_ACCOUNT_ID'];
 const defaultLabelTitle = process.env['2023oct6_JIRA_DEFAULT_LABEL_TITLE'];
 
 
