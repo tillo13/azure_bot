@@ -158,6 +158,9 @@ userMessages.forEach((msg, index) => {
           frustrationCounter(msg.content);
 });
 
+// Print frustration count after each user message is processed
+console.log(`\n\n***CHAT_HELPER.JS: Current frustrationCounter value: ${frustrationCount}`);
+
 console.log('\n\n***CHAT_HELPER.JS -> Entire conversation so far via chatmessages:\n');
 chatMessages.forEach((msg, index) => {
   const role = msg.role.toUpperCase();
