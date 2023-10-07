@@ -136,8 +136,10 @@ server.post('/api/messages', async (req, res) => {
         } catch (error) {
             console.error(`Error determining user data: ${error.message}`);
         }
-        await appendUserData(userId, userName, currentTimestamp, platform);
-        console.log(`*INDEX.JS: Logging interaction: ${userId},${userName},${currentTimestamp},${platform}`);
+        if (userId !== 'undefined' && userName !== 'undefined') {
+            await appendUserData(userId, userName, currentTimestamp, platform);
+            console.log(`*INDEX.JS: Logging interaction: ${userId},${userName},${currentTimestamp},${platform}`);
+        }
     }
 	let msg_id = req.body.id; // retrieve the message id
 
