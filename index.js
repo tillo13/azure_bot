@@ -75,10 +75,14 @@ async function appendUserData(userId, username, loginTimestamp, platform) {
         platform = platform || 'undetermined';
 
         // Create CSV content to append
+        // broken const csvData = Buffer.from(`${newId},${String(userId)},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`);
         const csvData = Buffer.from(`${newId},${String(userId)},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`);
+        const contentLength = csvData.length;
 
         // Append CSV Data
-        const appendBlobResponse = await appendBlobClient.appendBlock(csvData);
+        //not accepting undefined const appendBlobResponse = await appendBlobClient.appendBlock(csvData);
+        const appendBlobResponse = await appendBlobClient.appendBlock(csvData, contentLength);
+
         console.log(`\n*INDEX.JS: Appended data to blob ${blobName} successfully`, appendBlobResponse.requestId);
     } catch (error) {
         // Log the error
