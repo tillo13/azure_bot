@@ -48,38 +48,29 @@ const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.cor
 
 // A function to append new user login info to Azure Blob storage
 async function appendUserData(userId, username, loginTimestamp, platform) {
-    try {
-        // Get container client
-        const containerClient = blobServiceClient.getContainerClient(containerName);
+	try {
+		// Get container client
+		const containerClient = blobServiceClient.getContainerClient(containerName);
 
-        // Get client
-        const appendBlobClient = containerClient.getAppendBlobClient(blobName);
+		// Get append blob client
+		const appendBlobClient = containerClient.getAppendBlobClient(blobName);
 
-        // Create the appendBlob if it doesn't already exist
-        const blobExists = await appendBlobClient.exists();
+         	// Make sure the blob exists, create if it doesn't
+	        const blobExists = await appendBlobClient.exists();
+	        if (!blobExists) {
+	            await appendBlobClient.create();
+	        }    
 
-        if (!blobExists) {
-            await appendBlobClient.create();
-            console.log(`\n*INDEX.JS: Created new appendBlob: ${blobName}`);
-        }
+		// Create CSV content to append
+		const csvData = `${userId},${username},${loginTimestamp},${platform}\r\n`;
 
-        // Ensure none of the values are undefined
-        username = username || 'undetermined';
-        loginTimestamp = loginTimestamp || 'undetermined';
-        platform = platform || 'undetermined';
-
-        // Create CSV content to append
-        const csvData = Buffer.from(`${userId},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`);
-        const contentLength = csvData.length;
-
-        // Append CSV Data
-        const appendBlobResponse = await appendBlobClient.appendBlock(csvData, contentLength);
-
-        console.log(`\n*INDEX.JS: Appended data to blob ${blobName} successfully`, appendBlobResponse.requestId);
-    } catch (error) {
-        // Log the error
-        console.error(`\n*INDEX.JS: Error logging user data: ${error.message}`);
-    }
+		// Append data to the blob
+        	const appendBlobResponse = await appendBlobClient.appendBlock(csvData, Buffer.byteLength(csvData));
+        	console.log(`\n*INDEX.JS: Appended data to blob ${blobName} successfully`, appendBlobResponse.requestId);
+	} catch (error) {
+		// Log the error
+		console.error(`\n*INDEX.JS: Error logging user data: ${error.message}`);
+	}
 }
 // Convert stream to buffer
 function streamToBuffer(readableStream) {
