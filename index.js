@@ -120,17 +120,24 @@ const myBot = new EchoBot(userState);
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
     if (req.body) {
-        let userName = req.body.from ? req.body.from.name || 'undefined' : 'undefined';
-        const platform = req.body.channelId || 'undefined';
-        let userId = 'undefined';
-        if (platform === 'msteams' && req.body.from.aadObjectId) {
-            userId = req.body.from.aadObjectId;
-        } else if (req.body.from.id) {
-            userId = req.body.from.id;
-        }
+        let userId = 'undetermined';
+        let userName = 'undetermined';
+        const platform = req.body.channelId || 'undetermined';
         const currentTimestamp = Math.floor(Date.now() / 1000); // Timestamp in seconds
-        console.log(`\n*INDEX.JS: Logging interaction: ${userId},${userName},${currentTimestamp},${platform}`);
+        try {
+            if (req.body.from) {
+                userName = req.body.from.name;
+                if (req.body.channelId === 'msteams' && req.body.from.aadObjectId) {
+                    userId = req.body.from.aadObjectId;
+                } else if (req.body.from.id) {
+                    userId = req.body.from.id;
+                }
+            }
+        } catch (error) {
+            console.error(`Error determining user data: ${error.message}`);
+        }
         await appendUserData(userId, userName, currentTimestamp, platform);
+        console.log(`*INDEX.JS: Logging interaction: ${userId},${userName},${currentTimestamp},${platform}`);
     }
 	let msg_id = req.body.id; // retrieve the message id
 
