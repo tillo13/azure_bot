@@ -87,8 +87,9 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 
 
 
-
+let cleanConversation = '';
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
+
 
 
   // Define the frustrationPrompts array
@@ -161,7 +162,7 @@ userMessages.forEach((msg, index) => {
 // Print frustration count after each user message is processed
 console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT including latest response: ${frustrationCount}`);
 
-let cleanConversation = '';
+cleanConversation = '';
 
 chatMessages.forEach((msg, index) => {
     const role = msg.role.toUpperCase();
@@ -325,4 +326,4 @@ try {
 console.error("\n\n***CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
 throw error;
 }}
-module.exports = chatCompletion;
+module.exports = { chatCompletion, cleanConversation };

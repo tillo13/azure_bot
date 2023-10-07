@@ -1,5 +1,5 @@
 const formats = require('./endpoint_formats');
-const chatCompletion = require('./chat_helper');
+const { chatCompletion, cleanConversation } = require('./chat_helper');
 const jira_utils = require('./jira_utils');
 
 const {
@@ -33,12 +33,12 @@ const commands = new Proxy({
     }
 });
 
-async function createJiraTask(context, chatHistory, cleanConversation) {
-    const description = context.activity.text.replace('$jira ', '');
-    const summary = 'Test from teams';
-    console.log('\n******SPECIAL_COMMANDS: $jira command issued without a description payload by:', cleanConversation); 
-	
-    
+async function createJiraTask(context, cleanConversation) {
+	console.log('\n******SPECIAL_COMMANDS: $jira command issued without a description payload by:', cleanConversation);
+	const description = context.activity.text.replace('$jira ', '');
+	const summary = 'Test from teams';
+	  
+
     if (!description || description.length === 0) {
 		console.log('\n******SPECIAL_COMMANDS: $jira command issued without a description payload by:\n', context.activity.from.name);
         const adviceMessage = "Usage: `$jira [description]`. You need to provide a description after `$jira` to create a ticket.";
