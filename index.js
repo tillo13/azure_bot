@@ -48,30 +48,30 @@ const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.cor
 
 // A function to append new user login info to Azure Blob storage
 async function appendUserData(userId, username, loginTimestamp, platform) {
-	try {
-		// Get container client
-		const containerClient = blobServiceClient.getContainerClient(containerName);
+    try {
+        // Get container client
+        const containerClient = blobServiceClient.getContainerClient(containerName);
 
-		// Get blob client
-		const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+        // Get blob client
+        const appendBlobClient = containerClient.getAppendBlobClient(blobName);
 
-		// Create CSV content to append
-		const csvData = `${userId},${username},${loginTimestamp},${platform}\r\n`;
+        // Create the appendBlob if it doesn't already exist
+        const blobExists = await appendBlobClient.exists();
+        if (!blobExists) {
+            await appendBlobClient.create();
+            console.log(`Created new appendBlob: ${blobName}`);
+        }
 
-		// Download existing blob content
-		const downloadResponse = await blockBlobClient.download(0);
-		const existingBlobContent = (await streamToBuffer(downloadResponse.readableStreamBody)).toString();
+        // Create CSV content to append
+        const csvData = `${userId},${username},${loginTimestamp},${platform}\r\n`;
 
-		// Create new blob content by appending new CSV data to the existing blob content
-		const newBlobContent = existingBlobContent + csvData;
-
-		// Upload new blob content
-		const uploadBlobResponse = await blockBlobClient.upload(newBlobContent, Buffer.byteLength(newBlobContent));
-		console.log(`\n\n*INDEX.JS: Upload block blob ${blobName} successfully`, uploadBlobResponse.requestId);
-	} catch (error) {
-		// Log the error
-		console.error(`\n\n*INDEX.JS: Error logging user data: ${error.message}`);
-	}
+        // Append CSV Data
+        const appendBlobResponse = await appendBlobClient.appendBlock(csvData);
+        console.log(`Appended data to blob ${blobName} successfully`, appendBlobResponse.requestId);
+    } catch (error) {
+        // Log the error
+        console.error(`Error logging user data: ${error.message}`);
+    }
 }
 
 // Convert stream to buffer
@@ -129,7 +129,7 @@ server.post('/api/messages', async (req, res) => {
             userId = req.body.from.id;
         }
         const currentTimestamp = Math.floor(Date.now() / 1000); // Timestamp in seconds
-        console.log(`*INDEX.JS: Logging interaction: ${userId},${userName},${currentTimestamp},${platform}`);
+        console.log(`\n*INDEX.JS: Logging interaction: ${userId},${userName},${currentTimestamp},${platform}`);
         await appendUserData(userId, userName, currentTimestamp, platform);
     }
 	let msg_id = req.body.id; // retrieve the message id
