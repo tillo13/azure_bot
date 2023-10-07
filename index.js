@@ -1,4 +1,4 @@
-// 2023oct7 7:57am
+// 2023oct7 9:41am
 require('dotenv').config();
 
 const {
@@ -58,13 +58,7 @@ async function appendUserData(userId, username, loginTimestamp, platform) {
         // Create the appendBlob if it doesn't already exist
         const blobExists = await appendBlobClient.exists();
 
-        let lastId = 0;
-        let newId = 1;
-
-        if (blobExists) {
-            // Code to get the lastId value
-            // ...
-        } else {
+        if (!blobExists) {
             await appendBlobClient.create();
             console.log(`\n*INDEX.JS: Created new appendBlob: ${blobName}`);
         }
@@ -75,12 +69,10 @@ async function appendUserData(userId, username, loginTimestamp, platform) {
         platform = platform || 'undetermined';
 
         // Create CSV content to append
-        // broken const csvData = Buffer.from(`${newId},${String(userId)},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`);
-        const csvData = Buffer.from(`${newId},${String(userId)},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`);
+        const csvData = Buffer.from(`${userId},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`);
         const contentLength = csvData.length;
 
         // Append CSV Data
-        //not accepting undefined const appendBlobResponse = await appendBlobClient.appendBlock(csvData);
         const appendBlobResponse = await appendBlobClient.appendBlock(csvData, contentLength);
 
         console.log(`\n*INDEX.JS: Appended data to blob ${blobName} successfully`, appendBlobResponse.requestId);
