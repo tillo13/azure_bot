@@ -43,6 +43,20 @@ const blobName = process.env['2023oct7_AZURE_STORAGE_BLOB_NAME'];
 const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
 const pipeline = newPipeline(sharedKeyCredential);
 
+// Get the current content of blob
+const downloadBlockBlobResponse = await appendBlobClient.download(0);
+const blobContent = (await streamToBuffer(downloadBlockBlobResponse.readableStream)).toString();
+
+// Parse the last ID
+let lastId = 0;
+if (blobContent) { 
+    const lines = blobContent.split('\r\n');
+    if (lines.length > 2) { // Expecting a CSV format where first line is the header and last line is always empty
+        lastId = parseInt(lines[lines.length - 2].split(',')[0]);
+    }
+}
+let newId = isNaN(lastId) ? 1 : lastId + 1; // Increment or start from 1 if NaN
+
 // Create blob service client using connection string
 const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, pipeline);
 
@@ -93,16 +107,30 @@ async function appendUserData(username, loginTimestamp, platform) {
 
 // Convert stream to buffer
 function streamToBuffer(readableStream) {
-	return new Promise((resolve, reject) => {
-		const chunks = [];
-		readableStream.on("data", (data) => {
-			chunks.push(data instanceof Buffer ? data : Buffer.from(data));
-		});
-		readableStream.on("end", () => {
-			resolve(Buffer.concat(chunks));
-		});
-		readableStream.on("error", reject);
-	});
+    return new Promise((resolve, reject) => {const downloadBlockBlobResponse = await appendBlobClient.download(0);
+        const blobContent = (await streamToBuffer(downloadBlockBlobResponse.readableStream)).toString();
+        
+        // Parse the last ID
+        let lastId = 0;
+        if (blobContent) { 
+            const lines = blobContent.split('\r\n');
+            if (lines.length > 2) { // Expecting a CSV format where first line is the header and last line is always empty
+                lastId = parseInt(lines[lines.length - 2].split(',')[0]);
+            }
+        }
+        let newId = isNaN(lastId) ? 1 : lastId + 1; // Increment or start from 1 if NaN
+        const chunks = [];
+        if (!readableStream) {
+            return resolve(Buffer.from(chunks));
+        }
+        readableStream.on("data", (data) => {
+            chunks.push(data instanceof Buffer ? data : Buffer.from(data));
+        });
+        readableStream.on("end", () => {
+            resolve(Buffer.concat(chunks));
+        });
+        readableStream.on("error", reject);
+    });
 }
 
 // Create adapter.
