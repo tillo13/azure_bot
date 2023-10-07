@@ -76,8 +76,8 @@ async function getIssuesAssignedToCurrentUser() {
     }
 }
 
-async function createJiraTask(summary, description, context) 
-{    try {
+async function createJiraTask(summary, description, context, conversationHistory){    
+    try {
         const taskData = {
             "fields": {
                 "project": {
@@ -121,8 +121,8 @@ async function createJiraTask(summary, description, context)
         const taskDescription = `${description}\n\nReported by: ${context.activity.from.name || context.activity.from.id}\nTime: ${new Date().toISOString()}`;
 
         const newIssueId = createResponse.id;
+        
         const commentUrl = `/rest/api/3/issue/${newIssueId}/comment`;
-        const conversationHistory = context.activity.conversationHistory;
         const commentData = {
             "body": {
                 "version": 1,
