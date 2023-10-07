@@ -76,8 +76,8 @@ async function getIssuesAssignedToCurrentUser() {
     }
 }
 
-async function createJiraTask(summary, description, channelId) {
-    try {
+async function createJiraTask(summary, description, context) 
+{    try {
         const taskData = {
             "fields": {
                 "project": {
@@ -118,6 +118,8 @@ async function createJiraTask(summary, description, channelId) {
         const createResponse = await makeJiraRequest(createUrl, taskData, 'POST');
         console.log('\n*******JIRA_UTILS: Task created successfully');
         
+        const taskDescription = `${description}\n\nReported by: ${context.activity.from.name || context.activity.from.id}\nTime: ${new Date().toISOString()}`;
+
         const newIssueId = createResponse.id;
         const commentUrl = `/rest/api/3/issue/${newIssueId}/comment`;
         const commentData = {
@@ -129,14 +131,14 @@ async function createJiraTask(summary, description, channelId) {
                         "type": "paragraph",
                         "content": [
                             {
-                                "text": `Created by @bot automatically via ${channelId}`,
+                                "text": `Session Metadata:\nCreated by: ${context.activity.from.name || context.activity.from.id}\nChannel ID: ${context.activity.channelId}\nTimestamp: ${new Date().toISOString()}`,
                                 "type": "text"
                             }
                         ]
                     }
                 ]
             }
-        }
+        };
         console.log('\n*******JIRA_UTILS: Comment Payload:', JSON.stringify(commentData, null, 2)); 
 
         const commentResponse = await makeJiraRequest(commentUrl, commentData, 'POST');
