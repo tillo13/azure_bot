@@ -119,16 +119,14 @@ const myBot = new EchoBot(userState);
 
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
-	const fromUser = req.body.from;
-	if (fromUser && fromUser.name) {
-		let userId = fromUser.id; // Default is 'id'
-		if (req.body.channelId === 'msteams' && fromUser.aadObjectId) {
-			userId = fromUser.aadObjectId; // Use 'aadObjectId' for MS Teams
-		}
-		const currentTimestamp = Math.floor(Date.now() / 1000); // Timestamp in seconds
-		const platform = req.body.channelId;
-		await appendUserData(userId, fromUser.name, currentTimestamp, platform);
-	}
+    if (req.body && req.body.from) {
+        let userId = req.body.from.id || 'undefined';
+        let userName = req.body.from.name || 'undefined';
+        const currentTimestamp = Math.floor(Date.now() / 1000); // Timestamp in seconds
+        const platform = req.body.channelId || 'undefined';
+        console.log(`*INDEX.JS: Logging interaction: ${userId},${userName},${currentTimestamp},${platform}`);
+        await appendUserData(userId, userName, currentTimestamp, platform);
+    }
 	let msg_id = req.body.id; // retrieve the message id
 
 	// if id doesn't exist, set it to an empty string
