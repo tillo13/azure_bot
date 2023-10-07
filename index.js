@@ -63,7 +63,7 @@ async function appendUserData(userId, username, loginTimestamp, platform) {
         }
 
         // Create CSV content to append
-        const csvData = `${userId},${username},${loginTimestamp},${platform}\r\n`;
+        const csvData = `${String(userId)},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`;
 
         // Append CSV Data
         const appendBlobResponse = await appendBlobClient.appendBlock(csvData);
