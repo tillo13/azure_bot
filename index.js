@@ -47,7 +47,9 @@ const pipeline = newPipeline(sharedKeyCredential);
 const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, pipeline);
 
 // A function to append new user login info to Azure Blob storage
-async function appendUserData(username, loginTimestamp, platform) {
+async function appendUserData(userId, username, loginTimestamp, platform)
+
+//old version async function appendUserData(username, loginTimestamp, platform) {
     try {
         // Get container client
         const containerClient = blobServiceClient.getContainerClient(containerName);
@@ -95,8 +97,14 @@ async function appendUserData(username, loginTimestamp, platform) {
         loginTimestamp = loginTimestamp || 'undetermined';
         platform = platform || 'undetermined';
 
+
         // Create CSV content to append
-        const csvData = `${newId},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`;
+        // previous: const csvData = `${newId},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`;
+
+        //not this one const csvData = Buffer.from(`${newId},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`);
+
+        const csvData = Buffer.from(`${newId},${String(userId)},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`);
+        
 
         // Append CSV Data
         const appendBlobResponse = await appendBlobClient.appendBlock(csvData);
