@@ -18,6 +18,58 @@ const credentialsFactory = new ConfigurationServiceClientCredentialFactory({
 });
 
 const botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, credentialsFactory);
+// Azure storage imports
+const { BlobServiceClient, StorageSharedKeyCredential, newPipeline } = require('@azure/storage-blob');
+
+
+// Azure Blob Storage configuration
+const accountName = process.env['2023oct7_AZURE_STORAGE_ACCOUNT_NAME'];
+const accountKey = process.env['2023oct7_AZURE_STORAGE_ACCOUNT_KEY'];
+const containerName = process.env['2023oct7_AZURE_STORAGE_CONTAINER_NAME'];
+const blobName = process.env['2023oct7_AZURE_STORAGE_BLOB_NAME'];
+
+const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
+const pipeline = newPipeline(sharedKeyCredential);
+
+// Create blob service client using connection string
+const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, pipeline);
+
+// A function to append new user login info to Azure Blob storage
+async function appendUserData(userId, username, loginTimestamp, platform) {
+    // Get container client
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+
+    // Get blob client
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+    // Create CSV content to append
+    const csvData = `${userId},${username},${loginTimestamp},${platform}\r\n`;
+
+    // Download existing blob content
+    const downloadResponse = await blockBlobClient.download(0);
+    const existingBlobContent = (await streamToBuffer(downloadResponse.readableStreamBody)).toString();
+
+    // Create new blob content by appending new CSV data to the existing blob content
+    const newBlobContent = existingBlobContent + csvData;
+
+    // Upload new blob content
+    const uploadBlobResponse = await blockBlobClient.upload(newBlobContent, Buffer.byteLength(newBlobContent));
+    console.log(`Upload block blob ${blobName} successfully`, uploadBlobResponse.requestId);
+}
+
+// Convert stream to buffer
+function streamToBuffer(readableStream) {
+    return new Promise((resolve, reject) => {
+        const chunks = [];
+        readableStream.on("data", (data) => {
+            chunks.push(data instanceof Buffer ? data : Buffer.from(data));
+        });
+        readableStream.on("end", () => {
+            resolve(Buffer.concat(chunks));
+        });
+        readableStream.on("error", reject);
+    });
+}
 
 // Create adapter.
 const adapter = new CloudAdapter(botFrameworkAuthentication);
@@ -50,6 +102,13 @@ const myBot = new EchoBot(userState);
 
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
+    //this will log to azure blob
+    const fromUser = req.body.from;
+    if (fromUser && fromUser.name && fromUser.id) {
+        const currentTimestamp = Math.floor(Date.now() / 1000); // Timestamp in seconds
+        const platform = req.body.channelId;
+        await appendUserData(fromUser.id, fromUser.name, currentTimestamp, platform);
+    }
     let msg_id = req.body.id; // retrieve the message id
     
     // if id doesn't exist, set it to an empty string
