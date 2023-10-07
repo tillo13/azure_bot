@@ -1,6 +1,6 @@
 const formats = require('./endpoint_formats');
-const chatCompletion = require('./chat_helper');
-const chatHistory = require('./chat_helper')
+const { chatCompletion, chatHistory } = require('./chat_helper');
+
 const jira_utils = require('./jira_utils');
 
 const {
