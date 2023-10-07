@@ -52,7 +52,7 @@ async function appendUserData(userId, username, loginTimestamp, platform) {
         // Get container client
         const containerClient = blobServiceClient.getContainerClient(containerName);
 
-        // Get blob client
+        // Get client
         const appendBlobClient = containerClient.getAppendBlobClient(blobName);
 
         // Create the appendBlob if it doesn't already exist
@@ -61,6 +61,12 @@ async function appendUserData(userId, username, loginTimestamp, platform) {
             await appendBlobClient.create();
             console.log(`Created new appendBlob: ${blobName}`);
         }
+
+        // Ensure none of the values are undefined
+        userId = userId || 'undetermined';
+        username = username || 'undetermined';
+        loginTimestamp = loginTimestamp || 'undetermined';
+        platform = platform || 'undetermined';
 
         // Create CSV content to append
         const csvData = `${String(userId)},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`;
