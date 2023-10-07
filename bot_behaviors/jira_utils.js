@@ -153,7 +153,9 @@ async function createJiraTask(summary, description, context, conversationHistory
         console.error('\n*******JIRA_UTILS: Error creating JIRA task or adding comment:', err.message);
         
         // If the above fails, try creating the task with original taskData
-        return createTaskWithFallback(summary, description, channelId);
+        //return createTaskWithFallback(summary, description, channelId);
+        return createTaskWithFallback(summary, description, context.activity.channelId);
+
     }
 };
 
