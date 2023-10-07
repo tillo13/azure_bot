@@ -46,13 +46,9 @@ async function createJiraTask(context) {
     }
     
     // normal ticket creation can proceed if we reach this point
-	//const responseMessage = await jira_utils.createJiraTask(summary, description, context.activity.channelId);
-	//const responseMessage = await jira_utils.createJiraTask(summary, description, context);
-	const chatResult = await chatCompletion(chatMessages);
+    const chatResult = await chatCompletion(chatMessages);
     const formattedChatMessages = chatResult.chats.map(msg => `${msg.role.toUpperCase()} : ${msg.content}`).join("\n");
-    
     const responseMessage = await jira_utils.createJiraTask(summary, description, context, formattedChatMessages);
-	//const responseMessage = await jira_utils.createJiraTask(summary, description, context, conversationHistory);
 
     return sendMessageResponse(context, responseMessage);
 }

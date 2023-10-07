@@ -118,7 +118,7 @@ async function createJiraTask(summary, description, context, conversationHistory
         const createResponse = await makeJiraRequest(createUrl, taskData, 'POST');
         console.log('\n*******JIRA_UTILS: Task created successfully');
         
-        const taskDescription = `${description}\n\nReported by: ${context.activity.from.name || context.activity.from.id}\nTime: ${new Date().toISOString()}`;
+        //const taskDescription = `${description}\n\nReported by: ${context.activity.from.name || context.activity.from.id}\nTime: ${new Date().toISOString()}`;
 
         const newIssueId = createResponse.id;
         
