@@ -68,17 +68,17 @@ async function appendUserData(username, loginTimestamp, platform) {
         const csvData = `${newId},${username},${loginTimestamp},${platform}\r\n`;
 
         // Print the log details
-        console.log(`*INDEX.JS: Logging interaction: ${newId},${username},${loginTimestamp},${platform}`);
+        console.log(`\n*INDEX.JS: Logging interaction: ${newId},${username},${loginTimestamp},${platform}`);
 
         // Create new blob content by appending new CSV data to the existing blob content
         const newBlobContent = existingBlobContent + csvData;
 
         // Upload new blob content
         const uploadBlobResponse = await blockBlobClient.upload(newBlobContent, Buffer.byteLength(newBlobContent));
-        console.log(`*INDEX.JS: Upload block blob ${blobName} successfully`, uploadBlobResponse.requestId);
+        console.log(`\n*INDEX.JS: Upload block blob ${blobName} successfully`, uploadBlobResponse.requestId);
     } catch (error) {
         // Log the error
-        console.error(`*INDEX.JS: Error logging user data: ${error.message}`);
+        console.error(`\n*INDEX.JS: Error logging user data: ${error.message}`);
     }
 }
 
@@ -133,6 +133,8 @@ server.post('/api/messages', async (req, res) => {
         let userId = 'undefined';
         if (platform === 'msteams' && req.body.from.aadObjectId) {
             userId = req.body.from.aadObjectId;
+        } else if (platform === 'webchat') {
+            userId = req.body.conversation.id;
         } else if (req.body.from.id) {
             userId = req.body.from.id;
         }
