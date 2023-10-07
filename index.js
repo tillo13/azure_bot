@@ -131,16 +131,18 @@ server.post('/api/messages', async (req, res) => {
         let userName = req.body.from ? req.body.from.name || 'undefined' : 'undefined';
         const platform = req.body.channelId || 'undefined';
         let userId = 'undefined';
-        if (platform === 'msteams' && req.body.from.aadObjectId) {
-            userId = req.body.from.aadObjectId;
+        if (platform === 'msteams' && req.body.from.aadObjectId && userName !== 'undefined') {
+            userId = userName + '|' + req.body.from.aadObjectId;
         } else if (platform === 'webchat') {
             userId = req.body.conversation.id;
+        } else if (platform === 'slack' && userName !== 'undefined' && req.body.from.id) {
+            userId = req.body.from.id + '|' + userName;
         } else if (req.body.from.id) {
             userId = req.body.from.id;
         }
         const currentTimestamp = Math.floor(Date.now() / 1000); // Timestamp in seconds
         console.log(`*INDEX.JS: Logging interaction: ${userId},${userName},${currentTimestamp},${platform}`);
-        await appendUserData(userName, currentTimestamp, platform);
+        await appendUserData(userId, currentTimestamp, platform);
     }
 	let msg_id = req.body.id; // retrieve the message id
 
