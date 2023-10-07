@@ -1,4 +1,4 @@
-// Load environment variables at the top-most level
+// 2023oct7 7:57am
 require('dotenv').config();
 
 const {
@@ -119,7 +119,6 @@ const myBot = new EchoBot(userState);
 
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
-	//this will log to azure blob
 	const fromUser = req.body.from;
 	if (fromUser && fromUser.name) {
 		let userId = fromUser.id; // Default is 'id'
@@ -129,7 +128,6 @@ server.post('/api/messages', async (req, res) => {
 		const currentTimestamp = Math.floor(Date.now() / 1000); // Timestamp in seconds
 		const platform = req.body.channelId;
 		await appendUserData(userId, fromUser.name, currentTimestamp, platform);
-
 	}
 	let msg_id = req.body.id; // retrieve the message id
 
