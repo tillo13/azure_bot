@@ -47,9 +47,7 @@ const pipeline = newPipeline(sharedKeyCredential);
 const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, pipeline);
 
 // A function to append new user login info to Azure Blob storage
-async function appendUserData(userId, username, loginTimestamp, platform)
-
-//old version async function appendUserData(username, loginTimestamp, platform) {
+async function appendUserData(userId, username, loginTimestamp, platform) {
     try {
         // Get container client
         const containerClient = blobServiceClient.getContainerClient(containerName);
@@ -64,32 +62,11 @@ async function appendUserData(userId, username, loginTimestamp, platform)
         let newId = 1;
 
         if (blobExists) {
-            try {
-                // Get the current content of blob
-                const downloadBlockBlobResponse = await appendBlobClient.download(0);
-
-                // Check for readableStream before processing
-                if (downloadBlockBlobResponse.readableStream) {
-                    const blobContent = (await streamToBuffer(downloadBlockBlobResponse.readableStream)).toString();
-
-                    if (blobContent) {
-                        // Parse the last ID
-                        const lines = blobContent.split('\r\n');
-
-                        if (lines.length > 2) { // Expecting a CSV format where first line is the header and last line is always empty
-                            lastId = parseInt(lines[lines.length - 2].split(',')[0]);
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error(`Error reading from blob: ${error.message}`);
-            }
-
-            if (isNaN(lastId)) lastId = 0;
-            newId = lastId + 1; // Increment or start from 1 if NaN
+            // Code to get the lastId value
+            // ...
         } else {
             await appendBlobClient.create();
-            console.log(`Created new appendBlob: ${blobName}`);
+            console.log(`\n*INDEX.JS: Created new appendBlob: ${blobName}`);
         }
 
         // Ensure none of the values are undefined
@@ -97,24 +74,17 @@ async function appendUserData(userId, username, loginTimestamp, platform)
         loginTimestamp = loginTimestamp || 'undetermined';
         platform = platform || 'undetermined';
 
-
         // Create CSV content to append
-        // previous: const csvData = `${newId},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`;
-
-        //not this one const csvData = Buffer.from(`${newId},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`);
-
         const csvData = Buffer.from(`${newId},${String(userId)},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`);
-        
 
         // Append CSV Data
         const appendBlobResponse = await appendBlobClient.appendBlock(csvData);
-        console.log(`Appended data to blob ${blobName} successfully`, appendBlobResponse.requestId);
+        console.log(`\n*INDEX.JS: Appended data to blob ${blobName} successfully`, appendBlobResponse.requestId);
     } catch (error) {
         // Log the error
-        console.error(`Error logging user data: ${error.message}`);
+        console.error(`\n*INDEX.JS: Error logging user data: ${error.message}`);
     }
 }
-
 // Convert stream to buffer
 function streamToBuffer(readableStream) {
     return new Promise((resolve, reject) => {
@@ -178,11 +148,11 @@ server.post('/api/messages', async (req, res) => {
                 }
             }
         } catch (error) {
-            console.error(`Error determining user data: ${error.message}`);
+            console.error(`\n*INDEX.JS: Error determining user data in api/messages: ${error.message}`);
         }
         if (userId !== 'undefined' && userName !== 'undefined') {
             await appendUserData(userId, userName, currentTimestamp, platform);
-            console.log(`*INDEX.JS: Logging interaction: ${userId},${userName},${currentTimestamp},${platform}`);
+            console.log(`\n*INDEX.JS: Logging interaction: ${userId},${userName},${currentTimestamp},${platform}`);
         }
     }
 	let msg_id = req.body.id; // retrieve the message id
