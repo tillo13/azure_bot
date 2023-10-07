@@ -43,7 +43,7 @@ async function makeJiraRequest(url, payload, method = 'GET') {
         const response = await axios(config);
         
         console.log('\n*******JIRA_UTILS: Response Status:', response.status); // logging the Response status
-        console.log('\n*******JIRA_UTILS: Response Data:', response.data); // logging the Response data
+        //console.log('\n*******JIRA_UTILS: Response Data:', response.data); // logging the Response data use this if need to troubleshoot, it's verbose.
 
         return response.data;
     } catch (error) {
@@ -122,6 +122,7 @@ async function createJiraTask(summary, description, context)
 
         const newIssueId = createResponse.id;
         const commentUrl = `/rest/api/3/issue/${newIssueId}/comment`;
+        const conversationHistory = context.activity.conversationHistory;
         const commentData = {
             "body": {
                 "version": 1,
@@ -131,7 +132,7 @@ async function createJiraTask(summary, description, context)
                         "type": "paragraph",
                         "content": [
                             {
-                                "text": `Session Metadata:\nCreated by: ${context.activity.from.name || context.activity.from.id}\nChannel ID: ${context.activity.channelId}\nTimestamp: ${new Date().toISOString()}`,
+                                "text": `Session Metadata:\nCreated by: ${context.activity.from.name || context.activity.from.id}\nChannel ID: ${context.activity.channelId}\nTimestamp: ${new Date().toISOString()}\n\nConversation History:\n${conversationHistory}`,
                                 "type": "text"
                             }
                         ]
