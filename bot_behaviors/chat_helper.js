@@ -335,5 +335,5 @@ try {
 console.error("\n\n***CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
 throw error;
 }}
-//module.exports = chatCompletion;
-module.exports = { chatCompletion, chatHistory };
+module.exports = chatCompletion;
+//module.exports = { chatCompletion, chatHistory };
