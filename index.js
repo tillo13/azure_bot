@@ -36,25 +36,30 @@ const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.cor
 
 // A function to append new user login info to Azure Blob storage
 async function appendUserData(userId, username, loginTimestamp, platform) {
-    // Get container client
-    const containerClient = blobServiceClient.getContainerClient(containerName);
+    try {
+        // Get container client
+        const containerClient = blobServiceClient.getContainerClient(containerName);
 
-    // Get blob client
-    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+        // Get blob client
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
-    // Create CSV content to append
-    const csvData = `${userId},${username},${loginTimestamp},${platform}\r\n`;
+        // Create CSV content to append
+        const csvData = `${userId},${username},${loginTimestamp},${platform}\r\n`;
 
-    // Download existing blob content
-    const downloadResponse = await blockBlobClient.download(0);
-    const existingBlobContent = (await streamToBuffer(downloadResponse.readableStreamBody)).toString();
+        // Download existing blob content
+        const downloadResponse = await blockBlobClient.download(0);
+        const existingBlobContent = (await streamToBuffer(downloadResponse.readableStreamBody)).toString();
 
-    // Create new blob content by appending new CSV data to the existing blob content
-    const newBlobContent = existingBlobContent + csvData;
+        // Create new blob content by appending new CSV data to the existing blob content
+        const newBlobContent = existingBlobContent + csvData;
 
-    // Upload new blob content
-    const uploadBlobResponse = await blockBlobClient.upload(newBlobContent, Buffer.byteLength(newBlobContent));
-    console.log(`Upload block blob ${blobName} successfully`, uploadBlobResponse.requestId);
+        // Upload new blob content
+        const uploadBlobResponse = await blockBlobClient.upload(newBlobContent, Buffer.byteLength(newBlobContent));
+        console.log(`\n\n*INDEX.JS: Upload block blob ${blobName} successfully`, uploadBlobResponse.requestId);
+    } catch(error) {
+        // Log the error
+        console.error(`\n\n*INDEX.JS: Error logging user data: ${error.message}`);
+    }
 }
 
 // Convert stream to buffer
