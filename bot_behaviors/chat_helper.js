@@ -87,7 +87,7 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 
 
 
-
+let chatHistory = [];
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 
 
@@ -280,6 +280,18 @@ try {
 
       let looped_through_newCleanChatMessages = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(',');
       newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_newCleanChatMessages, lastUserMessage); 
+
+
+
+
+
+      chatHistory = newCleanChatMessages;
+
+
+
+
+
+
       //console.log('\n\n***CHAT_HELPER.JS: After running formatChatPayload(), newCleanChatMessages is now: ', newCleanChatMessages); 
 
       if(JSON.stringify(newCleanChatMessages) !== oldChatMessages) { 
@@ -308,9 +320,7 @@ try {
     'assistantResponse': result.choices[0].message.content,
     'requery': letMeCheckFlag,
     'letMeCheckFlag': letMeCheckFlag,
-    'chats': newCleanChatMessages,
-    'cleanConversation': cleanConversation
-
+    'chats': newCleanChatMessages
   };
 } else {
   console.log('\n\n***CHAT_HELPER.JS: No content in API response');
@@ -325,4 +335,5 @@ try {
 console.error("\n\n***CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
 throw error;
 }}
-module.exports = chatCompletion;
+//module.exports = chatCompletion;
+module.exports = { chatCompletion, chatHistory };
