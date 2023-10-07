@@ -161,11 +161,14 @@ userMessages.forEach((msg, index) => {
 // Print frustration count after each user message is processed
 console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT including latest response: ${frustrationCount}`);
 
-console.log('\n\n***CHAT_HELPER.JS -> Entire conversation so far via chatmessages:\n');
+let cleanConversation = '';
+
 chatMessages.forEach((msg, index) => {
-  const role = msg.role.toUpperCase();
-  console.log(`\n${index + 1}. ${role} : ${msg.content}\n`);
+    const role = msg.role.toUpperCase();
+    cleanConversation += `\n${index + 1}. ${role} : ${msg.content}\n`;
 });
+
+console.log('\n\n***CHAT_HELPER.JS -> new Entire conversation so far via chatmessages:\n', cleanConversation);
 
 // Count cleaned messages first
 const oldChatMessages = JSON.stringify(chatMessages);
@@ -300,12 +303,14 @@ try {
   console.log('\n\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
   console.log('\n\n***CHAT_HELPER.JS: Is the response from chatGPT including one of the [bot_response] patterns?', bot_response_patterns.some(pattern => result.choices[0].message.content.toLowerCase().includes(pattern.toLowerCase())));
 
-  // Send response back
+  // Send response back to anything listening
   return {
     'assistantResponse': result.choices[0].message.content,
     'requery': letMeCheckFlag,
     'letMeCheckFlag': letMeCheckFlag,
-    'chats': newCleanChatMessages
+    'chats': newCleanChatMessages,
+    'cleanConversation': cleanConversation
+
   };
 } else {
   console.log('\n\n***CHAT_HELPER.JS: No content in API response');

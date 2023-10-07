@@ -33,9 +33,11 @@ const commands = new Proxy({
     }
 });
 
-async function createJiraTask(context) {
+async function createJiraTask(context, chatHistory, cleanConversation) {
     const description = context.activity.text.replace('$jira ', '');
     const summary = 'Test from teams';
+    console.log('\n******SPECIAL_COMMANDS: $jira command issued without a description payload by:', cleanConversation); 
+	
     
     if (!description || description.length === 0) {
 		console.log('\n******SPECIAL_COMMANDS: $jira command issued without a description payload by:\n', context.activity.from.name);
