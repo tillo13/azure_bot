@@ -119,11 +119,16 @@ const myBot = new EchoBot(userState);
 
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
-    if (req.body && req.body.from) {
-        let userId = req.body.from.id || 'undefined';
-        let userName = req.body.from.name || 'undefined';
-        const currentTimestamp = Math.floor(Date.now() / 1000); // Timestamp in seconds
+    if (req.body) {
+        let userName = req.body.from ? req.body.from.name || 'undefined' : 'undefined';
         const platform = req.body.channelId || 'undefined';
+        let userId = 'undefined';
+        if (platform === 'msteams' && req.body.from.aadObjectId) {
+            userId = req.body.from.aadObjectId;
+        } else if (req.body.from.id) {
+            userId = req.body.from.id;
+        }
+        const currentTimestamp = Math.floor(Date.now() / 1000); // Timestamp in seconds
         console.log(`*INDEX.JS: Logging interaction: ${userId},${userName},${currentTimestamp},${platform}`);
         await appendUserData(userId, userName, currentTimestamp, platform);
     }
