@@ -47,7 +47,7 @@ const pipeline = newPipeline(sharedKeyCredential);
 const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, pipeline);
 
 // A function to append new user login info to Azure Blob storage
-async function appendUserData(userId, username, loginTimestamp, platform) {
+async function appendUserData(username, loginTimestamp, platform) {
     try {
         // Get container client
         const containerClient = blobServiceClient.getContainerClient(containerName);
@@ -63,13 +63,24 @@ async function appendUserData(userId, username, loginTimestamp, platform) {
         }
 
         // Ensure none of the values are undefined
-        userId = userId || 'undetermined';
         username = username || 'undetermined';
         loginTimestamp = loginTimestamp || 'undetermined';
         platform = platform || 'undetermined';
 
+        // Get the current content of blob
+        const downloadBlockBlobResponse = await appendBlobClient.download(0);
+        const blobContent = (await streamToBuffer(downloadBlockBlobResponse.readableStream)).toString();
+
+        // Parse the last ID
+        const lines = blobContent.split('\r\n');
+        let lastId = 0;
+        if (lines.length > 2) { // Expecting a CSV format where first line is the header and last line is always empty
+            lastId = parseInt(lines[lines.length - 2].split(',')[0]);
+        }
+        let newId = isNaN(lastId) ? 1 : lastId + 1; // Increment or start from 1 if NaN
+
         // Create CSV content to append
-        const csvData = `${String(userId)},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`;
+        const csvData = `${newId},${String(username)},${String(loginTimestamp)},${String(platform)}\r\n`;
 
         // Append CSV Data
         const appendBlobResponse = await appendBlobClient.appendBlock(csvData);
