@@ -1,3 +1,39 @@
+const formats = require('./endpoint_formats');
+const chatCompletion = require('./chat_helper');
+const jira_utils = require('./jira_utils');
+
+const {
+	MessageFactory
+} = require('botbuilder');
+const generateImages = require('./dalle_utils');
+const {
+	addReaction,
+	removeReaction
+} = require('./slack_utils');
+const https = require("https");
+
+const commands = new Proxy({
+    '$dig': useShovel,
+    '$jira': createJiraTask,
+    '$reset': resetChatPayload,
+    '$upgrade': teaseUpgrade,
+    '$help': contactHelp,
+    '$dalle': createDalleImages,
+	'$about': aboutCommandHandler,
+	'$high5': highFiveCommand,
+}, {
+    get: function(target, property) {
+        if (property in target) {
+            return target[property];
+        } else {
+            for (let key in target) {
+                if (property.startsWith(key)) {
+                    return target[key];
+                }
+            }
+        }
+    }
+});
 async function highFiveCommand(context) {
     let messageText = context.activity.text.replace('$high5', '').trim();
 
