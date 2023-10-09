@@ -14,8 +14,6 @@ const pool = new Pool({
 	},
 });
 
-console.log("\n*POSTGRES_UTILS: DATABASE HOST from .env:  ", process.env['2023oct9_AZURE_POSTGRES_HOST']);
-
 pool.on('error', (err, client) => {
 	console.error('\n*POSTGRES_UTILS.JS: Unexpected error on idle client', err)
 	client.end();

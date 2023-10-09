@@ -20,6 +20,7 @@ const commands = new Proxy({
     '$help': contactHelp,
     '$dalle': createDalleImages,
 	'$about': aboutCommandHandler,
+	'$high5': highFiveCommand,
 }, {
     get: function(target, property) {
         if (property in target) {
@@ -34,6 +35,13 @@ const commands = new Proxy({
     }
 });
 
+async function highFiveCommand(context) {
+    let messageText = context.activity.text.replace('$high5', '').trim();
+    if (messageText == '') {
+        return sendMessageResponse(context, "Sorry, you need to tell me who to $high5 like this `$high5 andy.tillo@teradata.com for doing something amazing!");
+    }
+    return sendMessageResponse(context, `You just $high5'd ${messageText}.`);
+}
 
 async function aboutCommandHandler(context) {
     const readmeUrl = "https://raw.githubusercontent.com/tillo13/azure_bot/main/README.md";
