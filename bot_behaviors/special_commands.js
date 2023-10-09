@@ -37,18 +37,23 @@ const commands = new Proxy({
 
 async function aboutCommandHandler(context) {
     const readmeUrl = "https://raw.githubusercontent.com/tillo13/azure_bot/main/README.md";
-    let readmeContent;
+    let readmeContent = "";
 
-    try {
-        const response = await fetch(readmeUrl);
-        readmeContent = await response.text();
-        console.log("Successfully got README.md from GitHub:\n", readmeContent);
-    } catch (error) {
-        console.error("Error fetching README.md from GitHub:\n", error);
-        readmeContent = `Could not get README information at this time due to the following error: ${error}`;
-    }
-    
-    return sendMessageResponse(context, readmeContent);
+    return new Promise((resolve, reject) => {
+        https.get(readmeUrl, (res) => {
+            res.on('data', (chunk) => {
+                readmeContent += chunk.toString();
+            });
+
+            res.on('end', () => {
+                resolve(sendMessageResponse(context, readmeContent));
+            });
+
+            res.on('error', (error) => {
+                reject(sendMessageResponse(context, "An error occured while fetching the README: " + error.message));
+            });
+        });
+    });
 }
 
 async function createJiraTask(context) {
