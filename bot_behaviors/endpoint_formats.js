@@ -14,7 +14,8 @@ const helpMessage = {
 		"Type `$dig` for some fun intrigue...",
 		"Use `$reset` command to erase all interaction memory.",
 		"Type `$about` to know more about this application.",
-		"Try `$jira [type description here] to create a ticket in ESS ticket queue for any assistance."
+		"How about just recognizing an outstanding colleague with `$high5 [insert email/phone/@ here]' to give some fun kudos!",
+		"If things just are not working for you, try `$jira [type description here]' to create a ticket in ESS ticket queue for any assistance."
 	]
 };
 
@@ -146,7 +147,12 @@ module.exports = {
 				},
 				{
 					type: "TextBlock",
-					text: `**4.**  Type **$jira** [description here] to create a ticket in ESS ticket queue for any assistance. to start over.`,
+					text: `**6.**  Try **$high5** to go recognize someone for being great!`,
+					wrap: true
+				},
+				{
+					type: "TextBlock",
+					text: `**7.**  Type **$jira** [description here] to create a ticket in ESS ticket queue for any assistance. to start over.`,
 					wrap: true
 				} 
 			],
