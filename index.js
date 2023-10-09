@@ -42,6 +42,8 @@ const accountKey = process.env['2023oct7_AZURE_STORAGE_ACCOUNT_KEY'];
 const containerName = process.env['2023oct7_AZURE_STORAGE_CONTAINER_NAME'];
 const blobName = process.env['2023oct7_AZURE_STORAGE_BLOB_NAME'];
 
+console.log("\n*INDEX.JS: DATABASE HOST from .env:  ", process.env['2023oct9_AZURE_POSTGRES_HOST']);
+
 const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
 const pipeline = newPipeline(sharedKeyCredential);
 
