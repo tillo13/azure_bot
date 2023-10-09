@@ -50,22 +50,19 @@ async function highFiveCommand(context) {
 
     // Match and remove username/email/phone from messageText
     let username = '';
-    if (messageText.match(usernameRegex)) {
-        username = messageText.match(usernameRegex)[0];
-        messageText = messageText.replace(username, '').trim();
+	if (messageText.match(usernameRegex)) {
+		if (context.activity.channelId.toLowerCase() === 'webchat' || context.activity.channelId.toLowerCase() === 'slack') {
+			username = messageText.match(usernameRegex)[1];
+		} else {
+			username = messageText.match(usernameRegex)[0];
+		}
+		messageText = messageText.replace(username, '').trim();
     } else if (messageText.match(emailRegex)) {
         username = messageText.match(emailRegex)[0];
         messageText = messageText.replace(username, '').trim();
     } else if(messageText.match(phoneRegex)) {
         username = messageText.match(phoneRegex)[0];
         messageText = messageText.replace(username, '').trim();
-    }
-
-    // Check if a username was successfully parsed
-    if (username === '') {
-        console.error('No valid username found in input message');
-        return sendMessageResponse(context, 
-        "Sorry, we couldn't find a valid identifier for the high5 receiver in your message. Make sure to include an @tag, email, or 10-digit phone number.");
     }
 
     // The remaining text is the reason, if it's empty set it to "just because"
