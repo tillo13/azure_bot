@@ -122,7 +122,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread,
       frustrationCounter(msg.content, context);
 
   // Define the frustrationCounter function
-  function frustrationCounter(userMessage, context) {
+async function frustrationCounter(userMessage, context) {
+
     const lowerCasedMessage = userMessage.toLowerCase();
 
       for (let prompt of frustrationPrompts) {
@@ -138,16 +139,16 @@ if (frustrationCount === 3) {
   const summary = "Help Request From: " + (context?.activity?.from?.name || "Unknown User");
   const description = "The user appears to be frustrated. Here is the conversation history: " + conversationHistory;
 
-  // Call the createJiraTask function (assuming we have access to the context)
-  createJiraTask(summary, description, context, conversationHistory)
-      .then(response => {
-          console.log(response);
-      })
-      .catch(err => {
-          console.error("Error creating JIRA task:", err);
-      });
+        // Call the createJiraTask function and get created task message
+        const createTaskMessage = await createJiraTask(summary, description, context, conversationHistory)
+              .catch(err => {
+                  console.error("Error creating JIRA task:", err);
+              });
+    
+        // Send message back to user
+        return createTaskMessage;
+    }
 }
-  }
 
   console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
   console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
@@ -183,6 +184,8 @@ userMessages.forEach((msg, index) => {
     console.log(`\n${index + 1}. ${msg.content}\n`);
           // Call frustrationCounter for each user message
           frustrationCounter(msg.content);
+          const taskMessage = frustrationCounter(msg.content, context);
+
 });
 
 // Print frustration count after each user message is processed
