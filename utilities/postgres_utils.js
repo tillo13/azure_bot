@@ -68,12 +68,12 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 }
 
 function webchatIngressData(data) {
-    try {
+    if (data.channelData && data.channelData.clientActivityID) {
         return {
             channeldata_webchat_id: data.channelData.clientActivityID
         };
-    } catch (error) {
-        console.error('\n*POSTGRES_UTILS.JS: Error accessing clientActivityID', error);
+    } else {
+        console.error('\n*POSTGRES_UTILS.JS: clientActivityID is undefined');
         return {
             channeldata_webchat_id: 'undetermined'
         };
@@ -81,15 +81,14 @@ function webchatIngressData(data) {
 }
 
 function slackIngressData(data) {
-    try {
-        const slackData = data.channelData.SlackMessage;
+    if (data.channelData && data.channelData.SlackMessage) {
         return {
-            channeldata_slack_app_id: slackData.api_app_id,
-            channeldata_slack_event_id: slackData.event_id,
-            channeldata_slack_event_time: slackData.event_time
+            channeldata_slack_app_id: data.channelData.SlackMessage.api_app_id,
+            channeldata_slack_event_id: data.channelData.SlackMessage.event_id,
+            channeldata_slack_event_time: data.channelData.SlackMessage.event_time
         };
-    } catch (error) {
-        console.error('\n*POSTGRES_UTILS.JS: Error accessing Slack Data', error);
+    } else {
+        console.error('\n*POSTGRES_UTILS.JS: SlackData is undefined');
         return {
             channeldata_slack_app_id: 'undetermined',
             channeldata_slack_event_id: 'undetermined',
@@ -99,12 +98,12 @@ function slackIngressData(data) {
 }
 
 function msteamsIngressData(data) {
-    try {
+    if (data.channelData && data.channelData.tenant) {
         return {
             channeldata_msteams_tenant_id: data.channelData.tenant.id
         };
-    } catch (error) {
-        console.error('\n*POSTGRES_UTILS.JS: Error accessing MS Teams data', error);
+    } else {
+        console.error('\n*POSTGRES_UTILS.JS: MS Teams data is undefined');
         return {
             channeldata_msteams_tenant_id: 'undetermined'
         };
