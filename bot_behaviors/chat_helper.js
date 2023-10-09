@@ -1,6 +1,5 @@
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
 const modelCosts = require('./openai_costs_2023sept7.json');
-const { createJiraTask } = require('./jira_utils');
 
 
 const MAX_OPENAI_TOKENS = 400;
@@ -41,15 +40,6 @@ const bot_response_patterns = [
     "just an ai"
     // Include any more patterns...
 ];
-
-function formatConversationHistory(chatMessages) {
-  let formattedHistory = "";
-  chatMessages.forEach((msg, index) => {
-      const role = msg.role.toUpperCase();
-      formattedHistory += `\n${index + 1}. ${role} : ${msg.content}\n`;
-  });
-  return formattedHistory;
-}
 
 function shouldRequery(responseContent) {
     const lowerCasedResponse = responseContent.toLowerCase();
@@ -98,7 +88,7 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 
 
 let chatHistory = [];
-async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread, context) { 
+async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 
 
   // Define the frustrationPrompts array
@@ -118,13 +108,10 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread,
 
   // Frustration counter
   let frustrationCount = 0; 
-      // Pass context to the frustrationCounter function
-      frustrationCounter(msg.content, context);
 
   // Define the frustrationCounter function
-async function frustrationCounter(userMessage, context) {
-
-    const lowerCasedMessage = userMessage.toLowerCase();
+  function frustrationCounter(userMessage) {
+      const lowerCasedMessage = userMessage.toLowerCase();
 
       for (let prompt of frustrationPrompts) {
           if (lowerCasedMessage.includes(prompt.toLowerCase())) { 
@@ -133,22 +120,7 @@ async function frustrationCounter(userMessage, context) {
               break;
           }
       }
-      // Add this inside the `frustrationCounter` function
-if (frustrationCount === 3) {
-  const conversationHistory = formatConversationHistory(chatMessages);
-  const summary = "Help Request From: " + (context?.activity?.from?.name || "Unknown User");
-  const description = "The user appears to be frustrated. Here is the conversation history: " + conversationHistory;
-
-        // Call the createJiraTask function and get created task message
-        const createTaskMessage = await createJiraTask(summary, description, context, conversationHistory)
-              .catch(err => {
-                  console.error("Error creating JIRA task:", err);
-              });
-    
-        // Send message back to user
-        return createTaskMessage;
-    }
-}
+  }
 
   console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
   console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
@@ -184,12 +156,22 @@ userMessages.forEach((msg, index) => {
     console.log(`\n${index + 1}. ${msg.content}\n`);
           // Call frustrationCounter for each user message
           frustrationCounter(msg.content);
-          const taskMessage = frustrationCounter(msg.content, context);
-
 });
 
 // Print frustration count after each user message is processed
 console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT including latest response: ${frustrationCount}`);
+
+if (frustrationCount === 3) {
+  console.log("\n\n***CHAT_HELPER.JS: User has hit the Frustration Counter. Sending them a custom message...");
+  const responseMessage = "You've hit the frustrationCounter, I'm sorry, please consider typing `$jira` [and your issue here] and we'll have someone take a look at it!";
+  console.log("\n\n***CHAT_HELPER.JS: Sent the following message to the user:", responseMessage);
+  return {
+      'assistantResponse': responseMessage,
+      'requery': false,
+      'letMeCheckFlag': false,
+      'chats': newCleanChatMessages
+  };
+}
 
 let cleanConversation = '';
 
