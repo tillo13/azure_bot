@@ -13,7 +13,8 @@ const helpMessage = {
 		},
 		"Type `$dig` for some fun intrigue...",
 		"Use `$reset` command to erase all interaction memory.",
-		"Type `$about` to know more about this application."
+		"Type `$about` to know more about this application.",
+		"Try `$jira [type description here] to create a ticket in ESS ticket queue for any assistance."
 	]
 };
 
@@ -23,7 +24,13 @@ module.exports = {
 			`*${helpMessage.title}*`,
 			helpMessage.note,
 			`*${helpMessage.instructions}*`,
-			...helpMessage.list.map((item, index) => `${index + 1}. ${item}`)
+			...helpMessage.list.map((item, index) => {
+					if(typeof item === 'object') {
+					   let nestedList = item.subList.map((subItem, subIndex) => `\t ${subIndex+1}. ${subItem}`).join('\n');
+					   return `${index + 1}. ${item.text}\n${nestedList}`;
+					} 
+					return `${index + 1}. ${item}`
+				})
 		].join('\n');
 	},
 
@@ -45,16 +52,32 @@ module.exports = {
 					text: `*${helpMessage.instructions}*`,
 					wrap: true,
 				},
-				...helpMessage.list.map((item) => ({
-					type: "TextBlock",
-					text: `\u2022 ${item}`,
-					wrap: true
-				}))
+				...helpMessage.list.map((item) => {
+					if(typeof item === 'object') {
+					   let nestedList = item.subList.map((subItem, subIndex) => {
+							return {
+								type: "TextBlock",
+								text: `\t ${subIndex+1}. ${subItem}`,
+								wrap: true
+							}
+					   });
+					   return [{
+							type: "TextBlock",
+							text: `${item.text}`,
+							wrap: true
+						}, ...nestedList];
+					} 
+					return {
+						type: "TextBlock",
+						text: `\u2022 ${item}`,
+						wrap: true
+					};
+				}).flat()
 			],
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			version: "1.3",
 		};
-
+	
 		return {
 			type: "attachment",
 			contentType: "application/vnd.microsoft.card.adaptive",
@@ -69,6 +92,10 @@ module.exports = {
 			`\n\n${helpMessage.note}\n`,
 			`\n\n:information_source: ${helpMessage.instructions}\n\n`,
 			...helpMessage.list.map((item, index) => {
+				if (typeof item === 'object') {
+						let nestedList = item.subList.map((subItem, subIndex) => `     - ${subItem}`).join('\n');
+						return `_${index + 1}. ${item.text}_\n${nestedList}`;
+				} 
 				return `_${index + 1}. ${item}_`;
 			})
 		].join('\n\n');
@@ -117,6 +144,11 @@ module.exports = {
 					text: `**5.**  Try **$about** for more info.`,
 					wrap: true
 				},
+				{
+					type: "TextBlock",
+					text: `**4.**  Type **$jira** [description here] to create a ticket in ESS ticket queue for any assistance. to start over.`,
+					wrap: true
+				} 
 			],
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			version: "1.4",
