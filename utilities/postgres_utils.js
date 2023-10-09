@@ -30,17 +30,27 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 		switch (channelId) {
 			case 'webchat':
 				preparedData = webchatIngressData(data);
-				payload = (data.text || "").substring(0, 2900); // truncate message text
+				try {
+					payload = (data.text || "").substring(0, 2900); // truncate message text
+				} catch(_) {
+					payload = JSON.stringify(data).substring(0, 2900); // default to entire payload
+				}
 				break;
 			case 'slack':
 				preparedData = slackIngressData(data);
-				payload = (data.channelData && data.channelData.SlackMessage && 
-                                        data.channelData.SlackMessage.event && 
-                                        data.channelData.SlackMessage.event.text || "").substring(0, 2900); // truncate message text
+				try {
+					payload = (data.channelData.SlackMessage.event.text || "").substring(0, 2900); // truncate message text
+				} catch(_) {
+					payload = JSON.stringify(data).substring(0, 2900); // default to entire payload
+				}
 				break;
 			case 'msteams':
 				preparedData = msteamsIngressData(data);
-				payload = (data.text || "").substring(0, 2900); // truncate message text
+				try {
+					payload = (data.text || "").substring(0, 2900); // truncate message text
+				} catch(_) {
+					payload = JSON.stringify(data).substring(0, 2900); // default to entire payload
+				}
 				break;
 			default:
 				preparedData = defaultIngressData(data);
@@ -54,29 +64,33 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 	try {
 		const query = `
 		INSERT INTO ${process.env['2023oct9_AZURE_POSTGRES_DATABASE_INGRESS_TABLE']} (
-				channel_id, message_type, message_id, timestamp_from_endpoint, local_timestamp_from_endpoint, 
-				local_timezone_from_endpoint, service_url, from_id, from_name, conversation_id, 
-				attachment_exists, recipient_id, recipient_name,channeldata_webchat_id, 
-				channeldata_slack_app_id, channeldata_slack_event_id, channeldata_slack_event_time, 
-				channeldata_msteams_tenant_id, message_payload
+			channel_id, message_type, message_id, timestamp_from_endpoint, 
+			local_timestamp_from_endpoint, local_timezone_from_endpoint, 
+			service_url, from_id, from_name, conversation_id, 
+			attachment_exists, recipient_id, recipient_name, 
+			channeldata_webchat_id, channeldata_slack_app_id, 
+			channeldata_slack_event_id, channeldata_slack_event_time, 
+			channeldata_msteams_tenant_id, message_payload
 		) 
 		VALUES (
-		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
-		)`;
-		await pool.query(query, [
-			channelId, data.type, data.id, data.timestamp,
-			data.localTimestamp, data.localTimezone, data.serviceUrl,
-			data.from.id, data.from.name, data.conversation.id,
-			data.attachments && data.attachments.length > 0,
-			data.recipient.id, data.recipient.name,
-			preparedData.channeldata_webchat_id,
-			preparedData.channeldata_slack_app_id,
-			preparedData.channeldata_slack_event_id,
-			preparedData.channeldata_slack_event_time,
-			preparedData.channeldata_msteams_tenant_id,
-			payload
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
+		) RETURNING pk_id, message_id`;
+
+		let result = await pool.query(query, [
+			channelId, data.type, data.id, data.timestamp, data.localTimestamp, 
+			data.localTimezone, data.serviceUrl, data.from.id, data.from.name, 
+			data.conversation.id, data.attachments && data.attachments.length > 0, 
+			data.recipient.id, data.recipient.name, preparedData.channeldata_webchat_id, 
+			preparedData.channeldata_slack_app_id, preparedData.channeldata_slack_event_id, 
+			preparedData.channeldata_slack_event_time, 
+			preparedData.channeldata_msteams_tenant_id, payload
 		]);
-		console.log('\n*POSTGRES_UTILS.JS: Data saved to Postgres');
+
+		if (result.rows.length > 0) {
+			console.log(`\n*POSTGRES_UTILS.JS: Data saved to Postgres with messageID from ingress = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
+		} else {
+			console.log('\n*POSTGRES_UTILS.JS: No Data returned after insert operation');
+		}
 	} catch (err) {
 		console.error('\n*POSTGRES_UTILS.JS: Failed to save data to Postgres', err);
 	}
