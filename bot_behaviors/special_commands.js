@@ -1,77 +1,22 @@
-const formats = require('./endpoint_formats');
-const chatCompletion = require('./chat_helper');
-const jira_utils = require('./jira_utils');
-
-const {
-	MessageFactory
-} = require('botbuilder');
-const generateImages = require('./dalle_utils');
-const {
-	addReaction,
-	removeReaction
-} = require('./slack_utils');
-const https = require("https");
-
-const commands = new Proxy({
-    '$dig': useShovel,
-    '$jira': createJiraTask,
-    '$reset': resetChatPayload,
-    '$upgrade': teaseUpgrade,
-    '$help': contactHelp,
-    '$dalle': createDalleImages,
-	'$about': aboutCommandHandler,
-	'$high5': highFiveCommand,
-}, {
-    get: function(target, property) {
-        if (property in target) {
-            return target[property];
-        } else {
-            for (let key in target) {
-                if (property.startsWith(key)) {
-                    return target[key];
-                }
-            }
-        }
-    }
-});
-
 async function highFiveCommand(context) {
     let messageText = context.activity.text.replace('$high5', '').trim();
-    let channelId = context.activity.channelId.toLowerCase();
 
-    if (messageText === '') {
+    if (messageText == '') {
         return sendMessageResponse(context, 
         "Sorry, you need to tell me who to $high5, like this `$high5 andy.tillo@teradata.com for doing something amazing!");
     }
 
-    // Regular expressions to match username/email/phone
+    // Setup regular expressions to match username/email/phone
+    const usernameRegex = /^@(\w+)/;
     const emailRegex = /(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/;
     const phoneRegex = /(\b\d{10}\b)/;
 
     // Match and remove username/email/phone from messageText
     let username = '';
-
-    // In Microsoft Teams and Slack, @username is treated as a mention
-    if (channelId === 'msteams' || channelId === 'slack') {
-        let mention = context.activity.entities.find(e => e.type === 'mention');
-        if (mention) {
-            username = mention.text;
-            messageText = messageText.replace(username, '').trim();
-        }
-    }
-
-    // In WebChat, @username is treated as plain text
-    if (channelId === 'webchat') {
-        const usernameRegex = /\@(\w+)/; 
-        let match = messageText.match(usernameRegex);
-        if (match) {
-          username = match[1];
-          messageText = messageText.replace('@' + username, '').trim();
-        }
-    }    
-
-    // Check for email address or phone number
-    if (messageText.match(emailRegex)) {
+    if (messageText.match(usernameRegex)) {
+        username = messageText.match(usernameRegex)[0];
+        messageText = messageText.replace(username, '').trim();
+    } else if (messageText.match(emailRegex)) {
         username = messageText.match(emailRegex)[0];
         messageText = messageText.replace(username, '').trim();
     } else if(messageText.match(phoneRegex)) {
@@ -79,33 +24,30 @@ async function highFiveCommand(context) {
         messageText = messageText.replace(username, '').trim();
     }
 
-    // Validate the extracted username
+    // Check if a username was successfully parsed
     if (username === '') {
-        console.error('No valid username found in message');
+        console.error('No valid username found in input message');
         return sendMessageResponse(context, 
-        "Sorry, we couldn't find a valid identifier for the high5 receiver in your message. Make sure to include an @tag, email, or phone number.");
+        "Sorry, we couldn't find a valid identifier for the high5 receiver in your message. Make sure to include an @tag, email, or 10-digit phone number.");
     }
 
-    // The remaining text is the reason for the high5
+    // The remaining text is the reason, if it's empty set it to "just because"
     let reason = messageText === '' ? "just because" : messageText;
 
-	// Log output for the console
-console.log(`\n\nSPECIAL_COMMANDS.JS: Parsed from ${channelId}: user ${username} from ${context.activity.from.name} for reason: ${reason}.`);
+    // Return the formatted message
+    let formattedMessage = `High5 Sender: ${context.activity.from.name}\n`;
+    formattedMessage += `High5 Receiver: ${username}\n`;
+    formattedMessage += `High5 Reason: ${reason}`;
 
-    try {
-        if (channelId === 'webchat') {
-            await context.sendActivity(formats.high5_WebchatResponse(context.activity.from.name, username, reason));
-        } else if (channelId === 'msteams') {
-            const reply = MessageFactory.attachment(formats.high5_msteamsResponse(context.activity.from.name, username, reason));
-            await context.sendActivity(reply);
-        } else if (channelId === 'slack') {
-            await context.sendActivity(formats.high5_SlackResponse(context.activity.from.name, username, reason));
-        } else {
-            throw new Error('Could not determine channelId');
-        }
-    } catch (error) {
-        console.error(error);
-        await context.sendActivity(`Error: ${error.message}`);
+    if (context.activity.channelId.toLowerCase() === 'webchat') {
+        await context.sendActivity(formats.high5_WebchatResponse(context.activity.from.name, username, reason));
+    } else if (context.activity.channelId.toLowerCase() === 'msteams') {
+        const reply = MessageFactory.attachment(formats.high5_msteamsResponse(context.activity.from.name, username, reason));
+        await context.sendActivity(reply);
+    } else if (context.activity.channelId.toLowerCase() === 'slack') {
+        await context.sendActivity(formats.high5_SlackResponse(context.activity.from.name, username, reason));
+    } else {
+        await context.sendActivity(formats.high5_DefaultResponse(context.activity.from.name, username, reason));
     }
 }
 
