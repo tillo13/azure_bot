@@ -37,32 +37,36 @@ const commands = new Proxy({
 
 async function highFiveCommand(context) {
     let messageText = context.activity.text.replace('$high5', '').trim();
+    let channelId = context.activity.channelId.toLowerCase();
 
-    if (messageText == '') {
+    if (messageText === '') {
         return sendMessageResponse(context, 
         "Sorry, you need to tell me who to $high5, like this `$high5 andy.tillo@teradata.com for doing something amazing!");
     }
 
     // Setup regular expressions to match username/email/phone
-    const usernameRegex = /^@(\w+)/;
+    const usernameRegex = channelId === 'webchat' ? /^@(\w+)/ : /@(\w+)\b/;
     const emailRegex = /(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/;
     const phoneRegex = /(\b\d{10}\b)/;
 
     // Match and remove username/email/phone from messageText
     let username = '';
-	if (messageText.match(usernameRegex)) {
-		if (context.activity.channelId.toLowerCase() === 'webchat' || context.activity.channelId.toLowerCase() === 'slack') {
-			username = messageText.match(usernameRegex)[1];
-		} else {
-			username = messageText.match(usernameRegex)[0];
-		}
-		messageText = messageText.replace(username, '').trim();
+    if (messageText.match(usernameRegex)) {
+        username = messageText.match(usernameRegex)[1];
+        messageText = messageText.replace('@' + username, '').trim();
     } else if (messageText.match(emailRegex)) {
         username = messageText.match(emailRegex)[0];
         messageText = messageText.replace(username, '').trim();
     } else if(messageText.match(phoneRegex)) {
         username = messageText.match(phoneRegex)[0];
         messageText = messageText.replace(username, '').trim();
+    }
+
+    // Check if a username was successfully parsed
+    if (username === '') {
+        console.error('No valid username found in input message');
+        return sendMessageResponse(context, 
+        "Sorry, we couldn't find a valid identifier for the high5 receiver in your message. Make sure to include an @tag, email, or 10-digit phone number.");
     }
 
     // The remaining text is the reason, if it's empty set it to "just because"
@@ -73,37 +77,21 @@ async function highFiveCommand(context) {
     formattedMessage += `High5 Receiver: ${username}\n`;
     formattedMessage += `High5 Reason: ${reason}`;
 
-    if (context.activity.channelId.toLowerCase() === 'webchat') {
-        await context.sendActivity(formats.high5_WebchatResponse(context.activity.from.name, username, reason));
-    } else if (context.activity.channelId.toLowerCase() === 'msteams') {
-        const reply = MessageFactory.attachment(formats.high5_msteamsResponse(context.activity.from.name, username, reason));
-        await context.sendActivity(reply);
-    } else if (context.activity.channelId.toLowerCase() === 'slack') {
-        await context.sendActivity(formats.high5_SlackResponse(context.activity.from.name, username, reason));
-    } else {
-        await context.sendActivity(formats.high5_DefaultResponse(context.activity.from.name, username, reason));
+    try {
+        if (channelId === 'webchat') {
+            await context.sendActivity(formats.high5_WebchatResponse(context.activity.from.name, username, reason));
+        } else if (channelId === 'msteams') {
+            const reply = MessageFactory.attachment(formats.high5_msteamsResponse(context.activity.from.name, username, reason));
+            await context.sendActivity(reply);
+        } else if (channelId === 'slack') {
+            await context.sendActivity(formats.high5_SlackResponse(context.activity.from.name, username, reason));
+        } else {
+            throw new Error('Could not determine channelId');
+        }
+    } catch (error) {
+        console.error(error);
+        await context.sendActivity(`Error: ${error.message}`);
     }
-}
-
-async function aboutCommandHandler(context) {
-    const readmeUrl = "https://raw.githubusercontent.com/tillo13/azure_bot/main/README.md";
-    let readmeContent = "";
-
-    return new Promise((resolve, reject) => {
-        https.get(readmeUrl, (res) => {
-            res.on('data', (chunk) => {
-                readmeContent += chunk.toString();
-            });
-
-            res.on('end', () => {
-                resolve(sendMessageResponse(context, readmeContent));
-            });
-
-            res.on('error', (error) => {
-                reject(sendMessageResponse(context, "An error occured while fetching the README: " + error.message));
-            });
-        });
-    });
 }
 
 async function createJiraTask(context) {
