@@ -13,7 +13,7 @@ pool.on('error', (err, client) => {
     client.end();
 })
 
-async function saveDataToPostgres(data, channelId) {
+async function botIngressSaveDataToPostgres(data, channelId) {
     let preparedData = {};
 
     // Prepare data for different channels
@@ -116,5 +116,5 @@ function defaultIngressData() {
 }
 
 module.exports = {
-    saveDataToPostgres
+    botIngressSaveDataToPostgres
 };
