@@ -10,43 +10,45 @@ const pool = new Pool({
 
 pool.on('error', (err, client) => {
     console.error('\n*POSTGRES_UTILS.JS: Unexpected error on idle client', err)
-    // end just this one problematic client connection.
-    client.end()
-  })
+    client.end();
+})
 
 async function saveDataToPostgres(data, channelId) {
-    // Prepare data for different channels
-    let preparedData;
+    let preparedData = {};
 
-    switch (channelId) {
-        case 'webchat':
-            preparedData = webchatIngressData(data);
-            break;
-        case 'slack':
-            preparedData = slackIngressData(data);
-            break;
-        case 'msteams':
-            preparedData = msteamsIngressData(data);
-            break;
-        default:
-            preparedData = defaultIngressData(data);
-            break;
+    // Prepare data for different channels
+    try {
+        switch (channelId) {
+            case 'webchat':
+                preparedData = webchatIngressData(data);
+                break;
+            case 'slack':
+                preparedData = slackIngressData(data);
+                break;
+            case 'msteams':
+                preparedData = msteamsIngressData(data);
+                break;
+            default:
+                preparedData = defaultIngressData(data);
+                break;
+        }
+    } catch (error) {
+        console.error('\n*POSTGRES_UTILS.JS: Error preparing data', error);
     }
 
-    // Use prepared data to populate database columns
-    const query = `
-        INSERT INTO bot_invoke_log (
-            channel_id, message_type, message_id, timestamp_from_endpoint, local_timestamp_from_endpoint, 
-            local_timezone_from_endpoint, service_url, from_id, from_name, 
-            conversation_id, attachment_exists, recipient_id, recipient_name,
-            channeldata_webchat_id, channeldata_slack_app_id, channeldata_slack_event_id, 
-            channeldata_slack_event_time, channeldata_msteams_tenant_id
-        ) 
-        VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18 
-        )`;
-
     try {
+        const query = `
+            INSERT INTO bot_invoke_log (
+                channel_id, message_type, message_id, timestamp_from_endpoint, local_timestamp_from_endpoint, 
+                local_timezone_from_endpoint, service_url, from_id, from_name, 
+                conversation_id, attachment_exists, recipient_id, recipient_name,
+                channeldata_webchat_id, channeldata_slack_app_id, channeldata_slack_event_id, 
+                channeldata_slack_event_time, channeldata_msteams_tenant_id
+            ) 
+            VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18 
+            )`;
+
         await pool.query(query, [
             channelId, data.type, data.id, data.timestamp,
             data.localTimestamp, data.localTimezone, data.serviceUrl,
@@ -66,27 +68,50 @@ async function saveDataToPostgres(data, channelId) {
 }
 
 function webchatIngressData(data) {
-    return {
-        channeldata_webchat_id: data.channelData.clientActivityID
-    };
+    try {
+        return {
+            channeldata_webchat_id: data.channelData.clientActivityID
+        };
+    } catch (error) {
+        console.error('\n*POSTGRES_UTILS.JS: Error accessing clientActivityID', error);
+        return {
+            channeldata_webchat_id: 'undetermined'
+        };
+    }
 }
 
 function slackIngressData(data) {
-    const slackData = data.channelData.SlackMessage;
-    return {
-        channeldata_slack_app_id: slackData.api_app_id,
-        channeldata_slack_event_id: slackData.event_id,
-        channeldata_slack_event_time: slackData.event_time
-    };
+    try {
+        const slackData = data.channelData.SlackMessage;
+        return {
+            channeldata_slack_app_id: slackData.api_app_id,
+            channeldata_slack_event_id: slackData.event_id,
+            channeldata_slack_event_time: slackData.event_time
+        };
+    } catch (error) {
+        console.error('\n*POSTGRES_UTILS.JS: Error accessing Slack Data', error);
+        return {
+            channeldata_slack_app_id: 'undetermined',
+            channeldata_slack_event_id: 'undetermined',
+            channeldata_slack_event_time: 'undetermined'
+        };
+    }
 }
 
 function msteamsIngressData(data) {
-    return {
-        channeldata_msteams_tenant_id: data.channelData.tenant.id
-    };
+    try {
+        return {
+            channeldata_msteams_tenant_id: data.channelData.tenant.id
+        };
+    } catch (error) {
+        console.error('\n*POSTGRES_UTILS.JS: Error accessing MS Teams data', error);
+        return {
+            channeldata_msteams_tenant_id: 'undetermined'
+        };
+    }
 }
 
-function defaultIngressData(data) {
+function defaultIngressData() {
     return {};
 }
 
