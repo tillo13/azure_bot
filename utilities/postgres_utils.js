@@ -21,6 +21,8 @@ pool.on('error', (err, client) => {
 
 async function botIngressSaveDataToPostgres(data, channelId) {
     let preparedData = {};
+    // Here, we're trimming the payload to the first 2900 characters.
+    const truncatedPayload = JSON.stringify(data).substring(0, 2900);
 
     // Prepare data for different channels
     try {
@@ -46,13 +48,13 @@ async function botIngressSaveDataToPostgres(data, channelId) {
         const query = `
         INSERT INTO ${process.env['2023oct9_AZURE_POSTGRES_DATABASE_INGRESS_TABLE']} (
              channel_id, message_type, message_id, timestamp_from_endpoint, local_timestamp_from_endpoint, 
-             local_timezone_from_endpoint, service_url, from_id, from_name, 
-             conversation_id, attachment_exists, recipient_id, recipient_name,
-             channeldata_webchat_id, channeldata_slack_app_id, channeldata_slack_event_id, 
-             channeldata_slack_event_time, channeldata_msteams_tenant_id
+             local_timezone_from_endpoint, service_url, from_id, from_name, conversation_id, 
+             attachment_exists, recipient_id, recipient_name,channeldata_webchat_id, 
+             channeldata_slack_app_id, channeldata_slack_event_id, channeldata_slack_event_time, 
+             channeldata_msteams_tenant_id, message_payload
         ) 
         VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18 
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
         )`;
             console.log("\n*POSTGRES_UTILS.JS: Executing query: ", query);
             console.log("\n*POSTGRES_UTILS.JS: Data: ", [
@@ -65,7 +67,8 @@ async function botIngressSaveDataToPostgres(data, channelId) {
                         preparedData.channeldata_slack_app_id, 
                         preparedData.channeldata_slack_event_id, 
                         preparedData.channeldata_slack_event_time, 
-                        preparedData.channeldata_msteams_tenant_id
+                        preparedData.channeldata_msteams_tenant_id,
+                        truncatedPayload
             ]);
         await pool.query(query, [
             channelId, data.type, data.id, data.timestamp,
@@ -77,7 +80,8 @@ async function botIngressSaveDataToPostgres(data, channelId) {
             preparedData.channeldata_slack_app_id, 
             preparedData.channeldata_slack_event_id, 
             preparedData.channeldata_slack_event_time, 
-            preparedData.channeldata_msteams_tenant_id
+            preparedData.channeldata_msteams_tenant_id,
+            truncatedPayload 
         ]);
         console.log('\n*POSTGRES_UTILS.JS: Data saved to Postgres');
     } catch (err) {
