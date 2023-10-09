@@ -35,6 +35,7 @@ const commands = new Proxy({
     }
 });
 async function highFiveCommand(context) {
+	try {
     let messageText = context.activity.text.replace('$high5', '').trim();
     
     // Default sender name
@@ -88,15 +89,23 @@ async function highFiveCommand(context) {
 	formattedMessage += `High5 Reason: ${reason}`;
 	
 	if (context.activity.channelId.toLowerCase() === 'webchat') {
-		await context.sendActivity(formats.high5_WebchatResponse(sender, username, reason));
+		const reply = formats.high5_WebchatResponse(sender, username, reason);
+		await context.sendActivity({ attachments: [reply] });
 	} else if (context.activity.channelId.toLowerCase() === 'msteams') {
 		const reply = MessageFactory.attachment(formats.high5_msteamsResponse(sender, username, reason));
-		await context.sendActivity(reply);
+		await context.sendActivity({ attachments: [reply] });
 	} else if (context.activity.channelId.toLowerCase() === 'slack') {
-		await context.sendActivity(formats.high5_SlackResponse(sender, username, reason));
+		const reply = formats.high5_SlackResponse(sender, username, reason);
+		await context.sendActivity({ attachments: [reply] });
 	} else {
-		await context.sendActivity(formats.high5_DefaultResponse(sender, username, reason));
+		const reply = formats.high5_DefaultResponse(sender, username, reason);
+		await context.sendActivity({ attachments: [reply] });
 	}
+} // this is the closing brace for the try block
+catch (error) {
+	console.error('Error in highFiveCommand:', error);
+	return sendMessageResponse(context, `We encountered an error: ${error}`);
+}
 }
 
 async function aboutCommandHandler(context) {
