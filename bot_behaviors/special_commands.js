@@ -44,17 +44,34 @@ async function highFiveCommand(context) {
         "Sorry, you need to tell me who to $high5, like this `$high5 andy.tillo@teradata.com for doing something amazing!");
     }
 
-    // Setup regular expressions to match username/email/phone
-    const usernameRegex = channelId === 'webchat' ? /^@(\w+)/ : /@(\w+)\b/;
+    // Regular expressions to match username/email/phone
     const emailRegex = /(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/;
     const phoneRegex = /(\b\d{10}\b)/;
 
     // Match and remove username/email/phone from messageText
     let username = '';
-    if (messageText.match(usernameRegex)) {
-        username = messageText.match(usernameRegex)[1];
-        messageText = messageText.replace('@' + username, '').trim();
-    } else if (messageText.match(emailRegex)) {
+
+    // In Microsoft Teams and Slack, @username is treated as a mention
+    if (channelId === 'msteams' || channelId === 'slack') {
+        let mention = context.activity.entities.find(e => e.type === 'mention');
+        if (mention) {
+            username = mention.text;
+            messageText = messageText.replace(username, '').trim();
+        }
+    }
+
+    // In WebChat, @username is treated as plain text
+    if (channelId === 'webchat') {
+        const usernameRegex = /\@(\w+)/; 
+        let match = messageText.match(usernameRegex);
+        if (match) {
+          username = match[1];
+          messageText = messageText.replace('@' + username, '').trim();
+        }
+    }    
+
+    // Check for email address or phone number
+    if (messageText.match(emailRegex)) {
         username = messageText.match(emailRegex)[0];
         messageText = messageText.replace(username, '').trim();
     } else if(messageText.match(phoneRegex)) {
@@ -62,20 +79,15 @@ async function highFiveCommand(context) {
         messageText = messageText.replace(username, '').trim();
     }
 
-    // Check if a username was successfully parsed
+    // Validate the extracted username
     if (username === '') {
-        console.error('No valid username found in input message');
+        console.error('No valid username found in message');
         return sendMessageResponse(context, 
-        "Sorry, we couldn't find a valid identifier for the high5 receiver in your message. Make sure to include an @tag, email, or 10-digit phone number.");
+        "Sorry, we couldn't find a valid identifier for the high5 receiver in your message. Make sure to include an @tag, email, or phone number.");
     }
 
-    // The remaining text is the reason, if it's empty set it to "just because"
+    // The remaining text is the reason for the high5
     let reason = messageText === '' ? "just because" : messageText;
-
-    // Return the formatted message
-    let formattedMessage = `High5 Sender: ${context.activity.from.name}\n`;
-    formattedMessage += `High5 Receiver: ${username}\n`;
-    formattedMessage += `High5 Reason: ${reason}`;
 
     try {
         if (channelId === 'webchat') {
