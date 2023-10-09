@@ -94,6 +94,27 @@ async function highFiveCommand(context) {
     }
 }
 
+async function aboutCommandHandler(context) {
+    const readmeUrl = "https://raw.githubusercontent.com/tillo13/azure_bot/main/README.md";
+    let readmeContent = "";
+
+    return new Promise((resolve, reject) => {
+        https.get(readmeUrl, (res) => {
+            res.on('data', (chunk) => {
+                readmeContent += chunk.toString();
+            });
+
+            res.on('end', () => {
+                resolve(sendMessageResponse(context, readmeContent));
+            });
+
+            res.on('error', (error) => {
+                reject(sendMessageResponse(context, "An error occured while fetching the README: " + error.message));
+            });
+        });
+    });
+}
+
 async function createJiraTask(context) {
     let description = context.activity.text.replace('$jira ', '');
     const summary = 'Test from teams';
