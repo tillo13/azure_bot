@@ -63,7 +63,7 @@ Copy code
 
 ### Configuration
 
-The app requires various API keys and settings specified in `.env`:
+The app requires various API keys and settings specified in an `.env`:
 
 - `MicrosoftAppId`, `MicrosoftAppPassword` - Bot Framework app credentials  
 - `OPENAI_API_KEY` - OpenAI API key

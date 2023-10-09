@@ -19,6 +19,7 @@ const commands = new Proxy({
     '$upgrade': teaseUpgrade,
     '$help': contactHelp,
     '$dalle': createDalleImages,
+	'$about': aboutCommandHandler,
 }, {
     get: function(target, property) {
         if (property in target) {
@@ -32,6 +33,22 @@ const commands = new Proxy({
         }
     }
 });
+
+
+async function aboutCommandHandler(context) {
+    const readmeUrl = "https://raw.githubusercontent.com/tillo13/azure_bot/main/README.md";
+    let readmeContent;
+
+    try {
+        const response = await fetch(readmeUrl);
+        readmeContent = await response.text();
+    } catch (error) {
+        console.log("Error fetching README.md", error);
+        readmeContent = "Could not get README information at this time.";
+    }
+    
+    return sendMessageResponse(context, readmeContent);
+}
 
 async function createJiraTask(context) {
 	const description = context.activity.text.replace('$jira ', '');
