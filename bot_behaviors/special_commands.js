@@ -42,9 +42,10 @@ async function aboutCommandHandler(context) {
     try {
         const response = await fetch(readmeUrl);
         readmeContent = await response.text();
+        console.log("Successfully got README.md from GitHub:\n", readmeContent);
     } catch (error) {
-        console.log("Error fetching README.md", error);
-        readmeContent = "Could not get README information at this time.";
+        console.error("Error fetching README.md from GitHub:\n", error);
+        readmeContent = `Could not get README information at this time due to the following error: ${error}`;
     }
     
     return sendMessageResponse(context, readmeContent);
