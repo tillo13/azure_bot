@@ -73,7 +73,16 @@ async function highFiveCommand(context) {
     formattedMessage += `High5 Receiver: ${username}\n`;
     formattedMessage += `High5 Reason: ${reason}`;
 
-    return sendMessageResponse(context, formattedMessage);
+    if (context.activity.channelId.toLowerCase() === 'webchat') {
+        await context.sendActivity(formats.high5_WebchatResponse(context.activity.from.name, username, reason));
+    } else if (context.activity.channelId.toLowerCase() === 'msteams') {
+        const reply = MessageFactory.attachment(formats.high5_msteamsResponse(context.activity.from.name, username, reason));
+        await context.sendActivity(reply);
+    } else if (context.activity.channelId.toLowerCase() === 'slack') {
+        await context.sendActivity(formats.high5_SlackResponse(context.activity.from.name, username, reason));
+    } else {
+        await context.sendActivity(formats.high5_DefaultResponse(context.activity.from.name, username, reason));
+    }
 }
 
 async function aboutCommandHandler(context) {

@@ -20,6 +20,128 @@ const helpMessage = {
 };
 
 module.exports = {
+
+	/////HIGH5 path START//////
+	high5_DefaultResponse: function(sender, receiver, reason) {
+		return `High5! :raised_hand::skin-tone-4:\n\nSender: ${sender}\nReceiver: ${receiver}\nReason: ${reason}`;
+	},
+	high5_WebchatResponse: function(sender, receiver, reason) {
+		const adaptiveCardContent = {
+			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+			type: "AdaptiveCard",
+			version: "1.3",
+			body: [
+				{
+					type: "TextBlock",
+					text: "High5! 🙌",
+					size: "medium",
+					wrap: true
+				},
+				{
+					type: "FactSet",
+					facts: [
+						{
+							title: "Sender:",
+							value: sender
+						},
+						{
+							title: "Receiver:",
+							value: receiver
+						},
+						{
+							title: "Reason:",
+							value: reason
+						}
+					]
+				}
+			]
+		};
+	
+		return {
+			type: "attachment",
+			contentType: "application/vnd.microsoft.card.adaptive",
+			contentUrl: null,
+			content: adaptiveCardContent,
+		};
+	},
+	high5_SlackResponse: function(sender, receiver, reason) {
+		let slackMessage = {
+			"blocks": [
+				{
+					"type": "header",
+					"text": {
+						"type": "plain_text",
+						"text": "High5! 🙌"
+					}
+				},
+				{
+					"type": "section",
+					"fields": [
+						{
+							"type": "mrkdwn",
+							"text": `*Sender:*\n${sender}`
+						},
+						{
+							"type": "mrkdwn",
+							"text": `*Receiver:*\n${receiver}`
+						}
+					]
+				},
+				{
+					"type": "section",
+					"text": {
+						"type": "mrkdwn",
+						"text": `*Reason:*\n${reason}`
+					}
+				}
+			]
+		};
+		  
+		return slackMessage;
+	},
+	high5_msteamsResponse: function(sender, receiver, reason) {
+		const adaptiveCardContent = {
+			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+			type: "AdaptiveCard",
+			version: "1.4",
+			body: [
+				{
+					type: "TextBlock",
+					text: "⭐ High5!",
+					weight: "Bolder",
+					size: "Medium"
+				},
+				{
+					type: "FactSet",
+					facts: [
+						{
+							title: "Sender:",
+							value: sender
+						},
+						{
+							title: "Receiver:",
+							value: receiver
+						},
+						{
+							title: "Reason:",
+							value: reason
+						}
+					]
+				}
+			]
+		};
+	
+		return {
+			type: "attachment",
+			contentType: "application/vnd.microsoft.card.adaptive",
+			contentUrl: null,
+			content: adaptiveCardContent
+		};
+	},
+
+		/////HIGH5 path END//////
+
+				/////help path START//////
 	help_DefaultResponse: function() {
 		return [
 			`*${helpMessage.title}*`,
@@ -167,13 +289,9 @@ module.exports = {
 			content: adaptiveCardContent
 		};
 	},
+//////////help path END///////
+//////////dalle path START///////
 
-
-
-
-
-//////////dalle formatting///////
-//////precursory message format/////////
 dalle_precursor_DefaultResponse: function(prompt, numImages, imageSize) {
 	return `Summary: We are going to use Dall-E to create: ${prompt}\nNumber of images: ${numImages}\nSize of images: ${imageSize}\n\nPlease hold while we align 1s and 0s...`;
 },
@@ -267,7 +385,7 @@ dalle_precursor_msteamsResponse: function(prompt, numImages, imageSize) {
 	};
 },
 
-
+//////////dalle path END///////
 //////post processing dalle message format/////
 
 	dalle_DefaultResponse: function(numImages, imageSize, duration) {
