@@ -57,21 +57,20 @@ async function aboutCommandHandler(context) {
 }
 
 async function createJiraTask(context) {
-	const description = context.activity.text.replace('$jira ', '');
-	const summary = 'Test from teams';
-	//console.log('\n******SPECIAL_COMMANDS: the context in flight:\n', context);
-	//console.log('\n******SPECIAL_COMMANDS: the current chat history in flight:\n', chatHistory);
-	
-    
-    if (!description || description.length === 0) {
-		console.log('\n******SPECIAL_COMMANDS: $jira command issued without a description payload by:\n', context.activity.from.name);
-        const adviceMessage = "Usage: `$jira [description]`. You need to provide a description after `$jira` to create a ticket.";
+    let description = context.activity.text.replace('$jira ', '');
+    const summary = 'Test from teams';
+
+    // creating a cleaned description by removing the command
+    const cleanedDescription = description.replace('$jira ', '');
+
+    if (!cleanedDescription || cleanedDescription.length < 10) {
+        console.log('\n******SPECIAL_COMMANDS: $jira command issued with insufficient description by:\n', context.activity.from.name);
+        const adviceMessage = "Usage: `$jira [description]`. The description must be longer than 10 characters.";
         return sendMessageResponse(context, adviceMessage);
     }
     
     // normal ticket creation can proceed if we reach this point
-	//const responseMessage = await jira_utils.createJiraTask(summary, description, context.activity.channelId);
-	const responseMessage = await jira_utils.createJiraTask(summary, description, context);
+    const responseMessage = await jira_utils.createJiraTask(summary, cleanedDescription, context);
 
     return sendMessageResponse(context, responseMessage);
 }
