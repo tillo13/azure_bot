@@ -44,16 +44,16 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 
     try {
         const query = `
-            INSERT INTO bot_invoke_log (
-                channel_id, message_type, message_id, timestamp_from_endpoint, local_timestamp_from_endpoint, 
-                local_timezone_from_endpoint, service_url, from_id, from_name, 
-                conversation_id, attachment_exists, recipient_id, recipient_name,
-                channeldata_webchat_id, channeldata_slack_app_id, channeldata_slack_event_id, 
-                channeldata_slack_event_time, channeldata_msteams_tenant_id
-            ) 
-            VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18 
-            )`;
+        INSERT INTO ${process.env['2023oct9_AZURE_POSTGRES_DATABASE_INGRESS_TABLE']} (
+             channel_id, message_type, message_id, timestamp_from_endpoint, local_timestamp_from_endpoint, 
+             local_timezone_from_endpoint, service_url, from_id, from_name, 
+             conversation_id, attachment_exists, recipient_id, recipient_name,
+             channeldata_webchat_id, channeldata_slack_app_id, channeldata_slack_event_id, 
+             channeldata_slack_event_time, channeldata_msteams_tenant_id
+        ) 
+        VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18 
+        )`;
             console.log("\n*POSTGRES_UTILS.JS: Executing query: ", query);
             console.log("\n*POSTGRES_UTILS.JS: Data: ", [
                         channelId, data.type, data.id, data.timestamp,
