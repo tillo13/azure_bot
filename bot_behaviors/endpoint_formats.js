@@ -11,7 +11,9 @@ const helpMessage = {
 				"`--num`: specifies the number of images to be generated. Maximum is 10. Example: `$dalle a nice painting --num 3`"
 			]
 		},
-		"Type `$dig` for intrigue..."
+		"Type `$dig` for some fun intrigue...",
+		"Use `$reset` command to erase all interaction memory.",
+		"Type `$about` to know more about this application."
 	]
 };
 

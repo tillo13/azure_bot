@@ -1,4 +1,4 @@
-# MS Azure Bot Features
+# Teradata Bot
 This app provides a conversational bot experience across multiple platforms like Slack, Microsoft Teams, and webchat. The bot can understand natural language, have coherent dialogs, and execute helpful commands.
 
 ## Features
@@ -6,7 +6,7 @@ This app provides a conversational bot experience across multiple platforms like
 - Responds intelligently to user messages across Slack, Teams and webchat
 - Maintains conversation context and history within a thread/chat session
 - Provides helpful responses and can requery itself when unsure  
-- Handles common commands like `$help`, `$reset`, `$dalle` etc.
+- Handles common commands like `$help`, `$reset`, `$dalle`, `$dig` to name a few.
 - Integrates with Jira to create tickets from conversations
 - Leverages DALL-E 2 to generate images from prompts
 - Logs usage analytics like messages, users and interactions
@@ -22,7 +22,7 @@ The app uses a modular architecture:
 - `chat_helper.js` - core conversational module
 - `special_commands.js` - custom command handlers  
 - `slack_utils.js`, `jira_utils.js` - integration helpers
-- `.env` file - secrets and configuration
+- Ties into Teradata OFS for storage
 
 Key components:
 
@@ -31,44 +31,6 @@ Key components:
 - **OpenAI GPT-3.5 Turbo** - NLP for conversations
 - **Azure Cognitive Services** - OpenAI endpoint
 - **User State** - Storage for context, dialogs
-
-## Getting Started 
-
-### Prerequisites
-
-- Node.js 14+  
-- Azure subscription
-- Bot Framework registration 
-- OpenAI API key
-- Other API keys for integrations
-
-### Installation
-git clone <repo>
-npm install
-
-Copy code
-
-
-Configure `.env` with API keys and settings.
-
-Deploy bot service on Azure.  
-
-Connect channels like Slack and Teams.
-
-Run locally:
-npm start
-
-Copy code
-
-
-### Configuration
-
-The app requires various API keys and settings specified in an `.env`:
-
-- `MicrosoftAppId`, `MicrosoftAppPassword` - Bot Framework app credentials  
-- `OPENAI_API_KEY` - OpenAI API key
-- `SLACK_BOT_TOKEN` - Slack bot token
-- etc.
 
 
 ## Usage
@@ -90,3 +52,9 @@ Handles platform-specific needs:
 - **Slack** - Threads, reactions  
 - **Teams** - User welcome, Adaptive Cards
 - **Webchat** - Hosted web embed
+
+
+## Future thoughts..
+- Cleaner payload manipulation
+- Deeper vector database analysis
+- Other chat platforms
