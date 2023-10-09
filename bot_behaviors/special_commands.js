@@ -43,34 +43,33 @@ async function highFiveCommand(context) {
         "Sorry, you need to tell me who to $high5, like this `$high5 andy.tillo@teradata.com for doing something amazing!");
     }
 
-    // Prepare placeholder variable for username and reason 
-    let username = "";
-    let reason = "";
+    // Setup regular expressions to match username/email/phone
+    const usernameRegex = /^@(\w+)/;
+    const emailRegex = /(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/;
+    const phoneRegex = /(\b\d{10}\b)/;
 
-    try {
-        // Split message by 'for' keyword to separate username and reason
-        let splitMessage = messageText.split(' for ');
-
-        username = splitMessage[0]; // The part before 'for' is always the username
-
-        // If there is a part after 'for', it is the reason
-        // If not, default to "just because"
-        reason = splitMessage.length > 1 ? splitMessage[1] : "just because";
-
-        // Remove any unwanted white spaces
-        username = username.trim();
-        reason = reason.trim();
-
-        // Check if input username is in valid format (email, @tag, phone number)
-        // Simplified logic: tag starts with @, email contains @ and '.', phone number is 10 digits long
-        if (!(username.startsWith('@') || (username.includes('@') && username.includes('.')) || /^\d{10}$/.test(username))) {
-            throw new Error('Invalid format for username');
-        }
-    } catch (error) {
-        console.error(`Error while parsing input message: ${error}`);
-        return sendMessageResponse(context, 
-        "Sorry, we couldn't parse your message correctly. Make sure to put your high5 receiver's tag, email or phone number correctly.");
+    // Match and remove username/email/phone from messageText
+    let username = '';
+    if (messageText.match(usernameRegex)) {
+        username = messageText.match(usernameRegex)[0];
+        messageText = messageText.replace(username, '').trim();
+    } else if (messageText.match(emailRegex)) {
+        username = messageText.match(emailRegex)[0];
+        messageText = messageText.replace(username, '').trim();
+    } else if(messageText.match(phoneRegex)) {
+        username = messageText.match(phoneRegex)[0];
+        messageText = messageText.replace(username, '').trim();
     }
+
+    // Check if a username was successfully parsed
+    if (username === '') {
+        console.error('No valid username found in input message');
+        return sendMessageResponse(context, 
+        "Sorry, we couldn't find a valid identifier for the high5 receiver in your message. Make sure to include an @tag, email, or 10-digit phone number.");
+    }
+
+    // The remaining text is the reason, if it's empty set it to "just because"
+    let reason = messageText === '' ? "just because" : messageText;
 
     // Return the formatted message
     let formattedMessage = `High5 Sender: ${context.activity.from.name}\n`;
