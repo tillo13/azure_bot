@@ -34,6 +34,7 @@ const commands = new Proxy({
         }
     }
 });
+
 async function highFiveCommand(context) {
     let messageText;
     let sender = 'undetermined';
@@ -45,6 +46,19 @@ async function highFiveCommand(context) {
     } catch (error) {
         console.error('Error in getting message text:', error);
         messageText = 'undetermined';
+    }
+
+    // New piece of code
+    if (messageText === '') { 
+        try {
+            await context.sendActivity(
+                "Sorry, you need to tell me who to high five. Use this command like `$high5 andy.tillo@teradata.com for doing something amazing!`"
+            );
+            return;
+        } catch (error) {
+            console.error('Error in sending guide message:', error);
+            return;
+        }
     }
 
     try {
@@ -81,6 +95,8 @@ async function highFiveCommand(context) {
     } catch (error) {
         console.error('Error in getting reason:', error);
     }
+
+    console.log(`Parsed from ${context.activity.channelId}: user ${username} from ${sender} for reason: ${reason}.`);
 
     try {
         let formattedMessage = `High5 Sender: ${sender}\nHigh5 Receiver: ${username}\nHigh5 Reason: ${reason}`;
