@@ -89,6 +89,9 @@ async function highFiveCommand(context) {
     // The remaining text is the reason for the high5
     let reason = messageText === '' ? "just because" : messageText;
 
+	// Log output for the console
+console.log(`\n\nSPECIAL_COMMANDS.JS: Parsed from ${channelId}: user ${username} from ${context.activity.from.name} for reason: ${reason}.`);
+
     try {
         if (channelId === 'webchat') {
             await context.sendActivity(formats.high5_WebchatResponse(context.activity.from.name, username, reason));
