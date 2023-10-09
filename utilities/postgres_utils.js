@@ -54,7 +54,19 @@ async function botIngressSaveDataToPostgres(data, channelId) {
             VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18 
             )`;
-
+            console.log("\n*POSTGRES_UTILS.JS: Executing query: ", query);
+            console.log("\n*POSTGRES_UTILS.JS: Data: ", [
+                        channelId, data.type, data.id, data.timestamp,
+                        data.localTimestamp, data.localTimezone, data.serviceUrl,
+                        data.from.id, data.from.name, data.conversation.id,
+                        data.attachments && data.attachments.length > 0, 
+                        data.recipient.id, data.recipient.name,
+                        preparedData.channeldata_webchat_id,
+                        preparedData.channeldata_slack_app_id, 
+                        preparedData.channeldata_slack_event_id, 
+                        preparedData.channeldata_slack_event_time, 
+                        preparedData.channeldata_msteams_tenant_id
+            ]);
         await pool.query(query, [
             channelId, data.type, data.id, data.timestamp,
             data.localTimestamp, data.localTimezone, data.serviceUrl,
