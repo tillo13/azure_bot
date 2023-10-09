@@ -37,10 +37,43 @@ const commands = new Proxy({
 
 async function highFiveCommand(context) {
     let messageText = context.activity.text.replace('$high5', '').trim();
+
     if (messageText == '') {
-        return sendMessageResponse(context, "Sorry, you need to tell me who to $high5 like this `$high5 andy.tillo@teradata.com for doing something amazing!");
+        return sendMessageResponse(context, "Sorry, you need to tell me who to $high5, like this `$high5 andy.tillo@teradata.com for doing something amazing!");
     }
-    return sendMessageResponse(context, `You just $high5'd ${messageText}.`);
+
+    // Prepare placeholder variable for username and reason 
+    let username = "";
+    let reason = "";
+
+    try {
+        // Try to split message by 'for' keyword to separate username and reason
+        [username, reason="just because"] = messageText.split(' for ');
+
+        // Remove any unwanted white spaces
+        username = username.trim();
+        reason = reason.trim();
+
+        // Check if input username is in valid format (email, @tag, phone number)
+        // For simplicity, assuming that @tag starts with @, email contains @ and phone number is 10 digits long
+        if (!(username.startsWith('@') || (username.includes('@') && username.includes('.')) || /^\d{10}$/.test(username))) {
+            throw new Error('Invalid format for username');
+        }
+
+        // If everything is valid, set the reason as remaining string after removing username
+        reason = messageText.replace(username, '').trim();
+
+    } catch (error) {
+        console.error(`Error while parsing input message: ${error}`);
+        return sendMessageResponse(context, "Sorry, we couldn't parse your message correctly. Make sure to put your high5 receiver's tag, email or phone number correctly.");
+    }
+
+    // Prepare the formatted message
+    let formattedMessage = `High5 Sender: ${context.activity.from.name}\n`;
+    formattedMessage += `High5 Receiver: ${username}\n`;
+    formattedMessage += `High5 Reason: ${reason}`;
+
+    return sendMessageResponse(context, formattedMessage);
 }
 
 async function aboutCommandHandler(context) {
