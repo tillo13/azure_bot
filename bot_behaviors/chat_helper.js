@@ -91,36 +91,46 @@ let chatHistory = [];
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 
 
-  // Define the frustrationPrompts array
-  const frustrationPrompts = [
-    "you're not getting it",
-    "you don't understand",
-    "no",
-    "not right",
-    "incorrect",
-    "wrong",
-    "that's not correct",
-    "try again",
-    "you're not listening",
-    "you're missing the point",
-    // Add more phrases as required...
-  ];
+// Define the frustrationPrompts array
+const frustrationPrompts = [
+  "you're not getting it",
+  "you don't understand",
+  "no",
+  "not right",
+  "incorrect",
+  "wrong",
+  "that's not correct",
+  "try again",
+  "you're not listening",
+  "you're missing the point",
+  "you're off the mark",
+  "that's not right",
+  "you're not making sense",
+  "I didn't ask for this",
+  "that doesn't help",
+  "you're misunderstanding",
+  "stop wasting my time",
+  "you're clueless",
+  "you're not helping",
+  "this is frustrating"
+  // Add more phrases as required...
+];
 
   // Frustration counter
   let frustrationCount = 0; 
 
   // Define the frustrationCounter function
-  function frustrationCounter(userMessage) {
-      const lowerCasedMessage = userMessage.toLowerCase();
+function frustrationCounter(userMessage) {
+    const lowerCasedMessageWords = userMessage.toLowerCase().split(' ');
 
-      for (let prompt of frustrationPrompts) {
-          if (lowerCasedMessage.includes(prompt.toLowerCase())) { 
-              frustrationCount++;
-              console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT prior to incoming message: ${frustrationCount}`);
-              break;
-          }
-      }
-  }
+    for (let prompt of frustrationPrompts) {
+        if (lowerCasedMessageWords.includes(prompt.toLowerCase())) { 
+            frustrationCount++;
+            console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT prior to incoming message: ${frustrationCount}`);
+            break;
+        }
+    }
+}
 
   console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
   console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
@@ -166,10 +176,7 @@ if (frustrationCount === 3) {
   const responseMessage = "You've hit the frustrationCounter, I'm sorry, please consider typing `$jira` [and your issue here] and we'll have someone take a look at it!";
   console.log("\n\n***CHAT_HELPER.JS: Sent the following message to the user:", responseMessage);
   return {
-      'assistantResponse': responseMessage,
-      'requery': false,
-      'letMeCheckFlag': false,
-      'chats': newCleanChatMessages
+    'assistantResponse': responseMessage
   };
 }
 
