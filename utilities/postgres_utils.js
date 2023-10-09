@@ -39,7 +39,7 @@ async function botIngressSaveDataToPostgres(data, channelId) {
                 break;
         }
     } catch (error) {
-        console.error('\n*POSTGRES_UTILS.JS: Error preparing data', error);
+        console.error('\n*POSTGRES_UTILS.JS:: Error preparing data', error);
     }
 
     try {
