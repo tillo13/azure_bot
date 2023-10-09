@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
 
+//make sure .env file as these as =, not : in defining them.
 const pool = new Pool({
     user: process.env['2023oct9_AZURE_POSTGRES_USER'],
     host: process.env['2023oct9_AZURE_POSTGRES_HOST'],
