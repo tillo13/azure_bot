@@ -106,7 +106,17 @@ module.exports = {
 					type: "TextBlock",
 					text: `**3.** Type **$dig** for a fun game...`,
 					wrap: true
-				}
+				},
+				{
+					type: "TextBlock",
+					text: `**4.**  Type **$reset** to start over.`,
+					wrap: true
+				},
+				{
+					type: "TextBlock",
+					text: `**5.**  Try **$about** for more info.`,
+					wrap: true
+				},
 			],
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			version: "1.4",
