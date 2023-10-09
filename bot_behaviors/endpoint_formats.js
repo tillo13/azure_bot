@@ -64,6 +64,47 @@ module.exports = {
 			content: adaptiveCardContent
 		};
 	},
+	high5_WebchatResponse: function(sender, receiver, reason) {
+		const adaptiveCardContent = {
+			type: "AdaptiveCard",
+			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+			version: "1.3",
+			body: [
+				{
+					type: "TextBlock",
+					text: "High5!",
+					weight: "Bolder",
+					size: "Medium",
+					isSubtle: false,
+					wrap: true
+				},
+				{
+					type: "FactSet",
+					facts: [
+						{
+							title: "Sender:",
+							value: sender
+						},
+						{
+							title: "Receiver:",
+							value: receiver
+						},
+						{
+							title: "Reason:",
+							value: reason
+						}
+					]
+				}
+			]
+		};
+	
+		return {
+			type: "attachment",
+			contentType: "application/vnd.microsoft.card.adaptive",
+			contentUrl: null,
+			content: adaptiveCardContent,
+		};
+	},
 
 		/////HIGH5 path END//////
 

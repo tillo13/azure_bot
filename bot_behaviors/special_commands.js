@@ -35,80 +35,77 @@ const commands = new Proxy({
     }
 });
 async function highFiveCommand(context) {
-	try {
-    let messageText = context.activity.text.replace('$high5', '').trim();
-    
-    // Default sender name
+    let messageText;
     let sender = 'undetermined';
+    let username = 'undetermined';
+    let reason = 'undetermined';
     
-    // For MSteams, use the 'name' property as the sender
-    if (context.activity.channelId.toLowerCase() === 'msteams') {
-        sender = context.activity.from.name || sender;
-    }
-    // For Webchat, use the 'id' property as the sender
-	if (context.activity.channelId.toLowerCase() === 'webchat') {
-		const reply = formats.high5_WebchatResponse(sender, username, reason);
-		console.log("Preparing to send reply: ", reply);    // New log statement
-		await context.sendActivity(reply);
-		console.log("Reply sent successfully!");    // New log statement
-	} 
-
-    if (messageText == '') {
-        return sendMessageResponse(context, "Sorry, you need to tell me who to $high5, like this `$high5 andy.tillo@teradata.com for doing something amazing!");
+    try {
+        messageText = context.activity.text.replace('$high5', '').trim();
+    } catch (error) {
+        console.error('Error in getting message text:', error);
+        messageText = 'undetermined';
     }
 
-    // Setup regular expressions to match username/email/phone
-    const usernameRegex = /^@(\w+)/;
-    const emailRegex = /(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/;
-    const phoneRegex = /(\b\d{10}\b)/;
-
-    // Match and remove username/email/phone from messageText
-    let username = '';
-    if (messageText.match(usernameRegex)) {
-        username = messageText.match(usernameRegex)[0];
-        messageText = messageText.replace(username, '').trim();
-    } else if (messageText.match(emailRegex)) {
-        username = messageText.match(emailRegex)[0];
-        messageText = messageText.replace(username, '').trim();
-    } else if(messageText.match(phoneRegex)) {
-        username = messageText.match(phoneRegex)[0];
-        messageText = messageText.replace(username, '').trim();
+    try {
+        if (context.activity.channelId.toLowerCase() === 'msteams') {
+            sender = context.activity.from.name || sender;
+        } else if (context.activity.channelId.toLowerCase() === 'webchat') {
+            sender = context.activity.from.name || sender;
+        }
+    } catch (error) {
+        console.error('Error in getting sender name:', error);
     }
 
-    // Check if a username was successfully parsed
-    if (username === '') {
-        console.error('No valid username found in input message');
-        return sendMessageResponse(context, "Sorry, we couldn't find a valid identifier for the high5 receiver in your message. Make sure to include an @tag, email, or 10-digit phone number.");
+    try {
+        const usernameRegex = /^@(\w+)/;
+        const emailRegex = /(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/;
+        const phoneRegex = /(\b\d{10}\b)/;
+
+        if (messageText.match(usernameRegex)) {
+            username = messageText.match(usernameRegex)[0];
+            messageText = messageText.replace(username, '').trim();
+        } else if (messageText.match(emailRegex)) {
+            username = messageText.match(emailRegex)[0];
+            messageText = messageText.replace(username, '').trim();
+        } else if(messageText.match(phoneRegex)) {
+            username = messageText.match(phoneRegex)[0];
+            messageText = messageText.replace(username, '').trim();
+        }
+    } catch (error) {
+        console.error('Error in parsing username:', error);
     }
 
-    // The remaining text is the reason, if it's empty set it to "just because"
-    let reason = messageText === '' ? "just because" : messageText;
+    try {
+        reason = messageText === '' ? "just because" : messageText;
+    } catch (error) {
+        console.error('Error in getting reason:', error);
+    }
 
-	console.log(`\n\nSPECIAL_COMMANDS.JS: Parsed from ${context.activity.channelId}: user ${username} from ${sender} for reason: ${reason}.`);
-
-	// Return the formatted message
-	let formattedMessage = `High5 Sender: ${sender}\n`;
-	formattedMessage += `High5 Receiver: ${username}\n`;
-	formattedMessage += `High5 Reason: ${reason}`;
-	
-	if (context.activity.channelId.toLowerCase() === 'webchat') {
-		const reply = formats.high5_WebchatResponse(sender, username, reason);
-		await context.sendActivity(reply);
-	} else if (context.activity.channelId.toLowerCase() === 'msteams') {
-		const reply = MessageFactory.attachment(formats.high5_msteamsResponse(sender, username, reason));
-		await context.sendActivity(reply);
-	} else if (context.activity.channelId.toLowerCase() === 'slack') {
-		const reply = formats.high5_SlackResponse(sender, username, reason);
-		await context.sendActivity({ attachments: [reply] });
-	} else {
-		const reply = formats.high5_DefaultResponse(sender, username, reason);
-		await context.sendActivity(reply);
-	}
-} // this is the closing brace for the try block
-catch (error) {
-	console.error('Error in highFiveCommand:', error);
-	return sendMessageResponse(context, `We encountered an error: ${error}`);
-}
+    try {
+        let formattedMessage = `High5 Sender: ${sender}\nHigh5 Receiver: ${username}\nHigh5 Reason: ${reason}`;
+        
+        if (context.activity.channelId.toLowerCase() === 'webchat') {
+            const reply = formats.high5_WebchatResponse(sender, username, reason);
+            await context.sendActivity(reply);
+        } else if (context.activity.channelId.toLowerCase() === 'msteams') {
+            const reply = MessageFactory.attachment(formats.high5_msteamsResponse(sender, username, reason));
+            await context.sendActivity(reply);
+        } else if (context.activity.channelId.toLowerCase() === 'slack') {
+            const reply = formats.high5_SlackResponse(sender, username, reason);
+            await context.sendActivity({ attachments: [reply] });
+        } else {
+            const reply = formats.high5_DefaultResponse(sender, username, reason);
+            await context.sendActivity(reply);
+        }
+    } catch (error) {
+        console.error('Error in sending message:', error);
+        try {
+            await context.sendActivity('Sorry, there seems to be an issue with this command. Please try again.');
+        } catch(finalError) {
+            console.error('Error in sending error message:', finalError);
+        }
+    }
 }
 
 async function aboutCommandHandler(context) {
