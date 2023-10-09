@@ -1,61 +1,92 @@
-# n16-echo
+# MS Azure Bot Features
+This app provides a conversational bot experience across multiple platforms like Slack, Microsoft Teams, and webchat. The bot can understand natural language, have coherent dialogs, and execute helpful commands.
 
-Demonstrate the core capabilities of the Microsoft Bot Framework
+## Features
 
-This bot has been created using [Bot Framework](https://dev.botframework.com), it shows how to create a simple bot that accepts input from the user and echoes it back.
+- Responds intelligently to user messages across Slack, Teams and webchat
+- Maintains conversation context and history within a thread/chat session
+- Provides helpful responses and can requery itself when unsure  
+- Handles common commands like `$help`, `$reset`, `$dalle` etc.
+- Integrates with Jira to create tickets from conversations
+- Leverages DALL-E 2 to generate images from prompts
+- Logs usage analytics like messages, users and interactions
+- Built with Bot Framework SDK and Azure bot service  
+- Uses OpenAI's GPT-3.5 Turbo model via Azure Cognitive Services API
+- Maintains state in bot's user state memory storage
 
-## Prerequisites
+## Architecture
 
-- [Node.js](https://nodejs.org) version 10.14.1 or higher
+The app uses a modular architecture:
 
-    ```bash
-    # determine node version
-    node --version
-    ```
+- `msteams.js`, `slack.js`, `message_handler.js` - platform-specific logic
+- `chat_helper.js` - core conversational module
+- `special_commands.js` - custom command handlers  
+- `slack_utils.js`, `jira_utils.js` - integration helpers
+- `.env` file - secrets and configuration
 
-## To run the bot
+Key components:
 
-- Install modules
+- **Bot Framework SDK** - SDK to build and connect bot
+- **Azure Bot Service** - Cloud hosting for bot  
+- **OpenAI GPT-3.5 Turbo** - NLP for conversations
+- **Azure Cognitive Services** - OpenAI endpoint
+- **User State** - Storage for context, dialogs
 
-    ```bash
-    npm install
-    ```
+## Getting Started 
 
-- Start the bot
+### Prerequisites
 
-    ```bash
-    npm start
-    ```
+- Node.js 14+  
+- Azure subscription
+- Bot Framework registration 
+- OpenAI API key
+- Other API keys for integrations
 
-## Testing the bot using Bot Framework Emulator
+### Installation
+git clone <repo>
+npm install
 
-[Bot Framework Emulator](https://github.com/microsoft/botframework-emulator) is a desktop application that allows bot developers to test and debug their bots on localhost or running remotely through a tunnel.
-
-- Install the Bot Framework Emulator version 4.9.0 or greater from [here](https://github.com/Microsoft/BotFramework-Emulator/releases)
-
-### Connect to the bot using Bot Framework Emulator
-
-- Launch Bot Framework Emulator
-- File -> Open Bot
-- Enter a Bot URL of `http://localhost:3978/api/messages`
-
-## Deploy the bot to Azure
-
-To learn more about deploying a bot to Azure, see [Deploy your bot to Azure](https://aka.ms/azuredeployment) for a complete list of deployment instructions.
+Copy code
 
 
-## Further reading
+Configure `.env` with API keys and settings.
 
-- [Bot Framework Documentation](https://docs.botframework.com)
-- [Bot Basics](https://docs.microsoft.com/azure/bot-service/bot-builder-basics?view=azure-bot-service-4.0)
-- [Dialogs](https://docs.microsoft.com/en-us/azure/bot-service/bot-builder-concept-dialog?view=azure-bot-service-4.0)
-- [Gathering Input Using Prompts](https://docs.microsoft.com/en-us/azure/bot-service/bot-builder-prompts?view=azure-bot-service-4.0)
-- [Activity processing](https://docs.microsoft.com/en-us/azure/bot-service/bot-builder-concept-activity-processing?view=azure-bot-service-4.0)
-- [Azure Bot Service Introduction](https://docs.microsoft.com/azure/bot-service/bot-service-overview-introduction?view=azure-bot-service-4.0)
-- [Azure Bot Service Documentation](https://docs.microsoft.com/azure/bot-service/?view=azure-bot-service-4.0)
-- [Azure CLI](https://docs.microsoft.com/cli/azure/?view=azure-cli-latest)
-- [Azure Portal](https://portal.azure.com)
-- [Language Understanding using LUIS](https://docs.microsoft.com/en-us/azure/cognitive-services/luis/)
-- [Channels and Bot Connector Service](https://docs.microsoft.com/en-us/azure/bot-service/bot-concepts?view=azure-bot-service-4.0)
-- [Restify](https://www.npmjs.com/package/restify)
-- [dotenv](https://www.npmjs.com/package/dotenv)
+Deploy bot service on Azure.  
+
+Connect channels like Slack and Teams.
+
+Run locally:
+npm start
+
+Copy code
+
+
+### Configuration
+
+The app requires various API keys and settings specified in `.env`:
+
+- `MicrosoftAppId`, `MicrosoftAppPassword` - Bot Framework app credentials  
+- `OPENAI_API_KEY` - OpenAI API key
+- `SLACK_BOT_TOKEN` - Slack bot token
+- etc.
+
+
+## Usage
+
+**Natural conversations** - Chat with the bot normally. It will have a coherent, context-aware conversation.
+
+**$help** - Get info about the bot's capabilities. 
+
+**$reset** - Start a fresh conversation thread.
+
+**$jira [description]** - Create a Jira ticket. 
+
+**$dalle [prompt] --size --num** - Generate AI images via DALL-E 2.0.  
+
+See `special_commands.js` for all supported commands.
+
+Handles platform-specific needs:
+
+- **Slack** - Threads, reactions  
+- **Teams** - User welcome, Adaptive Cards
+- **Webchat** - Hosted web embed
