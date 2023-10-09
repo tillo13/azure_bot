@@ -36,9 +36,17 @@ const commands = new Proxy({
 });
 async function highFiveCommand(context) {
     let messageText = context.activity.text.replace('$high5', '').trim();
-    // For Webchat, use the 'from' property as the sender
-    if (context.activity.channelId.toLowerCase() === 'webchat') {
-        context.activity.from.name = context.activity.from.name || context.activity.from.id;
+    
+    // Default sender name
+    let sender = 'undetermined';
+    
+    // For MSteams, use the 'name' property as the sender
+    if (context.activity.channelId.toLowerCase() === 'msteams') {
+        sender = context.activity.from.name || sender;
+    }
+    // For Webchat, use the 'id' property as the sender
+    else if (context.activity.channelId.toLowerCase() === 'webchat') {
+        sender = context.activity.from.id || sender;
     }
 
     if (messageText == '') {
@@ -72,23 +80,23 @@ async function highFiveCommand(context) {
     // The remaining text is the reason, if it's empty set it to "just because"
     let reason = messageText === '' ? "just because" : messageText;
 
-    console.log(`\n\nSPECIAL_COMMANDS.JS: Parsed from ${channelId}: user ${username} from ${context.activity.from.name} for reason: ${reason}.`);
+	console.log(`\n\nSPECIAL_COMMANDS.JS: Parsed from ${context.activity.channelId}: user ${username} from ${sender} for reason: ${reason}.`);
 
-    // Return the formatted message
-    let formattedMessage = `High5 Sender: ${context.activity.from.name}\n`;
-    formattedMessage += `High5 Receiver: ${username}\n`;
-    formattedMessage += `High5 Reason: ${reason}`;
-
-    if (context.activity.channelId.toLowerCase() === 'webchat') {
-        await context.sendActivity(formats.high5_WebchatResponse(context.activity.from.name, username, reason));
-    } else if (context.activity.channelId.toLowerCase() === 'msteams') {
-        const reply = MessageFactory.attachment(formats.high5_msteamsResponse(context.activity.from.name, username, reason));
-        await context.sendActivity(reply);
-    } else if (context.activity.channelId.toLowerCase() === 'slack') {
-        await context.sendActivity(formats.high5_SlackResponse(context.activity.from.name, username, reason));
-    } else {
-        await context.sendActivity(formats.high5_DefaultResponse(context.activity.from.name, username, reason));
-    }
+	// Return the formatted message
+	let formattedMessage = `High5 Sender: ${sender}\n`;
+	formattedMessage += `High5 Receiver: ${username}\n`;
+	formattedMessage += `High5 Reason: ${reason}`;
+	
+	if (context.activity.channelId.toLowerCase() === 'webchat') {
+		await context.sendActivity(formats.high5_WebchatResponse(sender, username, reason));
+	} else if (context.activity.channelId.toLowerCase() === 'msteams') {
+		const reply = MessageFactory.attachment(formats.high5_msteamsResponse(sender, username, reason));
+		await context.sendActivity(reply);
+	} else if (context.activity.channelId.toLowerCase() === 'slack') {
+		await context.sendActivity(formats.high5_SlackResponse(sender, username, reason));
+	} else {
+		await context.sendActivity(formats.high5_DefaultResponse(sender, username, reason));
+	}
 }
 
 async function aboutCommandHandler(context) {
