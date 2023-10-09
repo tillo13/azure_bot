@@ -22,6 +22,7 @@ The app uses a modular architecture:
 - `chat_helper.js` - core conversational module
 - `special_commands.js` - custom command handlers  
 - `slack_utils.js`, `jira_utils.js` - integration helpers
+- Azure Bot Framework and Azure Cloud infrastructure
 - Ties into Teradata OFS for storage
 
 Key components:
@@ -54,7 +55,7 @@ Handles platform-specific needs:
 - **Webchat** - Hosted web embed
 
 
-## Future thoughts..
+## Future thoughts...
 - Cleaner payload manipulation
 - Deeper vector database analysis
 - Other chat platforms
