@@ -46,9 +46,12 @@ async function highFiveCommand(context) {
         sender = context.activity.from.name || sender;
     }
     // For Webchat, use the 'id' property as the sender
-    else if (context.activity.channelId.toLowerCase() === 'webchat') {
-        sender = context.activity.from.id || sender;
-    }
+	if (context.activity.channelId.toLowerCase() === 'webchat') {
+		const reply = formats.high5_WebchatResponse(sender, username, reason);
+		console.log("Preparing to send reply: ", reply);    // New log statement
+		await context.sendActivity(reply);
+		console.log("Reply sent successfully!");    // New log statement
+	} 
 
     if (messageText == '') {
         return sendMessageResponse(context, "Sorry, you need to tell me who to $high5, like this `$high5 andy.tillo@teradata.com for doing something amazing!");
