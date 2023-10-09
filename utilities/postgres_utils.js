@@ -1,12 +1,18 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-    user: 'your_database_user',
-    host: 'localhost',
-    database: 'your_database_name',
-    password: 'your_database_password',
-    port: 5432,
+    user: process.env['2023oct9_AZURE_POSTGRES_USER'],
+    host: process.env['2023oct9_AZURE_POSTGRES_HOST'],
+    database: process.env['2023oct9_AZURE_POSTGRES_DATABASE'],
+    password: process.env['2023oct9_AZURE_POSTGRES_PASSWORD'],
+    port: process.env['2023oct9_AZURE_POSTGRES_PORT'],
 });
+
+pool.on('error', (err, client) => {
+    console.error('\n*POSTGRES_UTILS.JS: Unexpected error on idle client', err)
+    // end just this one problematic client connection.
+    client.end()
+  })
 
 async function saveDataToPostgres(data, channelId) {
     // Prepare data for different channels
@@ -53,9 +59,9 @@ async function saveDataToPostgres(data, channelId) {
             preparedData.channeldata_slack_event_time, 
             preparedData.channeldata_msteams_tenant_id
         ]);
-        console.log('Data saved to Postgres');
+        console.log('\n*POSTGRES_UTILS.JS: Data saved to Postgres');
     } catch (err) {
-        console.error('Failed to save data to Postgres', err);
+        console.error('\n*POSTGRES_UTILS.JS: Failed to save data to Postgres', err);
     }
 }
 

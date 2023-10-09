@@ -1,5 +1,7 @@
-// 2023oct7 7:57am
+// 2023oct9 8:39am --adding postgres_util
 require('dotenv').config();
+
+const { saveDataToPostgres } = require('./utilities/postgres_utils'); 
 
 const {
 	UserState,
@@ -145,6 +147,8 @@ server.post('/api/messages', async (req, res) => {
         await appendUserData(userId, currentTimestamp, platform);
     }
 	let msg_id = req.body.id; // retrieve the message id
+	    // Log the data to a Postgres database:
+		saveDataToPostgres(req.body, req.body.channelId);
 
 	// if id doesn't exist, set it to an empty string
 	if (typeof msg_id === 'undefined') {
