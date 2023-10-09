@@ -36,10 +36,13 @@ const commands = new Proxy({
 });
 async function highFiveCommand(context) {
     let messageText = context.activity.text.replace('$high5', '').trim();
+    // For Webchat, use the 'from' property as the sender
+    if (context.activity.channelId.toLowerCase() === 'webchat') {
+        context.activity.from.name = context.activity.from.name || context.activity.from.id;
+    }
 
     if (messageText == '') {
-        return sendMessageResponse(context, 
-        "Sorry, you need to tell me who to $high5, like this `$high5 andy.tillo@teradata.com for doing something amazing!");
+        return sendMessageResponse(context, "Sorry, you need to tell me who to $high5, like this `$high5 andy.tillo@teradata.com for doing something amazing!");
     }
 
     // Setup regular expressions to match username/email/phone
@@ -63,12 +66,13 @@ async function highFiveCommand(context) {
     // Check if a username was successfully parsed
     if (username === '') {
         console.error('No valid username found in input message');
-        return sendMessageResponse(context, 
-        "Sorry, we couldn't find a valid identifier for the high5 receiver in your message. Make sure to include an @tag, email, or 10-digit phone number.");
+        return sendMessageResponse(context, "Sorry, we couldn't find a valid identifier for the high5 receiver in your message. Make sure to include an @tag, email, or 10-digit phone number.");
     }
 
     // The remaining text is the reason, if it's empty set it to "just because"
     let reason = messageText === '' ? "just because" : messageText;
+
+    console.log(`\n\nSPECIAL_COMMANDS.JS: Parsed from ${channelId}: user ${username} from ${context.activity.from.name} for reason: ${reason}.`);
 
     // Return the formatted message
     let formattedMessage = `High5 Sender: ${context.activity.from.name}\n`;
