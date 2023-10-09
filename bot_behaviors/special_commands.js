@@ -90,16 +90,16 @@ async function highFiveCommand(context) {
 	
 	if (context.activity.channelId.toLowerCase() === 'webchat') {
 		const reply = formats.high5_WebchatResponse(sender, username, reason);
-		await context.sendActivity({ attachments: [reply] });
+		await context.sendActivity(reply);
 	} else if (context.activity.channelId.toLowerCase() === 'msteams') {
 		const reply = MessageFactory.attachment(formats.high5_msteamsResponse(sender, username, reason));
-		await context.sendActivity({ attachments: [reply] });
+		await context.sendActivity(reply);
 	} else if (context.activity.channelId.toLowerCase() === 'slack') {
 		const reply = formats.high5_SlackResponse(sender, username, reason);
 		await context.sendActivity({ attachments: [reply] });
 	} else {
 		const reply = formats.high5_DefaultResponse(sender, username, reason);
-		await context.sendActivity({ attachments: [reply] });
+		await context.sendActivity(reply);
 	}
 } // this is the closing brace for the try block
 catch (error) {
