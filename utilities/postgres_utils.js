@@ -7,6 +7,7 @@ const pool = new Pool({
     database: process.env['2023oct9_AZURE_POSTGRES_DATABASE'],
     password: process.env['2023oct9_AZURE_POSTGRES_PASSWORD'],
     port: process.env['2023oct9_AZURE_POSTGRES_PORT'],
+    ssl: false,
 });
 
 console.log("\n*POSTGRES_UTILS: DATABASE HOST from .env:  ", process.env['2023oct9_AZURE_POSTGRES_HOST']);
