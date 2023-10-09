@@ -69,6 +69,7 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 
 function webchatIngressData(data) {
     if (data.channelData && data.channelData.clientActivityID) {
+        console.log('\n*POSTGRES_UTILS.JS: Webchat data logged to Postgres');
         return {
             channeldata_webchat_id: data.channelData.clientActivityID
         };
@@ -82,6 +83,7 @@ function webchatIngressData(data) {
 
 function slackIngressData(data) {
     if (data.channelData && data.channelData.SlackMessage) {
+        console.log('\n*POSTGRES_UTILS.JS: Slack data logged to Postgres');
         return {
             channeldata_slack_app_id: data.channelData.SlackMessage.api_app_id,
             channeldata_slack_event_id: data.channelData.SlackMessage.event_id,
@@ -99,6 +101,7 @@ function slackIngressData(data) {
 
 function msteamsIngressData(data) {
     if (data.channelData && data.channelData.tenant) {
+        console.log('\n*POSTGRES_UTILS.JS: MS Teams data logged to Postgres');
         return {
             channeldata_msteams_tenant_id: data.channelData.tenant.id
         };
