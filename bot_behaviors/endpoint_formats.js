@@ -25,6 +25,80 @@ module.exports = {
 	high5_DefaultResponse: function(sender, receiver, reason) {
 		return `High5! :raised_hand::skin-tone-4:\n\nSender: ${sender}\nReceiver: ${receiver}\nReason: ${reason}`;
 	},
+	high5_WebchatResponse: function(sender, receiver, reason) {
+		const adaptiveCardContent = {
+			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+			type: "AdaptiveCard",
+			version: "1.3",
+			body: [
+				{
+					type: "TextBlock",
+					text: "High5! 🙌",
+					size: "medium",
+					wrap: true
+				},
+				{
+					type: "FactSet",
+					facts: [
+						{
+							title: "Sender:",
+							value: sender
+						},
+						{
+							title: "Receiver:",
+							value: receiver
+						},
+						{
+							title: "Reason:",
+							value: reason
+						}
+					]
+				}
+			]
+		};
+	
+		return {
+			type: "attachment",
+			contentType: "application/vnd.microsoft.card.adaptive",
+			contentUrl: null,
+			content: adaptiveCardContent,
+		};
+	},
+	high5_SlackResponse: function(sender, receiver, reason) {
+		let slackMessage = {
+			"blocks": [
+				{
+					"type": "header",
+					"text": {
+						"type": "plain_text",
+						"text": "High5! 🙌"
+					}
+				},
+				{
+					"type": "section",
+					"fields": [
+						{
+							"type": "mrkdwn",
+							"text": `*Sender:*\n${sender}`
+						},
+						{
+							"type": "mrkdwn",
+							"text": `*Receiver:*\n${receiver}`
+						}
+					]
+				},
+				{
+					"type": "section",
+					"text": {
+						"type": "mrkdwn",
+						"text": `*Reason:*\n${reason}`
+					}
+				}
+			]
+		};
+		  
+		return slackMessage;
+	},
 	high5_msteamsResponse: function(sender, receiver, reason) {
 		const adaptiveCardContent = {
 			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
@@ -63,19 +137,6 @@ module.exports = {
 			contentUrl: null,
 			content: adaptiveCardContent
 		};
-	},
-	high5_SlackResponse: function(sender, receiver, reason) {
-		return {
-			blocks: [
-				{
-					type: "section",
-					text: {
-						type: "mrkdwn",
-						text: ":raised_hands: *High Five!*\n\nFrom: *" + sender + "*\nTo: *" + receiver+ "*\nFor: *" + reason + "*",
-					}
-				}
-			]
-		}
 	},
 
 		/////HIGH5 path END//////

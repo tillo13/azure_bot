@@ -36,89 +36,52 @@ const commands = new Proxy({
 });
 
 async function highFiveCommand(context) {
-    let messageText;
-    let sender = 'undetermined';
-    let username = 'undetermined';
-    let reason = 'undetermined';
-    
-    try {
-        messageText = context.activity.text.replace('$high5', '').trim();
-    } catch (error) {
-        console.error('Error in getting message text:', error);
-        messageText = 'undetermined';
+    let messageText = context.activity.text.replace('$high5', '').trim();
+
+    if (messageText == '') {
+        return sendMessageResponse(context, "Sorry, you need to tell me who to $high5, like this `$high5 andy.tillo@teradata.com for doing something amazing!");
     }
 
-    // New piece of code
-    if (messageText === '') { 
-        try {
-            await context.sendActivity(
-                "Sorry, you need to tell me who to high five. Use this command like `$high5 andy.tillo@teradata.com for doing something better-than-average!`"
-            );
-            return;
-        } catch (error) {
-            console.error('Error in sending guide message:', error);
-            return;
-        }
-    }
+    // Prepare placeholder variable for username and reason 
+    let username = "";
+    let reason = "";
 
     try {
-        if (context.activity.channelId.toLowerCase() === 'msteams') {
-            sender = context.activity.from.name || sender;
-        } else if (context.activity.channelId.toLowerCase() === 'webchat') {
-            sender = context.activity.from.name || sender;
+        // Try to split message by 'for' keyword to separate username and reason
+        [username, reason="just because"] = messageText.split(' for ');
+
+        // Remove any unwanted white spaces
+        username = username.trim();
+        reason = reason.trim();
+
+        // Check if input username is in valid format (email, @tag, phone number)
+        // For simplicity, assuming that @tag starts with @, email contains @ and phone number is 10 digits long
+        if (!(username.startsWith('@') || (username.includes('@') && username.includes('.')) || /^\d{10}$/.test(username))) {
+            throw new Error('Invalid format for username');
         }
+
+        // If everything is valid, set the reason as remaining string after removing username
+        reason = messageText.replace(username, '').trim();
+
     } catch (error) {
-        console.error('Error in getting sender name:', error);
+        console.error(`Error while parsing input message: ${error}`);
+        return sendMessageResponse(context, "Sorry, we couldn't parse your message correctly. Make sure to put your high5 receiver's tag, email or phone number correctly.");
     }
 
-    try {
-        const usernameRegex = /^@(\w+)/;
-        const emailRegex = /(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/;
-        const phoneRegex = /(\b\d{10}\b)/;
+    // Prepare the formatted message
+    let formattedMessage = `High5 Sender: ${context.activity.from.name}\n`;
+    formattedMessage += `High5 Receiver: ${username}\n`;
+    formattedMessage += `High5 Reason: ${reason}`;
 
-        if (messageText.match(usernameRegex)) {
-            username = messageText.match(usernameRegex)[0];
-            messageText = messageText.replace(username, '').trim();
-        } else if (messageText.match(emailRegex)) {
-            username = messageText.match(emailRegex)[0];
-            messageText = messageText.replace(username, '').trim();
-        } else if(messageText.match(phoneRegex)) {
-            username = messageText.match(phoneRegex)[0];
-            messageText = messageText.replace(username, '').trim();
-        }
-    } catch (error) {
-        console.error('Error in parsing username:', error);
-    }
-
-    try {
-        reason = messageText === '' ? "just because" : messageText;
-    } catch (error) {
-        console.error('Error in getting reason:', error);
-    }
-
-    console.log(`Parsed from ${context.activity.channelId}: user ${username} from ${sender} for reason: ${reason}.`);
-
-    let formattedMessage;
-
-    try {
-        if (context.activity.channelId.toLowerCase() === 'webchat') {
-            formattedMessage = formats.high5_WebchatResponse(sender, username, reason);
-        } else if (context.activity.channelId.toLowerCase() === 'msteams') {
-            formattedMessage = MessageFactory.attachment(formats.high5_msteamsResponse(sender, username, reason));
-        } else if (context.activity.channelId.toLowerCase() === 'slack') {
-            formattedMessage = formats.high5_SlackResponse(sender, username, reason);
-            formattedMessage.thread_ts = context.activity.id;
-        } else {
-            formattedMessage = formats.high5_DefaultResponse(sender, username, reason);
-        }
-        await context.sendActivity(formattedMessage);
-    } catch (error) {
-        console.error('Error in sending message:', error);
-        try {
-            await context.sendActivity('Sorry, there seems to be an issue with this command. Please try again.');
-        } catch(finalError) {
-            console.error('Error in sending error message:', finalError);
-        }
+    if (context.activity.channelId.toLowerCase() === 'webchat') {
+        await context.sendActivity(formats.high5_WebchatResponse(context.activity.from.name, username, reason));
+    } else if (context.activity.channelId.toLowerCase() === 'msteams') {
+        const reply = MessageFactory.attachment(formats.high5_msteamsResponse(context.activity.from.name, username, reason));
+        await context.sendActivity(reply);
+    } else if (context.activity.channelId.toLowerCase() === 'slack') {
+        await context.sendActivity(formats.high5_SlackResponse(context.activity.from.name, username, reason));
+    } else {
+        await context.sendActivity(formats.high5_DefaultResponse(context.activity.from.name, username, reason));
     }
 }
 
