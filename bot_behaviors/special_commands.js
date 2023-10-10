@@ -38,29 +38,31 @@ const commands = new Proxy({
 async function highFiveCommand(context) {
     let message;
     
-    // remove $high5 from the user's text, trim any leading or trailing spaces
-    let userMessage = context.activity.text.replace('$high5', '').trim(); 
+    let userMessage = context.activity.text.replace('$high5', '').trim();
 
-    // If no userMessage (meaning they typed "$high5" followed by nothing or whitespace)
 	if (!userMessage) {
 		const message = 'Hey, you forgot to tell us who you are recognizing! Try phone, email of a @username after your $high5 and why you are recognizing them!';
 		return sendMessageResponse(context, message);
 	}
 
-    let recognizedUser; // The recognized @username, email, or phone from the payload
+    let recognizedUser;
 
-    // Regular Expressions to recognize @username, email, and phone numbers
     let usernameRegex = /\s@(\w+)/;
     let emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/;
-    let phoneRegex = /\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}/; // Recognizes US phone numbers
+    let phoneRegex = /\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}/;
 
-    // If no phone number, try to recognize email
-    let match = userMessage.match(emailRegex);
+    let match = userMessage.match(phoneRegex);
     if (match) {
         recognizedUser = match[0];
     }
 
-    // If no email, try to recognize @username
+    if (!recognizedUser) {
+        match = userMessage.match(emailRegex);
+        if (match) {
+            recognizedUser = match[0];
+        }
+    }
+
     if (!recognizedUser) {
         match = userMessage.match(usernameRegex);
         if (match) {
@@ -68,23 +70,18 @@ async function highFiveCommand(context) {
         }
     }
 
-    // If no @username, try to recognize phone number
-    if (!recognizedUser) {
-        match = userMessage.match(phoneRegex);
-        if (match) {
-            recognizedUser = match[0];
-        }
-    }
-
     try {
         switch (context.activity.channelId) {
             case 'webchat':
-                // Pass the userMessage and recognizedUser to the high5_WebchatResponse function
                 message = formats.high5_WebchatResponse(context, userMessage, recognizedUser);
                 console.log('\n******SPECIAL_COMMANDS: high5 path Chose Webchat format');
                 break;
             case 'slack':
-                message = formats.high5_SlackResponse();
+                let channelId = context.activity.recipient.id;
+                let channelName = context.activity.conversation.name;
+                let slackMessageID = context.activity.id;
+
+                message = formats.high5_SlackResponse(context, userMessage, recognizedUser, channelId, channelName, slackMessageID);
                 console.log('\n******SPECIAL_COMMANDS: high5 path Chose Slack format');
                 break;
             case 'msteams':
