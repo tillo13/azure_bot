@@ -23,10 +23,12 @@ const commands = new Proxy({
 	'$high5': highFiveCommand,
 }, {
     get: function(target, property) {
+        property = property.toLowerCase(); // Convert property to lower case here
         if (property in target) {
             return target[property];
         } else {
             for (let key in target) {
+                key = key.toLowerCase(); // Convert key to lower case here
                 if (property.startsWith(key)) {
                     return target[key];
                 }
