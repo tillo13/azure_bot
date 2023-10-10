@@ -36,69 +36,52 @@ const commands = new Proxy({
 });
 
 async function highFiveCommand(context) {
-    let messageText;
-    let sender = 'undetermined';
-    let receiver = 'undetermined';
-    let reason = 'undetermined';
+    let messageText = context.activity.text.replace('$high5', '').trim();
+
+    if (messageText == '') {
+        return sendMessageResponse(context, "Sorry, you need to tell me who to $high5, like this `$high5 andy.tillo@teradata.com for doing something amazing!");
+    }
+
+    // Prepare placeholder variable for username and reason 
+    let username = "";
+    let reason = "";
 
     try {
-        messageText = context.activity.text.replace('$high5', '').trim();
-        if (messageText === '') {
-            if (context.activity.channelId.toLowerCase() === 'slack') {
-                await context.sendActivity({
-                    channelData: {
-                        text: "Sorry, you need to tell me who to high five. Use this command like `$high5 andy.tillo@teradata.com for doing something better-than-average!`"
-                    }
-                });
-            } else {
-                await context.sendActivity(
-                    "Sorry, you need to tell me who to high five. Use this command like `$high5 andy.tillo@teradata.com for doing something better-than-average!`"
-                );
-            }
-            return;
+        // Try to split message by 'for' keyword to separate username and reason
+        [username, reason="just because"] = messageText.split(' for ');
+
+        // Remove any unwanted white spaces
+        username = username.trim();
+        reason = reason.trim();
+
+        // Check if input username is in valid format (email, @tag, phone number)
+        // For simplicity, assuming that @tag starts with @, email contains @ and phone number is 10 digits long
+        if (!(username.startsWith('@') || (username.includes('@') && username.includes('.')) || /^\d{10}$/.test(username))) {
+            throw new Error('Invalid format for username');
         }
+
+        // If everything is valid, set the reason as remaining string after removing username
+        reason = messageText.replace(username, '').trim();
+
     } catch (error) {
-        console.error('Error in parsing message text:', error);
-        return;
+        console.error(`Error while parsing input message: ${error}`);
+        return sendMessageResponse(context, "Sorry, we couldn't parse your message correctly. Make sure to put your high5 receiver's tag, email or phone number correctly.");
     }
 
-    try {
-        sender = context.activity.from.name || sender;
-    } catch (error) {
-        console.error('Error in getting sender:', error);
-    }
+    // Prepare the formatted message
+    let formattedMessage = `High5 Sender: ${context.activity.from.name}\n`;
+    formattedMessage += `High5 Receiver: ${username}\n`;
+    formattedMessage += `High5 Reason: ${reason}`;
 
-    try {
-        const receiverRegex = /^@(\w+)|(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)|(\b\d{10}\b)/;
-        const matchReceiver = messageText.match(receiverRegex);
-
-        if(matchReceiver && matchReceiver.length > 0){
-            receiver = matchReceiver[0];
-            messageText = messageText.replace(receiver, '').trim();
-        }
-    } catch (error) {
-        console.error('Error in parsing receiver:', error);
-    }
-
-    try {
-        reason = messageText || "just because";
-    } catch (error) {
-        console.error('Error in getting reason:', error);
-    }
-
-	console.log(`Parsed from ${context.activity.channelId}: user ${username} from ${sender} for reason: ${reason}.`);
-
-    if (context.activity.channelId.toLowerCase() === 'slack') {
-        await context.sendActivity({
-            channelData: formats.high5_SlackResponse(sender, receiver, reason)
-        });
-    } else if (context.activity.channelId.toLowerCase() === 'webchat') {
-        await context.sendActivity(formats.high5_WebchatResponse(sender, receiver, reason));
+    if (context.activity.channelId.toLowerCase() === 'webchat') {
+        await context.sendActivity(formats.high5_WebchatResponse(context.activity.from.name, username, reason));
     } else if (context.activity.channelId.toLowerCase() === 'msteams') {
-        const reply = MessageFactory.attachment(formats.high5_msteamsResponse(sender, receiver, reason));
+        const reply = MessageFactory.attachment(formats.high5_msteamsResponse(context.activity.from.name, username, reason));
         await context.sendActivity(reply);
+    } else if (context.activity.channelId.toLowerCase() === 'slack') {
+        await context.sendActivity(formats.high5_SlackResponse(context.activity.from.name, username, reason));
     } else {
-        await context.sendActivity(formats.high5_DefaultResponse(sender, receiver, reason));
+        await context.sendActivity(formats.high5_DefaultResponse(context.activity.from.name, username, reason));
     }
 }
 
