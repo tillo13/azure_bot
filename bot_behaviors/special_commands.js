@@ -41,7 +41,7 @@ async function highFiveCommand(context) {
 		try {
 			switch (context.activity.channelId) {
 				case 'webchat':
-					message = formats.high5_WebchatResponse();
+					message = formats.high5_WebchatResponse(context);
 					console.log('\n******SPECIAL_COMMANDS: high5 path Chose Webchat format');
 					break;
 				case 'slack':

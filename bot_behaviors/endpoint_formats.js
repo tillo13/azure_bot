@@ -31,31 +31,58 @@ high5_DefaultResponse: function() {
 	return `*${high5Message.title}* \n${high5Message.note}`;
 },
 
-high5_WebchatResponse: function() {
-	const adaptiveCardContent = {
-		type: "AdaptiveCard",
-		body: [
-		    {
-				type: "TextBlock",
-				text: `*${high5Message.title}*`,
-				wrap: true,
-			},
-			{
-				type: "TextBlock",
-				text: high5Message.note,
-				wrap: true,
-			}
-		],
-		$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-		version: "1.3",
-	};
+high5_WebchatResponse: function(context) {
+    const adaptiveCardContent = {
+        type: "AdaptiveCard",
+        body: [
+            {
+                type: "TextBlock",
+                size: "Large",
+                weight: "Bolder",
+                text: "High5 results...",
+                wrap: true,
+            },
+            {
+                type: "TextBlock",
+                text: `*${high5Message.title}*`,
+                wrap: true,
+            },
+            {
+                type: "TextBlock",
+                text: high5Message.note,
+                wrap: true,
+            },
+            {
+                type: "TextBlock",
+                text: `Your ingress was: ${context.activity.channelId}`,
+                wrap: true,
+            },
+            {
+                type: "TextBlock",
+                text: `Your messageID was: ${context.activity.id}`,
+                wrap: true,
+            },
+            {
+                type: "TextBlock",
+                text: `Your recipientID was: ${context.activity.recipient.id}`,
+                wrap: true,
+            },
+            {
+                type: "TextBlock",
+                text: "Thank you!",
+                wrap: true,
+            },
+        ],
+        $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+        version: "1.3",
+    };
 
-	return {
-		type: "attachment",
-		contentType: "application/vnd.microsoft.card.adaptive",
-		contentUrl: null,
-		content: adaptiveCardContent,
-	};
+    return {
+        type: "attachment",
+        contentType: "application/vnd.microsoft.card.adaptive",
+        contentUrl: null,
+        content: adaptiveCardContent,
+    };
 },
 
 high5_SlackResponse: function() {
