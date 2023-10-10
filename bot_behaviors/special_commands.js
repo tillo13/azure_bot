@@ -36,54 +36,34 @@ const commands = new Proxy({
 });
 
 async function highFiveCommand(context) {
-    let messageText = context.activity.text.replace('$high5', '').trim();
+		let message;
+	
+		try {
+			switch (context.activity.channelId) {
+				case 'webchat':
+					message = formats.high5_WebchatResponse();
+					console.log('\n******SPECIAL_COMMANDS: high5 path Chose Webchat format');
+					break;
+				case 'slack':
+					message = formats.high5_SlackResponse();
+					console.log('\n******SPECIAL_COMMANDS: high5 path Chose Slack format');
+					break;
+				case 'msteams':
+					message = formats.high5_msteamsResponse();
+					console.log('\n******SPECIAL_COMMANDS: high5 path Chose MSTeams format');
+					break;
+				default:
+					message = formats.high5_DefaultResponse();
+					console.log('\n******SPECIAL_COMMANDS: high5 path Chose default format');
+			}
+		} catch (error) {
+			console.error('\n******SPECIAL_COMMANDS: high5 path Failed to format the message:', error);
+			message = formats.high5_DefaultResponse();
+		}
+	
+		return sendMessageResponse(context, message);
+	}
 
-    if (messageText == '') {
-        return sendMessageResponse(context, "Sorry, you need to tell me who to $high5, like this `$high5 andy.tillo@teradata.com for doing something amazing!");
-    }
-
-    // Prepare placeholder variable for username and reason 
-    let username = "";
-    let reason = "";
-
-    try {
-        // Try to split message by 'for' keyword to separate username and reason
-        [username, reason="just because"] = messageText.split(' for ');
-
-        // Remove any unwanted white spaces
-        username = username.trim();
-        reason = reason.trim();
-
-        // Check if input username is in valid format (email, @tag, phone number)
-        // For simplicity, assuming that @tag starts with @, email contains @ and phone number is 10 digits long
-        if (!(username.startsWith('@') || (username.includes('@') && username.includes('.')) || /^\d{10}$/.test(username))) {
-            throw new Error('Invalid format for username');
-        }
-
-        // If everything is valid, set the reason as remaining string after removing username
-        reason = messageText.replace(username, '').trim();
-
-    } catch (error) {
-        console.error(`Error while parsing input message: ${error}`);
-        return sendMessageResponse(context, "Sorry, we couldn't parse your message correctly. Make sure to put your high5 receiver's tag, email or phone number correctly.");
-    }
-
-    // Prepare the formatted message
-    let formattedMessage = `High5 Sender: ${context.activity.from.name}\n`;
-    formattedMessage += `High5 Receiver: ${username}\n`;
-    formattedMessage += `High5 Reason: ${reason}`;
-
-    if (context.activity.channelId.toLowerCase() === 'webchat') {
-        await context.sendActivity(formats.high5_WebchatResponse(context.activity.from.name, username, reason));
-    } else if (context.activity.channelId.toLowerCase() === 'msteams') {
-        const reply = MessageFactory.attachment(formats.high5_msteamsResponse(context.activity.from.name, username, reason));
-        await context.sendActivity(reply);
-    } else if (context.activity.channelId.toLowerCase() === 'slack') {
-        await context.sendActivity(formats.high5_SlackResponse(context.activity.from.name, username, reason));
-    } else {
-        await context.sendActivity(formats.high5_DefaultResponse(context.activity.from.name, username, reason));
-    }
-}
 
 async function aboutCommandHandler(context) {
     const readmeUrl = "https://raw.githubusercontent.com/tillo13/azure_bot/main/README.md";

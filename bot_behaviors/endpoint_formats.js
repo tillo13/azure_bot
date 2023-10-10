@@ -19,53 +19,76 @@ const helpMessage = {
 	]
 };
 
+const high5Message ={
+	title: "You just high5'd someone!",
+	note:  "way to be nice!"
+};
+
 module.exports = {
 
-	/////HIGH5 path START//////
-	high5_DefaultResponse: function(sender, receiver, reason) {
-		return `High5! :raised_hand::skin-tone-4:\n\nSender: ${sender}\nReceiver: ${receiver}\nReason: ${reason}`;
-	},
-	high5_msteamsResponse: function(sender, receiver, reason) {
-		const adaptiveCardContent = {
-			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-			type: "AdaptiveCard",
-			version: "1.4",
-			body: [
-				{
-					type: "TextBlock",
-					text: "⭐ High5!",
-					weight: "Bolder",
-					size: "Medium"
-				},
-				{
-					type: "FactSet",
-					facts: [
-						{
-							title: "Sender:",
-							value: sender
-						},
-						{
-							title: "Receiver:",
-							value: receiver
-						},
-						{
-							title: "Reason:",
-							value: reason
-						}
-					]
-				}
-			]
-		};
-	
-		return {
-			type: "attachment",
-			contentType: "application/vnd.microsoft.card.adaptive",
-			contentUrl: null,
-			content: adaptiveCardContent
-		};
-	},
+	//////high5 path START//////
+high5_DefaultResponse: function() {
+	return `*${high5Message.title}* \n${high5Message.note}`;
+},
 
-		/////HIGH5 path END//////
+high5_WebchatResponse: function() {
+	const adaptiveCardContent = {
+		type: "AdaptiveCard",
+		body: [
+		    {
+				type: "TextBlock",
+				text: `*${high5Message.title}*`,
+				wrap: true,
+			},
+			{
+				type: "TextBlock",
+				text: high5Message.note,
+				wrap: true,
+			}
+		],
+		$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+		version: "1.3",
+	};
+
+	return {
+		type: "attachment",
+		contentType: "application/vnd.microsoft.card.adaptive",
+		contentUrl: null,
+		content: adaptiveCardContent,
+	};
+},
+
+high5_SlackResponse: function() {
+	return `:robot_face: _${high5Message.title}_\n\n${high5Message.note}\n\n`;
+},
+
+high5_msteamsResponse: function() {
+	const adaptiveCardContent = {
+		type: "AdaptiveCard",
+		body: [
+            {
+				type: "TextBlock",
+				text: `**${high5Message.title}**`,
+				wrap: true
+			},
+			{
+				type: "TextBlock",
+				text: high5Message.note,
+				wrap: true
+			}
+		],
+		$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+		version: "1.4",
+	};
+
+	return {
+		type: "attachment",
+		contentType: "application/vnd.microsoft.card.adaptive",
+		contentUrl: null,
+		content: adaptiveCardContent
+	};
+},
+/////high5 path END//////
 
 				/////help path START//////
 	help_DefaultResponse: function() {
