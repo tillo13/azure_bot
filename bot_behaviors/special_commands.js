@@ -36,34 +36,36 @@ const commands = new Proxy({
 });
 
 async function highFiveCommand(context) {
-		let message;
-	
-		try {
-			switch (context.activity.channelId) {
-				case 'webchat':
-					message = formats.high5_WebchatResponse(context);
-					console.log('\n******SPECIAL_COMMANDS: high5 path Chose Webchat format');
-					break;
-				case 'slack':
-					message = formats.high5_SlackResponse();
-					console.log('\n******SPECIAL_COMMANDS: high5 path Chose Slack format');
-					break;
-				case 'msteams':
-					message = formats.high5_msteamsResponse();
-					console.log('\n******SPECIAL_COMMANDS: high5 path Chose MSTeams format');
-					break;
-				default:
-					message = formats.high5_DefaultResponse();
-					console.log('\n******SPECIAL_COMMANDS: high5 path Chose default format');
-			}
-		} catch (error) {
-			console.error('\n******SPECIAL_COMMANDS: high5 path Failed to format the message:', error);
-			message = formats.high5_DefaultResponse();
-		}
-	
-		return sendMessageResponse(context, message);
-	}
+    let message;
+    
+    let userMessage = context.activity.text.replace('$high5 ', ''); // remove $high5 from the user's text
 
+    try {
+        switch (context.activity.channelId) {
+            case 'webchat':
+                // Pass the userMessage to the high5_WebchatResponse function
+                message = formats.high5_WebchatResponse(context, userMessage);
+                console.log('\n******SPECIAL_COMMANDS: high5 path Chose Webchat format');
+                break;
+            case 'slack':
+                message = formats.high5_SlackResponse();
+                console.log('\n******SPECIAL_COMMANDS: high5 path Chose Slack format');
+                break;
+            case 'msteams':
+                message = formats.high5_msteamsResponse();
+                console.log('\n******SPECIAL_COMMANDS: high5 path Chose MSTeams format');
+                break;
+            default:
+                message = formats.high5_DefaultResponse();
+                console.log('\n******SPECIAL_COMMANDS: high5 path Chose default format');
+        }
+    } catch (error) {
+        console.error('\n******SPECIAL_COMMANDS: high5 path Failed to format the message:', error);
+        message = formats.high5_DefaultResponse();
+    }
+
+    return sendMessageResponse(context, message);
+}
 
 async function aboutCommandHandler(context) {
     const readmeUrl = "https://raw.githubusercontent.com/tillo13/azure_bot/main/README.md";

@@ -31,7 +31,7 @@ high5_DefaultResponse: function() {
 	return `*${high5Message.title}* \n${high5Message.note}`;
 },
 
-high5_WebchatResponse: function(context) {
+high5_WebchatResponse: function(context, userMessage) {
     const adaptiveCardContent = {
         type: "AdaptiveCard",
         body: [
@@ -67,6 +67,11 @@ high5_WebchatResponse: function(context) {
                 text: `Your recipientID was: ${context.activity.recipient.id}`,
                 wrap: true,
             },
+			{
+				type: "TextBlock",
+				text: `You said: ${userMessage}`, // Include the user's message
+				wrap: true,
+			},
             {
                 type: "TextBlock",
                 text: "Thank you!",
