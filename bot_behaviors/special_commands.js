@@ -48,11 +48,10 @@ async function highFiveCommand(context) {
 
     try {
         // Try to split message by 'for' keyword to separate username and reason
-        [username, reason="just because"] = messageText.split(' for ');
+        [username, reason] = messageText.split(' for ');
 
         // Remove any unwanted white spaces
         username = username.trim();
-        reason = reason.trim();
 
         // Check if input username is in valid format (email, @tag, phone number)
         // For simplicity, assuming that @tag starts with @, email contains @ and phone number is 10 digits long
@@ -60,8 +59,11 @@ async function highFiveCommand(context) {
             throw new Error('Invalid format for username');
         }
 
-        // If everything is valid, set the reason as remaining string after removing username
-        reason = messageText.replace(username, '').trim();
+        if(!reason) {
+            reason = "just because";
+        } else {
+            reason = reason.trim();
+        }
 
     } catch (error) {
         console.error(`Error while parsing input message: ${error}`);
