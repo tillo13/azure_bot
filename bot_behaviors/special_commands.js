@@ -40,6 +40,8 @@ const commands = new Proxy({
 async function highFiveCommand(context) {
     let message;
 
+
+	
 // remove $high5 from the user's text, trim any leading or trailing spaces and case insensitive
 let userMessage = context.activity.text.replace(/\$high5/i, '').trim(); 
 
@@ -85,7 +87,13 @@ let userMessage = context.activity.text.replace(/\$high5/i, '').trim();
                 console.log('\n******SPECIAL_COMMANDS: high5 path Chose Webchat format');
                 break;
             case 'slack':
-                message = formats.high5_SlackResponse();
+                // Extract the mentioned user from entities array in slack payload
+                if (context.activity.entities && context.activity.entities[0].text) {
+                    recognizedUser = context.activity.entities[0].text.replace('@', '');
+                }
+                
+                // Use the new high5_SlackParsedResponse method and pass the user message and recognized user
+                message = formats.high5_SlackParsedResponse(userMessage, recognizedUser);
                 console.log('\n******SPECIAL_COMMANDS: high5 path Chose Slack format');
                 break;
             case 'msteams':

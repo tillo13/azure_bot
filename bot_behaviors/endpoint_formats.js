@@ -99,6 +99,11 @@ high5_SlackResponse: function() {
 	return `:robot_face: _${high5Message.title}_\n\n${high5Message.note}\n\n`;
 },
 
+high5_SlackParsedResponse: function(userMessage, recognizedUser) {
+	return `:robot_face: _${high5Message.title}_\n\nUser said: ${userMessage}\n\nRecognized User: ${recognizedUser}\n\n${high5Message.note}\n\n`;
+},
+
+
 high5_msteamsResponse: function() {
 	const adaptiveCardContent = {
 		type: "AdaptiveCard",
