@@ -103,7 +103,6 @@ async function highFiveCommand(context) {
     return sendMessageResponse(context, message);
 }
 
-
 async function aboutCommandHandler(context) {
     const readmeUrl = "https://raw.githubusercontent.com/tillo13/azure_bot/main/README.md";
     let readmeContent = "";
