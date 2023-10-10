@@ -41,18 +41,10 @@ async function highFiveCommand(context) {
     // remove $high5 from the user's text, trim any leading or trailing spaces
     let userMessage = context.activity.text.replace('$high5', '').trim(); 
 
-    // If no userMessage (meaning they typed "$high5" followed by nothing or whitespace)
-    if (!userMessage) {
-        return {
-            type: 'message',
-            text: 'Hey, you forgot to tell us who you are recognizing! Try phone, email of a @username after your $high5 and why you are recognizing them!'
-        };
-    }
-
     let recognizedUser; // The recognized @username, email, or phone from the payload
 
     // Regular Expressions to recognize @username, email, and phone numbers
-    let usernameRegex = /\s@(\w+)/;
+    let usernameRegex = /@(\w+)/;
     let emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/;
     let phoneRegex = /\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}/; // Recognizes US phone numbers
 
