@@ -48,21 +48,21 @@ async function highFiveCommand(context) {
     let emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/;
     let phoneRegex = /\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}/; // Recognizes US phone numbers
 
-    // Try to recognize @username from the user message
-    let match = userMessage.match(usernameRegex);
+    // If no phone number, try to recognize email
+    let match = userMessage.match(emailRegex);
     if (match) {
-        recognizedUser = match[0]; // includes the @ symbol
+        recognizedUser = match[0];
     }
 
-    // If no @username, try to recognize email
+    // If no email, try to recognize @username
     if (!recognizedUser) {
-        match = userMessage.match(emailRegex);
+        match = userMessage.match(usernameRegex);
         if (match) {
-            recognizedUser = match[0];
+            recognizedUser = match[1]; // Here use match[1] to exclude @ symbol.
         }
     }
 
-    // If no email, try to recognize phone number
+    // If no @username, try to recognize phone number
     if (!recognizedUser) {
         match = userMessage.match(phoneRegex);
         if (match) {
