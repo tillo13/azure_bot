@@ -43,16 +43,14 @@ let phoneRegex = /\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}/; // Recognizes US phone num
 async function highFiveCommand(context) {
     let message;
     
-    let userMessage = context.activity.text.replace('$high5 ', ''); // remove $high5 from the user's text
+    let userMessage = context.activity.text.replace('$high5', '').trim(); // remove $high5 from the user's text, trim any leading or trailing spaces
 
     let recognizedUser; // The recognized @username, email, or phone from the payload
-    let recognizedUserIndex = -1; // The start index of the recognized user in the user message
 
     // Try to recognize @username from the user message
-    let match = userMessage.match(usernameRegex);
+    let match = userMessage.match(/@(\w+)/i);
     if (match) {
-        recognizedUser = match[1];
-        recognizedUserIndex = match.index;
+        recognizedUser = match[0]; // match[0] includes the @ symbol, match[1] is just the username
     }
 
     // If no @username, try to recognize email
@@ -60,7 +58,6 @@ async function highFiveCommand(context) {
         match = userMessage.match(emailRegex);
         if (match) {
             recognizedUser = match[0];
-            recognizedUserIndex = match.index;
         }
     }
 
@@ -69,18 +66,14 @@ async function highFiveCommand(context) {
         match = userMessage.match(phoneRegex);
         if (match) {
             recognizedUser = match[0];
-            recognizedUserIndex = match.index;
         }
     }
-
-    // The user message without the recognized user
-    let restOfMessage = recognizedUser ? userMessage.substring(recognizedUserIndex + recognizedUser.length) : userMessage;
 
     try {
         switch (context.activity.channelId) {
             case 'webchat':
-                // Pass the restOfMessage and recognizedUser to the high5_WebchatResponse function
-                message = formats.high5_WebchatResponse(context, restOfMessage, recognizedUser);
+                // Pass the userMessage and recognizedUser to the high5_WebchatResponse function
+                message = formats.high5_WebchatResponse(context, userMessage, recognizedUser);
                 console.log('\n******SPECIAL_COMMANDS: high5 path Chose Webchat format');
                 break;
             case 'slack':
