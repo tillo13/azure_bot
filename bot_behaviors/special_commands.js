@@ -38,15 +38,16 @@ const commands = new Proxy({
 async function highFiveCommand(context) {
     let message;
     
-	let userMessage = context.activity.text;
+    // remove $high5 from the user's text, trim any leading or trailing spaces
+    let userMessage = context.activity.text.replace('$high5', '').trim(); 
 
-	if (!userMessage || userMessage.trim() === '$high5') {
+    // If no userMessage (meaning they typed "$high5" followed by nothing or whitespace)
+	if (!userMessage) {
 		const message = 'Hey, you forgot to tell us who you are recognizing! Try phone, email of a @username after your $high5 and why you are recognizing them!';
 		return sendMessageResponse(context, message);
 	}
-	
-	let recognizedUser;
-	userMessage = userMessage.replace('$high5', '').trim();
+
+    let recognizedUser; // The recognized @username, email, or phone from the payload
 
     // Regular Expressions to recognize @username, email, and phone numbers
     let usernameRegex = /\s@(\w+)/;
@@ -78,15 +79,12 @@ async function highFiveCommand(context) {
     try {
         switch (context.activity.channelId) {
             case 'webchat':
+                // Pass the userMessage and recognizedUser to the high5_WebchatResponse function
                 message = formats.high5_WebchatResponse(context, userMessage, recognizedUser);
                 console.log('\n******SPECIAL_COMMANDS: high5 path Chose Webchat format');
                 break;
             case 'slack':
-                let channelId = context.activity.recipient.id;
-                let channelName = context.activity.conversation.name;
-                let slackMessageID = context.activity.id;
-
-                message = formats.high5_SlackResponse(context, userMessage, recognizedUser, channelId, channelName, slackMessageID);
+                message = formats.high5_SlackResponse();
                 console.log('\n******SPECIAL_COMMANDS: high5 path Chose Slack format');
                 break;
             case 'msteams':
@@ -104,6 +102,7 @@ async function highFiveCommand(context) {
 
     return sendMessageResponse(context, message);
 }
+
 
 async function aboutCommandHandler(context) {
     const readmeUrl = "https://raw.githubusercontent.com/tillo13/azure_bot/main/README.md";
