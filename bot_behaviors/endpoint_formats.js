@@ -31,7 +31,7 @@ high5_DefaultResponse: function() {
 	return `*${high5Message.title}* \n${high5Message.note}`;
 },
 
-high5_WebchatResponse: function(context, userMessage) {
+high5_WebchatResponse: function(context, restOfMessage, recognizedUser) {
     const adaptiveCardContent = {
         type: "AdaptiveCard",
         body: [
@@ -69,7 +69,12 @@ high5_WebchatResponse: function(context, userMessage) {
             },
 			{
 				type: "TextBlock",
-				text: `You said: ${userMessage}`, // Include the user's message
+				text: `You said: ${restOfMessage}`, // Include the rest of the user's message
+				wrap: true,
+			},
+			{
+				type: "TextBlock",
+				text: `The user you recognized was: ${recognizedUser ? `@${recognizedUser}` : 'none'}`,
 				wrap: true,
 			},
             {

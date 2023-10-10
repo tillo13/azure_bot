@@ -35,16 +35,52 @@ const commands = new Proxy({
     }
 });
 
+// Regular Expressions to recognize @username, email, and phone numbers
+let usernameRegex = /@(\w+)/;
+let emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/;
+let phoneRegex = /\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}/; // Recognizes US phone numbers
+
 async function highFiveCommand(context) {
     let message;
     
     let userMessage = context.activity.text.replace('$high5 ', ''); // remove $high5 from the user's text
 
+    let recognizedUser; // The recognized @username, email, or phone from the payload
+    let recognizedUserIndex = -1; // The start index of the recognized user in the user message
+
+    // Try to recognize @username from the user message
+    let match = userMessage.match(usernameRegex);
+    if (match) {
+        recognizedUser = match[1];
+        recognizedUserIndex = match.index;
+    }
+
+    // If no @username, try to recognize email
+    if (!recognizedUser) {
+        match = userMessage.match(emailRegex);
+        if (match) {
+            recognizedUser = match[0];
+            recognizedUserIndex = match.index;
+        }
+    }
+
+    // If no email, try to recognize phone number
+    if (!recognizedUser) {
+        match = userMessage.match(phoneRegex);
+        if (match) {
+            recognizedUser = match[0];
+            recognizedUserIndex = match.index;
+        }
+    }
+
+    // The user message without the recognized user
+    let restOfMessage = recognizedUser ? userMessage.substring(recognizedUserIndex + recognizedUser.length) : userMessage;
+
     try {
         switch (context.activity.channelId) {
             case 'webchat':
-                // Pass the userMessage to the high5_WebchatResponse function
-                message = formats.high5_WebchatResponse(context, userMessage);
+                // Pass the restOfMessage and recognizedUser to the high5_WebchatResponse function
+                message = formats.high5_WebchatResponse(context, restOfMessage, recognizedUser);
                 console.log('\n******SPECIAL_COMMANDS: high5 path Chose Webchat format');
                 break;
             case 'slack':
