@@ -42,10 +42,12 @@ async function highFiveCommand(context) {
     let userMessage = context.activity.text.replace('$high5', '').trim(); 
 
     // If no userMessage (meaning they typed "$high5" followed by nothing or whitespace)
-	if (!userMessage) {
-		const message = 'Hey, you forgot to tell us who you are recognizing! Try phone, email of a @username after your $high5 and why you are recognizing them!';
-		return sendMessageResponse(context, message);
-	}
+    if (!userMessage) {
+        return {
+            type: 'message',
+            text: 'Hey, you forgot to tell us who you are recognizing! Try phone, email of a @username after your $high5 and why you are recognizing them!'
+        };
+    }
 
     let recognizedUser; // The recognized @username, email, or phone from the payload
 
