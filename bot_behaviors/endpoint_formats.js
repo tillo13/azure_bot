@@ -74,7 +74,7 @@ high5_WebchatResponse: function(context, restOfMessage, recognizedUser) {
 			},
 			{
 				type: "TextBlock",
-				text: `The user you recognized was: ${recognizedUser ? `@${recognizedUser}` : 'none'}`,
+				text: `The user you recognized was: ${recognizedUser ? `${recognizedUser}` : 'none'}`,
 				wrap: true,
 			},
             {
