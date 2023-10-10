@@ -52,7 +52,7 @@ const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.cor
 async function appendUserData(username, loginTimestamp, platform) {
     try {
         // Replacing any commas with underscores before storing
-        username = username.replace(/,/g, "_");
+        username = username.replace(/,\s+/g, "_");
         // Get container client
         const containerClient = blobServiceClient.getContainerClient(containerName);
 
