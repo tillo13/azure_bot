@@ -74,7 +74,7 @@ high5_WebchatResponse: function(context, restOfMessage, recognizedUser) {
 			},
 			{
 				type: "TextBlock",
-				text: `The user you recognized was: ${recognizedUser ? `${recognizedUser}` : 'none'}`,
+				text: `The user you recognized was: ${recognizedUser ? `@${recognizedUser}` : 'none'}`,
 				wrap: true,
 			},
             {
@@ -95,23 +95,8 @@ high5_WebchatResponse: function(context, restOfMessage, recognizedUser) {
     };
 },
 
-high5_SlackResponse: function(context, restOfMessage, recognizedUser, channelId, channelName, slackMessageID) {
-	let slackMessage = {
-		"blocks": [
-			{
-				"type": "section",
-				"text": {
-					"type": "mrkdwn",
-					"text": `*High5 results...*\n You just high5'd someone!\nWay to be nice!\nYour ingress was: slack\nYour messageID was: ${slackMessageID}\nYour slack channel name was: ${channelName}\nYour slack channel id was: ${channelId}\nYou said: ${restOfMessage}\nThe user you recognized was: ${recognizedUser}\nThank you!`
-				}
-			},
-			{
-				"type": "divider",
-			}
-		]
-	};
-	
-	return slackMessage;
+high5_SlackResponse: function() {
+	return `:robot_face: _${high5Message.title}_\n\n${high5Message.note}\n\n`;
 },
 
 high5_msteamsResponse: function() {
