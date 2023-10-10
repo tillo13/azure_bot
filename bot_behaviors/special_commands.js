@@ -58,40 +58,46 @@ async function highFiveCommand(context) {
         sender = context.activity.from.name || sender;
     } catch (error) {
         console.error('Error in getting sender:', error);
-        // return; (Uncomment if you need to abort operation when failing to get the sender)
     }
 
     try {
         const receiverRegex = /^@(\w+)|(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)|(\b\d{10}\b)/;
         const matchReceiver = messageText.match(receiverRegex);
 
-        if (matchReceiver && matchReceiver.length > 0) {
+        if(matchReceiver && matchReceiver.length > 0){
             receiver = matchReceiver[0];
             messageText = messageText.replace(receiver, '').trim();
         }
     } catch (error) {
         console.error('Error in parsing receiver:', error);
-        // return; (Uncomment if you need to abort operation when failing to get the receiver)
     }
 
     try {
         reason = messageText || "just because";
     } catch (error) {
         console.error('Error in getting reason:', error);
-        // return; (Uncomment if you need to abort operation when failing to get the reason)
     }
 
-    console.log(`Parsed message from ${context.activity.channelId}: high5 from ${sender} to ${receiver} for ${reason}.`);
+	console.log(`Parsed from ${context.activity.channelId}: user ${username} from ${sender} for reason: ${reason}.`);
+
 
     if (context.activity.channelId.toLowerCase() === 'webchat') {
-        await context.sendActivity(formats.high5_WebchatResponse(sender, receiver, reason));
+        const formattedMessage = formats.high5_WebchatResponse(sender, receiver, reason);
+        await context.sendActivity(formattedMessage);
     } else if (context.activity.channelId.toLowerCase() === 'msteams') {
-        const reply = MessageFactory.attachment(formats.high5_msteamsResponse(sender, receiver, reason));
+        const formattedMessage = formats.high5_msteamsResponse(sender, receiver, reason);
+        const reply = MessageFactory.attachment(formattedMessage);
         await context.sendActivity(reply);
     } else if (context.activity.channelId.toLowerCase() === 'slack') {
-        await context.sendActivity(formats.high5_SlackResponse(sender, receiver, reason));
+        const formattedMessage = formats.high5_SlackResponse(sender, receiver, reason);
+        // Original way of dispatching response to Slack, allowing threading
+        await context.sendActivity({
+            channelData: formattedMessage,
+            text: '',
+        });
     } else {
-        await context.sendActivity(formats.high5_DefaultResponse(sender, receiver, reason));
+        const formattedMessage = formats.high5_DefaultResponse(sender, receiver, reason);
+        await context.sendActivity(formattedMessage);
     }
 }
 
