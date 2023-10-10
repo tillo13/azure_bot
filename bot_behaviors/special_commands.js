@@ -96,10 +96,16 @@ let userMessage = context.activity.text.replace(/\$high5/i, '').trim();
                 message = formats.high5_SlackParsedResponse(userMessage, recognizedUser);
                 console.log('\n******SPECIAL_COMMANDS: high5 path Chose Slack format');
                 break;
-            case 'msteams':
-                message = formats.high5_msteamsResponse();
-                console.log('\n******SPECIAL_COMMANDS: high5 path Chose MSTeams format');
-                break;
+				case 'msteams':
+					// Parse mentioned user from context
+					if (context.activity.entities && context.activity.entities[0].mention) {
+						recognizedUser = context.activity.entities[0].mention.mentioned.name;
+					}
+				
+					// Use the high5_msteamsResponse method and pass user message and mentioned user
+					message = formats.high5_msteamsResponse(userMessage, recognizedUser);
+					console.log('\n******SPECIAL_COMMANDS: high5 path Chose MSTeams format');
+					break;
             default:
                 message = formats.high5_DefaultResponse();
                 console.log('\n******SPECIAL_COMMANDS: high5 path Chose default format');

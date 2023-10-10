@@ -104,31 +104,41 @@ high5_SlackParsedResponse: function(userMessage, recognizedUser) {
 },
 
 
-high5_msteamsResponse: function() {
-	const adaptiveCardContent = {
-		type: "AdaptiveCard",
-		body: [
+high5_msteamsResponse: function(userMessage, recognizedUser) {
+    const adaptiveCardContent = {
+        type: "AdaptiveCard",
+        body: [
+            {
+                type: "TextBlock",
+                text: `*${high5Message.title}*`,
+                wrap: true
+            },
+            {
+                type: "TextBlock",
+                text: high5Message.note,
+                wrap: true
+            },
             {
 				type: "TextBlock",
-				text: `**${high5Message.title}**`,
-				wrap: true
-			},
-			{
-				type: "TextBlock",
-				text: high5Message.note,
-				wrap: true
-			}
-		],
-		$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-		version: "1.4",
-	};
+		        text: `You said: ${userMessage}`, // Include the rest of the user's message
+		        wrap: true,
+            },
+            {
+                type: "TextBlock",
+                text: `The user you recognized was: ${recognizedUser ? `@${recognizedUser}` : 'none'}`,
+                wrap: true,
+            },
+        ],
+        $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+        version: "1.4",
+    };
 
-	return {
-		type: "attachment",
-		contentType: "application/vnd.microsoft.card.adaptive",
-		contentUrl: null,
-		content: adaptiveCardContent
-	};
+    return {
+        type: "attachment",
+        contentType: "application/vnd.microsoft.card.adaptive",
+        contentUrl: null,
+        content: adaptiveCardContent
+    };
 },
 /////high5 path END//////
 
