@@ -96,29 +96,31 @@ async function highFiveCommand(context) {
         console.error('Error in getting reason:', error);
     }
 
-	console.log(`Parsed from ${context.activity.channelId}: user ${username} from ${sender} for reason: ${reason}.`);
+    console.log(`Parsed from ${context.activity.channelId}: user ${username} from ${sender} for reason: ${reason}.`);
 
-	let formattedMessage; // Removed the assignment here
-	
-	try {
-		if (context.activity.channelId.toLowerCase() === 'webchat') {
-			formattedMessage = formats.high5_WebchatResponse(sender, username, reason);
-		} else if (context.activity.channelId.toLowerCase() === 'msteams') {
-			formattedMessage = MessageFactory.attachment(formats.high5_msteamsResponse(sender, username, reason));
-		} else if (context.activity.channelId.toLowerCase() === 'slack') {
-			formattedMessage = formats.high5_SlackResponse(sender, username, reason);
-		} else {
-			formattedMessage = formats.high5_DefaultResponse(sender, username, reason);
-		}
-		await context.sendActivity(formattedMessage); // used formattedMessage instead of reply
-	} catch (error) {
-		console.error('Error in sending message:', error);
-		try {
-			await context.sendActivity('Sorry, there seems to be an issue with this command. Please try again.');
-		} catch(finalError) {
-			console.error('Error in sending error message:', finalError);
-		}
-	}}
+    let formattedMessage;
+
+    try {
+        if (context.activity.channelId.toLowerCase() === 'webchat') {
+            formattedMessage = formats.high5_WebchatResponse(sender, username, reason);
+        } else if (context.activity.channelId.toLowerCase() === 'msteams') {
+            formattedMessage = MessageFactory.attachment(formats.high5_msteamsResponse(sender, username, reason));
+        } else if (context.activity.channelId.toLowerCase() === 'slack') {
+            formattedMessage = formats.high5_SlackResponse(sender, username, reason);
+            formattedMessage.thread_ts = context.activity.id;
+        } else {
+            formattedMessage = formats.high5_DefaultResponse(sender, username, reason);
+        }
+        await context.sendActivity(formattedMessage);
+    } catch (error) {
+        console.error('Error in sending message:', error);
+        try {
+            await context.sendActivity('Sorry, there seems to be an issue with this command. Please try again.');
+        } catch(finalError) {
+            console.error('Error in sending error message:', finalError);
+        }
+    }
+}
 
 async function aboutCommandHandler(context) {
     const readmeUrl = "https://raw.githubusercontent.com/tillo13/azure_bot/main/README.md";
