@@ -35,22 +35,23 @@ const commands = new Proxy({
     }
 });
 
-// Regular Expressions to recognize @username, email, and phone numbers
-let usernameRegex = /@(\w+)/;
-let emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/;
-let phoneRegex = /\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}/; // Recognizes US phone numbers
-
 async function highFiveCommand(context) {
     let message;
     
-    let userMessage = context.activity.text.replace('$high5', '').trim(); // remove $high5 from the user's text, trim any leading or trailing spaces
+    // remove $high5 from the user's text, trim any leading or trailing spaces
+    let userMessage = context.activity.text.replace('$high5', '').trim(); 
 
     let recognizedUser; // The recognized @username, email, or phone from the payload
 
+    // Regular Expressions to recognize @username, email, and phone numbers
+    let usernameRegex = /@(\w+)/;
+    let emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/;
+    let phoneRegex = /\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}/; // Recognizes US phone numbers
+
     // Try to recognize @username from the user message
-    let match = userMessage.match(/@(\w+)/i);
+    let match = userMessage.match(usernameRegex);
     if (match) {
-        recognizedUser = match[0]; // match[0] includes the @ symbol, match[1] is just the username
+        recognizedUser = match[0]; // includes the @ symbol
     }
 
     // If no @username, try to recognize email
