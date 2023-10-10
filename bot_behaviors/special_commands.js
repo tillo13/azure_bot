@@ -38,14 +38,15 @@ const commands = new Proxy({
 async function highFiveCommand(context) {
     let message;
     
-    let userMessage = context.activity.text.replace('$high5', '').trim();
+	let userMessage = context.activity.text;
 
-	if (!userMessage) {
+	if (!userMessage || userMessage.trim() === '$high5') {
 		const message = 'Hey, you forgot to tell us who you are recognizing! Try phone, email of a @username after your $high5 and why you are recognizing them!';
 		return sendMessageResponse(context, message);
 	}
-
-    let recognizedUser;
+	
+	let recognizedUser;
+	userMessage = userMessage.replace('$high5', '').trim();
 
     // Regular Expressions to recognize @username, email, and phone numbers
     let usernameRegex = /\s@(\w+)/;
