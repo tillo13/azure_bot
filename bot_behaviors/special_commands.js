@@ -40,8 +40,8 @@ const commands = new Proxy({
 async function highFiveCommand(context) {
     let message;
 
-    // remove $high5 from the user's text, trim any leading or trailing spaces
-    let userMessage = context.activity.text.replace('$high5', '').trim(); 
+// remove $high5 from the user's text, trim any leading or trailing spaces and case insensitive
+let userMessage = context.activity.text.replace(/\$high5/i, '').trim(); 
 
     if (!userMessage) {
 		message = 'Hey, you forgot to tell us who you are recognizing! Try phone, email of a @username after your $high5 and why you are recognizing them!';
