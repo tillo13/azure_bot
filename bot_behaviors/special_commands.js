@@ -44,9 +44,17 @@ async function highFiveCommand(context) {
     try {
         messageText = context.activity.text.replace('$high5', '').trim();
         if (messageText === '') {
-            await context.sendActivity(
-                "Sorry, you need to tell me who to high five. Use this command like `$high5 andy.tillo@teradata.com for doing something better-than-average!`"
-            );
+            if (context.activity.channelId.toLowerCase() === 'slack') {
+                await context.sendActivity({
+                    channelData: {
+                        text: "Sorry, you need to tell me who to high five. Use this command like `$high5 andy.tillo@teradata.com for doing something better-than-average!`"
+                    }
+                });
+            } else {
+                await context.sendActivity(
+                    "Sorry, you need to tell me who to high five. Use this command like `$high5 andy.tillo@teradata.com for doing something better-than-average!`"
+                );
+            }
             return;
         }
     } catch (error) {
@@ -80,24 +88,17 @@ async function highFiveCommand(context) {
 
 	console.log(`Parsed from ${context.activity.channelId}: user ${username} from ${sender} for reason: ${reason}.`);
 
-
-    if (context.activity.channelId.toLowerCase() === 'webchat') {
-        const formattedMessage = formats.high5_WebchatResponse(sender, receiver, reason);
-        await context.sendActivity(formattedMessage);
-    } else if (context.activity.channelId.toLowerCase() === 'msteams') {
-        const formattedMessage = formats.high5_msteamsResponse(sender, receiver, reason);
-        const reply = MessageFactory.attachment(formattedMessage);
-        await context.sendActivity(reply);
-    } else if (context.activity.channelId.toLowerCase() === 'slack') {
-        const formattedMessage = formats.high5_SlackResponse(sender, receiver, reason);
-        // Original way of dispatching response to Slack, allowing threading
+    if (context.activity.channelId.toLowerCase() === 'slack') {
         await context.sendActivity({
-            channelData: formattedMessage,
-            text: '',
+            channelData: formats.high5_SlackResponse(sender, receiver, reason)
         });
+    } else if (context.activity.channelId.toLowerCase() === 'webchat') {
+        await context.sendActivity(formats.high5_WebchatResponse(sender, receiver, reason));
+    } else if (context.activity.channelId.toLowerCase() === 'msteams') {
+        const reply = MessageFactory.attachment(formats.high5_msteamsResponse(sender, receiver, reason));
+        await context.sendActivity(reply);
     } else {
-        const formattedMessage = formats.high5_DefaultResponse(sender, receiver, reason);
-        await context.sendActivity(formattedMessage);
+        await context.sendActivity(formats.high5_DefaultResponse(sender, receiver, reason));
     }
 }
 
