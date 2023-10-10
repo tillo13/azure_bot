@@ -51,6 +51,8 @@ const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.cor
 // A function to append new user login info to Azure Blob storage
 async function appendUserData(username, loginTimestamp, platform) {
     try {
+        // Replacing any commas with underscores before storing
+        username = username.replace(/,/g, "_");
         // Get container client
         const containerClient = blobServiceClient.getContainerClient(containerName);
 
