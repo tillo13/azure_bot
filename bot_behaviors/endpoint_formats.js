@@ -110,6 +110,13 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
         body: [
             {
                 type: "TextBlock",
+                size: "Large",
+                weight: "Bolder",
+                text: "High5 results...",
+                wrap: true,
+            },
+            {
+                type: "TextBlock",
                 text: `*${high5Message.title}*`,
                 wrap: true
             },
