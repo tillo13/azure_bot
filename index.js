@@ -1,9 +1,6 @@
 // 2023oct9 8:39am --adding postgres_util
 require('dotenv').config();
 
-// declare the GOLDEN_MESSAGE_ID to be carried on to other arms of the platform to follow the path of the user
-let GOLDEN_MESSAGE_ID;  
-
 const { botIngressSaveDataToPostgres } = require('./utilities/postgres_utils'); 
 
 const {
@@ -152,12 +149,6 @@ server.post('/api/messages', async (req, res) => {
         await appendUserData(userId, currentTimestamp, platform);
     }
 	let msg_id = req.body.id; // retrieve the message id
-	let GOLDEN_MESSAGE_OBJ = { id: null }; //Wrap GOLDEN_MESSAGE_ID in an object
-	GOLDEN_MESSAGE_OBJ.id = req.body.id; // assign the id to GOLDEN_MESSAGE_ID to carry throughout the app
-	GOLDEN_MESSAGE_ID = GOLDEN_MESSAGE_OBJ.id; // assign the id to GOLDEN_MESSAGE_ID to carry throughout the app
-		console.log(`\n\n*INDEX.JS: This message GOLDEN_MESSAGE_ID will be: ${GOLDEN_MESSAGE_ID}\n`);
-
-
 		req.body.filename_ingress = 'index.js'; // add the filename to the request body
 		// Log the data to a Postgres database:
 		botIngressSaveDataToPostgres(req.body, req.body.channelId);
@@ -216,7 +207,3 @@ server.on('upgrade', async (req, socket, head) => {
 	console.log("\n\n*INDEX.JS: Finished handling upgrade request\n");
 
 });
-
-module.exports.getGoldenMessageId = function() {
-    return GOLDEN_MESSAGE_OBJ.id; 
-}; 
