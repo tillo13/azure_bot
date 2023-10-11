@@ -3,7 +3,7 @@ const {
 	AzureKeyCredential
 } = require("@azure/openai");
 const modelCosts = require('./openai_costs_2023sept7.json');
-
+const postgres_utils = require('../utilities/postgres_utils');
 
 const MAX_OPENAI_TOKENS = 400;
 const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
@@ -136,6 +136,10 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 	console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
 	console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
+
+	//test that db saves are working: 
+	postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId}, channelId);
+
 
 	//console.log('\n\n***CHAT_HELPER.JS: OpenAI API Base URL: ', process.env.OPENAI_API_BASE_URL);
 	//console.log('\n\n***CHAT_HELPER.JS: OpenAI API Deployment: ', process.env.OPENAI_API_DEPLOYMENT);
