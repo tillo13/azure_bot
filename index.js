@@ -149,8 +149,10 @@ server.post('/api/messages', async (req, res) => {
         await appendUserData(userId, currentTimestamp, platform);
     }
 	let msg_id = req.body.id; // retrieve the message id
-	    // Log the data to a Postgres database:
+		req.body.filename_ingress = 'index.js'; // add the filename to the request body
+		// Log the data to a Postgres database:
 		botIngressSaveDataToPostgres(req.body, req.body.channelId);
+
 
 	// if id doesn't exist, set it to an empty string
 	if (typeof msg_id === 'undefined') {

@@ -20,6 +20,7 @@ pool.on('error', (err, client) => {
 })
 
 async function botIngressSaveDataToPostgres(data, channelId) {
+	let created_via = data.filename_ingress || null;
 	let preparedData = {};
 	let payload;
 
@@ -68,10 +69,10 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 			attachment_exists, recipient_id, recipient_name, 
 			channeldata_webchat_id, channeldata_slack_app_id, 
 			channeldata_slack_event_id, channeldata_slack_event_time, 
-			channeldata_msteams_tenant_id, message_payload
+			channeldata_msteams_tenant_id, message_payload, created_via
 		) 
 		VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
 		) RETURNING pk_id, message_id`;
 
 		let result = await pool.query(query, [
@@ -81,7 +82,7 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 			data.recipient.id, data.recipient.name, preparedData.channeldata_webchat_id, 
 			preparedData.channeldata_slack_app_id, preparedData.channeldata_slack_event_id, 
 			preparedData.channeldata_slack_event_time, 
-			preparedData.channeldata_msteams_tenant_id, payload
+			preparedData.channeldata_msteams_tenant_id, payload, created_via
 		]);
 
 		if (result.rows.length > 0) {
