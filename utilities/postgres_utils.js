@@ -57,7 +57,7 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 				break;
 		}
 	} catch (error) {
-		console.error('\n*POSTGRES_UTILS.JS:: Error preparing data', error);
+		console.error('\n*POSTGRES_UTILS.JS: Error preparing data for botIngress path: ', error);
 	}
 
 	try {
@@ -86,12 +86,12 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 		]);
 
 		if (result.rows.length > 0) {
-			console.log(`\n*POSTGRES_UTILS.JS: Data saved to Postgres with messageID from ingress = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
+			console.log(`\n*POSTGRES_UTILS.JS: Data saved to Postgres with messageID for botIngress path:  = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
 		} else {
-			console.log('\n*POSTGRES_UTILS.JS: No Data returned after insert operation');
+			console.log('\n*POSTGRES_UTILS.JS: No Data returned after insert operation for botIngress path: ');
 		}
 	} catch (err) {
-		console.error('\n*POSTGRES_UTILS.JS: Failed to save data to Postgres', err);
+		console.error('\n*POSTGRES_UTILS.JS: Failed to save data to Postgres for botIngress path: ', err);
 	}
 }
 
@@ -146,7 +146,44 @@ function defaultIngressData() {
 }
 
 async function botInteractionSaveDataToPostgres(data, channelId, filename_ingress) {
-    console.log('\n*POSTGRES_UTILS.JS: Saving data to Postgres:', data); 
+    console.log('\n*POSTGRES_UTILS.JS: Saving data to Postgres for botInteraction path:', data);
+	console.log('\n*POSTGRES_UTILS.JS: Interaction Channel Data for botInteraction path :', data.channelData);
+	
+	// Prepare data for different channels
+	try {
+		switch (channelId) {
+			case 'webchat':
+				preparedData = webchatIngressData(data);
+				try {
+					payload = (data.text || "").substring(0, 2900); // truncate message text
+				} catch(_) {
+					payload = JSON.stringify(data).substring(0, 2900); // default to entire payload
+				}
+				break;
+			case 'slack':
+				preparedData = slackIngressData(data);
+				try {
+					payload = (data.channelData.SlackMessage.event.text || "").substring(0, 2900); // truncate message text
+				} catch(_) {
+					payload = JSON.stringify(data).substring(0, 2900); // default to entire payload
+				}
+				break;
+			case 'msteams':
+				preparedData = msteamsIngressData(data);
+				try {
+					payload = (data.text || "").substring(0, 2900); // truncate message text
+				} catch(_) {
+					payload = JSON.stringify(data).substring(0, 2900); // default to entire payload
+				}
+				break;
+			default:
+				preparedData = defaultIngressData(data);
+				payload = JSON.stringify(data).substring(0, 2900); // truncate entire payload
+				break;
+		}
+	} catch (error) {
+		console.error('\n*POSTGRES_UTILS.JS: Error preparing data for botInteraction path: ', error);
+	}
 
     try {
         const query = `
