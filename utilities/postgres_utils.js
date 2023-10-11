@@ -145,6 +145,7 @@ function defaultIngressData() {
 }
 
 async function botInteractionSaveDataToPostgres(data, channelId) {
+	console.log('\n*POSTGRES_UTILS.JS: Saving iData to Postgres:', data);  
 	try {
 		const query = `
 		INSERT INTO public.bot_invoke_log (
@@ -159,6 +160,8 @@ async function botInteractionSaveDataToPostgres(data, channelId) {
 			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 
 			$15, $16, $17, $18, $19, $20, $21
 		) RETURNING pk_id, message_id`;
+
+		console.log('\n*POSTGRES_UTILS.JS: iRunning Query:', query); 
 
 		let values = [
 			channelId, 
@@ -183,15 +186,15 @@ async function botInteractionSaveDataToPostgres(data, channelId) {
 			data.channelData.msteams.conversation.id,   // placeholder, replace with your actual property
 			data.channelData.webchat.conversation.id    // placeholder, replace with your actual property
 		];
-
+		console.log('\n*POSTGRES_UTILS.JS: Query Values:', values);  
 		let result = await pool.query(query, values);
 		if (result.rows.length > 0) {
-			console.log(`Data saved with messageID = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
+			console.log(`\n*POSTGRES_UTILS.JS: iData saved with messageID = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
 		} else {
-			console.log('No data returned after INSERT operation');
+			console.log('\n*POSTGRES_UTILS.JS: iNo data returned after INSERT operation');
 		}
 	} catch (error) {
-		console.error('Failed to save data to Postgres', error);
+		console.error('\n*POSTGRES_UTILS.JS: iFailed to save data to Postgres', error);
 	}
 }
 
