@@ -1,3 +1,7 @@
+const { GOLDEN_MESSAGE_ID } = require('./index.js');
+
+console.log("\n\n**BOT_ROUTER.JS: GOLDEN_MESSAGE_ID: ", GOLDEN_MESSAGE_ID);
+
 const PATH_CONFIGS = {
 	'msteams': {
 		personality: "You are thorough, polite, helpful and courteous.",
