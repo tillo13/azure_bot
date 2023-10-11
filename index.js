@@ -217,4 +217,6 @@ server.on('upgrade', async (req, socket, head) => {
 
 });
 
-module.exports = { GOLDEN_MESSAGE_OBJ };  // export the GOLDEN_MESSAGE_OBJ so everyone else can use it
+module.exports.getGoldenMessageId = function() {
+    return GOLDEN_MESSAGE_OBJ.id; 
+}; 
