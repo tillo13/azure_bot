@@ -148,6 +148,8 @@ function defaultIngressData() {
 async function botInteractionSaveDataToPostgres(data, channelId, filename_ingress) {
     console.log('\n*POSTGRES_UTILS.JS: Saving data to Postgres for botInteraction path:', data);
 	console.log('\n*POSTGRES_UTILS.JS: Interaction Channel Data for botInteraction path :', data.channelData);
+	let preparedData = {};
+	let payload;
 	
 	// Prepare data for different channels
 	try {
