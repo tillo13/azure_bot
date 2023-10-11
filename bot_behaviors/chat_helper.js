@@ -138,7 +138,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
 
 	//test that db saves are working: 
-	postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId}, channelId, 'chat_helper.js');
+	// v1 works: postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId}, channelId, 'chat_helper.js');
+	//testing v2: 
+	postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId, roleMessage: roleMessage, isActiveThread: isActiveThread}, channelId, 'chat_helper.js');
 
 
 
