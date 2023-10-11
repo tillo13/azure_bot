@@ -140,9 +140,10 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	//test that db saves are working: 
 	// v1 works: postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId}, channelId, 'chat_helper.js');
 	// v2 works: 
-	//postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId, conversation_id : channelId}, channelId, 'chat_helper.js');
+	postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId, conversation_id : channelId}, channelId, 'chat_helper.js');
 	//testing v3!
-	postgres_utils.botInteractionSaveDataToPostgres(data, channelId, 'chat_helper.js');
+	//create an object we can send data into and call data
+	//postgres_utils.botInteractionSaveDataToPostgres(data, channelId, 'chat_helper.js');
 
 
 
