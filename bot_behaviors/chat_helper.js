@@ -140,9 +140,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	//test that db saves are working: 
 	// v1 works: postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId}, channelId, 'chat_helper.js');
 	//testing v2: 
-	postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId, roleMessage: roleMessage, isActiveThread: isActiveThread}, channelId, 'chat_helper.js');
-
-
+	 postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId, conversation_id : channelId}, channelId, 'chat_helper.js');
 
 	//console.log('\n\n***CHAT_HELPER.JS: OpenAI API Base URL: ', process.env.OPENAI_API_BASE_URL);
 	//console.log('\n\n***CHAT_HELPER.JS: OpenAI API Deployment: ', process.env.OPENAI_API_DEPLOYMENT);
