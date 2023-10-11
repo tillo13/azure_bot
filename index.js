@@ -152,8 +152,9 @@ server.post('/api/messages', async (req, res) => {
         await appendUserData(userId, currentTimestamp, platform);
     }
 	let msg_id = req.body.id; // retrieve the message id
-	
-		GOLDEN_MESSAGE_ID = req.body.id; // assign the id to GOLDEN_MESSAGE_ID to carry throughout the app
+	let GOLDEN_MESSAGE_OBJ = { id: null }; //Wrap GOLDEN_MESSAGE_ID in an object
+	GOLDEN_MESSAGE_OBJ.id = req.body.id; // assign the id to GOLDEN_MESSAGE_ID to carry throughout the app
+	GOLDEN_MESSAGE_ID = GOLDEN_MESSAGE_OBJ.id; // assign the id to GOLDEN_MESSAGE_ID to carry throughout the app
 		console.log(`\n\n*INDEX.JS: This message GOLDEN_MESSAGE_ID will be: ${GOLDEN_MESSAGE_ID}\n`);
 
 
@@ -171,7 +172,7 @@ server.post('/api/messages', async (req, res) => {
 
 	console.log(`\n\n*INDEX.JS: Incoming request to /api/messages endpoint.${msg_id}\n`);
 	console.log("\n\n*INDEX.JS: Request payload: \n", req.body, "\n"); // logs the entire request payload
-	console.log("\n\n*INDEX.JS: Request source IP: \n", req.socket.remoteAddress, "\n"); // logs the origin IP address
+	//console.log("\n\n*INDEX.JS: Request source IP: \n", req.socket.remoteAddress, "\n"); // logs the origin IP address
 	console.log("\n\n*INDEX.JS: Processing the request...\n");
 
 	await adapter.process(req, res, (context) => myBot.run(context));
@@ -216,4 +217,4 @@ server.on('upgrade', async (req, socket, head) => {
 
 });
 
-module.exports = { GOLDEN_MESSAGE_ID };  // export the GOLDEN_MESSAGE_ID so everyone else can use it
+module.exports = { GOLDEN_MESSAGE_OBJ };  // export the GOLDEN_MESSAGE_OBJ so everyone else can use it

@@ -1,6 +1,6 @@
-const { GOLDEN_MESSAGE_ID } = require('./index.js');
+const { GOLDEN_MESSAGE_OBJ } = require('./index.js');
 
-console.log("\n\n**BOT_ROUTER.JS: GOLDEN_MESSAGE_ID: ", GOLDEN_MESSAGE_ID);
+console.log("\n\n**BOT_ROUTER.JS: GOLDEN_MESSAGE_OBJ.id: ", GOLDEN_MESSAGE_OBJ.id);
 
 const PATH_CONFIGS = {
 	'msteams': {
