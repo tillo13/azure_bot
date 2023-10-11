@@ -19,6 +19,7 @@ async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstIntera
         await context.sendActivity(MessageFactory.text(assistantResponse));
         return true;
     }
+    console.log("\n\n**MESSAGE_HANDLER.JS (handleMessageFromMSTeams) payload: ",{context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig});
     return false;
 }
 
@@ -69,6 +70,7 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
         return true;
     
     }
+    console.log("\n\n**MESSAGE_HANDLER.JS (handleMessageFromSlack) payload: ",{context, chatMessagesUser, savedThread_ts, botInvokedFlag, threadproperty, personality, pathConfig});
     return false;
 }
 
@@ -87,7 +89,7 @@ async function handleDefault(context, chatMessagesUser, personality) {
     chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
 
     await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
-
+    console.log("\n\n**MESSAGE_HANDLER.JS (handleDefault) payload: ", {context, chatMessagesUser, personality});
     return true;
 }
         
