@@ -144,8 +144,9 @@ function defaultIngressData() {
 	return {};
 }
 
-async function botInteractionSaveDataToPostgres(data, channelId) {
-    console.log('\n*POSTGRES_UTILS.JS: iSaving data to Postgres:', data);  
+async function botInteractionSaveDataToPostgres(data, channelId, filename_ingress) {
+    console.log('\n*POSTGRES_UTILS.JS: Saving data to Postgres:', data); 
+
     try {
         const query = `
         INSERT INTO public.bot_invoke_log (
@@ -154,37 +155,36 @@ async function botInteractionSaveDataToPostgres(data, channelId) {
             attachment_exists, recipient_id, recipient_name, message_payload,
             bot_response_id, conversation_turn, bot_response_payload,
             interacting_user_id, channeldata_slack_thread_ts,
-            channeldata_msteams_conversation_id, channeldata_webchat_conversation_id
+            channeldata_msteams_conversation_id, channeldata_webchat_conversation_id, created_via
         ) 
         VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 
-            $15, $16, $17, $18, $19, $20, $21
+            $15, $16, $17, $18, $19, $20, $21, $22
         ) RETURNING pk_id, message_id`;
 
-        console.log('\n*POSTGRES_UTILS.JS: iRunning Query:', query); 
-        
         let values = [
             channelId, 
-            data.type, 
-            data.id, 
-            data.timestamp, 
-            data.localTimestamp, 
-            data.localTimezone, 
-            data.serviceUrl, 
+            data.type || null, 
+            data.id || null, 
+            data.timestamp || null, 
+            data.localTimestamp || null, 
+            data.localTimezone || null, 
+            data.serviceUrl || null, 
             data.from ? data.from.id : null,
             data.from ? data.from.name : null,
             data.conversation ? data.conversation.id : null,
             data.hasAttachments ? data.hasAttachments() : false,
             data.recipient ? data.recipient.id : null,
             data.recipient ? data.recipient.name : null,
-            JSON.stringify(data),
+            JSON.stringify(data) || null,
             data.botResponse ? data.botResponse.id : null,
             data.conversationTurn || null,
             data.botResponse ? JSON.stringify(data.botResponse) : null,
             data.interactingUser ? data.interactingUser.id : null,
             data.channelData && data.channelData.slack ? data.channelData.slack.threadTimestamp : null,
             data.channelData && data.channelData.msteams ? data.channelData.msteams.conversation.id : null,
-            data.channelData && data.channelData.webchat ? data.channelData.webchat.conversation.id : null
+            data.channelData && data.channelData.webchat ? data.channelData.webchat.conversation.id : null,
+            filename_ingress || null
         ];
         
         console.log('\n*POSTGRES_UTILS.JS: iQuery Values:', values);  

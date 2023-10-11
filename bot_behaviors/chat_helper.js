@@ -138,7 +138,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
 
 	//test that db saves are working: 
-	postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId}, channelId);
+	postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId}, channelId, 'chat_helper.js');
+
 
 
 	//console.log('\n\n***CHAT_HELPER.JS: OpenAI API Base URL: ', process.env.OPENAI_API_BASE_URL);
