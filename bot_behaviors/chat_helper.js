@@ -142,6 +142,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	//testing v2: 
 	 postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId, conversation_id : channelId}, channelId, 'chat_helper.js');
 
+
 	//console.log('\n\n***CHAT_HELPER.JS: OpenAI API Base URL: ', process.env.OPENAI_API_BASE_URL);
 	//console.log('\n\n***CHAT_HELPER.JS: OpenAI API Deployment: ', process.env.OPENAI_API_DEPLOYMENT);
 

@@ -173,7 +173,7 @@ async function botInteractionSaveDataToPostgres(data, channelId, filename_ingres
             data.serviceUrl || null, 
             data.from ? data.from.id : null,
             data.from ? data.from.name : null,
-            data.conversation ? data.conversation.id : null,
+			data.conversation_id ? data.conversation_id : null,
             data.hasAttachments ? data.hasAttachments() : false,
             data.recipient ? data.recipient.id : null,
             data.recipient ? data.recipient.name : null,
