@@ -73,7 +73,8 @@ class EchoBot extends ActivityHandler {
 		this.onMessage(async (context, next) => {
 			// save each payload to db regardless 2023oct12
 			try {
-				await botRouterSaveDataToPostgres(context.activity, context.activity.channelId);
+				const filename_ingress = "bot_router.js";
+				await botRouterSaveDataToPostgres(context.activity, context.activity.channelId, filename_ingress);
 			} catch (err) {
 				console.error('\n\n**BOT_ROUTER.JS: Failed to save data to Postgres at botRouter path: ', err);
 			}
