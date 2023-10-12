@@ -279,8 +279,7 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 
   let preparedData = {};
   let payload;
-
-
+  let slackUrl = null; // Initialize slackUrl to a default value
 
   // Prepare data for different channels
   try {
@@ -289,21 +288,18 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
       	preparedData = webchatIngressData(data);
       	payload = getPayload(data, 'text');
       	break;
-		  case 'slack':
-			preparedData = slackIngressData(data);
-			let slackPath = data.channelData?.SlackMessage?.event?.text ? 'channelData.SlackMessage.event.text' : 'text';
-			payload = getPayload(data, slackPath);
-	
-			// extract channelId and threadTs from data
-			let slackChannelId = data.conversation?.id || "UnlistedForDebug";
-			let timestamp = data.timestamp || null;
-			let threadTs = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null;
-	
-			// Generate slackUrl only when we have required values
-			if (slackChannelId !== "UnlistedForDebug"  && timestamp !== null) {
-				slackUrl = generateSlackUrl(slackChannelId, timestamp, threadTs);
-			}
-			break;
+    case 'slack':
+      preparedData = slackIngressData(data);
+      payload = getPayload(data, 'text');
+      let slackChannelId = data.conversation?.id || "UnlistedForDebug";
+      let timestamp = data.timestamp || null;
+      let threadTs = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null;
+
+      // Generate slackUrl only when we have required values
+      if (slackChannelId !== "UnlistedForDebug" && timestamp !== null && typeof timestamp === 'string') {
+        slackUrl = generateSlackUrl(slackChannelId, timestamp, threadTs);
+      }
+      break;
       case 'msteams':
       	preparedData = msteamsIngressData(data);
       	payload = getPayload(data, 'text');
@@ -485,7 +481,10 @@ function getSlackPayload(data, path) {
 }
 
 function generateSlackUrl(channelId, timestamp, threadTs) {
-    const [wholeTs, fractionalTs] = timestamp.split('.');
+	if (!timestamp.includes('.')) {
+	  return null; // 
+	}
+	const [wholeTs, fractionalTs] = timestamp.split('.');
     const reformattedTs = `${wholeTs}${fractionalTs.padEnd(6, '0')}`; // pad to 6 digits if fractionalTs is less than 6
    
     let url = `https://teradata.slack.com/archives/${channelId}/p${reformattedTs}`;
