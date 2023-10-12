@@ -288,18 +288,20 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
       	preparedData = webchatIngressData(data);
       	payload = getPayload(data, 'text');
       	break;
-    case 'slack':
-      preparedData = slackIngressData(data);
-      payload = getPayload(data, 'text');
-      let slackChannelId = data.conversation?.id || "UnlistedForDebug";
-      let timestamp = data.timestamp || null;
-      let threadTs = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null;
-
-      // Generate slackUrl only when we have required values
-      if (slackChannelId !== "UnlistedForDebug" && timestamp !== null && typeof timestamp === 'string') {
-        slackUrl = generateSlackUrl(slackChannelId, timestamp, threadTs);
-      }
-      break;
+		  case 'slack':
+			preparedData = slackIngressData(data);
+			payload = getPayload(data, 'text');
+			let slackChannelId = data.conversation?.id || "UnlistedForDebug";
+			let timestamp = data.timestamp || null;
+			let threadTs = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null;
+	  
+			// Generate slackUrl only when we have required values
+			if (slackChannelId !== "UnlistedForDebug" && timestamp !== null && typeof timestamp === 'string') {
+			  slackUrl = generateSlackUrl(slackChannelId, timestamp, threadTs);
+			} else {
+			  slackUrl = "Test Slack URL in switch statement";  // Add default test value
+			}
+			break;
       case 'msteams':
       	preparedData = msteamsIngressData(data);
       	payload = getPayload(data, 'text');
@@ -454,7 +456,7 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	  parsed_webchat_conversation_id,
 	  parsed_textFormat,
 	  parsed_localTimezone,
-	  slackUrl
+	  slackUrl || "Test Slack URL in await path" 
 	]);
 		//DEBUG console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Query result:', result); // Log result of query
 
