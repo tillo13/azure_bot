@@ -299,8 +299,10 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 			let timestamp = data.timestamp || null;
 			let threadTs = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null;
 	
-			// Generate slackUrl
-			slackUrl = generateSlackUrl(slackChannelId, timestamp, threadTs);
+			// Generate slackUrl only when we have required values
+			if (slackChannelId !== "UnlistedForDebug"  && timestamp !== null) {
+				slackUrl = generateSlackUrl(slackChannelId, timestamp, threadTs);
+			}
 			break;
       case 'msteams':
       	preparedData = msteamsIngressData(data);
