@@ -86,7 +86,7 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 		]);
 
 		if (result.rows.length > 0) {
-			console.log(`\n*POSTGRES_UTILS.JS: Data saved to Postgres with messageID for botIngress path:  = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
+			console.log(`\n*POSTGRES_UTILS.JS: Data saved to bot_invoke_log with messageID for botIngress path:  = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
 		} else {
 			console.log('\n*POSTGRES_UTILS.JS: No Data returned after insert operation for botIngress path: ');
 		}
@@ -272,7 +272,7 @@ function defaultIngressData() {
 }
 
 async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
-	console.log('[DEBUG] Inside botRouterSaveDataToPostgres function', data, channelId, filename_ingress); // Log start of function
+	//DEBUG console.log('[DEBUG] Inside botRouterSaveDataToPostgres function', data, channelId, filename_ingress); // Log start of function
 
   console.log('\n*POSTGRES_UTILS.JS: Saving data to Postgres for botRouter path:', data);
   console.log('\n*POSTGRES_UTILS.JS: Interaction Channel Data for botRouter path :', data.channelData);
@@ -337,7 +337,7 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 		$20, $21, $22, $23, $24, $25, NOW(), $26, $27, $28, 
 		$29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39
 	) RETURNING pk_id, message_id`;
-	console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Running query:', query); // Log your query
+	//DEBUG console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Running query:', query); // Log your query
 
 
     let result = await pool.query(query, [
@@ -367,11 +367,11 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 			data.textFormat || null,
 			data.localTimezone || null,
 		]);
-		console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Query result:', result); // Log result of query
+		//DEBUG console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Query result:', result); // Log result of query
 
 
     if (result.rows.length > 0) {
-      console.log(`\n*POSTGRES_UTILS.JS: Data saved with messageID = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
+      console.log(`\n*POSTGRES_UTILS.JS: Data saved to bot_router_log with messageID = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
     } else {
       console.log('\n*POSTGRES_UTILS.JS: No data returned after INSERT operation');
     }
