@@ -191,7 +191,7 @@ process.on('SIGINT', () => {
 	console.log('\n*INDEX.JS: Received SIGINT, shutting down gracefully...');
 	server.close(() => {
 		console.log('\n*INDEX.JS: Closed out remaining connections');
-		// Here you can do other cleanup actions before your app is actually terminated, if needed
+		// Here you can do other cleanup actions before your app is actually terminated, if needed --
 		process.exit(0);
 	});
 });
