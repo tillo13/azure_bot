@@ -308,7 +308,8 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
   const stateHashJSON = data.stateHash ? JSON.stringify(data.stateHash) : null;
 
   // Make sure we are inserting into the correct table
-  const tableName = process.env['2023oct9_AZURE_POSTGRES_DATABASE_ROUTER_LOG'];
+  const tableName = process.env['2023oct12_AZURE_POSTGRES_DATABASE_ROUTER_LOG_TABLE'];
+
 
   // Execute query
   try {
