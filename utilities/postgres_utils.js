@@ -301,8 +301,9 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 			console.log('\n*POSTGRES_UTILS.JS: threadTs:', threadTs);
 	  
 			// Generate slackUrl only when we have required values
-			if (slackChannelId !== "UnlistedForDebug" && timestamp !== null && typeof timestamp === 'string') {
-			  slackUrl = generateSlackUrl(slackChannelId, timestamp, threadTs);
+			let parsed_timestamp = (new Date(data.timestamp)).getTime() / 1000; // convert to Unix timestamp
+			if (slackChannelId !== "UnlistedForDebug" && parsed_timestamp) {
+			  slackUrl = generateSlackUrl(slackChannelId, parsed_timestamp.toString(), threadTs);
 			} else {
 			  slackUrl = "Test Slack URL in switch statement";  // Add default test value
 			}
@@ -488,20 +489,25 @@ function getSlackPayload(data, path) {
 }
 
 function generateSlackUrl(channelId, timestamp, threadTs) {
-	if (!timestamp.includes('.')) {
-	  return null; // 
+	// Convert the timestamp into number for checking if it's in unix timestamp format
+	const numTimestamp = Number(timestamp);
+	
+	if (!Number.isNaN(numTimestamp)) {
+	  // If the timestamp is in Unix timestamp format, convert it into Slack's format
+	  timestamp = `${Math.floor(numTimestamp)}.000000`;
 	}
-	const [wholeTs, fractionalTs] = timestamp.split('.');
-    const reformattedTs = `${wholeTs}${fractionalTs.padEnd(6, '0')}`; // pad to 6 digits if fractionalTs is less than 6
-   
-    let url = `https://teradata.slack.com/archives/${channelId}/p${reformattedTs}`;
   
-    if (threadTs) {
-        url += `?thread_ts=${threadTs}&cid=${channelId}`;
-    }
-   
-    return url;
-}
+	const [wholeTs, fractionalTs] = timestamp.split('.');
+	const reformattedTs = `${wholeTs}${fractionalTs.padEnd(6, '0')}`;
+  
+	let url = `https://teradata.slack.com/archives/${channelId}/p${reformattedTs}`;
+  
+	if (threadTs) {
+		url += `?thread_ts=${threadTs}&cid=${channelId}`;
+	}
+	 
+	return url;
+  }
 
 //default for msteams and webchat
 function getPayload(data, path) {
