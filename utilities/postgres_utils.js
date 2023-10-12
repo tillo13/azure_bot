@@ -146,98 +146,98 @@ function defaultIngressData() {
 }
 
 async function botInteractionSaveDataToPostgres(data, channelId, filename_ingress) {
-    console.log('\n*POSTGRES_UTILS.JS: Saving data to Postgres for botInteraction path:', data);
+	console.log('\n*POSTGRES_UTILS.JS: Saving data to Postgres for botInteraction path:', data);
 	console.log('\n*POSTGRES_UTILS.JS: Interaction Channel Data for botInteraction path :', data.channelData);
+
 	let preparedData = {};
 	let payload;
-	
+
 	// Prepare data for different channels
 	try {
 		switch (channelId) {
-			case 'webchat':
-				preparedData = webchatIngressData(data);
-				try {
-					payload = (data.text || "").substring(0, 2900); // truncate message text
-				} catch(_) {
-					payload = JSON.stringify(data).substring(0, 2900); // default to entire payload
-				}
-				break;
-			case 'slack':
-				preparedData = slackIngressData(data);
-				try {
-					payload = (data.channelData.SlackMessage.event.text || "").substring(0, 2900); // truncate message text
-				} catch(_) {
-					payload = JSON.stringify(data).substring(0, 2900); // default to entire payload
-				}
-				break;
-			case 'msteams':
-				preparedData = msteamsIngressData(data);
-				try {
-					payload = (data.text || "").substring(0, 2900); // truncate message text
-				} catch(_) {
-					payload = JSON.stringify(data).substring(0, 2900); // default to entire payload
-				}
-				break;
-			default:
-				preparedData = defaultIngressData(data);
-				payload = JSON.stringify(data).substring(0, 2900); // truncate entire payload
-				break;
+		case 'webchat':
+			preparedData = webchatIngressData(data);
+			payload = getPayload(data, 'text');
+			break;
+		case 'slack':
+			preparedData = slackIngressData(data);
+			payload = getPayload(data, 'channelData.SlackMessage.event.text');
+			break;
+		case 'msteams':
+			preparedData = msteamsIngressData(data);
+			payload = getPayload(data, 'text');
+			break;
+		default:
+			preparedData = defaultIngressData(data);
+			payload = JSON.stringify(data).substring(0, 2900); // truncate entire payload
+			break;
 		}
 	} catch (error) {
 		console.error('\n*POSTGRES_UTILS.JS: Error preparing data for botInteraction path: ', error);
 	}
 
-    try {
-        const query = `
-        INSERT INTO public.bot_invoke_log (
-            channel_id, message_type, message_id, timestamp_from_endpoint, local_timestamp_from_endpoint, 
-            local_timezone_from_endpoint, service_url, from_id, from_name, conversation_id, 
-            attachment_exists, recipient_id, recipient_name, message_payload,
-            bot_response_id, conversation_turn, bot_response_payload,
-            interacting_user_id, channeldata_slack_thread_ts,
-            channeldata_msteams_conversation_id, channeldata_webchat_conversation_id, created_via
-        ) 
-        VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 
-            $15, $16, $17, $18, $19, $20, $21, $22
-        ) RETURNING pk_id, message_id`;
+	// Execute query
+	try {
+		const query = `
+		INSERT INTO public.bot_router_log (
+			channel_id, message_type, message_id, timestamp_from_endpoint, local_timestamp_from_endpoint, 
+			local_timezone_from_endpoint, service_url, from_id, from_name, conversation_id, 
+			attachment_exists, recipient_id, recipient_name, message_payload,
+			state_hash_conversation_thread, state_hash_is_first_interaction,
+			interacting_user_id, channeldata_slack_thread_ts,
+			channeldata_msteams_conversation_id, channeldata_webchat_conversation_id, 
+			filename_ingress
+		)
+		VALUES (
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 
+			$15::json, $16, $17, $18, $19, $20, $21
+		) RETURNING pk_id, message_id`;
 
-        let values = [
-            channelId, 
-            data.type || null, 
-            data.id || null, 
-            data.timestamp || null, 
-            data.localTimestamp || null, 
-            data.localTimezone || null, 
-            data.serviceUrl || null, 
-            data.from ? data.from.id : null,
-            data.from ? data.from.name : null,
+		let values = [
+			channelId,
+			data.type || null, 
+			data.id || null, 
+			data.timestamp || null, 
+			data.localTimestamp || null,
+			data.localTimezone || null,
+			data.serviceUrl || null,
+			data.from ? data.from.id : null,
+			data.from ? data.from.name : null,
 			data.conversation_id ? data.conversation_id : null,
-            data.hasAttachments ? data.hasAttachments() : false,
-            data.recipient ? data.recipient.id : null,
-            data.recipient ? data.recipient.name : null,
-            JSON.stringify(data) || null,
-            data.botResponse ? data.botResponse.id : null,
-            data.conversationTurn || null,
-            data.botResponse ? JSON.stringify(data.botResponse) : null,
-            data.interactingUser ? data.interactingUser.id : null,
-            data.channelData && data.channelData.slack ? data.channelData.slack.threadTimestamp : null,
-            data.channelData && data.channelData.msteams ? data.channelData.msteams.conversation.id : null,
-            data.channelData && data.channelData.webchat ? data.channelData.webchat.conversation.id : null,
-            filename_ingress || null
-        ];
-        
-        console.log('\n*POSTGRES_UTILS.JS: iQuery Values:', values);  
-        
-        let result = await pool.query(query, values);
-        if (result.rows.length > 0) {
-            console.log(`\n*POSTGRES_UTILS.JS: iData saved with messageID = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
-        } else {
-            console.log('\n*POSTGRES_UTILS.JS: iNo data returned after INSERT operation');
-        }
-    } catch (error) {
-        console.error('\n*POSTGRES_UTILS.JS: iFailed to save data to Postgres', error);
-    }
+			data.hasAttachments ? data.hasAttachments() : false,
+			data.recipient ? data.recipient.id : null,
+			data.recipient ? data.recipient.name : null,
+			payload || null,
+			JSON.stringify(data.stateHash) || null, // assuming state hash as an object
+			data.isFirstInteraction || false, // assuming isFirstInteraction as a boolean
+			data.interactingUser ? data.interactingUser.id : null,
+			data.channelData && data.channelData.slack ? data.channelData.slack.threadTimestamp : null,
+			data.channelData && data.channelData.msteams ? data.channelData.msteams.conversation.id : null,
+			data.channelData && data.channelData.webchat ? data.channelData.webchat.conversation.id : null,
+			filename_ingress || null
+		];
+
+		console.log('\n*POSTGRES_UTILS.JS: Query Values:', values);
+
+		let result = await pool.query(query, values);
+		if (result.rows.length > 0) {
+			console.log(`\n*POSTGRES_UTILS.JS: Data saved with messageID = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
+		} else {
+			console.log('\n*POSTGRES_UTILS.JS: No data returned after INSERT operation');
+		}
+	} catch (error) {
+		console.error('\n*POSTGRES_UTILS.JS: Failed to save data to Postgres', error);
+	}
+}
+
+function getPayload(data, path) {
+	try {
+		let fields = path.split('.');
+		let payload = fields.reduce((prev, curr) => prev ? prev[curr] : undefined, data);
+		return (payload || "").substring(0, 2900); // truncate message text
+	} catch(_) {
+		return JSON.stringify(data).substring(0, 2900); // default to entire payload
+	}
 }
 
 module.exports = {

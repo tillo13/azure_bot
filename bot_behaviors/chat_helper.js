@@ -3,7 +3,7 @@ const {
 	AzureKeyCredential
 } = require("@azure/openai");
 const modelCosts = require('./openai_costs_2023sept7.json');
-const postgres_utils = require('../utilities/postgres_utils');
+//not needed per 2023oct12 const postgres_utils = require('../utilities/postgres_utils');
 
 const MAX_OPENAI_TOKENS = 400;
 const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
@@ -137,13 +137,10 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
 	console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
 
-	//test that db saves are working: 
+	//test that db saves would work from this channel: 
 	// v1 works: postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId}, channelId, 'chat_helper.js');
-	// v2 works: 
-	postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId, conversation_id : channelId}, channelId, 'chat_helper.js');
-	//testing v3!
-	//create an object we can send data into and call data
-	//postgres_utils.botInteractionSaveDataToPostgres(data, channelId, 'chat_helper.js');
+	//v2 works: postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId, conversation_id : channelId}, channelId, 'chat_helper.js');
+
 
 
 

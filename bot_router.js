@@ -1,3 +1,6 @@
+//2023oct12 update to save to db
+const { botRouterSaveDataToPostgres } = require('../utilities/postgres_utils');
+
 const PATH_CONFIGS = {
 	'msteams': {
 		personality: "You are thorough, polite, helpful and courteous.",
@@ -69,27 +72,25 @@ class EchoBot extends ActivityHandler {
 
 		this.onMessage(async (context, next) => {
 			try {
-
 				const messageContent = context.activity.text.trim();
-
+		
 				console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
-
+		
 				// Insert the following block here.
 				if (specialCommands[messageContent]) {
 					console.log("\n\n**BOT_ROUTER.JS: A special command has been detected.");
 					console.log("\n\n**BOT_ROUTER.JS: Command content: ", context.activity.text);
-
+		
 					// If the command exists in our special commands, execute it.
 					await specialCommands[messageContent](context, this.chatMessagesProperty);
 				} else {
-
 					// Log interaction to Slack
 					try {
 						const slackApiToken = process.env.SLACK_BOT_TOKEN;
 						const slackChannelId = 'C05UMRHSLR2';
 						let username;
 						let id;
-
+		
 						if (context.activity.channelId === 'webchat') {
 							username = 'webchat';
 							id = context.activity.id;
@@ -104,7 +105,7 @@ class EchoBot extends ActivityHandler {
 							username = 'unknown';
 							id = 'unknown';
 						}
-
+		
 						const slackBlocks = {
 							"blocks": [{
 									"type": "section",
@@ -125,66 +126,61 @@ class EchoBot extends ActivityHandler {
 								}
 							]
 						};
-
+		
 						// Send message to Slack and capture the response
 						const slackResponse = await postMessageToSlack(slackChannelId, null, slackBlocks, slackApiToken);
-
+		
 						// Check if the response is successful
 						if (!slackResponse.ok) {
 							throw new Error(`${slackResponse.error}`);
 						}
-
+		
 						console.log('\n\n**BOT_ROUTER.JS: Successfully posted message to Slack**');
 					} catch (error) {
 						console.error('\n\n**BOT_ROUTER.JS:Failed to post message to Slack (but app will continue):', error.message);
 					}
-
-
-					if (specialCommands[messageContent]) {
-						console.log("\n\n**BOT_ROUTER.JS: A special command has been detected.");
-						console.log("\n\n**BOT_ROUTER.JS: Command content: ", context.activity.text);
-						// If the command exists in our special commands, execute it
-						await specialCommands[messageContent](context);
-					} else {
-						const pathConfig = PATH_CONFIGS[context.activity.channelId];
-						const personality = pathConfig ? pathConfig.personality : "Default personality";
-						let chatMessagesUser = await this.chatMessagesProperty.get(context, []) || [];
-						chatMessagesUser.push({
-							role: "user",
-							content: context.activity.text
-						});
-
-						let isFirstInteraction = await this.isFirstInteraction.get(context, true);
-
-
-
-						let handled = false;
-						//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, personality) || handled;	
-						//handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, pathConfig) || handled;
-						handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, PATH_CONFIGS['msteams']) || handled;
-
-
-						if (handled) {
-							await this.chatMessagesProperty.set(context, chatMessagesUser);
-							return;
-						}
-
-						//handled = await handleMessageFromSlack(context, chatMessagesUser, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality);                   
-						handled = await handleMessageFromSlack(context, chatMessagesUser, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality, PATH_CONFIGS['slack']);
-						if (handled) {
-
-							await this.chatMessagesProperty.set(context, chatMessagesUser);
-							return;
-						}
-
-						// If not handled by MSTeams or Slack, call the default handler
-						handled = await handleDefault(context, chatMessagesUser, personality);
-						if (handled) {
-							await this.chatMessagesProperty.set(context, chatMessagesUser);
-							await next();
-							return;
-						}
+		
+					const pathConfig = PATH_CONFIGS[context.activity.channelId];
+					const personality = pathConfig ? pathConfig.personality : "Default personality";
+					let chatMessagesUser = await this.chatMessagesProperty.get(context, []) || [];
+					chatMessagesUser.push({
+						role: "user",
+						content: context.activity.text
+					});
+		
+					let isFirstInteraction = await this.isFirstInteraction.get(context, true);
+					let handled = false;
+		
+					handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, PATH_CONFIGS['msteams']) || handled;
+		
+					if (handled) {
+						await this.chatMessagesProperty.set(context, chatMessagesUser);
+						return;
 					}
+		
+					handled = await handleMessageFromSlack(context, chatMessagesUser, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality, PATH_CONFIGS['slack']);
+		
+					if (handled) {
+						await this.chatMessagesProperty.set(context, chatMessagesUser);
+						return;
+					}
+		
+					handled = await handleDefault(context, chatMessagesUser, personality);
+		
+					if (handled) {
+						await this.chatMessagesProperty.set(context, chatMessagesUser);
+						await next();
+						return;
+					} 
+		
+					try {
+						await botRouterSaveDataToPostgres(context.activity, context.activity.channelId);
+					} catch (err) {
+						console.error('\n\n**BOT_ROUTER.JS: Failed to save data to Postgres at botRouter path: ', err);
+					}
+		
+					// After you save to postgres, call the next() function to continue to the next middleware in your pipeline.
+					await next();
 				}
 			} catch (error) {
 				console.error("\n\n**BOT_ROUTER.JS: An error occurred:", error);
