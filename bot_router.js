@@ -71,6 +71,12 @@ class EchoBot extends ActivityHandler {
 		});
 
 		this.onMessage(async (context, next) => {
+			// save each payload to db regardless 2023oct12
+			try {
+				await botRouterSaveDataToPostgres(context.activity, context.activity.channelId);
+			} catch (err) {
+				console.error('\n\n**BOT_ROUTER.JS: Failed to save data to Postgres at botRouter path: ', err);
+			}
 			try {
 				const messageContent = context.activity.text.trim();
 		
@@ -172,12 +178,6 @@ class EchoBot extends ActivityHandler {
 						await next();
 						return;
 					} 
-		
-					try {
-						await botRouterSaveDataToPostgres(context.activity, context.activity.channelId);
-					} catch (err) {
-						console.error('\n\n**BOT_ROUTER.JS: Failed to save data to Postgres at botRouter path: ', err);
-					}
 		
 					// After you save to postgres, call the next() function to continue to the next middleware in your pipeline.
 					await next();
