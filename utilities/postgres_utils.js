@@ -338,7 +338,7 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 		slack_channeldata_api_token, msteams_activity_conversation_conversation_type,
 		msteams_activity_conversation_tenant_id, msteams_activity_conversation_id,
 		msteams_activity_recipient_aad_object_id, webchat_activity_local_timestamp,
-		webchat_activity_conversation_id, webchat_activity_text_format, webchat_activity_local_timezone,slack_url,
+		webchat_activity_conversation_id, webchat_activity_text_format, webchat_activity_local_timezone, slack_url
 	)
 	VALUES (
 		NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, 
