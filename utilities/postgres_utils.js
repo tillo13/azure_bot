@@ -455,7 +455,8 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	  parsed_localTimestamp,
 	  parsed_webchat_conversation_id,
 	  parsed_textFormat,
-	  parsed_localTimezone
+	  parsed_localTimezone,
+	  slackUrl
 	]);
 		//DEBUG console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Query result:', result); // Log result of query
 
