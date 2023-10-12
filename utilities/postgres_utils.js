@@ -344,34 +344,114 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	//DEBUG console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Running query:', query); // Log your query
 
 
-    let result = await pool.query(query, [
-			// Assuming some fields from your data
-			data.responded_ref_responded, data.turn_context_state_collection, data.bot_identity_claims_identity_authentication_type,
-			data.connector_client_with_credentials, data.connector_client_http_client, 
-			data.user_token_client_app_id, data.connector_factory_app_id, data.connector_factory_validate_authority,
-			data.turn_locale, data.locale, 
-			data.type, data.id, data.timestamp,
-			data.serviceUrl, channelId, 
-			data.from?.id, 
-			data.from?.name, data.recipient?.id, data.recipient?.name, 
-			payload || null, filename_ingress || null, 
-			data.activity_raw_timestamp, data.activity_caller_id, stateHashJSON, 
-			data.isFirstInteraction || false, 
-			data.channelData?.SlackMessage?.conversation?.is_group || null, 
-			data.channelData?.SlackMessage?.conversation?.id || null, 
-			data.channelData?.SlackMessage?.conversation?.name || null, 
-			data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null,
-			data.stateHash?.bot_invoked_flag || null,
-			data.channelData?.SlackMessage?.api_token || null,
-			data.channelData?.msteams?.conversation?.conversationType,
-			data.channelData?.msteams?.conversation?.tenantId,
-			data.channelData?.msteams?.conversation?.id, 
-			data.recipient?.aadObjectId || null, 
-			data.localTimestamp || null,
-			data.conversation?.id || null,
-			data.textFormat || null,
-			data.localTimezone || null,
-		]);
+	//align data in variables beforehand to be able to see in console for test: 
+	slack_state_hash_thread_timestamp = data.channelData && data.channelData.slack ? data.channelData.slack.api_token : null,
+	console.log('\n*POSTGRES_UTILS.JS: [DEBUG] slack_state_hash_thread_timestamp = ', slack_state_hash_thread_timestamp); 
+
+	let parsed_responded_ref_responded = data.responded_ref_responded || "UnlistedForDebug";
+	let parsed_turn_context_state_collection = data.turn_context_state_collection || "UnlistedForDebug";
+	let parsed_bot_identity_claims_identity_authentication_type = data.bot_identity_claims_identity_authentication_type || "UnlistedForDebug";
+	let parsed_connector_client_with_credentials = data.connector_client_with_credentials || "UnlistedForDebug";
+	let parsed_connector_client_http_client = data.connector_client_http_client || "UnlistedForDebug";
+	let parsed_user_token_client_app_id = data.user_token_client_app_id || "UnlistedForDebug";
+	let parsed_connector_factory_app_id = data.connector_factory_app_id || "UnlistedForDebug";
+	let parsed_connector_factory_validate_authority = data.connector_factory_validate_authority || "UnlistedForDebug";
+	let parsed_turn_locale = data.turn_locale || "UnlistedForDebug";
+	let parsed_locale = data.locale || "UnlistedForDebug";
+	let parsed_type = data.type || "UnlistedForDebug";
+	let parsed_id = data.id || "UnlistedForDebug";
+	let parsed_timestamp = data.timestamp || "UnlistedForDebug";
+	let parsed_serviceUrl = data.serviceUrl || "UnlistedForDebug";
+	let parsed_from_id = data.from?.id || "UnlistedForDebug";
+	let parsed_from_name = data.from?.name || "UnlistedForDebug";
+	let parsed_recipient_id = data.recipient?.id || "UnlistedForDebug";
+	let parsed_recipient_name = data.recipient?.name || "UnlistedForDebug";
+	let parsed_payload = payload || null;
+	let parsed_filename_ingress = filename_ingress || null;
+	let parsed_activity_raw_timestamp = data.activity_raw_timestamp || "UnlistedForDebug";
+	let parsed_activity_caller_id = data.activity_caller_id || "UnlistedForDebug";
+	let parsed_stateHashJSON = stateHashJSON || "UnlistedForDebug";
+	let parsed_isFirstInteraction = data.isFirstInteraction || false;
+	let parsed_is_group = data.channelData?.SlackMessage?.conversation?.is_group || "UnlistedForDebug";
+	let parsed_conversation_id = data.channelData?.SlackMessage?.conversation?.id || "UnlistedForDebug";
+	let parsed_conversation_name = data.channelData?.SlackMessage?.conversation?.name || "UnlistedForDebug";
+	let parsed_slack_state_hash_thread_timestamp = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || "UnlistedForDebug";
+	let parsed_bot_invoked_flag = data.stateHash?.bot_invoked_flag || null;
+	let parsed_api_token = data.channelData?.SlackMessage?.api_token || "UnlistedForDebug";
+	let parsed_conversation_conversationType = data.channelData?.msteams?.conversation?.conversationType || "UnlistedForDebug";
+	let parsed_conversation_tenantId = data.channelData?.msteams?.conversation?.tenantId || "UnlistedForDebug";
+	let parsed_msteams_conversation_id = data.channelData?.msteams?.conversation?.id || "UnlistedForDebug";
+	let parsed_aadObjectId = data.recipient?.aadObjectId || null;
+	let parsed_localTimestamp = data.localTimestamp || null;
+	let parsed_webchat_conversation_id = data.conversation?.id || null;
+	let parsed_textFormat = data.textFormat || null;
+	let parsed_localTimezone = data.localTimezone || null;
+	
+	console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Now see the parsed list of values',
+	{parsed_responded_ref_responded, 
+	parsed_turn_context_state_collection, 
+	parsed_bot_identity_claims_identity_authentication_type,
+	parsed_connector_client_with_credentials,
+	parsed_connector_client_http_client, 
+	parsed_user_token_client_app_id, 
+	parsed_connector_factory_app_id, 
+	parsed_connector_factory_validate_authority,
+	parsed_turn_locale, parsed_locale, 
+	parsed_type, parsed_id, parsed_timestamp,
+	parsed_serviceUrl, channelId, 
+	parsed_from_id, 
+	parsed_from_name, parsed_recipient_id, parsed_recipient_name, 
+	parsed_payload, parsed_filename_ingress, 
+	parsed_activity_raw_timestamp, parsed_activity_caller_id, parsed_stateHashJSON, 
+	parsed_isFirstInteraction,
+	parsed_is_group,
+	parsed_conversation_id, 
+	parsed_conversation_name, 
+	parsed_slack_state_hash_thread_timestamp,
+	parsed_bot_invoked_flag,
+	parsed_api_token,
+	parsed_conversation_conversationType,
+	parsed_conversation_tenantId,
+	parsed_msteams_conversation_id, 
+	parsed_aadObjectId, 
+	parsed_localTimestamp,
+	parsed_webchat_conversation_id,
+	parsed_textFormat,
+	parsed_localTimezone}
+  )	
+  
+	result = await pool.query(query, [
+	  parsed_responded_ref_responded, 
+	  parsed_turn_context_state_collection, 
+	  parsed_bot_identity_claims_identity_authentication_type,
+	  parsed_connector_client_with_credentials,
+	  parsed_connector_client_http_client, 
+	  parsed_user_token_client_app_id, 
+	  parsed_connector_factory_app_id, 
+	  parsed_connector_factory_validate_authority,
+	  parsed_turn_locale, parsed_locale, 
+	  parsed_type, parsed_id, parsed_timestamp,
+	  parsed_serviceUrl, channelId, 
+	  parsed_from_id, 
+	  parsed_from_name, parsed_recipient_id, parsed_recipient_name, 
+	  parsed_payload || null, parsed_filename_ingress || null, 
+	  parsed_activity_raw_timestamp, parsed_activity_caller_id, parsed_stateHashJSON, 
+	  parsed_isFirstInteraction,
+	  parsed_is_group,
+	  parsed_conversation_id, 
+	  parsed_conversation_name, 
+	  parsed_slack_state_hash_thread_timestamp,
+	  parsed_bot_invoked_flag,
+	  parsed_api_token,
+	  parsed_conversation_conversationType,
+	  parsed_conversation_tenantId,
+	  parsed_msteams_conversation_id, 
+	  parsed_aadObjectId, 
+	  parsed_localTimestamp,
+	  parsed_webchat_conversation_id,
+	  parsed_textFormat,
+	  parsed_localTimezone
+	]);
 		//DEBUG console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Query result:', result); // Log result of query
 
 
