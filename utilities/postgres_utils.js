@@ -298,7 +298,9 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
             console.log('*POSTGRES_UTILS.JS: slackChannelId:', slackChannelIdString);
             console.log('*POSTGRES_UTILS.JS: threadTs:', threadTsString);
 
-            let parsed_timestamp = (new Date(data.timestamp)).getTime() / 1000; // convert to Unix timestamp
+            //let parsed_timestamp = (new Date(data.timestamp)).getTime() / 1000; // convert to Unix timestamp
+			let parsed_timestamp = data.timestamp.replace('.', '').substring(0, 16); // format to match Slack's timestamp
+
             let slackChannelIdParts = slackChannelIdString.split(':');
             let actualSlackChannelId = slackChannelIdParts[2]; // Now this will hold something like C05USME0X35
             
@@ -500,7 +502,9 @@ function generateSlackUrl(channelId, timestamp, threadTs) {
 	
 	if (!Number.isNaN(numTimestamp)) {
 	  // If the timestamp is in Unix timestamp format, convert it into Slack's format
-	  timestamp = `${Math.floor(numTimestamp)}.000000`;
+	  //timestamp = `${Math.floor(numTimestamp)}.000000`;
+	  timestamp = reformattedTs
+
 	}
   
 	const [wholeTs, fractionalTs] = timestamp.split('.');
