@@ -291,9 +291,7 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
       	break;
 		  case 'slack':
 			preparedData = slackIngressData(data);
-			// Check if Slack specific event text exists otherwise default to main text
-			let slackPath = data.channelData?.SlackMessage?.event?.text ? 'channelData.SlackMessage.event.text' : 'text';
-			payload = getPayload(data, slackPath);
+			payload = getSlackPayloadFromContextObj(data, 'text');
 			break;
       case 'msteams':
       	preparedData = msteamsIngressData(data);
@@ -385,6 +383,15 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
   }
   console.log('\n*POSTGRES_UTILS.JS:[DEBUG] Exiting botRouterSaveDataToPostgres');  // Log end of function
 
+}
+
+function getSlackPayloadFromContextObj(data, path) {
+	try {
+		let payload = data.channelData?.SlackMessage?.event?.text ? data.channelData.SlackMessage.event.text : data.text;
+		return (payload || "").substring(0, 2900); // truncate message text
+	} catch(_) {
+		return JSON.stringify(data).substring(0, 2900); // default to entire payload
+	}
 }
 function getPayload(data, path) {
 	try {
