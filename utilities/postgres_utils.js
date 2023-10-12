@@ -291,21 +291,29 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 		  case 'slack':
 			preparedData = slackIngressData(data);
 			payload = getPayload(data, 'text');
-			let slackChannelId = data.conversation?.id || "UnlistedForDebug";
+			let slackChannelIdString = data.conversation?.id || "UnlistedForDebug";
 			let timestamp = data.timestamp || null;
-			let threadTs = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null;
-
+			let threadTsString = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null;
+	
 			//make sure we are passing the right values
-			console.log('\n*POSTGRES_UTILS.JS: slackChannelId:', slackChannelId);
+			console.log('\n*POSTGRES_UTILS.JS: slackChannelId:', slackChannelIdString);
 			console.log('\n*POSTGRES_UTILS.JS: timestamp:', timestamp);
-			console.log('\n*POSTGRES_UTILS.JS: threadTs:', threadTs);
-	  
+			console.log('\n*POSTGRES_UTILS.JS: threadTs:', threadTsString);
+	
 			// Generate slackUrl only when we have required values
 			let parsed_timestamp = (new Date(data.timestamp)).getTime() / 1000; // convert to Unix timestamp
-			if (slackChannelId !== "UnlistedForDebug" && parsed_timestamp) {
-			  slackUrl = generateSlackUrl(slackChannelId, parsed_timestamp.toString(), threadTs);
+	
+			let slackChannelIdParts = slackChannelIdString.split(':');
+			let actualSlackChannelId = slackChannelIdParts[2]; // Now this will hold something like C05USME0X35
+	
+			let threadTsParts = threadTsString.split(':');
+			let actualThreadTs = threadTsParts[threadTsParts.length - 1]; // Now this will hold something like 1697146691.533689
+	
+			// Now generate your URL with these actual values
+			if (actualSlackChannelId !== "UnlistedForDebug" && parsed_timestamp) {
+				slackUrl = generateSlackUrl(actualSlackChannelId, parsed_timestamp.toString(), actualThreadTs);
 			} else {
-			  slackUrl = "Test Slack URL in switch statement";  // Add default test value
+				slackUrl = "Test Slack URL in switch statement";  // Add default test value
 			}
 			break;
       case 'msteams':
@@ -499,6 +507,7 @@ function generateSlackUrl(channelId, timestamp, threadTs) {
   
 	const [wholeTs, fractionalTs] = timestamp.split('.');
 	const reformattedTs = `${wholeTs}${fractionalTs.padEnd(6, '0')}`;
+	
   
 	let url = `https://teradata.slack.com/archives/${channelId}/p${reformattedTs}`;
   
