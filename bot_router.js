@@ -67,8 +67,9 @@ class EchoBot extends ActivityHandler {
 
 		this.onMessage(async (context, next) => {
 			try {
+				const golden_record_id = context.activity.golden_record_id;
 				const messageContent = context.activity.text.trim();
-				console.log('\n\n**BOT_ROUTER.JS: onMessage triggered!');
+				console.log('\n\n**BOT_ROUTER.JS: golden_record_id = ', golden_record_id);
 				console.log("\n\n**BOT_ROUTER.JS: Message content: ", context.activity.text);
 
 				// Insert the following block here.

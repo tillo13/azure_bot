@@ -132,6 +132,7 @@ const myBot = new EchoBot(userState);
 // Listen for incoming requests.
 server.post('/api/messages', async (req, res) => {
     if (req.body) {
+        req.body.golden_record_id = req.body.id; //set golden_record_id across the app
         let userName = req.body.from ? req.body.from.name || 'undefined' : 'undefined';
         const platform = req.body.channelId || 'undefined';
         let userId = 'undefined';
