@@ -38,6 +38,8 @@ const THREAD_TS = 'thread_ts';
 class EchoBot extends ActivityHandler {
 	constructor(userState) {
 		super();
+		console.log("\n\n**BOT_ROUTER.JS: EchoBot constructor has been called with userState: ", userState);
+
 		this.welcomedUserProperty = userState.createProperty(WELCOMED_USER);
 		this.chatMessagesProperty = userState.createProperty(CHAT_MESSAGES);
 		this.threadproperty = userState.createProperty(THREAD_TS);
@@ -214,10 +216,10 @@ class EchoBot extends ActivityHandler {
 		}
 	}
 	async run(context) {
-		//console.log('\n\n**BOT_ROUTER.JS: Running the bot...');
+		console.log('\n\n**BOT_ROUTER.JS: Running the bot with context: ', context);
 		await super.run(context);
 		await this.userState.saveChanges(context);
-		//console.log('\n\n**BOT_ROUTER.JS: State changes have been saved.');
+		console.log('\n\n**BOT_ROUTER.JS: Running the bot with context: ', context);
 	}
 }
 module.exports.EchoBot = EchoBot;
