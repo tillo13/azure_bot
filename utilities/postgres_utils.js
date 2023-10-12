@@ -362,7 +362,7 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 			data.channelData?.SlackMessage?.conversation?.name || null, 
 			data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null,
 			data.stateHash?.bot_invoked_flag || null,
-			data.channelData?.ApiToken || null, 
+			data.channelData?.SlackMessage?.api_token || null,
 			data.channelData?.msteams?.conversation?.conversationType,
 			data.channelData?.msteams?.conversation?.tenantId,
 			data.channelData?.msteams?.conversation?.id, 
