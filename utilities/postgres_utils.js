@@ -291,9 +291,16 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
       	break;
 		  case 'slack':
 			preparedData = slackIngressData(data);
-			// Check if Slack specific event text exists otherwise default to main text
 			let slackPath = data.channelData?.SlackMessage?.event?.text ? 'channelData.SlackMessage.event.text' : 'text';
 			payload = getPayload(data, slackPath);
+	
+			// extract channelId and threadTs from data
+			let slackChannelId = data.conversation?.id || "UnlistedForDebug";
+			let timestamp = data.timestamp || null;
+			let threadTs = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null;
+	
+			// Generate slackUrl
+			slackUrl = generateSlackUrl(slackChannelId, timestamp, threadTs);
 			break;
       case 'msteams':
       	preparedData = msteamsIngressData(data);
@@ -333,13 +340,13 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 		slack_channeldata_api_token, msteams_activity_conversation_conversation_type,
 		msteams_activity_conversation_tenant_id, msteams_activity_conversation_id,
 		msteams_activity_recipient_aad_object_id, webchat_activity_local_timestamp,
-		webchat_activity_conversation_id, webchat_activity_text_format, webchat_activity_local_timezone
+		webchat_activity_conversation_id, webchat_activity_text_format, webchat_activity_local_timezone,slack_url,
 	)
 	VALUES (
 		NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, 
 		$10, $11, $12, $13, $14, $15, $16, $17, $18, $19, 
 		$20, $21, $22, $23, $24, $25, NOW(), $26, $27, $28, 
-		$29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39
+		$29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40
 	) RETURNING pk_id, message_id`;
 	//DEBUG console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Running query:', query); // Log your query
 
@@ -414,7 +421,8 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	parsed_localTimestamp,
 	parsed_webchat_conversation_id,
 	parsed_textFormat,
-	parsed_localTimezone}
+	parsed_localTimezone,
+	slackUrl }
   )	
 
 	result = await pool.query(query, [
@@ -472,6 +480,21 @@ function getSlackPayload(data, path) {
 		return JSON.stringify(data).substring(0, 2900); // default to entire payload
 	}
 }
+
+function generateSlackUrl(channelId, timestamp, threadTs) {
+    const [wholeTs, fractionalTs] = timestamp.split('.');
+    const reformattedTs = `${wholeTs}${fractionalTs.padEnd(6, '0')}`; // pad to 6 digits if fractionalTs is less than 6
+   
+    let url = `https://teradata.slack.com/archives/${channelId}/p${reformattedTs}`;
+  
+    if (threadTs) {
+        url += `?thread_ts=${threadTs}&cid=${channelId}`;
+    }
+   
+    return url;
+}
+
+//default for msteams and webchat
 function getPayload(data, path) {
 	try {
 		// Split path into array and reduce the path while checking at each level if the value is defined.
