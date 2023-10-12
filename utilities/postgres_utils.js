@@ -348,14 +348,14 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	slack_state_hash_thread_timestamp = data.channelData && data.channelData.slack ? data.channelData.slack.api_token : null,
 	console.log('\n*POSTGRES_UTILS.JS: [DEBUG] slack_state_hash_thread_timestamp = ', slack_state_hash_thread_timestamp); 
 
-	let parsed_responded_ref_responded = data.responded_ref_responded || "UnlistedForDebug";
-	let parsed_turn_context_state_collection = data.turn_context_state_collection || "UnlistedForDebug";
-	let parsed_bot_identity_claims_identity_authentication_type = data.bot_identity_claims_identity_authentication_type || "UnlistedForDebug";
-	let parsed_connector_client_with_credentials = data.connector_client_with_credentials || "UnlistedForDebug";
+	let parsed_responded_ref_responded = data.responded_ref_responded || false;
+	let parsed_turn_context_state_collection = data.turn_context_state_collection || null;
+	let parsed_bot_identity_claims_identity_authentication_type = data.bot_identity_claims_identity_authentication_type !== undefined ? data.bot_identity_claims_identity_authentication_type : null;
+	let parsed_connector_client_with_credentials = data.connector_client_with_credentials !== undefined ? data.connector_client_with_credentials : null;
 	let parsed_connector_client_http_client = data.connector_client_http_client || "UnlistedForDebug";
 	let parsed_user_token_client_app_id = data.user_token_client_app_id || "UnlistedForDebug";
 	let parsed_connector_factory_app_id = data.connector_factory_app_id || "UnlistedForDebug";
-	let parsed_connector_factory_validate_authority = data.connector_factory_validate_authority || "UnlistedForDebug";
+	let parsed_connector_factory_validate_authority = data.connector_factory_validate_authority || false;
 	let parsed_turn_locale = data.turn_locale || "UnlistedForDebug";
 	let parsed_locale = data.locale || "UnlistedForDebug";
 	let parsed_type = data.type || "UnlistedForDebug";
@@ -372,11 +372,11 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	let parsed_activity_caller_id = data.activity_caller_id || "UnlistedForDebug";
 	let parsed_stateHashJSON = stateHashJSON || "UnlistedForDebug";
 	let parsed_isFirstInteraction = data.isFirstInteraction || false;
-	let parsed_is_group = data.channelData?.SlackMessage?.conversation?.is_group || "UnlistedForDebug";
+	let parsed_is_group = data.channelData?.SlackMessage?.conversation?.is_group || false;
 	let parsed_conversation_id = data.channelData?.SlackMessage?.conversation?.id || "UnlistedForDebug";
 	let parsed_conversation_name = data.channelData?.SlackMessage?.conversation?.name || "UnlistedForDebug";
 	let parsed_slack_state_hash_thread_timestamp = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || "UnlistedForDebug";
-	let parsed_bot_invoked_flag = data.stateHash?.bot_invoked_flag || null;
+	let parsed_bot_invoked_flag = data.stateHash?.bot_invoked_flag || false;
 	let parsed_api_token = data.channelData?.SlackMessage?.api_token || "UnlistedForDebug";
 	let parsed_conversation_conversationType = data.channelData?.msteams?.conversation?.conversationType || "UnlistedForDebug";
 	let parsed_conversation_tenantId = data.channelData?.msteams?.conversation?.tenantId || "UnlistedForDebug";
@@ -419,7 +419,7 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	parsed_textFormat,
 	parsed_localTimezone}
   )	
-  
+
 	result = await pool.query(query, [
 	  parsed_responded_ref_responded, 
 	  parsed_turn_context_state_collection, 
