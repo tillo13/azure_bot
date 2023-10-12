@@ -291,7 +291,9 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
       	break;
 		  case 'slack':
 			preparedData = slackIngressData(data);
-			payload = getSlackPayloadFromContextObj(data, 'text');
+			// Check if Slack specific event text exists otherwise default to main text
+			let slackPath = data.channelData?.SlackMessage?.event?.text ? 'channelData.SlackMessage.event.text' : 'text';
+			payload = getPayload(data, slackPath);
 			break;
       case 'msteams':
       	preparedData = msteamsIngressData(data);
@@ -355,12 +357,12 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 			payload || null, filename_ingress || null, 
 			data.activity_raw_timestamp, data.activity_caller_id, stateHashJSON, 
 			data.isFirstInteraction || false, 
-			data.channelData?.slack?.conversation?.is_group || null,
-			data.channelData?.slack?.conversation?.id || null,
-			data.channelData?.slack?.conversation?.name || null,
+			data.channelData?.SlackMessage?.conversation?.is_group || null, 
+			data.channelData?.SlackMessage?.conversation?.id || null, 
+			data.channelData?.SlackMessage?.conversation?.name || null, 
 			data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null,
 			data.stateHash?.bot_invoked_flag || null,
-			data.channelData && data.channelData.slack ? data.channelData.slack.api_token : null,
+			data.channelData?.ApiToken || null, 
 			data.channelData?.msteams?.conversation?.conversationType,
 			data.channelData?.msteams?.conversation?.tenantId,
 			data.channelData?.msteams?.conversation?.id, 
@@ -385,7 +387,7 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 
 }
 
-function getSlackPayloadFromContextObj(data, path) {
+function getSlackPayload(data, path) {
 	try {
 		let payload = data.channelData?.SlackMessage?.event?.text ? data.channelData.SlackMessage.event.text : data.text;
 		return (payload || "").substring(0, 2900); // truncate message text
