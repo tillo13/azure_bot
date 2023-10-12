@@ -294,6 +294,11 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 			let slackChannelId = data.conversation?.id || "UnlistedForDebug";
 			let timestamp = data.timestamp || null;
 			let threadTs = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null;
+
+			//make sure we are passing the right values
+			console.log('\n*POSTGRES_UTILS.JS: slackChannelId:', slackChannelId);
+			console.log('\n*POSTGRES_UTILS.JS: timestamp:', timestamp);
+			console.log('\n*POSTGRES_UTILS.JS: threadTs:', threadTs);
 	  
 			// Generate slackUrl only when we have required values
 			if (slackChannelId !== "UnlistedForDebug" && timestamp !== null && typeof timestamp === 'string') {
