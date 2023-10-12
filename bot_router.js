@@ -1,5 +1,5 @@
 //2023oct12 update to save to db
-const { botRouterSaveDataToPostgres } = require('../utilities/postgres_utils');
+const { botRouterSaveDataToPostgres } = require('./utilities/postgres_utils');
 
 const PATH_CONFIGS = {
 	'msteams': {
