@@ -280,6 +280,8 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
   let preparedData = {};
   let payload;
 
+
+
   // Prepare data for different channels
   try {
     switch (channelId) {
@@ -358,7 +360,8 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 			data.channelData?.slack?.conversation?.is_group || null,
 			data.channelData?.slack?.conversation?.id || null,
 			data.channelData?.slack?.conversation?.name || null,
-			data.stateHash?.slack_thread_ts || null, data.stateHash?.bot_invoked_flag || null,
+			data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null,
+			data.stateHash?.bot_invoked_flag || null,
 			data.channelData && data.channelData.slack ? data.channelData.slack.api_token : null,
 			data.channelData?.msteams?.conversation?.conversationType,
 			data.channelData?.msteams?.conversation?.tenantId,
