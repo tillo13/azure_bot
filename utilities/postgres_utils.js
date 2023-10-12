@@ -367,7 +367,7 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	let parsed_filename_ingress = filename_ingress || null;
 	let parsed_activity_raw_timestamp = data.activity_raw_timestamp || null;
 	let parsed_activity_caller_id = data.activity_caller_id || "UnlistedForDebug";
-	let parsed_stateHashJSON = stateHashJSON || "{\"UnlistedForDebug\"}";
+	let parsed_stateHashJSON = stateHashJSON || "{\"key\": \"UnlistedForDebug\"}";
 	let parsed_isFirstInteraction = data.isFirstInteraction || false;
 	let parsed_is_group = data.conversation?.isGroup || false;
 	let parsed_conversation_id = data.conversation?.id || "UnlistedForDebug";
