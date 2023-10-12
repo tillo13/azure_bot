@@ -495,7 +495,6 @@ function getSlackPayload(data, path) {
 		return JSON.stringify(data).substring(0, 2900); // default to entire payload
 	}
 }
-
 function generateSlackUrl(channelId, timestamp, threadTs) {
 	// Convert the timestamp into number for checking if it's in unix timestamp format
 	const numTimestamp = Number(timestamp);
@@ -507,14 +506,13 @@ function generateSlackUrl(channelId, timestamp, threadTs) {
   
 	const [wholeTs, fractionalTs] = timestamp.split('.');
 	const reformattedTs = `${wholeTs}${fractionalTs.padEnd(6, '0')}`;
-	
   
 	let url = `https://teradata.slack.com/archives/${channelId}/p${reformattedTs}`;
   
-	if (threadTs) {
-		url += `?thread_ts=${threadTs}&cid=${channelId}`;
+	// Only append the thread_ts parameter if threadTs is defined
+	if(threadTs) {
+	  url += `?thread_ts=${threadTs}&cid=${channelId}`;
 	}
-	 
 	return url;
   }
 
