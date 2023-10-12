@@ -111,7 +111,7 @@ function webchatIngressData(data) {
 
 function slackIngressData(data) {
 	if (data.channelData && data.channelData.SlackMessage) {
-		console.log('\n*POSTGRES_UTILS.JS: Slack data logged to Postgres');
+		console.log('\n*POSTGRES_UTILS.JS: executing function slackIngressData...');
 		return {
 			channeldata_slack_app_id: data.channelData.SlackMessage.api_app_id,
 			channeldata_slack_event_id: data.channelData.SlackMessage.event_id,
@@ -287,10 +287,12 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
       	preparedData = webchatIngressData(data);
       	payload = getPayload(data, 'text');
       	break;
-      case 'slack':
-      	preparedData = slackIngressData(data);
-      	payload = getPayload(data, 'channelData?.SlackMessage?.event?.text');
-      	break;
+		  case 'slack':
+			preparedData = slackIngressData(data);
+			// Check if Slack specific event text exists otherwise default to main text
+			let slackPath = data.channelData?.SlackMessage?.event?.text ? 'channelData.SlackMessage.event.text' : 'text';
+			payload = getPayload(data, slackPath);
+			break;
       case 'msteams':
       	preparedData = msteamsIngressData(data);
       	payload = getPayload(data, 'text');
@@ -383,8 +385,9 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 }
 function getPayload(data, path) {
 	try {
-		let fields = path.split('.');
-		let payload = fields.reduce((prev, curr) => prev ? prev[curr] : undefined, data);
+		// Split path into array and reduce the path while checking at each level if the value is defined.
+		// If at any level the value is not defined, it will return undefined which will be caught by the fallback in the catch block.
+		let payload = path.split('.').reduce((acc, currVal) => acc[currVal] !== undefined ? acc[currVal] : undefined, data);
 		return (payload || "").substring(0, 2900); // truncate message text
 	} catch(_) {
 		return JSON.stringify(data).substring(0, 2900); // default to entire payload
