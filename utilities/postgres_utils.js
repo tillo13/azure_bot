@@ -279,8 +279,7 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 
   let preparedData = {};
   let payload;
-  let slackUrl = generateSlackUrl(actualSlackChannelId, parsed_timestamp, actualThreadTs);
-
+  let slackUrl = null; // Initialize slackUrl to a default value
 
   // Prepare data for different channels
   try {
@@ -299,8 +298,8 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
             console.log('*POSTGRES_UTILS.JS: slackChannelId:', slackChannelIdString);
             console.log('*POSTGRES_UTILS.JS: threadTs:', threadTsString);
 
-            //dont use this let parsed_timestamp = (new Date(data.timestamp)).getTime() / 1000; // convert to Unix timestamp
-			let parsed_timestamp = data.channelData?.SlackMessage?.event?.ts;
+            let original_ts = data.channelData?.SlackMessage?.event?.ts; // Getting the ts value from payload 
+			let parsed_timestamp = original_ts.replace('.', '').padEnd(original_ts.indexOf('.') + 7, '0'); // Padding additional zeroes to make decimals to 6 digits
 			
             let slackChannelIdParts = slackChannelIdString.split(':');
             let actualSlackChannelId = slackChannelIdParts[2]; // Now this will hold something like C05USME0X35
@@ -313,7 +312,8 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 
             // Generate slackUrl when required values are not default ones
             if (actualSlackChannelId !== "UnlistedForDebug" && parsed_timestamp) {
-                slackUrl = generateSlackUrl(actualSlackChannelId, parsed_timestamp.toString(), actualThreadTs);
+               
+				slackUrl = generateSlackUrl(actualSlackChannelId, parsed_timestamp, actualThreadTs);
             } else {
                 slackUrl = "Test Slack URL in switch statement";
             }
@@ -380,8 +380,7 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	let parsed_locale = data.locale || "UnlistedForDebug";
 	let parsed_type = data.type || "UnlistedForDebug";
 	let parsed_id = data.id || "UnlistedForDebug";
-	//not this one > let parsed_timestamp = data.timestamp || null;
-	let parsed_timestamp = data.channelData?.SlackMessage?.event?.ts;
+	let parsed_timestamp = data.timestamp || null;
 	let parsed_serviceUrl = data.serviceUrl || "UnlistedForDebug";
 	let parsed_from_id = data.from?.id || "UnlistedForDebug";
 	let parsed_from_name = data.from?.name || "UnlistedForDebug";
@@ -498,18 +497,29 @@ function getSlackPayload(data, path) {
 		return JSON.stringify(data).substring(0, 2900); // default to entire payload
 	}
 }
-function generateSlackUrl(channelId, parsed_timestamp, threadTs) {
-	let [wholeTs, fractionalTs] = parsed_timestamp.split('.');
-  // ensure fractional part is exactly 6 digits
-	fractionalTs = fractionalTs.padEnd(6, '0').substring(0, 6);
-	let reformattedTs = `${wholeTs}${fractionalTs}`;
-	let url = `https://teradata.slack.com/archives/${channelId}/p${reformattedTs}`;
+function generateSlackUrl(channelId, timestamp, threadTs) {
+	// Convert the timestamp into number for checking if it's in unix timestamp format
+	const numTimestamp = Number(timestamp);
 	
+	if (!Number.isNaN(numTimestamp)) {
+	  // If the timestamp is in Unix timestamp format, convert it into Slack's format
+	  timestamp = `${Math.floor(numTimestamp)}.000000`;
+	}
+  
+	const [wholeTs, fractionalTs] = timestamp.split('.');
+	let reformattedTs = `${wholeTs}${fractionalTs.padEnd(6, '0')}`;
+  
+	// Add the correct number of decimal places to match your incoming data
+	reformattedTs = reformattedTs.substring(0, reformattedTs.length - 3);
+  
+	let url = `https://teradata.slack.com/archives/${channelId}/p${reformattedTs}`;
+  
+	// Only append the thread_ts parameter if threadTs is defined
 	if(threadTs) {
 	  url += `?thread_ts=${threadTs}&cid=${channelId}`;
 	}
 	return url;
-  }
+}
 
 //default for msteams and webchat
 function getPayload(data, path) {
