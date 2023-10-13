@@ -364,8 +364,16 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			console.log('\n\n***CHAT_HELPER.JS: Is the response from chatGPT including one of the [bot_response] patterns?', bot_response_patterns.some(pattern => result.choices[0].message.content.toLowerCase().includes(pattern.toLowerCase())));
 
 			try {
+				let chat_id;
+				// Attempt to access the result id
+				try {
+					chat_id = result.id;
+				} catch (e) {
+					// If an error occured, default to the current epoch time
+					chat_id = Date.now();
+				}
 				let dataToSave = {
-					chat_id: Date.now(),
+					chat_id: chat_id,
 					timestamp: new Date(),
 					user_message: lastUserMessage,
 					assistant_response: result.choices[0].message.content,
