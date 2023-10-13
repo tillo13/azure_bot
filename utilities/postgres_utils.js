@@ -97,7 +97,7 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 
 function webchatIngressData(data) {
 	if (data.channelData && data.channelData.clientActivityID) {
-		console.log('\n*POSTGRES_UTILS.JS: Webchat ingress data saving to bot_invoke_log...');
+		console.log('\n*POSTGRES_UTILS.JS: WEBCHAT ingress data saving to bot_invoke_log...');
 		return {
 			channeldata_webchat_id: data.channelData.clientActivityID
 		};
@@ -111,7 +111,7 @@ function webchatIngressData(data) {
 
 function slackIngressData(data) {
 	if (data.channelData && data.channelData.SlackMessage) {
-		console.log('\n*POSTGRES_UTILS.JS: Slack ingress data saving to bot_invoke_log...');
+		console.log('\n*POSTGRES_UTILS.JS: SLACK ingress data saving to bot_invoke_log...');
 		return {
 			channeldata_slack_app_id: data.channelData.SlackMessage.api_app_id,
 			channeldata_slack_event_id: data.channelData.SlackMessage.event_id,
@@ -129,12 +129,12 @@ function slackIngressData(data) {
 
 function msteamsIngressData(data) {
 	if (data.channelData && data.channelData.tenant) {
-		console.log('\n*POSTGRES_UTILS.JS: MS Teams ingress data saving to bot_invoke_log...');
+		console.log('\n*POSTGRES_UTILS.JS: MSTEAMS ingress data saving to bot_invoke_log...');
 		return {
 			channeldata_msteams_tenant_id: data.channelData.tenant.id
 		};
 	} else {
-		console.error('\n*POSTGRES_UTILS.JS: MS Teams data is undefined for bot_invoke_log...');
+		console.error('\n*POSTGRES_UTILS.JS: MSTEAMS data is undefined for bot_invoke_log...');
 		return {
 			channeldata_msteams_tenant_id: 'undetermined'
 		};
@@ -223,7 +223,7 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 
 function webchatIngressData(data) {
 	if (data.channelData && data.channelData.clientActivityID) {
-		console.log('\n*POSTGRES_UTILS.JS: Webchat ingress data logged to bot_router_log..');
+		console.log('\n*POSTGRES_UTILS.JS: WEBCHAT ingress data logged to bot_router_log..');
 		return {
 			channeldata_webchat_id: data.channelData.clientActivityID
 		};
@@ -255,12 +255,12 @@ function slackIngressData(data) {
 
 function msteamsIngressData(data) {
 	if (data.channelData && data.channelData.tenant) {
-		console.log('\n*POSTGRES_UTILS.JS: MS Teams data logged to bot_router_log..');
+		console.log('\n*POSTGRES_UTILS.JS: MSTEAMS data logged to bot_router_log..');
 		return {
 			channeldata_msteams_tenant_id: data.channelData.tenant.id
 		};
 	} else {
-		console.error('\n*POSTGRES_UTILS.JS: MS Teams data is undefined');
+		console.error('\n*POSTGRES_UTILS.JS: MSTEAMS data is undefined');
 		return {
 			channeldata_msteams_tenant_id: 'undetermined'
 		};

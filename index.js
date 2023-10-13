@@ -72,7 +72,7 @@ async function appendUserData(username, loginTimestamp, platform) {
         const csvData = `${newId},${username},${loginTimestamp},${platform}\r\n`;
 
         // Print the log details
-        console.log(`\n*INDEX.JS: Logging interaction: ${newId},${username},${loginTimestamp},${platform}`);
+        //DEBUG console.log(`\n*INDEX.JS: Logging interaction: ${newId},${username},${loginTimestamp},${platform}`);
 
         // Create new blob content by appending new CSV data to the existing blob content
         const newBlobContent = existingBlobContent + csvData;
@@ -126,7 +126,7 @@ server.listen(process.env.port || process.env.PORT || 3978, () => {
 });
 
 // EchoBot initialization
-console.log("\n\n*INDEX.JS: Initializing the EchoBot with User State...\n");
+// DEBUG console.log("\n\n*INDEX.JS: Initializing the EchoBot with User State...\n");
 const myBot = new EchoBot(userState);
 
 // Listen for incoming requests.
@@ -163,9 +163,9 @@ server.post('/api/messages', async (req, res) => {
 	}
 
 	console.log(`\n\n*INDEX.JS: Incoming request to /api/messages endpoint.${msg_id}\n`);
-	console.log("\n\n*INDEX.JS: Request payload: \n", req.body, "\n"); // logs the entire request payload
-	//console.log("\n\n*INDEX.JS: Request source IP: \n", req.socket.remoteAddress, "\n"); // logs the origin IP address
-	console.log("\n\n*INDEX.JS: Processing the request...\n");
+	//DEBUG console.log("\n\n*INDEX.JS: Request payload: \n", req.body, "\n"); // logs the entire request payload
+	//DEBUG console.log("\n\n*INDEX.JS: Request source IP: \n", req.socket.remoteAddress, "\n"); // logs the origin IP address
+	//DEBUG console.log("\n\n*INDEX.JS: Processing the request...\n");
 
 	await adapter.process(req, res, (context) => myBot.run(context));
 	console.log(`\n\n*INDEX.JS: Finished processing most recent api/messages request!${msg_id}\n`);
