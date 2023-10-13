@@ -498,7 +498,7 @@ function getSlackPayload(data, path) {
 	}
 }
 function generateSlackUrl(channelId, timestamp, threadTs) {
-    let parsedTimestamp = timestamp.replace('.', '').substring(0, 16);  // preserve only 16 digits
+    let parsedTimestamp = timestamp.replace('.', '');
   
     let baseSlackUrl = `https://teradata.slack.com/archives/${channelId}/p${parsedTimestamp}`;
   
