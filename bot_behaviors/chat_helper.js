@@ -365,7 +365,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 			try {
 				let dataToSave = {
-					chat_id: channelId.conversation_id,
+					chat_id: Date.now(),
 					timestamp: new Date(),
 					user_message: lastUserMessage,
 					assistant_response: result.choices[0].message.content,
