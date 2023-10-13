@@ -498,24 +498,15 @@ function getSlackPayload(data, path) {
 	}
 }
 function generateSlackUrl(channelId, timestamp, threadTs) {
-	// Convert the timestamp into number for checking if it's in unix timestamp format
-	const numTimestamp = Number(timestamp);
-	
-	if (!Number.isNaN(numTimestamp)) {
-	  // If the timestamp is in Unix timestamp format, convert it into Slack's format
-	  timestamp = `${Math.floor(numTimestamp)}.000000`;
-	}
-	  
-	const [wholeTs, fractionalTs] = timestamp.split('.');
-	let reformattedTs = `${wholeTs}${fractionalTs.substring(0,6)}`;
+    let parsedTimestamp = timestamp.replace('.', '');
   
-	let url = `https://teradata.slack.com/archives/${channelId}/p${reformattedTs}`;
-	
-	// Only append the thread_ts parameter if threadTs is defined
-	if(threadTs) {
-	  url += `?thread_ts=${threadTs}&cid=${channelId}`;
-	}
-	return url;
+    let baseSlackUrl = `https://teradata.slack.com/archives/${channelId}/p${parsedTimestamp}`;
+  
+    if (threadTs !== null) {
+        baseSlackUrl += `?thread_ts=${threadTs}&cid=${channelId}`;
+    }
+  
+    return baseSlackUrl;
 }
 
 //default for msteams and webchat
