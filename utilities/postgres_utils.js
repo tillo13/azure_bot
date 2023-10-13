@@ -505,15 +505,12 @@ function generateSlackUrl(channelId, timestamp, threadTs) {
 	  // If the timestamp is in Unix timestamp format, convert it into Slack's format
 	  timestamp = `${Math.floor(numTimestamp)}.000000`;
 	}
-  
+	  
 	const [wholeTs, fractionalTs] = timestamp.split('.');
-	let reformattedTs = `${wholeTs}${fractionalTs.padEnd(6, '0')}`;
-  
-	// Add the correct number of decimal places to match your incoming data
-	reformattedTs = reformattedTs.substring(0, reformattedTs.length - 3);
+	let reformattedTs = `${wholeTs}${fractionalTs.substring(0,6)}`;
   
 	let url = `https://teradata.slack.com/archives/${channelId}/p${reformattedTs}`;
-  
+	
 	// Only append the thread_ts parameter if threadTs is defined
 	if(threadTs) {
 	  url += `?thread_ts=${threadTs}&cid=${channelId}`;
