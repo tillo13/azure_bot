@@ -274,8 +274,8 @@ function defaultIngressData() {
 async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	//DEBUG console.log('[DEBUG] Inside botRouterSaveDataToPostgres function', data, channelId, filename_ingress); // Log start of function
 
-  console.log('\n*POSTGRES_UTILS.JS: entering the botRouter path:', data);
-  console.log('\n*POSTGRES_UTILS.JS: Interaction slack Channel Data for botRouter path :', data.channelData);
+  //DEBUG // console.log('\n*POSTGRES_UTILS.JS: entering the botRouter path:', data);
+  //DEBUG // console.log('\n*POSTGRES_UTILS.JS: Interaction slack Channel Data for botRouter path :', data.channelData);
 
   let preparedData = {};
   let payload;
@@ -295,8 +295,8 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
             let threadTsString = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null;
 
             // Log the variables to verify the values
-            console.log('\n*POSTGRES_UTILS.JS: slackChannelId:', slackChannelIdString);
-            console.log('\n*POSTGRES_UTILS.JS: threadTs:', threadTsString);
+            //DEBUG console.log('\n*POSTGRES_UTILS.JS: slackChannelId:', slackChannelIdString);
+            //DEBUG console.log('\n*POSTGRES_UTILS.JS: threadTs:', threadTsString);
 
             let original_ts = data.channelData?.SlackMessage?.event?.ts; // Getting the ts value from payload 
 			let parsed_timestamp = original_ts.replace('.', '').padEnd(original_ts.indexOf('.') + 7, '0'); // Padding additional zeroes to make decimals to 6 digits

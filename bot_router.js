@@ -41,7 +41,7 @@ const THREAD_TS = 'thread_ts';
 class EchoBot extends ActivityHandler {
 	constructor(userState) {
 		super();
-		console.log("\n\n**BOT_ROUTER.JS: EchoBot constructor has been called with userState: ", userState);
+		//DEBUG// console.log("\n\n**BOT_ROUTER.JS: EchoBot constructor has been called with userState: ", userState);
 
 		this.welcomedUserProperty = userState.createProperty(WELCOMED_USER);
 		this.chatMessagesProperty = userState.createProperty(CHAT_MESSAGES);
@@ -92,60 +92,60 @@ class EchoBot extends ActivityHandler {
 					await specialCommands[messageContent](context, this.chatMessagesProperty);
 				} else {
 					// Log interaction to Slack
-					try {
-						const slackApiToken = process.env.SLACK_BOT_TOKEN;
-						const slackChannelId = 'C05UMRHSLR2';
-						let username;
-						let id;
+					// try {
+					// 	const slackApiToken = process.env.SLACK_BOT_TOKEN;
+					// 	const slackChannelId = 'C05UMRHSLR2';
+					// 	let username;
+					// 	let id;
 		
-						if (context.activity.channelId === 'webchat') {
-							username = 'webchat';
-							id = context.activity.id;
-						} else if (context.activity.channelId === 'slack') {
-							username = context.activity.from.name;
-							id = context.activity.from.id;
-						} else if (context.activity.channelId === 'msteams') {
-							username = context.activity.from.name;
-							id = context.activity.from.aadObjectId;
-						} else {
-							// Default case
-							username = 'unknown';
-							id = 'unknown';
-						}
+					// 	if (context.activity.channelId === 'webchat') {
+					// 		username = 'webchat';
+					// 		id = context.activity.id;
+					// 	} else if (context.activity.channelId === 'slack') {
+					// 		username = context.activity.from.name;
+					// 		id = context.activity.from.id;
+					// 	} else if (context.activity.channelId === 'msteams') {
+					// 		username = context.activity.from.name;
+					// 		id = context.activity.from.aadObjectId;
+					// 	} else {
+					// 		// Default case
+					// 		username = 'unknown';
+					// 		id = 'unknown';
+					// 	}
 		
-						const slackBlocks = {
-							"blocks": [{
-									"type": "section",
-									"text": {
-										"type": "mrkdwn",
-										"text": `:information_source: *Incoming interaction:*\n*Source:* \`${context.activity.channelId}\`\n*User ID:* \`${id}\`\n*Username:* \`${username}\`\n*User Payload:* \`${context.activity.text}\``
-									}
-								},
-								{
-									"type": "context",
-									"elements": [{
-										"type": "mrkdwn",
-										"text": `:robot_face: _Message ID: ${context.activity.id}_`
-									}]
-								},
-								{
-									"type": "divider"
-								}
-							]
-						};
+					// 	const slackBlocks = {
+					// 		"blocks": [{
+					// 				"type": "section",
+					// 				"text": {
+					// 					"type": "mrkdwn",
+					// 					"text": `:information_source: *Incoming interaction:*\n*Source:* \`${context.activity.channelId}\`\n*User ID:* \`${id}\`\n*Username:* \`${username}\`\n*User Payload:* \`${context.activity.text}\``
+					// 				}
+					// 			},
+					// 			{
+					// 				"type": "context",
+					// 				"elements": [{
+					// 					"type": "mrkdwn",
+					// 					"text": `:robot_face: _Message ID: ${context.activity.id}_`
+					// 				}]
+					// 			},
+					// 			{
+					// 				"type": "divider"
+					// 			}
+					// 		]
+					// 	};
 		
-						// Send message to Slack and capture the response
-						const slackResponse = await postMessageToSlack(slackChannelId, null, slackBlocks, slackApiToken);
+					// 	// Send message to Slack and capture the response
+					// 	const slackResponse = await postMessageToSlack(slackChannelId, null, slackBlocks, slackApiToken);
 		
-						// Check if the response is successful
-						if (!slackResponse.ok) {
-							throw new Error(`${slackResponse.error}`);
-						}
+					// 	// Check if the response is successful
+					// 	if (!slackResponse.ok) {
+					// 		throw new Error(`${slackResponse.error}`);
+					// 	}
 		
-						console.log('\n\n**BOT_ROUTER.JS: Successfully posted message to Slack**');
-					} catch (error) {
-						console.error('\n\n**BOT_ROUTER.JS:Failed to post message to Slack (but app will continue):', error.message);
-					}
+					// 	console.log('\n\n**BOT_ROUTER.JS: Successfully posted message to Slack**');
+					// } catch (error) {
+					// 	console.error('\n\n**BOT_ROUTER.JS:Failed to post message to Slack (but app will continue):', error.message);
+					// }
 		
 					const pathConfig = PATH_CONFIGS[context.activity.channelId];
 					const personality = pathConfig ? pathConfig.personality : "Default personality";
