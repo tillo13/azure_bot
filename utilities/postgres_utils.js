@@ -298,23 +298,24 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 			let slackChannelIdParts = slackChannelIdString.split(':');
 			let threadTsParts = threadTsString.split(':');
 		
-			let actualSlackChannelId = slackChannelIdParts[2]; // Keep this line
+			//Ensure that slackChannelIdParts has at least 3 elements
+			let actualSlackChannelId = slackChannelIdParts.length > 2 ? slackChannelIdParts[2] : "UnlistedForDebug";
 		
 			// If threadTsParts length is more than 3, then rebuild the actualThreadTs with everything to the right of 'B05RAARQ8LX:T02EV1PAT:C05USME0X35'
+			let actualThreadTs;
 			if (threadTsParts.length > 3) {
 				actualThreadTs = threadTsParts.slice(3).join(":"); // Build the actualThreadTs from the parts
 			} else {
 				actualThreadTs = threadTsParts[threadTsParts.length - 1];
 			}
 		
-					// Generate slackUrl when required values are not default ones
-					if (actualSlackChannelId !== "UnlistedForDebug" && parsed_timestamp) {
-					   
-						slackUrl = generateSlackUrl(actualSlackChannelId, parsed_timestamp, actualThreadTs);
-					} else {
-						slackUrl = "Test Slack URL in switch statement";
-					}
-					break;
+			// Generate slackUrl when required values are not default ones
+			if (actualSlackChannelId !== "UnlistedForDebug" && parsed_timestamp) {
+				slackUrl = generateSlackUrl(actualSlackChannelId, parsed_timestamp, actualThreadTs);
+			} else {
+				slackUrl = "Test Slack URL in switch statement";
+			}
+		break;
       case 'msteams':
       	preparedData = msteamsIngressData(data);
       	payload = getPayload(data, 'text');
