@@ -289,35 +289,32 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
       	payload = getPayload(data, 'text');
       	break;
 		  case 'slack':
-            preparedData = slackIngressData(data);
-            payload = getPayload(data, 'text');
-            let slackChannelIdString = data.conversation?.id || "UnlistedForDebug";
-            let threadTsString = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null;
-
-            // Log the variables to verify the values
-            console.log('*POSTGRES_UTILS.JS: slackChannelId:', slackChannelIdString);
-            console.log('*POSTGRES_UTILS.JS: threadTs:', threadTsString);
-
-            let original_ts = data.channelData?.SlackMessage?.event?.ts; // Getting the ts value from payload 
-			let parsed_timestamp = original_ts.replace('.', '').padEnd(original_ts.indexOf('.') + 7, '0'); // Padding additional zeroes to make decimals to 6 digits
-			
-            let slackChannelIdParts = slackChannelIdString.split(':');
-            let actualSlackChannelId = slackChannelIdParts[2]; // Now this will hold something like C05USME0X35
-            
-            let actualThreadTs = null;  // default value
-            if (threadTsString) {  // if threadTsString is not null or undefined
-                let threadTsParts = threadTsString.split(':');
-                actualThreadTs = threadTsParts[threadTsParts.length - 1]; // Now this will hold something like 1697146691.533689
-            }
-
-            // Generate slackUrl when required values are not default ones
-            if (actualSlackChannelId !== "UnlistedForDebug" && parsed_timestamp) {
-               
-				slackUrl = generateSlackUrl(actualSlackChannelId, parsed_timestamp, actualThreadTs);
-            } else {
-                slackUrl = "Test Slack URL in switch statement";
-            }
-            break;
+			preparedData = slackIngressData(data);
+			payload = getPayload(data, 'text');
+			let slackChannelIdString = data.conversation?.id || "UnlistedForDebug";
+			let threadTsString = data.channelData?.SlackMessage?.event?.thread_ts || "UnlistedForDebug";
+		
+			// Keep the variable names consistent
+			let slackChannelIdParts = slackChannelIdString.split(':');
+			let threadTsParts = threadTsString.split(':');
+		
+			let actualSlackChannelId = slackChannelIdParts[2]; // Keep this line
+		
+			// If threadTsParts length is more than 3, then rebuild the actualThreadTs with everything to the right of 'B05RAARQ8LX:T02EV1PAT:C05USME0X35'
+			if (threadTsParts.length > 3) {
+				actualThreadTs = threadTsParts.slice(3).join(":"); // Build the actualThreadTs from the parts
+			} else {
+				actualThreadTs = threadTsParts[threadTsParts.length - 1];
+			}
+		
+					// Generate slackUrl when required values are not default ones
+					if (actualSlackChannelId !== "UnlistedForDebug" && parsed_timestamp) {
+					   
+						slackUrl = generateSlackUrl(actualSlackChannelId, parsed_timestamp, actualThreadTs);
+					} else {
+						slackUrl = "Test Slack URL in switch statement";
+					}
+					break;
       case 'msteams':
       	preparedData = msteamsIngressData(data);
       	payload = getPayload(data, 'text');
