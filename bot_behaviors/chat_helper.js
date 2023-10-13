@@ -1,4 +1,8 @@
 const {
+	chatHelperSaveDataToPostgres,
+  } = require('../utilities/postgres_utils');
+
+const {
 	OpenAIClient,
 	AzureKeyCredential
 } = require("@azure/openai");
@@ -350,6 +354,25 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			console.log('\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n', JSON.stringify(result));
 			console.log('\n\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
 			console.log('\n\n***CHAT_HELPER.JS: Is the response from chatGPT including one of the [bot_response] patterns?', bot_response_patterns.some(pattern => result.choices[0].message.content.toLowerCase().includes(pattern.toLowerCase())));
+
+			let dataToSave = {
+				chat_id: channelId,
+				timestamp: new Date(),
+				user_message: lastUserMessage,
+				assistant_response: result.choices[0].message.content,
+				is_active_thread: isActiveThread,
+				incoming_channel_source: channelId,
+				frustration_count: frustrationCount,
+				let_me_check_flag: letMeCheckFlag,
+				requery: letMeCheckFlag,
+				total_tokens: result.usage.totalTokens,
+				payload_source: JSON.stringify(newCleanChatMessages),
+				cleaned_duplicates_count: duplicatesRemoved,
+				total_tokens_in_chat: result.usage.totalTokens,
+				chat_gpt3_5turbo_cost_estimate: turboCost,
+				chat_gpt4_cost_estimate: gpt4Cost,
+			};
+			await chatHelperSaveDataToPostgres(dataToSave);
 
 			// Send response back to anything listening
 			return {

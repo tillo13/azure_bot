@@ -524,8 +524,43 @@ function getPayload(data, path) {
 		return JSON.stringify(data).substring(0, 2900); // default to entire payload
 	}
 }
+async function chatHelperSaveDataToPostgres(data) {
+	try {
+		const query = `
+		INSERT INTO bot_chat_interactions (
+			creation_timestamp, chat_id, timestamp, 
+			user_message, assistant_response, is_active_thread, 
+			incoming_channel_source, frustration_count, let_me_check_flag,
+			requery, total_tokens, payload_source, 
+			cleaned_duplicates_count, total_tokens_in_chat,
+			chat_gpt3_5turbo_cost_estimate, chat_gpt4_cost_estimate
+		) 
+		VALUES (
+			NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+		) RETURNING pk_id, chat_id`;
 
+		let result = await pool.query(query, [
+			data.chat_id, data.timestamp,
+			data.user_message, data.assistant_response, data.is_active_thread, 
+			data.incoming_channel_source, data.frustration_count, data.let_me_check_flag, 
+			data.requery, data.total_tokens, data.payload_source, 
+			data.cleaned_duplicates_count, data.total_tokens_in_chat, 
+			data.chat_gpt3_5turbo_cost_estimate, data.chat_gpt4_cost_estimate
+		]);
+
+		if (result.rows.length > 0) {
+			console.log(`\n*POSTGRES_UTILS.JS: Data saved to bot_chat_interactions with chat_id = ${data.chat_id}`);
+		} else {
+			console.log('\n*POSTGRES_UTILS.JS: No Data returned after insert operation');
+		}
+	} catch (error) {
+		console.error('\n*POSTGRES_UTILS.JS: Failed to save data to Postgres', error);
+	}
+}
+
+	
 module.exports = {
 	botIngressSaveDataToPostgres,
-	botRouterSaveDataToPostgres
+	botRouterSaveDataToPostgres,
+	chatHelperSaveDataToPostgres
 };
