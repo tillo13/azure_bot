@@ -97,12 +97,12 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 
 function webchatIngressData(data) {
 	if (data.channelData && data.channelData.clientActivityID) {
-		console.log('\n*POSTGRES_UTILS.JS: Webchat data logged to Postgres');
+		console.log('\n*POSTGRES_UTILS.JS: Webchat ingress data saving to bot_invoke_log...');
 		return {
 			channeldata_webchat_id: data.channelData.clientActivityID
 		};
 	} else {
-		console.error('\n*POSTGRES_UTILS.JS: clientActivityID is undefined');
+		console.error('\n*POSTGRES_UTILS.JS: clientActivityID is undefined for bot_invoke_log...');
 		return {
 			channeldata_webchat_id: 'undetermined'
 		};
@@ -111,14 +111,14 @@ function webchatIngressData(data) {
 
 function slackIngressData(data) {
 	if (data.channelData && data.channelData.SlackMessage) {
-		console.log('\n*POSTGRES_UTILS.JS: executing function slackIngressData...');
+		console.log('\n*POSTGRES_UTILS.JS: Slack ingress data saving to bot_invoke_log...');
 		return {
 			channeldata_slack_app_id: data.channelData.SlackMessage.api_app_id,
 			channeldata_slack_event_id: data.channelData.SlackMessage.event_id,
 			channeldata_slack_event_time: data.channelData.SlackMessage.event_time
 		};
 	} else {
-		console.error('\n*POSTGRES_UTILS.JS: SlackData is undefined');
+		console.error('\n*POSTGRES_UTILS.JS: SlackData is undefined for bot_invoke_log...');
 		return {
 			channeldata_slack_app_id: 'undetermined',
 			channeldata_slack_event_id: 'undetermined',
@@ -129,12 +129,12 @@ function slackIngressData(data) {
 
 function msteamsIngressData(data) {
 	if (data.channelData && data.channelData.tenant) {
-		console.log('\n*POSTGRES_UTILS.JS: MS Teams data logged to Postgres');
+		console.log('\n*POSTGRES_UTILS.JS: MS Teams ingress data saving to bot_invoke_log...');
 		return {
 			channeldata_msteams_tenant_id: data.channelData.tenant.id
 		};
 	} else {
-		console.error('\n*POSTGRES_UTILS.JS: MS Teams data is undefined');
+		console.error('\n*POSTGRES_UTILS.JS: MS Teams data is undefined for bot_invoke_log...');
 		return {
 			channeldata_msteams_tenant_id: 'undetermined'
 		};
@@ -212,7 +212,7 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 		]);
 
 		if (result.rows.length > 0) {
-			console.log(`\n*POSTGRES_UTILS.JS: Data saved to Postgres with messageID for botIngress path:  = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
+			console.log(`\n*POSTGRES_UTILS.JS: Data saved to postgres bot_router_log with messageID for botIngress path:  = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
 		} else {
 			console.log('\n*POSTGRES_UTILS.JS: No Data returned after insert operation for botIngress path: ');
 		}
@@ -223,7 +223,7 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 
 function webchatIngressData(data) {
 	if (data.channelData && data.channelData.clientActivityID) {
-		console.log('\n*POSTGRES_UTILS.JS: Webchat data logged to Postgres');
+		console.log('\n*POSTGRES_UTILS.JS: Webchat ingress data logged to bot_router_log..');
 		return {
 			channeldata_webchat_id: data.channelData.clientActivityID
 		};
@@ -237,7 +237,7 @@ function webchatIngressData(data) {
 
 function slackIngressData(data) {
 	if (data.channelData && data.channelData.SlackMessage) {
-		console.log('\n*POSTGRES_UTILS.JS: Slack data logged to Postgres');
+		console.log('\n*POSTGRES_UTILS.JS: Slack data logged to bot_router_log..');
 		return {
 			channeldata_slack_app_id: data.channelData.SlackMessage.api_app_id,
 			channeldata_slack_event_id: data.channelData.SlackMessage.event_id,
@@ -255,7 +255,7 @@ function slackIngressData(data) {
 
 function msteamsIngressData(data) {
 	if (data.channelData && data.channelData.tenant) {
-		console.log('\n*POSTGRES_UTILS.JS: MS Teams data logged to Postgres');
+		console.log('\n*POSTGRES_UTILS.JS: MS Teams data logged to bot_router_log..');
 		return {
 			channeldata_msteams_tenant_id: data.channelData.tenant.id
 		};
@@ -274,8 +274,8 @@ function defaultIngressData() {
 async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	//DEBUG console.log('[DEBUG] Inside botRouterSaveDataToPostgres function', data, channelId, filename_ingress); // Log start of function
 
-  console.log('\n*POSTGRES_UTILS.JS: Saving data to Postgres for botRouter path:', data);
-  console.log('\n*POSTGRES_UTILS.JS: Interaction Channel Data for botRouter path :', data.channelData);
+  console.log('\n*POSTGRES_UTILS.JS: entering the botRouter path:', data);
+  console.log('\n*POSTGRES_UTILS.JS: Interaction slack Channel Data for botRouter path :', data.channelData);
 
   let preparedData = {};
   let payload;
@@ -295,8 +295,8 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
             let threadTsString = data.channelData?.SlackMessage?.event?.thread_ts || data.thread_ts || null;
 
             // Log the variables to verify the values
-            console.log('*POSTGRES_UTILS.JS: slackChannelId:', slackChannelIdString);
-            console.log('*POSTGRES_UTILS.JS: threadTs:', threadTsString);
+            console.log('\n*POSTGRES_UTILS.JS: slackChannelId:', slackChannelIdString);
+            console.log('\n*POSTGRES_UTILS.JS: threadTs:', threadTsString);
 
             let original_ts = data.channelData?.SlackMessage?.event?.ts; // Getting the ts value from payload 
 			let parsed_timestamp = original_ts.replace('.', '').padEnd(original_ts.indexOf('.') + 7, '0'); // Padding additional zeroes to make decimals to 6 digits
@@ -411,39 +411,39 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	// console.log('\n*POSTGRES_UTILS.JS: [DEBUG]  aadObject2', parsed_aadObjectId2)
 	// console.log('\n*POSTGRES_UTILS.JS: [DEBUG] aaObject1',parsed_aadObjectId) 
 	
-	console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Now see the parsed list of values',
-	{parsed_responded_ref_responded, 
-	parsed_turn_context_state_collection, 
-	parsed_bot_identity_claims_identity_authentication_type,
-	parsed_connector_client_with_credentials,
-	parsed_connector_client_http_client, 
-	parsed_user_token_client_app_id, 
-	parsed_connector_factory_app_id, 
-	parsed_connector_factory_validate_authority,
-	parsed_turn_locale, parsed_locale, 
-	parsed_type, parsed_id, parsed_timestamp,
-	parsed_serviceUrl, channelId, 
-	parsed_from_id, 
-	parsed_from_name, parsed_recipient_id, parsed_recipient_name, 
-	parsed_payload, parsed_filename_ingress, 
-	parsed_activity_raw_timestamp, parsed_activity_caller_id, parsed_stateHashJSON, 
-	parsed_isFirstInteraction,
-	parsed_is_group,
-	parsed_conversation_id, 
-	parsed_conversation_name, 
-	parsed_slack_state_hash_thread_timestamp,
-	parsed_bot_invoked_flag,
-	parsed_api_token,
-	parsed_conversation_conversationType,
-	parsed_conversation_tenantId,
-	parsed_msteams_conversation_id, 
-	parsed_aadObjectId, 
-	parsed_localTimestamp,
-	parsed_webchat_conversation_id,
-	parsed_textFormat,
-	parsed_localTimezone,
-	slackUrl }
-  )	
+// 	console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Now see the parsed list of values',
+// 	{parsed_responded_ref_responded, 
+// 	parsed_turn_context_state_collection, 
+// 	parsed_bot_identity_claims_identity_authentication_type,
+// 	parsed_connector_client_with_credentials,
+// 	parsed_connector_client_http_client, 
+// 	parsed_user_token_client_app_id, 
+// 	parsed_connector_factory_app_id, 
+// 	parsed_connector_factory_validate_authority,
+// 	parsed_turn_locale, parsed_locale, 
+// 	parsed_type, parsed_id, parsed_timestamp,
+// 	parsed_serviceUrl, channelId, 
+// 	parsed_from_id, 
+// 	parsed_from_name, parsed_recipient_id, parsed_recipient_name, 
+// 	parsed_payload, parsed_filename_ingress, 
+// 	parsed_activity_raw_timestamp, parsed_activity_caller_id, parsed_stateHashJSON, 
+// 	parsed_isFirstInteraction,
+// 	parsed_is_group,
+// 	parsed_conversation_id, 
+// 	parsed_conversation_name, 
+// 	parsed_slack_state_hash_thread_timestamp,
+// 	parsed_bot_invoked_flag,
+// 	parsed_api_token,
+// 	parsed_conversation_conversationType,
+// 	parsed_conversation_tenantId,
+// 	parsed_msteams_conversation_id, 
+// 	parsed_aadObjectId, 
+// 	parsed_localTimestamp,
+// 	parsed_webchat_conversation_id,
+// 	parsed_textFormat,
+// 	parsed_localTimezone,
+// 	slackUrl }
+//   )	
 
 	result = await pool.query(query, [
 	  parsed_responded_ref_responded, 
@@ -482,14 +482,14 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 
 
     if (result.rows.length > 0) {
-      console.log(`\n*POSTGRES_UTILS.JS: Data saved to bot_router_log with messageID = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
+      console.log(`\n\n*POSTGRES_UTILS.JS: Data saved to bot_router_log with messageID = ${result.rows[0].message_id}, and pk_id = ${result.rows[0].pk_id}`);
     } else {
       console.log('\n*POSTGRES_UTILS.JS: No data returned after INSERT operation');
     }
   } catch (error) {
     console.error('\n*POSTGRES_UTILS.JS: Failed to save data to Postgres', error);
   }
-  console.log('\n*POSTGRES_UTILS.JS:[DEBUG] Exiting botRouterSaveDataToPostgres');  // Log end of function
+  //DEBUG console.log('\n*POSTGRES_UTILS.JS:[DEBUG] Exiting botRouterSaveDataToPostgres');  // Log end of function
 
 }
 
