@@ -525,7 +525,3 @@ module.exports = {
 	botIngressSaveDataToPostgres,
 	botRouterSaveDataToPostgres
 };
-
-
-https://teradata.slack.com/archives/C05USME0X35/p1697173099710369?thread_ts=1697164833.463049&cid=C05USME0X35
-https://teradata.slack.com/archives/C05USME0X35/p1697172995435169
