@@ -401,15 +401,15 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	let parsed_conversation_conversationType = data.channelData?.msteams?.conversation?.conversationType || "UnlistedForDebug";
 	let parsed_conversation_tenantId = data.channelData?.msteams?.conversation?.tenantId || "UnlistedForDebug";
 	let parsed_msteams_conversation_id = data.channelData?.msteams?.conversation?.id || "UnlistedForDebug";
-	let parsed_aadObjectId2 = data.recipient?.aadObjectId || null;
+	//let parsed_aadObjectId2 = data.recipient?.aadObjectId || null;
 	let parsed_aadObjectId = data.from?.aadObjectId || null;
 	let parsed_localTimestamp = data.localTimestamp || null;
 	let parsed_webchat_conversation_id = data.conversation?.id || null;
 	let parsed_textFormat = data.textFormat || null;
 	let parsed_localTimezone = data.localTimezone || null;
 
-	console.log('\n*POSTGRES_UTILS.JS: [DEBUG]  aadObject2', parsed_aadObjectId2)
-	console.log('\n*POSTGRES_UTILS.JS: [DEBUG] aaObject1',parsed_aadObjectId) 
+	// console.log('\n*POSTGRES_UTILS.JS: [DEBUG]  aadObject2', parsed_aadObjectId2)
+	// console.log('\n*POSTGRES_UTILS.JS: [DEBUG] aaObject1',parsed_aadObjectId) 
 	
 	console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Now see the parsed list of values',
 	{parsed_responded_ref_responded, 
