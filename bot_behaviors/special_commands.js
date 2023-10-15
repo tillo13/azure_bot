@@ -1,3 +1,6 @@
+//2023oct15 912am adding getqa from db
+const { getQAFromDatabase } = require('./postgres_utils');
+
 const formats = require('./endpoint_formats');
 const chatCompletion = require('./chat_helper');
 const jira_utils = require('./jira_utils');
