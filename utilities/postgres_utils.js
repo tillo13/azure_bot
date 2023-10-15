@@ -19,6 +19,17 @@ pool.on('error', (err, client) => {
 	client.end();
 })
 
+async function getQAFromDatabase() {
+    const query = `
+        SELECT question, answer
+        FROM ${process.env['2023oct15_AZURE_POSTGRES_DATABASE_RLHF_TD_QUESTIONS_AND_ANSWERS_TABLE']}
+        ORDER BY RANDOM()
+        LIMIT 1;
+    `;
+    const result = await pool.query(query);
+    return result.rows[0];
+}
+
 async function botIngressSaveDataToPostgres(data, channelId) {
 	let created_via = data.filename_ingress || null;
 	let preparedData = {};
@@ -562,5 +573,6 @@ async function chatHelperSaveDataToPostgres(data) {
 module.exports = {
 	botIngressSaveDataToPostgres,
 	botRouterSaveDataToPostgres,
-	chatHelperSaveDataToPostgres
+	chatHelperSaveDataToPostgres,
+	getQAFromDatabase
 };

@@ -21,6 +21,7 @@ const commands = new Proxy({
     '$dalle': createDalleImages,
 	'$about': aboutCommandHandler,
 	'$high5': highFiveCommand,
+    '$train': peekTrainingData,
 }, {
     get: function(target, property) {
         property = property.toLowerCase(); // Convert property to lower case here
@@ -36,6 +37,16 @@ const commands = new Proxy({
         }
     }
 });
+
+
+async function peekTrainingData(context) {
+    // Fetch random QA from the database
+    const questionAndAnswer = await getQAFromDatabase();
+    
+    // Return the formatted question and answer to the user 
+    return sendMessageResponse(context, `The training question is: ${questionAndAnswer.question} and the answer is: ${questionAndAnswer.answer}`);
+}
+
 
 async function highFiveCommand(context) {
     let message;
