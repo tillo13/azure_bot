@@ -46,8 +46,34 @@ async function peekTrainingData(context) {
     // Fetch random QA from the database
     const questionAndAnswer = await getQAFromDatabase();
     
+    // Determine the platform and format the response accordingly
+    let message;
+
+	try {
+		switch (context.activity.channelId) {
+			case 'webchat':
+				message = formats.train_WebchatResponse(questionAndAnswer);
+				console.log('\n******SPECIAL_COMMANDS: train path Chose Webchat format');
+				break;
+			case 'slack':
+				message = formats.train_SlackResponse(questionAndAnswer);
+				console.log('\n******SPECIAL_COMMANDS: train path Chose Slack format');
+				break;
+			case 'msteams':
+				message = formats.train_msteamsResponse(questionAndAnswer);
+				console.log('\n******SPECIAL_COMMANDS: train path Chose MSTeams format');
+				break;
+			default:
+				message = formats.train_DefaultResponse(questionAndAnswer);
+				console.log('\n******SPECIAL_COMMANDS: train path Chose default format');
+		}
+	} catch (error) {
+		console.error('\n******SPECIAL_COMMANDS: train path Failed to format the message:', error);
+		message = formats.train_DefaultResponse(questionAndAnswer);
+	}
+    
     // Return the formatted question and answer to the user 
-    return sendMessageResponse(context, `Here is a question and answer set from our 10,000 QA.  Please rate it 1-5 where 1 is "not close at all" and 5 is "exactly correct".  Also feel free to type "skip" if you do not know the answer.  There are no wrong answers.\n\n**Question**: ${questionAndAnswer.question} || \n **Answer**: ${questionAndAnswer.answer}`);
+    return sendMessageResponse(context, message);
 }
 
 

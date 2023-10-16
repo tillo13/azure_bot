@@ -24,7 +24,85 @@ const high5Message ={
 	note:  "way to be nice!"
 };
 
+const trainMessage = {
+    title: "Training Session",
+    note: "Here is a question and answer set from our 10,000 QA. Please rate it 1-5 where 1 is 'not close at all' and 5 is 'exactly correct'. Also, feel free to type 'skip' if you do not know the answer. There are no wrong answers."
+};
+
 module.exports = {
+
+  // train path START
+  train_DefaultResponse: function(questionAndAnswer) {
+	return `*${trainMessage.title}* \n${trainMessage.note}\n\n${formatQA(questionAndAnswer)}`;
+},
+
+train_msteamsResponse: function(questionAndAnswer) {
+    const adaptiveCardContent = {
+        type: "AdaptiveCard",
+        body: [
+            {
+                type: "TextBlock",
+                size: "Large",
+                weight: "Bolder",
+                text: "Training results...",
+                wrap: true,
+            },
+            {
+                type: "TextBlock",
+                text: `*${trainMessage.title}*`,
+                wrap: true
+            },
+            {
+                type: "TextBlock",
+                text: trainMessage.note,
+                wrap: true
+            },
+            {
+                type: "TextBlock",
+                text: formatQA(questionAndAnswer),
+                wrap: true,
+            },
+        ],
+        $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+        version: "1.4",
+    };
+
+    return {
+        type: "attachment",
+        contentType: "application/vnd.microsoft.card.adaptive",
+        contentUrl: null,
+        content: adaptiveCardContent
+    };
+}, 
+
+train_SlackResponse: function(questionAndAnswer) {
+    let slackMessage = {
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": `*${trainMessage.title}*\n${trainMessage.note}`
+                },
+            },
+            {
+                "type": "divider",
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": `_Question_: ${questionAndAnswer.question}\n\`Answer: ${questionAndAnswer.answer}\``
+                }
+            }
+        ]
+    };
+    return slackMessage;
+},
+
+// Add more platform specific responses...
+// train path END
+	
 
 	//////high5 path START//////
 high5_DefaultResponse: function() {
