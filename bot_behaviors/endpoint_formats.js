@@ -340,7 +340,12 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 				},
 				{
 					type: "TextBlock",
-					text: `**7.**  Type **$jira** [description here] to create a ticket in ESS ticket queue for any assistance. to start over.`,
+					text: `**7.**  Want to help get this bot smarter?  Please try **$train**!`,
+					wrap: true
+				},
+				{
+					type: "TextBlock",
+					text: `**8.**  Type **$jira** [description here] to create a ticket in ESS ticket queue for any assistance. to start over.`,
 					wrap: true
 				} 
 			],
