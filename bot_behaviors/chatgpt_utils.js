@@ -38,11 +38,13 @@ async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
             );
         });
 
-        console.log("Success! Chat payload is: ", JSON.stringify(chatPayload));
+        console.log("\n\n*******CHATGPT_UTILS.JS: Success! Chat payload is:", JSON.stringify(chatPayload));
+        console.log("\n*******CHATGPT_UTILS.JS:Oldest user message was:", sortedResult[sortedResult.length - 1].user_invoke_message);
+        console.log("\n*******CHATGPT_UTILS.JS:Newest user message is:", sortedResult[0].user_invoke_message);
         return chatPayload;
 
     } catch (error) {
-        console.error("An error occurred while retrieving and formatting interactions: ", error);
+        console.error("An error occurred while retrieving and formating interactions: ", error);
     }
 }
 
