@@ -1,14 +1,14 @@
-async function getMSTeamsConversationHistoryFunction(chatID) {
-    const result = await getMSTeamsConversationHistoryFromDB(chatID);
+async function getAADObjectIdFromDB(chatID) {
+    const result = await fetchAADObjectIdFromDB(chatID);
     return result;
 }
 
-async function getUserInteractionDataFunction(aadObjectID) {
-    const result = await getUserInteractionDataFromDB(aadObjectID);
+async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
+    const result = await fetchLast24HrInteractionPerUserFromDB(aadObjectID);
     return result;
 }
 
 module.exports = {
-    getMSTeamsConversationHistoryFunction,
-    getUserInteractionDataFunction
+    getAADObjectIdFromDB,
+    getLast24HrInteractionPerUserFromDB,
 };

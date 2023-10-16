@@ -2,9 +2,8 @@ const {
 	chatHelperSaveDataToPostgres,
   } = require('../utilities/postgres_utils');
 
-  const {
-    getMSTeamsConversationHistoryFunction
-} = require('./chatgpt_utils');
+
+const { getAADObjectIdFromDB, getLast24HrInteractionPerUserFromDB } = require('./chatgpt_utils');
 
 const {
 	OpenAIClient,
@@ -368,16 +367,16 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			console.log('\n\n***CHAT_HELPER.JS: Is the response from chatGPT including one of the [bot_response] patterns?', bot_response_patterns.some(pattern => result.choices[0].message.content.toLowerCase().includes(pattern.toLowerCase())));
 			///////2023oct16 114pm push to move to db instead of in thread: 
 // Fetch and print conversation history from database
-let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
-	maxTokens: validatedTokens
-});
+try {
+    let AadObjectId = await getAADObjectIdFromDB(result.id)
+    console.log('\n\n***CHAT_HELPER.JS ->AAD Object ID we will query:', AadObjectId);
 
-let history = await getMSTeamsConversationHistoryFunction(result.id)
-console.log('\n\n***CHAT_HELPER.JS ->Database conversation history:', history);
-
-if (history.length > 0) {
-    let userInteractionData = await getUserInteractionDataFunction(history[0].msteam_recipient_aad_object_id);
-    console.log('\n\n***CHAT_HELPER.JS ->User Interaction Data:', userInteractionData);
+    if (AadObjectId.length > 0) {
+        let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
+        console.log('\n\n***CHAT_HELPER.JS ->Last 24 Hr Interaction Data:', last24HrInteractionData);
+    }
+} catch (error) {
+    console.error('\n\n***CHAT_HELPER.JS -> Error fetching data from DB:', error);
 }
 
 			try {
