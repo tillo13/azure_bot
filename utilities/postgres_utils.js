@@ -411,7 +411,8 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	let parsed_api_token = data.channelData?.SlackMessage?.api_token || "UnlistedForDebug";
 	let parsed_conversation_conversationType = data.channelData?.msteams?.conversation?.conversationType || "UnlistedForDebug";
 	let parsed_conversation_tenantId = data.channelData?.msteams?.conversation?.tenantId || "UnlistedForDebug";
-	let parsed_msteams_conversation_id = data.channelData?.msteams?.conversation?.id || "UnlistedForDebug";
+	//not this one let parsed_msteams_conversation_id = data.channelData?.msteams?.conversation?.id || "UnlistedForDebug";
+	let parsed_msteams_conversation_id = data.conversation?.id || null;
 	//let parsed_aadObjectId2 = data.recipient?.aadObjectId || null;
 	let parsed_aadObjectId = data.from?.aadObjectId || null;
 	let parsed_localTimestamp = data.localTimestamp || null;
