@@ -12,7 +12,7 @@ const {
 const modelCosts = require('./openai_costs_2023sept7.json');
 //not needed per 2023oct12 const postgres_utils = require('../utilities/postgres_utils');
 
-const MAX_OPENAI_TOKENS = 400;
+const MAX_OPENAI_TOKENS = 700;
 const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
 
 
@@ -163,7 +163,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	const endpoint = process.env.OPENAI_API_BASE_URL;
 	const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
 	//debug
-	console.log("\n\n[DEBUG] OpenAIClient:", JSON.stringify(client));
+	//console.log("\n\n[DEBUG] OpenAIClient:", JSON.stringify(client));
 
 	const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
 	const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
@@ -241,13 +241,13 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 	// Start interacting with OpenAI
 	try {
-		console.log("\n\n[DEBUG] newCleanChatMessages before OpenAI:", JSON.stringify(newCleanChatMessages));
+		console.log("\n\n***CHAT_HELPER.JS:[DEBUG] newCleanChatMessages before OpenAI:", JSON.stringify(newCleanChatMessages));
 
 		//console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI: ', newCleanChatMessages);
 		let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
 			maxTokens: validatedTokens
 		});
-		console.log("\n\n[DEBUG] Result from OpenAI:", JSON.stringify(result));
+		//console.log("\n\n[DEBUG] Result from OpenAI:", JSON.stringify(result));
 
 		// did it hit a content policy violation?
 		if (result && result.code === "content_filter" && result.innererror && result.innererror.code === 'ResponsibleAIPolicyViolation') {
@@ -327,7 +327,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 					let looped_through_newCleanChatMessages = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(',');
 					newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_newCleanChatMessages, lastUserMessage);
-					console.log("\n\n[DEBUG] newCleanChatMessages after formatChatPayload():", JSON.stringify(newCleanChatMessages));
+					console.log("\n\n***CHAT_HELPER.JS:[DEBUG] newCleanChatMessages after formatChatPayload():", JSON.stringify(newCleanChatMessages));
 
 
 
