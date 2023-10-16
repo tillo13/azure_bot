@@ -29,6 +29,10 @@ const trainMessage = {
     note: "Here is a question and answer set from our 10,000 QA. Please rate it 1-5 where 1 is 'not close at all' and 5 is 'exactly correct'. Also, feel free to type 'skip' if you do not know the answer. There are no wrong answers."
 };
 
+function formatQA(questionAnswer) {
+    return `**Question**: ${questionAnswer.question} || \n **Answer**: ${questionAnswer.answer}`;
+}
+
 module.exports = {
 
   // train path START
