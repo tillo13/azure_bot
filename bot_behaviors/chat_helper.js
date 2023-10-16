@@ -402,7 +402,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 					if (AadObjectId.length > 0) {
 						let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
-						console.log('\n\n***CHAT_HELPER.JS ->Last 24 Hr Interaction Data:', last24HrInteractionData);
+						console.log('\n\n***CHAT_HELPER.JS ->Last 24 Hr Interaction Data is not blank, processing...');
 					}
 				} catch (error) {
 					console.error('\n\n***CHAT_HELPER.JS -> Error fetching data from DB:', error);
