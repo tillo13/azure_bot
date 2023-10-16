@@ -13,8 +13,8 @@ async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
         // fetch the last 24 hour interaction from the database
         const result = await fetchLast24HrInteractionPerUserFromDB(aadObjectID);
         
-        // sort the interaction based on 'hourssincelastinteraction' in ascending order
-        const sortedResult = result.sort((a, b) => a.hourssincelastinteraction - b.hourssincelastinteraction);
+        // sort the interaction based on 'hourssincelastinteraction' in descending order
+        const sortedResult = result.sort((a, b) => b.hourssincelastinteraction - a.hourssincelastinteraction);
         
         // Define the initial system message
         const chatPayload = [
@@ -38,11 +38,11 @@ async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
             );
         });
 
-        console.log("Success! Chat payload is:", JSON.stringify(chatPayload));
+        console.log("Success! Chat payload is: ", JSON.stringify(chatPayload));
         return chatPayload;
 
     } catch (error) {
-        console.error("An error occurred while retrieving and formating interactions: ", error);
+        console.error("An error occurred while retrieving and formatting interactions: ", error);
     }
 }
 
