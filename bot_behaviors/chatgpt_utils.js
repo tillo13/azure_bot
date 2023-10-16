@@ -40,8 +40,10 @@ async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
 
         console.log("\n*******CHATGPT_UTILS.JS:Oldest user message was:", sortedResult[sortedResult.length - 1].user_invoke_message, "\n*******CHATGPT_UTILS.JS:It was sent", sortedResult[sortedResult.length - 1].hourssincelastinteraction, "hours ago.");
         console.log("\n*******CHATGPT_UTILS.JS:Newest user message is:", sortedResult[0].user_invoke_message, "\n*******CHATGPT_UTILS.JS:It was sent", sortedResult[0].hourssincelastinteraction, "hours ago.");
-        console.log("\n*******CHATGPT_UTILS.JS:Success! Chat payload is: ", JSON.stringify(chatPayload));
+        console.log("\n*******CHATGPT_UTILS.JS:Success! Chat payload is: ", JSON.stringify(chatPayload, null, 2));
         return chatPayload;
+        
+
 
     } catch (error) {
         console.error("An error occurred while retrieving and formating interactions ", error);
