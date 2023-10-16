@@ -15,6 +15,7 @@ const helpMessage = {
 		"Use `$reset` command to erase all interaction memory.",
 		"Type `$about` to know more about this application.",
 		"How about just recognizing an outstanding colleague with `$high5 [insert email/phone/@ here]' to give some fun kudos!",
+		"$train is a way to teach this bot to be smarter! (v1)",
 		"If things just are not working for you, try `$jira [type description here]' to create a ticket in ESS ticket queue for any assistance."
 	]
 };
@@ -25,8 +26,8 @@ const high5Message ={
 };
 
 const trainMessage = {
-    title: "Training Session",
-    note: "Here is a question and answer set from our 10,000 QA. Please rate it 1-5 where 1 is 'not close at all' and 5 is 'exactly correct'. Also, feel free to type 'skip' if you do not know the answer. There are no wrong answers."
+    title: "RLHF training path... (in dev)",
+    note: "Here is a question and answer set from our 10,000 QA we set up for ask-ai. Please rate it 1-5 where 1 is 'not close at all' and 5 is 'exactly correct'. Also, feel free to type 'skip' if you do not know the answer. There are no wrong answers."
 };
 
 function formatQA(questionAnswer) {
@@ -48,7 +49,7 @@ train_msteamsResponse: function(questionAndAnswer) {
                 type: "TextBlock",
                 size: "Large",
                 weight: "Bolder",
-                text: "Training results...",
+                text: "Training via MSteams...",
                 wrap: true,
             },
             {
@@ -78,38 +79,6 @@ train_msteamsResponse: function(questionAndAnswer) {
         content: adaptiveCardContent
     };
 }, 
-
-train_SlackResponse: function(questionAndAnswer) {
-    let slackMessage = {
-        "blocks": [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": `*Please rate this 1-5...*\n`
-                },
-            },
-            {
-                "type": "divider",
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": `*Question*: `
-                },
-            }
-        ]
-    };
-    return slackMessage;
-},
-
-
-
-
-
-
-
 
 // Add more platform specific responses...
 // train path END
