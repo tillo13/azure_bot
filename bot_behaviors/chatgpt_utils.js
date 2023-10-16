@@ -1,3 +1,8 @@
+const {
+    fetchAADObjectIdFromDB,
+    fetchLast24HrInteractionPerUserFromDB
+} = require('../utilities/postgres_utils');
+
 async function getAADObjectIdFromDB(chatID) {
     const result = await fetchAADObjectIdFromDB(chatID);
     return result;
@@ -10,5 +15,5 @@ async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
 
 module.exports = {
     getAADObjectIdFromDB,
-    getLast24HrInteractionPerUserFromDB,
+    getLast24HrInteractionPerUserFromDB
 };
