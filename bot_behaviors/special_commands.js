@@ -47,7 +47,7 @@ async function peekTrainingData(context) {
     const questionAndAnswer = await getQAFromDatabase();
     
     // Return the formatted question and answer to the user 
-    return sendMessageResponse(context, `The training question is: ${questionAndAnswer.question} and the answer is: ${questionAndAnswer.answer}`);
+    return sendMessageResponse(context, `Here is a question and answer set from our 10,000 QA.  Please rate it 1-5 where 1 is "not close at all" and 5 is "exactly correct".  Also feel free to type "skip" if you do not know the answer.  There are no wrong answers.\n\n**Question**: ${questionAndAnswer.question} || \n **Answer**: ${questionAndAnswer.answer}`);
 }
 
 
