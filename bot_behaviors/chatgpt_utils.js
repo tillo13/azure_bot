@@ -39,8 +39,7 @@ async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
                     content: message.bot_response_message,
                 }
             );
-            // every loop, we add to the start of the array (hence unshift), a new formatted string
-            userMessagesArray.unshift(`[~${parseFloat(message.hourssincelastinteraction).toFixed(3)} hours ago: ${message.user_invoke_message}]`);
+            userMessagesArray.push(`[~${parseFloat(message.hourssincelastinteraction).toFixed(3)} hours ago: ${message.user_invoke_message}]`);
         });
 
         // Join each message and interaction time with ', ' to create the final string
