@@ -57,6 +57,7 @@ async function peekTrainingData(context) {
 				break;
 			case 'slack':
 				message = formats.train_SlackResponse(questionAndAnswer);
+                console.log('\n******SPECIAL_COMMANDS: Slack message:', message);
 				console.log('\n******SPECIAL_COMMANDS: train path Chose Slack format');
 				break;
 			case 'msteams':
