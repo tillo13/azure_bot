@@ -570,10 +570,17 @@ async function chatHelperSaveDataToPostgres(data) {
     }
 }
 
+async function getMSTeamsConversationHistoryFromDB() {
+	console.log('\n*POSTGRES_UTILS.JS: Invoking getMSTeamsConversationThreads function...');
+    const query = `SELECT * FROM vw_msteams_conversation_threads`;
+    const result = await pool.query(query);
+    return result.rows;
+}
 	
 module.exports = {
 	botIngressSaveDataToPostgres,
 	botRouterSaveDataToPostgres,
 	chatHelperSaveDataToPostgres,
-	getQAFromDatabase
+	getQAFromDatabase,
+	getMSTeamsConversationThreads
 };

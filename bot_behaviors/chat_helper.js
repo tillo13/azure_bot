@@ -2,6 +2,10 @@ const {
 	chatHelperSaveDataToPostgres,
   } = require('../utilities/postgres_utils');
 
+  const {
+    getMSTeamsConversationHistoryFunction
+} = require('./chatgpt_utils');
+
 const {
 	OpenAIClient,
 	AzureKeyCredential
@@ -207,6 +211,16 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	});
 
 	console.log('\n\n***CHAT_HELPER.JS -> new Entire conversation so far via chatmessages:\n', cleanConversation);
+
+///////2023oct16 114pm push to move to db instead of in thread: 
+// Fetch and print conversation history from database
+getMSTeamsConversationHistoryFunction()
+    .then(history => {
+        console.log('\n\n***CHAT_HELPER.JS ->Database conversation history:', history);
+    })
+    .catch(err => {
+        console.error('\n\n***CHAT_HELPER.JS -> Error fetching conversation history:', err);
+    });
 
 	// Count cleaned messages first
 	const oldChatMessages = JSON.stringify(chatMessages);
