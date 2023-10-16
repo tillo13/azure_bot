@@ -582,5 +582,5 @@ module.exports = {
 	botRouterSaveDataToPostgres,
 	chatHelperSaveDataToPostgres,
 	getQAFromDatabase,
-	getMSTeamsConversationThreads
+	getMSTeamsConversationHistoryFromDB
 };
