@@ -96,8 +96,8 @@ train_SlackResponse: function(questionAndAnswer) {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": `_Question: ${questionAndAnswer.question}_\n_Answer: ${questionAndAnswer.answer}_`  
-                }
+                    "text": `*Question*: ${questionAndAnswer.question}\n*Answer*: ${questionAndAnswer.answer}`
+                },
             }
         ]
     };
