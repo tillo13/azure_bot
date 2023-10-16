@@ -365,19 +365,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			console.log('\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n', JSON.stringify(result));
 			console.log('\n\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
 			console.log('\n\n***CHAT_HELPER.JS: Is the response from chatGPT including one of the [bot_response] patterns?', bot_response_patterns.some(pattern => result.choices[0].message.content.toLowerCase().includes(pattern.toLowerCase())));
-			///////2023oct16 114pm push to move to db instead of in thread: 
-// Fetch and print conversation history from database
-try {
-    let AadObjectId = await getAADObjectIdFromDB(result.id)
-    console.log('\n\n***CHAT_HELPER.JS ->AAD Object ID we will query:', AadObjectId);
-
-    if (AadObjectId.length > 0) {
-        let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
-        console.log('\n\n***CHAT_HELPER.JS ->Last 24 Hr Interaction Data:', last24HrInteractionData);
-    }
-} catch (error) {
-    console.error('\n\n***CHAT_HELPER.JS -> Error fetching data from DB:', error);
-}
 
 			try {
 				let chat_id;
@@ -407,6 +394,20 @@ try {
 				};
 				await chatHelperSaveDataToPostgres(dataToSave);
 				console.log('\n\n***CHAT_HELPER.JS: Chat data saved successfully to PostgreSQL!');
+				///////2023oct16 114pm push to move to db instead of in thread: 
+				// Fetch and print conversation history from database
+				try {
+					let AadObjectId = await getAADObjectIdFromDB(result.id)
+					console.log('\n\n***CHAT_HELPER.JS ->AAD Object ID we will query:', AadObjectId);
+
+					if (AadObjectId.length > 0) {
+						let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
+						console.log('\n\n***CHAT_HELPER.JS ->Last 24 Hr Interaction Data:', last24HrInteractionData);
+					}
+				} catch (error) {
+					console.error('\n\n***CHAT_HELPER.JS -> Error fetching data from DB:', error);
+				}
+
 			} catch (error) {
 				console.error('\n\n***CHAT_HELPER.JS: Failed to save chat data to PostgreSQL. Error:', error);
 			}
