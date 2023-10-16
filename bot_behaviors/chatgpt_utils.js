@@ -38,9 +38,11 @@ async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
             );
         });
 
-        console.log("\n*******CHATGPT_UTILS.JS:Oldest user message was:", sortedResult[sortedResult.length - 1].user_invoke_message, "\n*******CHATGPT_UTILS.JS:It was sent", sortedResult[sortedResult.length - 1].hourssincelastinteraction, "hours ago.");
-        console.log("\n*******CHATGPT_UTILS.JS:Newest user message is:", sortedResult[0].user_invoke_message, "\n*******CHATGPT_UTILS.JS:It was sent", sortedResult[0].hourssincelastinteraction, "hours ago.");
-        console.log("\n*******CHATGPT_UTILS.JS:Success! Chat payload is: ", JSON.stringify(chatPayload, null, 2));
+        console.log("\n*******CHATGPT_UTILS.JS: The most recent user message in the last 60 mins:", sortedResult[sortedResult.length - 1].user_invoke_message)
+        console.log("\n*******CHATGPT_UTILS.JS: The most recent user message was received: ", sortedResult[sortedResult.length - 1].hourssincelastinteraction, "hours ago.");
+        console.log("\n*******CHATGPT_UTILS.JS: The oldest user message in the last 60 mins is:", sortedResult[0].user_invoke_message)
+        console.log("\n*******CHATGPT_UTILS.JS: The oldest user message was received", sortedResult[0].hourssincelastinteraction, "hours ago.");
+
         return chatPayload;
         
 
