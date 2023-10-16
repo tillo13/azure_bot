@@ -79,30 +79,30 @@ train_msteamsResponse: function(questionAndAnswer) {
     };
 }, 
 
-train_SlackResponse: function(questionAndAnswer) {
-    let slackMessage = {
-        "blocks": [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": `*${trainMessage.title}*\n${trainMessage.note}`
-                },
-            },
-            {
-                "type": "divider",
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": `*Question*: ${questionAndAnswer.question}\n*Answer*: ${questionAndAnswer.answer}`
-                },
-            }
-        ]
-    };
-    return slackMessage;
-},
+// train_SlackResponse: function(questionAndAnswer) {
+//     let slackMessage = {
+//         "blocks": [
+//             {
+//                 "type": "section",
+//                 "text": {
+//                     "type": "mrkdwn",
+//                     "text": `*${trainMessage.title}*\n${trainMessage.note}`
+//                 },
+//             },
+//             {
+//                 "type": "divider",
+//             },
+//             {
+//                 "type": "section",
+//                 "text": {
+//                     "type": "mrkdwn",
+//                     "text": `*Question*: ${questionAndAnswer.question}\n*Answer*: ${questionAndAnswer.answer}`
+//                 },
+//             }
+//         ]
+//     };
+//     return slackMessage;
+// },
 
 // Add more platform specific responses...
 // train path END
