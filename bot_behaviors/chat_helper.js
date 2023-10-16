@@ -212,16 +212,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 	console.log('\n\n***CHAT_HELPER.JS -> new Entire conversation so far via chatmessages:\n', cleanConversation);
 
-///////2023oct16 114pm push to move to db instead of in thread: 
-// Fetch and print conversation history from database
-getMSTeamsConversationHistoryFunction()
-    .then(history => {
-        console.log('\n\n***CHAT_HELPER.JS ->Database conversation history:', history);
-    })
-    .catch(err => {
-        console.error('\n\n***CHAT_HELPER.JS -> Error fetching conversation history:', err);
-    });
-
 	// Count cleaned messages first
 	const oldChatMessages = JSON.stringify(chatMessages);
 
@@ -376,6 +366,19 @@ getMSTeamsConversationHistoryFunction()
 			console.log('\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n', JSON.stringify(result));
 			console.log('\n\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
 			console.log('\n\n***CHAT_HELPER.JS: Is the response from chatGPT including one of the [bot_response] patterns?', bot_response_patterns.some(pattern => result.choices[0].message.content.toLowerCase().includes(pattern.toLowerCase())));
+			///////2023oct16 114pm push to move to db instead of in thread: 
+// Fetch and print conversation history from database
+let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
+	maxTokens: validatedTokens
+});
+
+let history = await getMSTeamsConversationHistoryFunction(result.id)
+console.log('\n\n***CHAT_HELPER.JS ->Database conversation history:', history);
+
+if (history.length > 0) {
+    let userInteractionData = await getUserInteractionDataFunction(history[0].msteam_recipient_aad_object_id);
+    console.log('\n\n***CHAT_HELPER.JS ->User Interaction Data:', userInteractionData);
+}
 
 			try {
 				let chat_id;

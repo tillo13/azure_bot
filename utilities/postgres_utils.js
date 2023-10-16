@@ -570,10 +570,18 @@ async function chatHelperSaveDataToPostgres(data) {
     }
 }
 
-async function getMSTeamsConversationHistoryFromDB() {
-	console.log('\n*POSTGRES_UTILS.JS: Invoking getMSTeamsConversationThreads function...');
-    const query = `SELECT * FROM vw_msteams_conversation_threads LIMIT 1`;
-    const result = await pool.query(query);
+async function getMSTeamsConversationHistoryFromDB(chatID) {
+    const query = `SELECT msteam_recipient_aad_object_id FROM vw_msteams_conversation_threads WHERE chat_id = $1`;
+    const result = await pool.query(query, [chatID]);
+    return result.rows;
+}
+
+async function getUserInteractionDataFromDB(aadObjectID) {
+    const query = `SELECT user_interacting, hourssincelastinteraction, user_invoke_message, bot_response_message 
+    FROM vw_msteams_conversation_threads 
+    WHERE msteam_recipient_aad_object_id = $1 
+    AND inlast24hrs =true`;
+    const result = await pool.query(query, [aadObjectID]);
     return result.rows;
 }
 	
@@ -582,5 +590,6 @@ module.exports = {
 	botRouterSaveDataToPostgres,
 	chatHelperSaveDataToPostgres,
 	getQAFromDatabase,
-	getMSTeamsConversationHistoryFromDB
+    getMSTeamsConversationHistoryFromDB,
+    getUserInteractionDataFromDB
 };
