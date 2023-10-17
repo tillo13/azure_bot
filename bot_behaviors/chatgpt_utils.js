@@ -111,15 +111,22 @@ async function recreateGptPayloadViaDB(aadObjectID) {
             console.log("\n*******CHATGPT_UTILS.JS: No interactions found in the last 24 hours for the provided AAD Object ID.");
             return [];
         }
+        
+        if (!Array.isArray(last24HrInteraction) || last24HrInteraction.length === 0) {
+            console.log("\n*******CHATGPT_UTILS.JS: last24HrInteraction is not an array or is empty.");
+            return [];
+        }
 
         let userInvokeDiscussion;
 
         // Process interaction details
         if(last24HrInteraction.length > 0){
             let userInvokeMessageArray = [];
-            for(let interaction of last24HrInteraction){
+            for(let index = 0 ; index < last24HrInteraction.length ; index++){
+                const interaction = last24HrInteraction[index];
                 console.log("\n*******CHATGPT_UTILS.JS: Interaction detail: ", interaction);
-                userInvokeMessageArray.push(`[~${parseFloat(interaction.hourssincelastinteraction).toFixed(3)} hours ago: ${interaction.user_invoke_message}]`);
+                // assuming that each 'interaction' also contains the 'hourssincelastinteraction' property:
+                userInvokeMessageArray.push(`[~${parseFloat(interaction.hourssincelastinteraction).toFixed(3)} hours ago: ${interaction.content}]`);
             }
             console.log("\n*******CHATGPT_UTILS.JS: User invoke message array: ", userInvokeMessageArray);
             userInvokeDiscussion = "Certainly, here is what I have said so far. Here are your past conversations: "+userInvokeMessageArray.join(', ');
