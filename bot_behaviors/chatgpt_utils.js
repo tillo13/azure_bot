@@ -107,6 +107,8 @@ async function recreateGptPayloadViaDB(aadObjectID) {
         // Fetch interaction details of the user from the database
         const last24HrInteraction = await getLast24HrInteractionPerUserFromDB(aadObjectID);
 
+        console.log("\n*******CHATGPT_UTILS.JS: Fetched last 24Hr interactions: ", last24HrInteraction);
+
         if (!last24HrInteraction || last24HrInteraction.length === 0) {
             console.log("\n*******CHATGPT_UTILS.JS: No interactions found in the last 24 hours for the provided AAD Object ID.");
             return [];
@@ -122,9 +124,11 @@ async function recreateGptPayloadViaDB(aadObjectID) {
         // Process interaction details
         if(last24HrInteraction.length > 0){
             let userInvokeMessageArray = [];
+
+            console.log('\n*******CHATGPT_UTILS.JS: Last 24 hours interaction contains data, processing...');
             for(let index = 0 ; index < last24HrInteraction.length ; index++){
                 const interaction = last24HrInteraction[index];
-                console.log("\n*******CHATGPT_UTILS.JS: Interaction detail: ", interaction);
+                console.log("\n*******CHATGPT_UTILS.JS: Processing Interaction detail ["+index+"]: ", interaction);
                 // assuming that each 'interaction' also contains the 'hourssincelastinteraction' property:
                 userInvokeMessageArray.push(`[~${parseFloat(interaction.hourssincelastinteraction).toFixed(3)} hours ago: ${interaction.content}]`);
             }
@@ -132,6 +136,7 @@ async function recreateGptPayloadViaDB(aadObjectID) {
             userInvokeDiscussion = "Certainly, here is what I have said so far. Here are your past conversations: "+userInvokeMessageArray.join(', ');
 
         } else {
+            console.log('\n*******CHATGPT_UTILS.JS: Last 24 hours interaction does not contain data.');
             userInvokeDiscussion = "Certainly, there are no past conversations in the last 24 hours.";
         }
 
@@ -145,7 +150,9 @@ async function recreateGptPayloadViaDB(aadObjectID) {
         ];
 
         // Add interaction details to the payload
+        console.log('\n*******CHATGPT_UTILS.JS: Adding interaction details to payload...');
         for(let interaction of last24HrInteraction){
+            console.log("\n*******CHATGPT_UTILS.JS: Adding Interaction detail: ", interaction);
             payload.push(
                 { role: "user", content: interaction.user_invoke_message },
                 { role: "assistant", content: interaction.bot_response_message }
@@ -153,7 +160,10 @@ async function recreateGptPayloadViaDB(aadObjectID) {
         }
 
         // Fetch the latest user message and include in the payload
+        console.log('\n*******CHATGPT_UTILS.JS: Fetching latest user message...');
         let latestUserMessage = last24HrInteraction[last24HrInteraction.length - 1].user_invoke_message;
+
+        console.log('\n*******CHATGPT_UTILS.JS: Latest user message: ', latestUserMessage);
 
         payload.push(
             { role: "assistant", content: 'Let me check our past conversations in this exact gpt thread, one moment...' },
