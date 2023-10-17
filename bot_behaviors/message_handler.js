@@ -97,9 +97,9 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 
 async function handleDefault(context, chatMessagesUser, personality) {
     if (isFromSlack(context)) {
-        console.log("\n\n**MESSAGE_HANDLER.JS: Message from Slack, but in the handleDefault path, and bot was not called or is not in thread. Checking parentMessage via Slack API...");
-        console.log("\n\n**MESSAGE_HANDLER.JS: Slack conversation info:", context.activity.conversation);
-        console.log("\n\n**MESSAGE_HANDLER.JS: Raw Slack data:", context.activity.channelData);
+        console.log("\n\n**MESSAGE_HANDLER.JS: Message from Slack, but in the handleDefault path and do not detect @bot invoke in memory. Checking parentMessage via Slack API...");
+        //DEBUG_PATH: console.log("\n\n**MESSAGE_HANDLER.JS: Slack conversation info:", context.activity.conversation);
+        //DEBUG_PATH: console.log("\n\n**MESSAGE_HANDLER.JS: Raw Slack data:", context.activity.channelData);
 
         //go fetch the parent message if it's a thread
         if (isFromSlack(context) && context.activity.channelData?.SlackMessage?.event?.thread_ts) {
