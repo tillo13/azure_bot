@@ -379,10 +379,11 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 								// Call the recreateGptPayloadViaDB function and store the result in rebuiltPayloadViaDB
 								rebuiltPayloadViaDB = await recreateGptPayloadViaDB(AadObjectId[0].msteam_recipient_aad_object_id);
 							}
-						} catch  {
-							console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> Error fetching data from DB:', error);
+						} 
+						catch(err)  {
+							console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> Error fetching data from DB:', err);
 						}
-					
+
 						result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
 						console.log("\n\n***CHAT_HELPER.JS_TRYPATH ->Result.id value (after secondary request to OpenAI):", result.id);
 					
