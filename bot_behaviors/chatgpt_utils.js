@@ -107,7 +107,8 @@ async function recreateGptPayloadViaDB(aadObjectID) {
         // Fetch interaction details of the user from the database
         const last24HrInteraction = await getLast24HrInteractionPerUserFromDB(aadObjectID);
 
-        console.log("\n*******CHATGPT_UTILS.JS: Fetched last 24Hr interactions: ", last24HrInteraction);
+        // Log the interaction details fetched from DB
+        console.log('\n*******CHATGPT_UTILS.JS: Received user interactions from the database: ', last24HrInteraction);
 
         if (!last24HrInteraction || last24HrInteraction.length === 0) {
             console.log("\n*******CHATGPT_UTILS.JS: No interactions found in the last 24 hours for the provided AAD Object ID.");
@@ -128,9 +129,11 @@ async function recreateGptPayloadViaDB(aadObjectID) {
             console.log('\n*******CHATGPT_UTILS.JS: Last 24 hours interaction contains data, processing...');
             for(let index = 0 ; index < last24HrInteraction.length ; index++){
                 const interaction = last24HrInteraction[index];
+                console.log(`******CHATGPT_UTILS.JS: Value of hourssincelastinteraction: ${interaction.hourssincelastinteraction}, Type: ${typeof interaction.hourssincelastinteraction}`)
+
                 console.log("\n*******CHATGPT_UTILS.JS: Processing Interaction detail ["+index+"]: ", interaction);
-                // assuming that each 'interaction' also contains the 'hourssincelastinteraction' property:
-                userInvokeMessageArray.push(`[~${parseFloat(interaction.hourssincelastinteraction).toFixed(3)} hours ago: ${interaction.content}]`);
+
+                userInvokeMessageArray.push(`[~${parseFloat(interaction.hourssincelastinteraction).toFixed(3)} hours ago: ${interaction.user_invoke_message}]`);
             }
             console.log("\n*******CHATGPT_UTILS.JS: User invoke message array: ", userInvokeMessageArray);
             userInvokeDiscussion = "Certainly, here is what I have said so far. Here are your past conversations: "+userInvokeMessageArray.join(', ');
