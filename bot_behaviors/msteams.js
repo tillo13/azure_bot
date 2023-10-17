@@ -1,5 +1,7 @@
 const { MessageFactory } = require('botbuilder');
 const chatCompletion = require('./chat_helper');
+const { getLast24HrInteractionPerUserFromDB } = require('./chatgpt_utils');
+
 
 async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
     console.log('\n*****MSTEAMS.JS: Preparing to handle a message from MS Teams');
@@ -20,6 +22,9 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
     
     const username = context.activity.from.name;
     const aadObjectID = context.activity.from.aadObjectId;
+
+    const interactionResult = await getLast24HrInteractionPerUserFromDB(aadObjectID);
+    console.log('\n*****MSTEAMS.JS [DEBUG] last 24 hours:', interactionResult);
     
     // Debug log
     console.log('\n*****MSTEAMS.JS [DEBUG]: username data: ', username);
@@ -42,7 +47,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
         const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, false);
         
         // Debug log
-        //console.log('\n*****MSTEAMS.JS [DEBUG]: chatResponse data: ', chatResponse);
+        console.log('\n*****MSTEAMS.JS [DEBUG]: chatResponse data: ', chatResponse);
 
         assistantResponse = `${chatResponse.assistantResponse}`;
         chatMessagesUser = chatResponse.chats;
