@@ -11,7 +11,7 @@ const {
 } = require('./msteams');
 const chatCompletion = require('./chat_helper');
 
-const { fetchConversationHistory } = require('./slack_utils');
+const { fetchConversationHistory, getBotId } = require('./slack_utils');
 
 
 const { getLast24HrInteractionPerUserFromDB } = require('./chatgpt_utils');
@@ -97,7 +97,7 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 
 async function handleDefault(context, chatMessagesUser, personality) {
     if (isFromSlack(context)) {
-        console.log("\n\n**MESSAGE_HANDLER.JS: Message from Slack, but in the handleDefault path, and bot was not called or is not in thread. Ignoring...");
+        console.log("\n\n**MESSAGE_HANDLER.JS: Message from Slack, but in the handleDefault path, and bot was not called or is not in thread. Checking parentMessage via Slack API...");
         console.log("\n\n**MESSAGE_HANDLER.JS: Slack conversation info:", context.activity.conversation);
         console.log("\n\n**MESSAGE_HANDLER.JS: Raw Slack data:", context.activity.channelData);
 
@@ -105,6 +105,15 @@ async function handleDefault(context, chatMessagesUser, personality) {
         if (isFromSlack(context) && context.activity.channelData?.SlackMessage?.event?.thread_ts) {
             try {
                 const apiToken = context.activity.channelData?.ApiToken;
+
+                // Fetch botId and handle any potential errors
+                try {
+                    const botId = await getBotId(apiToken);
+                    console.log("\n\n**MESSAGE_HANDLER.JS: Bot ID: ", botId);
+                } catch (error) {
+                    console.error("\n\n**MESSAGE_HANDLER.JS: Failed to retrieve bot ID. Error: ", error);
+                }
+
                 const slack_channel_id = context.activity.channelData.SlackMessage.event.channel;
                 const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts;
                 
