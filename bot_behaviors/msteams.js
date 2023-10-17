@@ -35,11 +35,23 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
             console.log('\n*****MSTEAMS.JS: This is the first user interaction');
             assistantResponse = `Hey [${username}]!\nType *$help* for more info!\n----------------------\n`;
             const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
-
+            
             console.log('\n*****MSTEAMS.JS [DEBUG]: firstInteraction chatResponse data: ', chatResponse);
-
+        
             assistantResponse += `${chatResponse.assistantResponse}`;
-            chatMessagesUser = chatResponse.chats;
+            
+            // Here we find the index of the first user message
+            let firstUserIndex;
+            for (let i = 0; i < chatResponse.chats.length; i++) {
+                if (chatResponse.chats[i].role === 'user') {
+                    firstUserIndex = i;
+                    break;
+                }
+            }
+        
+            // Now we create a new array that only contains the system message,
+            // the first user message, and the assistant's response to it. 
+            chatMessagesUser = chatResponse.chats.slice(firstUserIndex - 1, firstUserIndex + 2);
         }
         else {
             const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, false);

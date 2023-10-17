@@ -130,7 +130,7 @@ async function handleDefault(context, chatMessagesUser, personality) {
                     invokedViaBotThread = true;
                 } 
 
-                console.log("**MESSAGE_HANDLER.JS: Based on the botID and the payload from the parent, the invokedViaBotThread=", invokedViaBotThread);
+                console.log("\n\n**MESSAGE_HANDLER.JS: Based on the botID and the payload from the parent, the invokedViaBotThread =", invokedViaBotThread);
         
             } catch (error) {
                 console.error("\n\n**MESSAGE_HANDLER.JS: Failed to retrieve parent message in the thread. Error: ", error);
