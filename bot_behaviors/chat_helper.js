@@ -217,6 +217,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	// Start interacting with OpenAI
 	try {
 		console.log("\n\n***CHAT_HELPER.JS:[DEBUG] newCleanChatMessages before OpenAI:", JSON.stringify(newCleanChatMessages));
+		console.log("\n\n***CHAT_HELPER.JS ->Result.id value (right after newCLeanChatMessages):", result.id);
+
 
 		let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
 			maxTokens: validatedTokens
