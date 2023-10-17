@@ -16,7 +16,7 @@ async function getAADObjectIdFromDB(chatID) {
       console.log("\n*******CHATGPT_UTILS.JS: No match found in the database for any chatIDs in the given array");
       return [];
     } else {
-      console.log("***CHATGPT_UTILS.JS: Detected a single chatID");
+      console.log("\n*******CHATGPT_UTILS.JS: Detected a single chatID");
       const result = await fetchAADObjectIdFromDB(chatID);
   
       if(result && result.length > 0){
