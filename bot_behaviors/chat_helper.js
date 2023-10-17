@@ -54,10 +54,6 @@ const bot_response_patterns = [
 	// Include any more patterns...
 ];
 
-// Debug log
-const aadObjectID = context.activity.from.aadObjectId;
-console.log('\n*****CHAT_HELPER.JS [DEBUG]: aad of user: ',aadObjectID );
-
 function shouldRequery(responseContent) {
 	const lowerCasedResponse = responseContent.toLowerCase();
 	//console.log('\n\n***CHAT_HELPER.JS: Running shouldRequery() with responseContent:', responseContent);
