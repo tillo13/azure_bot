@@ -16,16 +16,16 @@ const { getLast24HrInteractionPerUserFromDB } = require('./chatgpt_utils');
 async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
     // Debug log
     const aadObjectID = context.activity.from.aadObjectId;
-    console.log('\n*****MESSAGE_HANDLER.JS [DEBUG]: aad of user: ',aadObjectID );
+    //DEBUG_PATH: console.log('\n*****MESSAGE_HANDLER.JS [DEBUG]: aad of user: ',aadObjectID );
     
     if (isFromMSTeams(context)) {
         let chatPayload;
         if (!isFirstInteraction) {
             chatPayload = await getLast24HrInteractionPerUserFromDB(aadObjectID);
-            console.log("\n\n**MESSAGE_HANDLER.JS: This is NOT first interactiong using getLast24Hrs, meaning it will have a payload regardless, from first interaction...")
+            //DEBUG_PATH: console.log("\n\n**MESSAGE_HANDLER.JS: This is NOT first interactiong using getLast24Hrs, meaning it will have a payload regardless, from first interaction...")
         } else {
             chatPayload = chatMessagesUser;
-            console.log("\n\n**MESSAGE_HANDLER.JS: This IS first interactiong using chatMessageUser as normal...")
+            //DEBUG_PATH:  console.log("\n\n**MESSAGE_HANDLER.JS: This IS first interactiong using chatMessageUser as normal...")
         }
         // const chatResponse = await chatCompletion(chatPayload, pathConfig.personality, context.activity.channelId);
         const assistantResponse = await handleTeamsMessage(context, chatPayload, isFirstInteraction, propertyAccessor, pathConfig); // chatPayload used instead of chatMessagesUser.
@@ -34,7 +34,7 @@ async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstIntera
         chatMessagesUser.push({ role: "assistant", content: assistantResponse });
         await context.sendActivity(MessageFactory.text(assistantResponse));
         
-        console.log("\n\n**MESSAGE_HANDLER.JS (handleMessageFromMSTeams) payload: ",{context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig});
+        //DEBUG_PATH:  console.log("\n\n**MESSAGE_HANDLER.JS (handleMessageFromMSTeams) payload: ",{context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig});
         
         return true;
     }
@@ -45,7 +45,7 @@ async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstIntera
 async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts, botInvokedFlag, threadproperty, personality, pathConfig) { 	
     const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
         context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
-    console.log("\n\n**MESSAGE_HANDLER.JS: Current Slack thread timestamp: ", current_thread_ts);
+    //DEBUG_PATH:  console.log("\n\n**MESSAGE_HANDLER.JS: Current Slack thread timestamp: ", current_thread_ts);
 
     savedThread_ts = await threadproperty.get(context, "");
 
@@ -101,13 +101,13 @@ async function handleDefault(context, chatMessagesUser, personality) {
 
     // Continue with the rest of the function
     const chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
-    console.log(`\n\n***MESSAGE_HANDLER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
+    //DEBUG_PATH: console.log(`\n\n***MESSAGE_HANDLER.JS: assistant responded with: ${chatResponse.assistantResponse}`);
 
     // Add the assistant's response to chatMessagesUser
     chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
 
     await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
-    console.log("\n\n**MESSAGE_HANDLER.JS (handleDefault) payload: ", {context, chatMessagesUser, personality});
+    //DEBUG_PATH: console.log("\n\n**MESSAGE_HANDLER.JS (handleDefault) payload: ", {context, chatMessagesUser, personality});
     return true;
 }
         

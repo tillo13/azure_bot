@@ -71,10 +71,10 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 	//make this a global --> const checkMessage = "Let me check our past conversations in this exact thread, one moment....";
 	const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
 
-	console.log('\n\n***CHAT_HELPER.JS: Value of lastIndex variable: ', lastIndex); // This will show if we're even getting here...
+	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Value of lastIndex variable: ', lastIndex); // This will show if we're even getting here...
 
 	if (lastIndex > -1) {
-		console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
+		//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
 		const newResponses = [{
 				role: 'assistant',
 				content: `I could not find a suitable response to your latest message of: ${lastUserMessage}. Please respond with your conversation history to this point and I will investigate.`
@@ -84,7 +84,7 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 				content: `Certainly, here is what I have said so far. Here are your past conversations: ${cleanedFormattedMessages}. Based on this, can you answer this question: ${lastUserMessage}? If not, suggest a topic we have discussed already.`
 			}
 		];
-		console.log('New responses: ', newResponses);
+		//DEBUG_PATH: console.log('New responses: ', newResponses);
 		chatMessages.push(...newResponses);
 	}
 
@@ -136,8 +136,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		}
 	}
 
-	console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
-	console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
+	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
+	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
 
 	const endpoint = process.env.OPENAI_API_BASE_URL;
 	const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
@@ -188,7 +188,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		cleanConversation += `\n${index + 1}. ${role} : ${msg.content}\n`;
 	});
 
-	console.log('\n\n***CHAT_HELPER.JS -> new Entire conversation so far via chatmessages:\n', cleanConversation);
+	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS -> new Entire conversation so far via chatmessages:\n', cleanConversation);
 
 	// Count cleaned messages first
 	const oldChatMessages = JSON.stringify(chatMessages);
@@ -220,14 +220,14 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 	// Start interacting with OpenAI
 	try {
-		console.log("\n\n***CHAT_HELPER.JS:[DEBUG] newCleanChatMessages before OpenAI:", JSON.stringify(newCleanChatMessages));
+		//DEBUG_PATH: console.log("\n\n***CHAT_HELPER.JS:[DEBUG] newCleanChatMessages before OpenAI:", JSON.stringify(newCleanChatMessages));
 		//this won't work because this IS the place it is created -> console.log("\n\n***CHAT_HELPER.JS ->Result.id value (right after newCLeanChatMessages):", result.id);
 
 
 		let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
 			maxTokens: validatedTokens
 		});
-		console.log("\n\n[DEBUG] Result from OpenAI:", JSON.stringify(result));
+		//DEBUG_PATH: console.log("\n\n[DEBUG] Result from OpenAI:", JSON.stringify(result));
 
 		// Add result to global chatcmplHistory array 2023oct17
 		chatIdHistoryLog.push(result.id);
@@ -243,7 +243,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 		if (result && result.choices[0]?.message?.content) {
 			//debug for result.id: 
-			console.log("\n\n***CHAT_HELPER.JS ->Result.id value (after policy violation content filter):", result.id);
+			//DEBUG_PATH: console.log("\n\n***CHAT_HELPER.JS ->Result.id value (after policy violation content filter):", result.id);
 
 
 			// Check if assistant wants to requery message
@@ -306,12 +306,12 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 					newCleanChatMessages = Array.from(uniquePayload).map(JSON.parse);
 
 					if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
-						console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
+						//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
 						const newResponses = [{
 							role: 'assistant',
 							content: `Let me check our past conversations in this exact thread, one moment...`
 						}, ];
-						console.log('New responses: ', newResponses);
+						//DEBUG_PATH: console.log('New responses: ', newResponses);
 						newCleanChatMessages.push(...newResponses);
 
 						console.log("\n\n***CHAT_HELPER.JS: 'Let me check our past conversations...' added to newCleanChatMessages since it's not present in previous message");
@@ -458,7 +458,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 				console.error('\n\n***CHAT_HELPER.JS: Failed to save chat data to PostgreSQL. Error:', error);
 			}
 			//debug
-			console.log("\n\n***CHAT_HELPER.JS ->Result.id value (before final return statement):", result.id);
+			//DEBUG_PATH: console.log("\n\n***CHAT_HELPER.JS ->Result.id value (before final return statement):", result.id);
 
 			// Send response back to anything listening
 			return {

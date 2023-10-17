@@ -74,29 +74,29 @@ async function getAADObjectIdFromDB(chatID) {
         const formattedUserMessages = "In the last 24 hours, I have said the following with the approximate times they were mentioned: " + userMessagesinLast24hrswithapproximateTimessortedChronologically;
         
         // Print messages along with their approximate times
-        console.log("\n*******CHATGPT_UTILS.JS: Messages along with their approximate times: ", formattedUserMessages);
+        console.log("\n*******CHATGPT_UTILS.JS: last24 Messages along with their approximate times: ", formattedUserMessages);
         
         // Print the most recent user message in the last 24 hours and time it was received
         if (sortedResult.length > 0) {
-            console.log("\n*******CHATGPT_UTILS.JS: The most recent user message in the last 24 hours: ", sortedResult[sortedResult.length - 1].user_invoke_message);
-            console.log("\n*******CHATGPT_UTILS.JS: The most recent user message was received", sortedResult[sortedResult.length - 1].hourssincelastinteraction, "hours ago.");
+            console.log("\n*******CHATGPT_UTILS.JS: last24 The most recent user message in the last 24 hours: ", sortedResult[sortedResult.length - 1].user_invoke_message);
+            console.log("\n*******CHATGPT_UTILS.JS: last24 The most recent user message was received", sortedResult[sortedResult.length - 1].hourssincelastinteraction, "hours ago.");
         } else {
-            console.error("\n*******CHATGPT_UTILS.JS: No recent user message found in the last 24 hours");
+            console.error("\n*******CHATGPT_UTILS.JS: last 24No recent user message found in the last 24 hours");
         }
 
         // Print the oldest user message in the last 24 hours and time it was received
         if (sortedResult.length > 0) {
-            console.log("\n*******CHATGPT_UTILS.JS: The oldest user message in the last 24 hours: ", sortedResult[0].user_invoke_message);
-            console.log("\n*******CHATGPT_UTILS.JS: The oldest user message was received", sortedResult[0].hourssincelastinteraction, "hours ago.");
+            console.log("\n*******CHATGPT_UTILS.JS: last24 The oldest user message in the last 24 hours: ", sortedResult[0].user_invoke_message);
+            console.log("\n*******CHATGPT_UTILS.JS: last24 The oldest user message was received", sortedResult[0].hourssincelastinteraction, "hours ago.");
         } else {
-            console.error("\n*******CHATGPT_UTILS.JS: No oldest user message found in the last 24 hours.");
+            console.error("\n*******CHATGPT_UTILS.JS: last24 No oldest user message found in the last 24 hours.");
         }
 
-        console.log('\n\n***CHATGPT_UTILS.JS -> Last 24 Hr Interaction Data:', chatPayload);
+        console.log('\n\n***CHATGPT_UTILS.JS -> last24 Last 24 Hr Interaction Data:', chatPayload);
 
         return chatPayload;
     } catch (error) {
-        console.error("An error occurred while retrieving and formatting interactions ", error);
+        console.error("last24: An error occurred while retrieving and formatting interactions ", error);
     }
 }
 
@@ -159,11 +159,11 @@ async function recreateGptPayloadViaDB(aadObjectID) {
             }
         );
 
-        console.log('\n*******CHATGPT_UTILS.JS -> recreateGptPayloadViaDB The updated payload: ', chatPayload);
+        console.log('\n*******CHATGPT_UTILS.JS -> recreateGptPayloadViaDB updated payload: ', chatPayload);
         return chatPayload;
 
     } catch (error) {
-        console.error("\n*******CHATGPT_UTILS.JS: recreateGptPayloadViaDB An error occurred while recreating the payload: ", error);
+        console.error("\n*******CHATGPT_UTILS.JS: recreateGptPayloadViaDB -->an error occurred while recreating the payload: ", error);
         return null;
     }
 }

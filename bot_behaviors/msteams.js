@@ -13,7 +13,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
 
     try {
         chatMessagesUser = await getLast24HrInteractionPerUserFromDB(aadObjectID);
-        console.log('\n*****MSTEAMS.JS [DEBUG] last 24 hours:', chatMessagesUser);
+        //console.log('\n*****MSTEAMS.JS [DEBUG] last 24 hours:', chatMessagesUser);
     } catch (error) {
         console.error('\n*****MSTEAMS.JS [DEBUG] Failed to fetch interaction data:', error);
     }
@@ -36,7 +36,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
             assistantResponse = `Hey [${username}]!\nType *$help* for more info!\n----------------------\n`;
             const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
 
-            console.log('\n*****MSTEAMS.JS [DEBUG]: chatResponse data: ', chatResponse);
+            console.log('\n*****MSTEAMS.JS [DEBUG]: firstInteraction chatResponse data: ', chatResponse);
 
             assistantResponse += `${chatResponse.assistantResponse}`;
             chatMessagesUser = chatResponse.chats;
@@ -44,7 +44,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
         else {
             const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, false);
 
-            console.log('\n*****MSTEAMS.JS [DEBUG]: chatResponse data: ', chatResponse);
+            console.log('\n*****MSTEAMS.JS [DEBUG]: More than firstInteraction chatResponse data: ', chatResponse);
 
             assistantResponse = `${chatResponse.assistantResponse}`;
             chatMessagesUser = chatResponse.chats;
@@ -62,7 +62,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
 
                 const secondChatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, true);
 
-                console.log('\n*****MSTEAMS.JS [DEBUG]: secondChatResponse data: ', secondChatResponse);
+                console.log('\n*****MSTEAMS.JS [DEBUG]: letmecheck result --> secondChatResponse data: ', secondChatResponse);
 
                 assistantResponse = `${secondChatResponse.assistantResponse}`;
                 chatMessagesUser = secondChatResponse.chats;
