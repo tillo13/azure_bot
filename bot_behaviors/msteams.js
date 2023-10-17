@@ -50,7 +50,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
             chatMessagesUser = chatResponse.chats;
 
             if (chatResponse.letMeCheckFlag) {
-                const checkMessage = "Let me check our past conversations in this exact thread via msteams.js, one moment...";
+                const checkMessage = "Just a moment, I'm collecting (checking chat history) my thoughts...";
                 let checkMessageActivity = MessageFactory.text(checkMessage);
 
                 await context.sendActivity(checkMessageActivity);

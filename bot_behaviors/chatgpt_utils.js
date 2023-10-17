@@ -29,14 +29,20 @@ async function getAADObjectIdFromDB(chatID) {
     }
   }
 
-async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
+  async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
     try {
+        // Print the AAD Object ID
+        console.log("\n*******CHATGPT_UTILS.JS: AAD Object ID: ", aadObjectID);
+
         // fetch the last 24-hour interaction from the database
         const result = await fetchLast24HrInteractionPerUserFromDB(aadObjectID);
         
         // sort the interaction based on 'hourssincelastinteraction' in descending order
         const sortedResult = result.sort((a, b) => b.hourssincelastinteraction - a.hourssincelastinteraction);
         
+        // Print the sorted result
+        console.log("\n*******CHATGPT_UTILS.JS: Sorted result: ", sortedResult);
+
         // Define the initial system message
         const chatPayload = [
             {
@@ -74,8 +80,6 @@ async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
         console.log("\n*******CHATGPT_UTILS.JS: The oldest user message was received", sortedResult[0].hourssincelastinteraction, "hours ago.");
         console.log('\n\n***CHATGPT_UTILS.JS -> Last 24 Hr Interaction Data:', chatPayload);
 
-
-
         return chatPayload;
     } catch (error) {
         console.error("An error occurred while retrieving and formatting interactions ", error);
@@ -84,14 +88,23 @@ async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
 
 async function recreateGptPayloadViaDB(aadObjectID) {
     try {
+        // Log the AAD Object ID
+        console.log("\n*******CHATGPT_UTILS.JS: AAD Object ID: ", aadObjectID);
+
         // Fetch interaction details of the user from the database
         const last24HrInteraction = await getLast24HrInteractionPerUserFromDB(aadObjectID);
 
         // Process interaction details
         let userInvokeMessageArray = [];
-        last24HrInteraction.forEach(interaction => {
+        for (let interaction of last24HrInteraction) {
+            // Log the interaction detail
+            console.log("\n*******CHATGPT_UTILS.JS: Interaction detail: ", interaction);
+            
             userInvokeMessageArray.push(`[~${parseFloat(interaction.hourssincelastinteraction).toFixed(3)} hours ago: ${interaction.user_invoke_message}]`);
-        });
+        }
+
+        // Log the user invoke message array
+        console.log("\n*******CHATGPT_UTILS.JS: User invoke message array: ", userInvokeMessageArray);
 
         const userInvokeDiscussion = "Certainly, here is what I have said so far. Here are your past conversations: " + userInvokeMessageArray.join(', ');
 
@@ -99,7 +112,7 @@ async function recreateGptPayloadViaDB(aadObjectID) {
         const payload = [
             {
                 role: "system",
-                content: "You are a polite, sophisticated, chatbot assistant that always checks historic conversations before using other resources to find answers."
+                content: "You are a polite, sophisticated, chatbot assistant that always checks historic conversations before using other resources to find answers!"
             },
         ];
 
