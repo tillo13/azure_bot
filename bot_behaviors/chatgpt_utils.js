@@ -129,8 +129,10 @@ async function recreateGptPayloadViaDB(aadObjectID) {
             for(let index = 0 ; index < last24HrInteraction.length ; index++){
                 const interaction = last24HrInteraction[index];
                 console.log("\n*******CHATGPT_UTILS.JS: Processing Interaction detail ["+index+"]: ", interaction);
-                // assuming that each 'interaction' also contains the 'hourssincelastinteraction' property:
-                userInvokeMessageArray.push(`[~${parseFloat(interaction.hourssincelastinteraction).toFixed(3)} hours ago: ${interaction.content}]`);
+                // Check if 'hourssincelastinteraction' is a number before proceeding
+                if(!isNaN(interaction.hourssincelastinteraction)){
+                    userInvokeMessageArray.push(`[~${parseFloat(interaction.hourssincelastinteraction).toFixed(3)} hours ago: ${interaction.content}]`);
+                }
             }
             console.log("\n*******CHATGPT_UTILS.JS: User invoke message array: ", userInvokeMessageArray);
             userInvokeDiscussion = "Certainly, here is what I have said so far. Here are your past conversations: "+userInvokeMessageArray.join(', ');
@@ -153,10 +155,12 @@ async function recreateGptPayloadViaDB(aadObjectID) {
         console.log('\n*******CHATGPT_UTILS.JS: Adding interaction details to payload...');
         for(let interaction of last24HrInteraction){
             console.log("\n*******CHATGPT_UTILS.JS: Adding Interaction detail: ", interaction);
-            payload.push(
-                { role: "user", content: interaction.user_invoke_message },
-                { role: "assistant", content: interaction.bot_response_message }
-            );
+            if(interaction.user_invoke_message && interaction.bot_response_message) {
+                payload.push(
+                    { role: "user", content: interaction.user_invoke_message },
+                    { role: "assistant", content: interaction.bot_response_message }
+                );
+            }
         }
 
         // Fetch the latest user message and include in the payload
