@@ -12,23 +12,31 @@ const {
 const chatCompletion = require('./chat_helper');
 
 async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
-
     // Debug log
-const aadObjectID = context.activity.from.aadObjectId;
-console.log('\n*****MESSAGE_HANDLER.JS [DEBUG]: aad of user: ',aadObjectID );
-
-
-
+    const aadObjectID = context.activity.from.aadObjectId;
+    console.log('\n*****MESSAGE_HANDLER.JS [DEBUG]: aad of user: ',aadObjectID );
+    
     if (isFromMSTeams(context)) {
-        const assistantResponse = await handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig);
+        let chatPayload;
+        if (!isFirstInteraction) {
+            chatPayload = await getLast24HrInteractionPerUserFromDB(aadObjectID);
+            console.log("\n\n**MESSAGE_HANDLER.JS: This is NOT first interactiong using getLast24Hrs...")
+        } else {
+            chatPayload = chatMessagesUser;
+            console.log("\n\n**MESSAGE_HANDLER.JS: This IS first interactiong using chatMessageUser as normal...")
+        }
+        // const chatResponse = await chatCompletion(chatPayload, pathConfig.personality, context.activity.channelId);
+        const assistantResponse = await handleTeamsMessage(context, chatPayload, isFirstInteraction, propertyAccessor, pathConfig); // chatPayload used instead of chatMessagesUser.
+
         // Add the assistant's response to chatMessagesUser
         chatMessagesUser.push({ role: "assistant", content: assistantResponse });
         await context.sendActivity(MessageFactory.text(assistantResponse));
+        
+        console.log("\n\n**MESSAGE_HANDLER.JS (handleMessageFromMSTeams) payload: ",{context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig});
+        
         return true;
     }
-    console.log("\n\n**MESSAGE_HANDLER.JS (handleMessageFromMSTeams) payload: ",{context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig});
-    return false
-
+    return false;
 }
 
 
