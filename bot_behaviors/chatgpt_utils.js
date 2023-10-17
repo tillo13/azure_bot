@@ -4,9 +4,30 @@ const {
 } = require('../utilities/postgres_utils');
 
 async function getAADObjectIdFromDB(chatID) {
-    const result = await fetchAADObjectIdFromDB(chatID);
-    return result;
-}
+    if (Array.isArray(chatID)) {
+      console.log("\n*******CHATGPT_UTILS.JS: Detected an array of chatIDs");
+      for (const id of chatID) {
+        const result = await fetchAADObjectIdFromDB(id);
+        if (result && result.length > 0) {
+          console.log(`\n*******CHATGPT_UTILS.JS: Found a match in the database for chatID: ${id}`);
+          return result;
+        }
+      }
+      console.log("\n*******CHATGPT_UTILS.JS: No match found in the database for any chatIDs in the given array");
+      return [];
+    } else {
+      console.log("***CHATGPT_UTILS.JS: Detected a single chatID");
+      const result = await fetchAADObjectIdFromDB(chatID);
+  
+      if(result && result.length > 0){
+          console.log(`\n*******CHATGPT_UTILS.JS: Found a match in the database for chatID: ${chatID}`);
+      }else{
+          console.log("\n*******CHATGPT_UTILS.JS:: No match found in the database for the given chatID");
+      }
+  
+      return result;
+    }
+  }
 
 async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
     try {
@@ -100,11 +121,11 @@ async function recreateGptPayloadViaDB(aadObjectID) {
         );
 
         // Output the final payload
-        console.log('*******CHATGPT_UTILS.JS -> The final payload: ', payload);
+        console.log('\n*******CHATGPT_UTILS.JS -> The final recreated payload: ', payload);
 
         return payload;
     } catch (error) {
-        console.error("An error occurred while recreating the payload: ", error);
+        console.error("\n*******CHATGPT_UTILS.JS: An error occurred while recreating the payload: ", error);
         return null;
     }
 }
