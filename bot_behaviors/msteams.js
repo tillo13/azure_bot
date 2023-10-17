@@ -4,6 +4,11 @@ const chatCompletion = require('./chat_helper');
 async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
     console.log('\n*****MSTEAMS.JS: Preparing to handle a message from MS Teams');
     
+    // Debug logs
+    console.log('\n*****MSTEAMS.JS [DEBUG]: context data: ', context);
+    console.log('\n*****MSTEAMS.JS [DEBUG]: chatMessagesUser data: ', chatMessagesUser);
+    console.log('\n*****MSTEAMS.JS [DEBUG]: isFirstInteraction data: ', isFirstInteraction);
+
     if (!chatMessagesUser.some(item => item.role === "user" && item.content === context.activity.text)) {
         chatMessagesUser.push({
             role: "user",
@@ -14,6 +19,9 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
     }
     
     const username = context.activity.from.name;
+
+    // Debug log
+    console.log('\n*****MSTEAMS.JS [DEBUG]: username data: ', username);
     
     let assistantResponse = '';
     
@@ -21,27 +29,26 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
         console.log('\n*****MSTEAMS.JS: This is the first user interaction');
         assistantResponse = `Hey [${username}]!\nType *$help* for more info!\n----------------------\n`;
         const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
+        
+        // Debug log
+        console.log('\n*****MSTEAMS.JS [DEBUG]: chatResponse data: ', chatResponse);
+
         assistantResponse += `${chatResponse.assistantResponse}`;
-        chatMessagesUser = chatResponse.chats; // 
+        chatMessagesUser = chatResponse.chats;
     }
     else {
         const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, false);
+        
+        // Debug log
+        console.log('\n*****MSTEAMS.JS [DEBUG]: chatResponse data: ', chatResponse);
 
-        console.log('\n****MSTEAMS.JS: chatResponse:', {
-            assistantResponse: chatResponse.assistantResponse,
-            requery: chatResponse.requery,
-            letMeCheckFlag: chatResponse.letMeCheckFlag
-        });
-    
         assistantResponse = `${chatResponse.assistantResponse}`;
         chatMessagesUser = chatResponse.chats;
     
         if (chatResponse.letMeCheckFlag) {
-            const checkMessage = "Let me check our past conversations in this exact thread vis msteams.js, one moment...";
+            const checkMessage = "Let me check our past conversations in this exact thread via msteams.js, one moment...";
             let checkMessageActivity = MessageFactory.text(checkMessage);
-    
-            //console.log('\n*****MSTEAMS.JS: Sending Check Message:', checkMessageActivity); 
-    
+        
             await context.sendActivity(checkMessageActivity);
             
             chatMessagesUser.push({
@@ -50,6 +57,10 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
             });
     
             const secondChatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, true);
+            
+            // Debug log
+            console.log('\n*****MSTEAMS.JS [DEBUG]: secondChatResponse data: ', secondChatResponse);
+
             assistantResponse = `${secondChatResponse.assistantResponse}`;
             chatMessagesUser = secondChatResponse.chats; 
         }
@@ -59,10 +70,11 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
         propertyAccessor.set(context, false);
     }
     
-    //console.log('\n*****MSTEAMS.JS: Assistant Response: ', assistantResponse);
     return assistantResponse;
 }
+
 function isFromMSTeams(context) {
     return context.activity.channelId === 'msteams';
 }
+
 module.exports = { isFromMSTeams, handleTeamsMessage };
