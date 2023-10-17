@@ -338,6 +338,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 					try {
 						console.log('\n\n***CHAT_HELPER.JS_TRYPATH Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages);
+						console.log("\n\n***CHAT_HELPER.JS: TRYPATH running chatIdHistoryLog: ",chatIdHistoryLog);
 						console.log("\n\n***CHAT_HELPER.JS_TRYPATH ->Result.id value (before secondary request to OpenAI):", result.id);
 						let rebuiltPayloadViaDB = [];
 						try {
