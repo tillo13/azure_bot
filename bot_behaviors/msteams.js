@@ -5,9 +5,9 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
     console.log('\n*****MSTEAMS.JS: Preparing to handle a message from MS Teams');
     
     // Debug logs
-    console.log('\n*****MSTEAMS.JS [DEBUG]: context data: ', context);
-    console.log('\n*****MSTEAMS.JS [DEBUG]: chatMessagesUser data: ', chatMessagesUser);
-    console.log('\n*****MSTEAMS.JS [DEBUG]: isFirstInteraction data: ', isFirstInteraction);
+    // console.log('\n*****MSTEAMS.JS [DEBUG]: context data: ', context);
+    // console.log('\n*****MSTEAMS.JS [DEBUG]: chatMessagesUser data: ', chatMessagesUser);
+    // console.log('\n*****MSTEAMS.JS [DEBUG]: isFirstInteraction data: ', isFirstInteraction);
 
     if (!chatMessagesUser.some(item => item.role === "user" && item.content === context.activity.text)) {
         chatMessagesUser.push({
@@ -19,9 +19,11 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
     }
     
     const username = context.activity.from.name;
-
+    const aadObjectID = context.activity.from.aadObjectId;
+    
     // Debug log
     console.log('\n*****MSTEAMS.JS [DEBUG]: username data: ', username);
+    console.log('\n*****MSTEAMS.JS [DEBUG]: aad of user: ',aadObjectID );
     
     let assistantResponse = '';
     
@@ -40,7 +42,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
         const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, false);
         
         // Debug log
-        console.log('\n*****MSTEAMS.JS [DEBUG]: chatResponse data: ', chatResponse);
+        //console.log('\n*****MSTEAMS.JS [DEBUG]: chatResponse data: ', chatResponse);
 
         assistantResponse = `${chatResponse.assistantResponse}`;
         chatMessagesUser = chatResponse.chats;
