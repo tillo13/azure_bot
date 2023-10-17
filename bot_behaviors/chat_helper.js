@@ -5,7 +5,8 @@ const {
 
 const {
 	getAADObjectIdFromDB,
-	getLast24HrInteractionPerUserFromDB
+	getLast24HrInteractionPerUserFromDB,
+	recreateGptPayloadViaDB
 } = require('./chatgpt_utils');
 
 const {
