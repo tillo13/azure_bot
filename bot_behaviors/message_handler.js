@@ -11,6 +11,8 @@ const {
 } = require('./msteams');
 const chatCompletion = require('./chat_helper');
 
+const { getLast24HrInteractionPerUserFromDB } = require('./chatgpt_utils');
+
 async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
     // Debug log
     const aadObjectID = context.activity.from.aadObjectId;
@@ -20,7 +22,7 @@ async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstIntera
         let chatPayload;
         if (!isFirstInteraction) {
             chatPayload = await getLast24HrInteractionPerUserFromDB(aadObjectID);
-            console.log("\n\n**MESSAGE_HANDLER.JS: This is NOT first interactiong using getLast24Hrs...")
+            console.log("\n\n**MESSAGE_HANDLER.JS: This is NOT first interactiong using getLast24Hrs, meaning it will have a payload regardless, from first interaction...")
         } else {
             chatPayload = chatMessagesUser;
             console.log("\n\n**MESSAGE_HANDLER.JS: This IS first interactiong using chatMessageUser as normal...")
