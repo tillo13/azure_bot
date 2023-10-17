@@ -328,36 +328,36 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 
 					try {
-						console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages);
-						console.log("\n\n***CHAT_HELPER.JS ->Result.id value (before secondary request to OpenAI):", result.id);
+						console.log('\n\n***CHAT_HELPER.JS_TRYPATH Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages);
+						console.log("\n\n***CHAT_HELPER.JS_TRYPATH ->Result.id value (before secondary request to OpenAI):", result.id);
 						let rebuiltPayloadViaDB = [];
 						try {
 						  let AadObjectId = await getAADObjectIdFromDB(result.id);
-						  console.log('\n\n***CHAT_HELPER.JS ->AAD Object ID we will query:', AadObjectId);
+						  console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->AAD Object ID we will query:', AadObjectId);
 						  if (AadObjectId.length > 0) {
 							let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
-							console.log('\n\n***CHAT_HELPER.JS ->Swapping newCleanChatMessages for last24HrInteractionData...');
-							console.log('\n\n***CHAT_HELPER.JS ->Last 24 Hr Interaction Data:', last24HrInteractionData);
+							console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Swapping newCleanChatMessages for last24HrInteractionData...');
+							console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Last 24 Hr Interaction Data:', last24HrInteractionData);
 							newCleanChatMessages = last24HrInteractionData;
 							
 							// Call the recreateGptPayloadViaDB function and store the result in rebuiltPayloadViaDB
 						   rebuiltPayloadViaDB = await recreateGptPayloadViaDB(AadObjectId[0].msteam_recipient_aad_object_id);
 						  }
 						} catch  {
-						  console.error('\n\n***CHAT_HELPER.JS -> Error fetching data from DB:', error);
+						  console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> Error fetching data from DB:', error);
 						}
 					   
 						result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
-						console.log("\n\n***CHAT_HELPER.JS ->Result.id value (after secondary request to OpenAI):", result.id);
+						console.log("\n\n***CHAT_HELPER.JS_TRYPATH ->Result.id value (after secondary request to OpenAI):", result.id);
 					   
 						//console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
-						console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
+						console.log('\n\n***CHAT_HELPER.JS_TRYPATH: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
 					   
 						// Log the rebuiltPayloadViaDB
-						console.log('\n\n***CHAT_HELPER.JS: Most up to date payload via DB recreation: ', rebuiltPayloadViaDB);
+						console.log('\n\n***CHAT_HELPER.JS_TRYPATHS: Most up to date payload via DB recreation: ', rebuiltPayloadViaDB);
 					   
 					   } catch (error) {
-						console.error('\n\n***CHAT_HELPER.JS -> An error occurred during communication with OpenAI: ', error);
+						console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> An error occurred during communication with OpenAI: ', error);
 					   }
 
 
