@@ -12,6 +12,13 @@ const {
 const chatCompletion = require('./chat_helper');
 
 async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
+
+    // Debug log
+const aadObjectID = context.activity.from.aadObjectId;
+console.log('\n*****MESSAGE_HANDLER.JS [DEBUG]: aad of user: ',aadObjectID );
+
+
+
     if (isFromMSTeams(context)) {
         const assistantResponse = await handleTeamsMessage(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig);
         // Add the assistant's response to chatMessagesUser
@@ -20,7 +27,8 @@ async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstIntera
         return true;
     }
     console.log("\n\n**MESSAGE_HANDLER.JS (handleMessageFromMSTeams) payload: ",{context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig});
-    return false;
+    return false
+
 }
 
 
