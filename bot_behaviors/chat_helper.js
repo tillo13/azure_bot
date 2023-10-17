@@ -1,9 +1,12 @@
 const {
 	chatHelperSaveDataToPostgres,
-  } = require('../utilities/postgres_utils');
+} = require('../utilities/postgres_utils');
 
 
-const { getAADObjectIdFromDB, getLast24HrInteractionPerUserFromDB } = require('./chatgpt_utils');
+const {
+	getAADObjectIdFromDB,
+	getLast24HrInteractionPerUserFromDB
+} = require('./chatgpt_utils');
 
 const {
 	OpenAIClient,
@@ -84,18 +87,6 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 	return chatMessages;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 let chatHistory = [];
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 
@@ -143,22 +134,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 	console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
 	console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
-
-	//test that db saves would work from this channel: 
-	// v1 works: postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId}, channelId, 'chat_helper.js');
-	//v2 works: postgres_utils.botInteractionSaveDataToPostgres({type: 'message', id: channelId, conversation_id : channelId}, channelId, 'chat_helper.js');
-
-
-
-
-	//console.log('\n\n***CHAT_HELPER.JS: OpenAI API Base URL: ', process.env.OPENAI_API_BASE_URL);
-	//console.log('\n\n***CHAT_HELPER.JS: OpenAI API Deployment: ', process.env.OPENAI_API_DEPLOYMENT);
-
-	///test dalle items showing in .env
-	//console.log('\n\n***CHAT_HELPER.JS: OpenAI DallE API Base URL: ', process.env.OPENAI_DALLE_BASE_URL);
-	//console.log('\n\n***CHAT_HELPER.JS: OpenAI DallE API Deployment: ', process.env.OPENAI_DALLE_VERSION);
-
-
 
 	const endpoint = process.env.OPENAI_API_BASE_URL;
 	const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
@@ -243,7 +218,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	try {
 		console.log("\n\n***CHAT_HELPER.JS:[DEBUG] newCleanChatMessages before OpenAI:", JSON.stringify(newCleanChatMessages));
 
-		//console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI: ', newCleanChatMessages);
 		let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
 			maxTokens: validatedTokens
 		});
@@ -257,9 +231,15 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		}
 
 		if (result && result.choices[0]?.message?.content) {
+			//debug for result.id: 
+			console.log("\n\n***CHAT_HELPER.JS ->Result.id value (after policy violation content filter):", result.id);
+
 			// Check if assistant wants to requery message
 			let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
 			let assistantResponse = result.choices[0].message.content;
+
+			//debug
+			console.log("\n\n***CHAT_HELPER.JS ->Result.id value (after response and cost calculations):", result.id);
 
 			// Add the assistant response to newCleanChatMessages array
 			newCleanChatMessages.push({
@@ -305,6 +285,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			console.log('\n\n***CHAT_HELPER.JS: if GPT-4, the cost is:', formatCost(gpt4Cost));
 
 			if (letMeCheckFlag) {
+				//debug
+				console.log("\n\n***CHAT_HELPER.JS ->Result.id value (within first letMeCheckFlag conditional):", result.id);
 				console.log('\n\n***CHAT_HELPER.JS: Entered the letMeCheckFlag "true" condition.');
 				if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
 					let newPayload = newCleanChatMessages.filter(item => !item.content.startsWith('Certainly'));
@@ -330,16 +312,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 					console.log("\n\n***CHAT_HELPER.JS:[DEBUG] newCleanChatMessages after formatChatPayload():", JSON.stringify(newCleanChatMessages));
 
 
-
-
-
-
 					chatHistory = newCleanChatMessages;
-
-
-
-
-
 
 					//console.log('\n\n***CHAT_HELPER.JS: After running formatChatPayload(), newCleanChatMessages is now: ', newCleanChatMessages); 
 
@@ -352,6 +325,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 						result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
 							maxTokens: validatedTokens
 						});
+						//debug
+						console.log("\n\n***CHAT_HELPER.JS ->Result.id value (after secondary request to OpenAI):", result.id);
+
 						//console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
 						console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
 
@@ -394,6 +370,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 				};
 				await chatHelperSaveDataToPostgres(dataToSave);
 				console.log('\n\n***CHAT_HELPER.JS: Chat data saved successfully to PostgreSQL!');
+
 				///////2023oct16 114pm push to move to db instead of in thread: 
 				// Fetch and print conversation history from database
 				try {
@@ -411,6 +388,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			} catch (error) {
 				console.error('\n\n***CHAT_HELPER.JS: Failed to save chat data to PostgreSQL. Error:', error);
 			}
+			//debug
+			console.log("\n\n***CHAT_HELPER.JS ->Result.id value (before final return statement):", result.id);
 
 			// Send response back to anything listening
 			return {
@@ -419,6 +398,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 				'letMeCheckFlag': letMeCheckFlag,
 				'chats': newCleanChatMessages
 			};
+		
 		} else {
 			console.log('\n\n***CHAT_HELPER.JS: No content in API response');
 			return {
@@ -434,4 +414,3 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	}
 }
 module.exports = chatCompletion;
-//module.exports = { chatCompletion, chatHistory };
