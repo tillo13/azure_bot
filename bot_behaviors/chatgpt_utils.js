@@ -88,12 +88,12 @@ async function recreateGptPayloadViaDB(aadObjectID) {
         const last24HrInteraction = await getLast24HrInteractionPerUserFromDB(aadObjectID);
 
         // Process interaction details
-        let userMessagesArray = [];
-        last24HrInteraction.forEach(message => {
-            userMessagesArray.push(`[~${parseFloat(message.hourssincelastinteraction).toFixed(3)} hours ago: ${message.user_invoke_message}]`);
+        let userInvokeMessageArray = [];
+        last24HrInteraction.forEach(interaction => {
+            userInvokeMessageArray.push(`[~${parseFloat(interaction.hourssincelastinteraction).toFixed(3)} hours ago: ${interaction.user_invoke_message}]`);
         });
 
-        const userMessagesDiscussion = "Certainly, here is what I have said so far. Here are your past conversations: " + userMessagesArray.join(', ');
+        const userInvokeDiscussion = "Certainly, here is what I have said so far. Here are your past conversations: " + userInvokeMessageArray.join(', ');
 
         // Structure the payload as required
         const payload = [
@@ -115,9 +115,9 @@ async function recreateGptPayloadViaDB(aadObjectID) {
         let latestUserMessage = last24HrInteraction[last24HrInteraction.length - 1].user_invoke_message;
 
         payload.push(
-            { role: "assistant", content: 'Let me check our past conversations in this exact thread, one moment...' },
+            { role: "assistant", content: 'Let me check our past conversations in this exact gpt thread, one moment...' },
             { role: "assistant", content: `I could not find a suitable response to your latest message of: ${latestUserMessage}. Please respond with your conversation history to this point and I will investigate.` },
-            { role: "user", content: userMessagesDiscussion}
+            { role: "user", content: userInvokeDiscussion }
         );
 
         // Output the final payload
