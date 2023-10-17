@@ -216,11 +216,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 	// Start interacting with OpenAI
 	try {
-		if (result.id) {
-			console.log("\n\n***CHAT_HELPER.JS:[DEBUG] result.id IS populated in first chatCompletion call");
-		} else {
-			console.log("\n\n***CHAT_HELPER.JS:[DEBUG] result.id NOT populated yet in first chatCompletion call");
-		}
 		console.log("\n\n***CHAT_HELPER.JS:[DEBUG] newCleanChatMessages before OpenAI:", JSON.stringify(newCleanChatMessages));
 		//this won't work because this IS the place it is created -> console.log("\n\n***CHAT_HELPER.JS ->Result.id value (right after newCLeanChatMessages):", result.id);
 
@@ -328,17 +323,22 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 					}
 
 					try {
-						console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages); 
-						//debug
-						if (result.id) {
-							console.log("\n\n***CHAT_HELPER.JS:[DEBUG] result.id IS populated in second chatCompletion call");
-						} else {
-							console.log("\n\n***CHAT_HELPER.JS:[DEBUG] result.id NOT populated yet in second chatCompletion call");
+						console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages);
+						console.log("\n\n***CHAT_HELPER.JS ->Result.id value (before secondary request to OpenAI):", result.id);
+						try {
+						  let AadObjectId = await getAADObjectIdFromDB(result.id);
+						  console.log('\n\n***CHAT_HELPER.JS ->AAD Object ID we will query:', AadObjectId);
+						  if (AadObjectId.length > 0) {
+							let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
+							console.log('\n\n***CHAT_HELPER.JS ->Last 24 Hr Interaction Data:', last24HrInteractionData);
+							console.log('\n\n***CHAT_HELPER.JS ->Swapping newCleanChatMessages for last24HrInteractionData...');
+							newCleanChatMessages = last24HrInteractionData;
+						  }
+						} catch  {
+						  console.error('\n\n***CHAT_HELPER.JS -> Error fetching data from DB:', error);
 						}
-						result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
-							maxTokens: validatedTokens
-						});
-						//debug
+					  
+						result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
 						console.log("\n\n***CHAT_HELPER.JS ->Result.id value (after secondary request to OpenAI):", result.id);
 
 						//console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
