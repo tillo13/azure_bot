@@ -11,6 +11,9 @@ const {
 } = require('./msteams');
 const chatCompletion = require('./chat_helper');
 
+const { fetchConversationHistory } = require('./slack_utils');
+
+
 const { getLast24HrInteractionPerUserFromDB } = require('./chatgpt_utils');
 
 async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
