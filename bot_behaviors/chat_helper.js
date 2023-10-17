@@ -216,6 +216,11 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 	// Start interacting with OpenAI
 	try {
+		if (result.id) {
+			console.log("\n\n***CHAT_HELPER.JS:[DEBUG] result.id IS populated in first chatCompletion call");
+		} else {
+			console.log("\n\n***CHAT_HELPER.JS:[DEBUG] result.id NOT populated yet in first chatCompletion call");
+		}
 		console.log("\n\n***CHAT_HELPER.JS:[DEBUG] newCleanChatMessages before OpenAI:", JSON.stringify(newCleanChatMessages));
 		//this won't work because this IS the place it is created -> console.log("\n\n***CHAT_HELPER.JS ->Result.id value (right after newCLeanChatMessages):", result.id);
 
@@ -323,7 +328,13 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 					}
 
 					try {
-						//console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages); 
+						console.log('\n\n***CHAT_HELPER.JS: Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages); 
+						//debug
+						if (result.id) {
+							console.log("\n\n***CHAT_HELPER.JS:[DEBUG] result.id IS populated in second chatCompletion call");
+						} else {
+							console.log("\n\n***CHAT_HELPER.JS:[DEBUG] result.id NOT populated yet in second chatCompletion call");
+						}
 						result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
 							maxTokens: validatedTokens
 						});
