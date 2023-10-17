@@ -580,7 +580,7 @@ async function fetchLast24HrInteractionPerUserFromDB(aadObjectID) {
     const query = `SELECT user_interacting, hourssincelastinteraction, user_invoke_message, bot_response_message 
     FROM vw_msteams_conversation_threads 
     WHERE msteam_recipient_aad_object_id = $1 
-    AND inlast24hrs =true LIMIT 3`;
+    AND inlast24hrs =true LIMIT 10`;
     const result = await pool.query(query, [aadObjectID]);
     return result.rows;
 }
