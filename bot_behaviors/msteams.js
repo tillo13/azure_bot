@@ -44,7 +44,7 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
         else {
             const chatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, false);
 
-            console.log('\n*****MSTEAMS.JS [DEBUG]: More than firstInteraction chatResponse data: ', chatResponse);
+            console.log('\n*****MSTEAMS.JS [DEBUG]: NOT firstInteraction chatResponse data: ', chatResponse);
 
             assistantResponse = `${chatResponse.assistantResponse}`;
             chatMessagesUser = chatResponse.chats;

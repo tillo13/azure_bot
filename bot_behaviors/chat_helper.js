@@ -231,7 +231,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 		// Add result to global chatcmplHistory array 2023oct17
 		chatIdHistoryLog.push(result.id);
-		console.log("\n\n***CHAT_HELPER.JS running chatIdHistoryLog: ",chatIdHistoryLog);
+		//DEBUG_PATH moved to TRYPATH console.log("\n\n***CHAT_HELPER.JS running chatIdHistoryLog: ",chatIdHistoryLog);
 
 
 		// did it hit a content policy violation?
@@ -374,7 +374,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 							if (AadObjectId.length > 0) {
 								let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
 								console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Swapping newCleanChatMessages for last24HrInteractionData...');
-								console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Last 24 Hr Interaction Data:', last24HrInteractionData);
+								console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Last 24 Hr Interaction Data received from CHATGPT_UTILS.JS');
 								newCleanChatMessages = last24HrInteractionData;
 					
 								// Call the recreateGptPayloadViaDB function and store the result in rebuiltPayloadViaDB
@@ -407,7 +407,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 				}
 			}
-			console.log('\n\n***CHAT_HELPER.JS: Response from OpenAI API:\n', JSON.stringify(result));
+			console.log('\n\n***CHAT_HELPER.JS: Response from OpenAI API with id:\n', JSON.stringify(result.id));
 			console.log('\n\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
 			console.log('\n\n***CHAT_HELPER.JS: Is the response from chatGPT including one of the [bot_response] patterns?', bot_response_patterns.some(pattern => result.choices[0].message.content.toLowerCase().includes(pattern.toLowerCase())));
 
@@ -438,7 +438,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 					chat_gpt4_cost_estimate: gpt4Cost,
 				};
 				await chatHelperSaveDataToPostgres(dataToSave);
-				console.log('\n\n***CHAT_HELPER.JS: Chat data saved successfully to PostgreSQL!');
+				console.log('\n\n***CHAT_HELPER.JS: chatHelperSaveDataToPostgres saved successfully to PostgreSQL!');
 
 				///////2023oct16 114pm push to move to db instead of in thread: 
 				// Fetch and print conversation history from database
