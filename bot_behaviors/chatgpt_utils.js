@@ -31,18 +31,18 @@ async function getAADObjectIdFromDB(chatID) {
 
   async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
     try {
-        // Print the AAD Object ID
-        console.log("\n*******CHATGPT_UTILS.JS: AAD Object ID: ", aadObjectID);
-
         // fetch the last 24-hour interaction from the database
         const result = await fetchLast24HrInteractionPerUserFromDB(aadObjectID);
         
+        // If no records were found, handle gracefully
+        if (result.length === 0) {
+            console.error("\n*******CHATGPT_UTILS.JS: No interactions found in last 24 hours for the user.");
+            return [];
+        }
+
         // sort the interaction based on 'hourssincelastinteraction' in descending order
         const sortedResult = result.sort((a, b) => b.hourssincelastinteraction - a.hourssincelastinteraction);
         
-        // Print the sorted result
-        console.log("\n*******CHATGPT_UTILS.JS: Sorted result: ", sortedResult);
-
         // Define the initial system message
         const chatPayload = [
             {
@@ -72,12 +72,26 @@ async function getAADObjectIdFromDB(chatID) {
         // Join each message and interaction time with ', ' to create the final string
         const userMessagesinLast24hrswithapproximateTimessortedChronologically = userMessagesArray.join(', ');
         const formattedUserMessages = "In the last 24 hours, I have said the following with the approximate times they were mentioned: " + userMessagesinLast24hrswithapproximateTimessortedChronologically;
+        
+        // Print messages along with their approximate times
         console.log("\n*******CHATGPT_UTILS.JS: Messages along with their approximate times: ", formattedUserMessages);
         
-        console.log("\n*******CHATGPT_UTILS.JS: The most recent user message in the last 24 hours: ", sortedResult[sortedResult.length - 1].user_invoke_message);
-        console.log("\n*******CHATGPT_UTILS.JS: The most recent user message was received", sortedResult[sortedResult.length - 1].hourssincelastinteraction, "hours ago.");
-        console.log("\n*******CHATGPT_UTILS.JS: The oldest user message in the last 24 hours: ", sortedResult[0].user_invoke_message);
-        console.log("\n*******CHATGPT_UTILS.JS: The oldest user message was received", sortedResult[0].hourssincelastinteraction, "hours ago.");
+        // Print the most recent user message in the last 24 hours and time it was received
+        if (sortedResult.length > 0) {
+            console.log("\n*******CHATGPT_UTILS.JS: The most recent user message in the last 24 hours: ", sortedResult[sortedResult.length - 1].user_invoke_message);
+            console.log("\n*******CHATGPT_UTILS.JS: The most recent user message was received", sortedResult[sortedResult.length - 1].hourssincelastinteraction, "hours ago.");
+        } else {
+            console.error("\n*******CHATGPT_UTILS.JS: No recent user message found in the last 24 hours");
+        }
+
+        // Print the oldest user message in the last 24 hours and time it was received
+        if (sortedResult.length > 0) {
+            console.log("\n*******CHATGPT_UTILS.JS: The oldest user message in the last 24 hours: ", sortedResult[0].user_invoke_message);
+            console.log("\n*******CHATGPT_UTILS.JS: The oldest user message was received", sortedResult[0].hourssincelastinteraction, "hours ago.");
+        } else {
+            console.error("\n*******CHATGPT_UTILS.JS: No oldest user message found in the last 24 hours.");
+        }
+
         console.log('\n\n***CHATGPT_UTILS.JS -> Last 24 Hr Interaction Data:', chatPayload);
 
         return chatPayload;
@@ -88,25 +102,32 @@ async function getAADObjectIdFromDB(chatID) {
 
 async function recreateGptPayloadViaDB(aadObjectID) {
     try {
-        // Log the AAD Object ID
         console.log("\n*******CHATGPT_UTILS.JS: AAD Object ID: ", aadObjectID);
 
         // Fetch interaction details of the user from the database
         const last24HrInteraction = await getLast24HrInteractionPerUserFromDB(aadObjectID);
 
-        // Process interaction details
-        let userInvokeMessageArray = [];
-        for (let interaction of last24HrInteraction) {
-            // Log the interaction detail
-            console.log("\n*******CHATGPT_UTILS.JS: Interaction detail: ", interaction);
-            
-            userInvokeMessageArray.push(`[~${parseFloat(interaction.hourssincelastinteraction).toFixed(3)} hours ago: ${interaction.user_invoke_message}]`);
+        if (!last24HrInteraction || last24HrInteraction.length === 0) {
+            console.log("\n*******CHATGPT_UTILS.JS: No interactions found in the last 24 hours for the provided AAD Object ID.");
+            return [];
         }
 
-        // Log the user invoke message array
-        console.log("\n*******CHATGPT_UTILS.JS: User invoke message array: ", userInvokeMessageArray);
+        let userInvokeDiscussion;
 
-        const userInvokeDiscussion = "Certainly, here is what I have said so far. Here are your past conversations: " + userInvokeMessageArray.join(', ');
+        // Process interaction details
+        if(last24HrInteraction.length > 0){
+            let userInvokeMessageArray = [];
+            for(let interaction of last24HrInteraction){
+                console.log("\n*******CHATGPT_UTILS.JS: Interaction detail: ", interaction);
+                userInvokeMessageArray.push(`[~${parseFloat(interaction.hourssincelastinteraction).toFixed(3)} hours ago: ${interaction.user_invoke_message}]`);
+            }
+            console.log("\n*******CHATGPT_UTILS.JS: User invoke message array: ", userInvokeMessageArray);
+            userInvokeDiscussion = "Certainly, here is what I have said so far. Here are your past conversations: "+userInvokeMessageArray.join(', ');
+
+        } else {
+            userInvokeDiscussion = "Certainly, there are no past conversations in the last 24 hours.";
+        }
+
 
         // Structure the payload as required
         const payload = [
@@ -117,7 +138,7 @@ async function recreateGptPayloadViaDB(aadObjectID) {
         ];
 
         // Add interaction details to the payload
-        for (let interaction of last24HrInteraction) {
+        for(let interaction of last24HrInteraction){
             payload.push(
                 { role: "user", content: interaction.user_invoke_message },
                 { role: "assistant", content: interaction.bot_response_message }
@@ -133,10 +154,9 @@ async function recreateGptPayloadViaDB(aadObjectID) {
             { role: "user", content: userInvokeDiscussion }
         );
 
-        // Output the final payload
         console.log('\n*******CHATGPT_UTILS.JS -> The final recreated payload: ', payload);
-
         return payload;
+
     } catch (error) {
         console.error("\n*******CHATGPT_UTILS.JS: An error occurred while recreating the payload: ", error);
         return null;
