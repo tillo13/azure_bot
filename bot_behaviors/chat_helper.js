@@ -54,7 +54,7 @@ const bot_response_patterns = [
 	// Include any more patterns...
 ];
 
-let chatcmplHistory = []; // Global usage of array
+let chatIdHistoryLog = []; // Global usage of array
 
 
 function shouldRequery(responseContent) {
@@ -226,29 +226,24 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
 			maxTokens: validatedTokens
 		});
-		//console.log("\n\n[DEBUG] Result from OpenAI:", JSON.stringify(result));
+		console.log("\n\n[DEBUG] Result from OpenAI:", JSON.stringify(result));
+
+		// Add result to global chatcmplHistory array 2023oct17
+		chatIdHistoryLog.push(result.id);
+		console.log("\n\n***CHAT_HELPER.JS running chatIdHistoryLog: ",chatIdHistoryLog);
+
 
 		// did it hit a content policy violation?
-		let original_resultObj = JSON.parse(JSON.stringify(result));
-
-		try {
-			if (result && result.code === "content_filter" && result.innererror && result.innererror.code === 'ResponsibleAIPolicyViolation') {
-				result.id = 'OpenAiPolicyResult';
-				let error = new Error('The response was filtered due to the prompt triggering Azure OpenAI’s content management policy. Please modify your prompt and retry.');
-				error.type = 'content_filter';
-				throw error;
-			}
-		} catch (err) {
-			result = original_resultObj;
-			throw err;
+		if (result && result.code === "content_filter" && result.innererror && result.innererror.code === 'ResponsibleAIPolicyViolation') {
+			let error = new Error('The response was filtered due to the prompt triggering Azure OpenAI’s content management policy. Please modify your prompt and retry.');
+			error.type = 'content_filter';
+			throw error;
 		}
 
 		if (result && result.choices[0]?.message?.content) {
 			//debug for result.id: 
 			console.log("\n\n***CHAT_HELPER.JS ->Result.id value (after policy violation content filter):", result.id);
 
-			// Add result to global chatcmplHistory array 2023oct17
-			chatcmplHistory.push(result);
 
 			// Check if assistant wants to requery message
 			let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
