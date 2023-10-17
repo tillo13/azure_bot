@@ -95,7 +95,10 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 async function handleDefault(context, chatMessagesUser, personality) {
     // Ignore if the message source is from Slack
     if (isFromSlack(context)) {
-        console.log("\n\n**MESSAGE_HANDLER.JS: Message from Slack and bot was not called or is not in thread. Ignoring...");
+        console.log("\n\n**MESSAGE_HANDLER.JS: Message from Slack, but in the handleDefault path, and bot was not called or is not in thread. Ignoring...");
+        console.log("\n\n**MESSAGE_HANDLER.JS: Slack channel info:", context.activity.channelId);
+        console.log("\n\n**MESSAGE_HANDLER.JS: Slack conversation info:", context.activity.conversation);
+        console.log("\n\n**MESSAGE_HANDLER.JS: Raw Slack data:", context.activity.channelData);
         return false;
     }
 
