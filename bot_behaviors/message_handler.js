@@ -90,7 +90,48 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 			content: context.activity.text
 		});
 	}
+    if (isFromSlack(context)) {
+		console.log("\n\n**MESSAGE_HANDLER.JS: Message from Slack, but in the handleDefault path and do not detect @bot invoke in memory. Checking parentMessage via Slack API...");
+		//DEBUG_PATH: console.log("\n\n**MESSAGE_HANDLER.JS: Slack conversation info:", context.activity.conversation);
+		//DEBUG_PATH: console.log("\n\n**MESSAGE_HANDLER.JS: Raw Slack data:", context.activity.channelData);
 
+		//go fetch the parent message if it's a thread
+		if (isFromSlack(context) && context.activity.channelData?.SlackMessage?.event?.thread_ts) {
+			let botId;
+			try {
+				const apiToken = context.activity.channelData?.ApiToken;
+
+				// Fetch botId and handle any potential errors
+				try {
+					botId = await getBotId(apiToken);
+					console.log("\n\n**MESSAGE_HANDLER.JS: Bot ID: ", botId);
+				} catch (error) {
+					console.error("\n\n**MESSAGE_HANDLER.JS: Failed to retrieve bot ID. Error: ", error);
+				}
+
+				const slack_channel_id = context.activity.channelData.SlackMessage.event.channel;
+				const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts;
+
+				const conversationHistory = await fetchConversationHistory(slack_channel_id, thread_ts, apiToken);
+
+				const parentMessage = conversationHistory.messages[0];
+
+				console.log("\n\n**MESSAGE_HANDLER.JS: Success in retrieving the parent message in the thread: ", parentMessage.text);
+
+				let invokedViaBotThread = false;
+
+				if (parentMessage.text.toLowerCase().includes(botId.toLowerCase())) {
+					invokedViaBotThread = true;
+				}
+
+				console.log("\n\n**MESSAGE_HANDLER.JS: Based on the botID and the payload from the parent, the invokedViaBotThread =", invokedViaBotThread);
+
+			} catch (error) {
+				console.error("\n\n**MESSAGE_HANDLER.JS: Failed to retrieve parent message in the thread. Error: ", error);
+			}
+		}
+		return false;
+	}
 	if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts))) {
 		console.log("\n\n**MESSAGE_HANDLER.JS: All conditions in handleMessageFromSlack met, now about to process the Slack message.");
 
@@ -135,49 +176,6 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 async function handleDefault(context, chatMessagesUser, personality) {
 	console.log("\n\n**MESSAGE_HANDLER.JS: In `handleDefault`. The context activity channel Id is: ", context.activity.channelId);
 	console.log("\n\n**MESSAGE_HANDLER.JS: If we got here, the message was not handled by MSTeams or Slack handlers. Whether the bot was invoked in the parent message of a Slack thread is being checked. We're about to handle this message.");
-
-	if (isFromSlack(context)) {
-		console.log("\n\n**MESSAGE_HANDLER.JS: Message from Slack, but in the handleDefault path and do not detect @bot invoke in memory. Checking parentMessage via Slack API...");
-		//DEBUG_PATH: console.log("\n\n**MESSAGE_HANDLER.JS: Slack conversation info:", context.activity.conversation);
-		//DEBUG_PATH: console.log("\n\n**MESSAGE_HANDLER.JS: Raw Slack data:", context.activity.channelData);
-
-		//go fetch the parent message if it's a thread
-		if (isFromSlack(context) && context.activity.channelData?.SlackMessage?.event?.thread_ts) {
-			let botId;
-			try {
-				const apiToken = context.activity.channelData?.ApiToken;
-
-				// Fetch botId and handle any potential errors
-				try {
-					botId = await getBotId(apiToken);
-					console.log("\n\n**MESSAGE_HANDLER.JS: Bot ID: ", botId);
-				} catch (error) {
-					console.error("\n\n**MESSAGE_HANDLER.JS: Failed to retrieve bot ID. Error: ", error);
-				}
-
-				const slack_channel_id = context.activity.channelData.SlackMessage.event.channel;
-				const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts;
-
-				const conversationHistory = await fetchConversationHistory(slack_channel_id, thread_ts, apiToken);
-
-				const parentMessage = conversationHistory.messages[0];
-
-				console.log("\n\n**MESSAGE_HANDLER.JS: Success in retrieving the parent message in the thread: ", parentMessage.text);
-
-				let invokedViaBotThread = false;
-
-				if (parentMessage.text.toLowerCase().includes(botId.toLowerCase())) {
-					invokedViaBotThread = true;
-				}
-
-				console.log("\n\n**MESSAGE_HANDLER.JS: Based on the botID and the payload from the parent, the invokedViaBotThread =", invokedViaBotThread);
-
-			} catch (error) {
-				console.error("\n\n**MESSAGE_HANDLER.JS: Failed to retrieve parent message in the thread. Error: ", error);
-			}
-		}
-		return false;
-	}
 
 	// Continue with the rest of the function
 	const chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
