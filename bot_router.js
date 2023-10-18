@@ -106,6 +106,9 @@ class EchoBot extends ActivityHandler {
 					handled = await handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, this.isFirstInteraction, PATH_CONFIGS['msteams']) || handled;
 		
 					if (handled) {
+						console.log("\n\n**BOT_ROUTER.JS: The handleMessageFromMSTeams function has successfully processed the incoming message. This means that the channel ID of the incoming message matched 'msteams'. The chat messages at this point are:", chatMessagesUser);
+						console.log("\n\n**BOT_ROUTER.JS: Next, these messages are being stored in the 'chatMessagesProperty' state property and then we're exiting this middleware pipeline - the control will return back to one of the bot's adapters (like the CloudAdapter) to send these messages out.");
+
 						await this.chatMessagesProperty.set(context, chatMessagesUser);
 						return;
 					}
@@ -113,6 +116,9 @@ class EchoBot extends ActivityHandler {
 					handled = await handleMessageFromSlack(context, chatMessagesUser, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality, PATH_CONFIGS['slack']);
 		
 					if (handled) {
+						console.log("\n\n**BOT_ROUTER.JS: The handleMessageFromSlack function has successfully processed the incoming message. This shows that the channel ID of the incoming message matched 'slack' and either the bot was summoned in the message text OR the bot was already interacting in the thread (its thread timestamp aligns with the current thread timestamp). So, the bot successfully processed the message from Slack. The chat messages at this point are:", chatMessagesUser);
+						console.log("\n\n**BOT_ROUTER.JS: Next, these messages are being stored in the 'chatMessagesProperty' state property and then we're exiting this middleware pipeline - the control will return back to one of the bot's adapters (like the CloudAdapter) to send these messages out.");
+
 						await this.chatMessagesProperty.set(context, chatMessagesUser);
 						return;
 					}
@@ -120,6 +126,8 @@ class EchoBot extends ActivityHandler {
 					handled = await handleDefault(context, chatMessagesUser, personality);
 		
 					if (handled) {
+						console.log("\n\n**BOT_ROUTER.JS: The message was handled by `handleDefault` because the triggers for msteams or slack were not met. The chat messages at this point are:", chatMessagesUser);
+
 						await this.chatMessagesProperty.set(context, chatMessagesUser);
 						await next();
 						return;
