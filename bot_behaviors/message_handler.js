@@ -21,6 +21,42 @@ const {
 	getLast24HrInteractionPerUserFromDB
 } = require('./chatgpt_utils');
 
+async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
+	// Debug logs
+	console.log("\n\n**MESSAGE_HANDLER.JS: In `handleMessageFromMSTeams`, checking if the message is from MS Teams. The context activity channel Id is: ", context.activity.channelId);
+	console.log("\n\n**MESSAGE_HANDLER.JS: IS the message from MS Teams? ", isFromMSTeams(context));
+
+	console.log("\n\n**MESSAGE_HANDLER.JS: If we got here, the message is from MS Teams, and we are about to handle it.");
+
+	const aadObjectID = context.activity.from.aadObjectId;
+	//DEBUG_PATH: console.log('\n*****MESSAGE_HANDLER.JS [DEBUG]: aad of user: ',aadObjectID );
+
+	if (isFromMSTeams(context)) {
+		let chatPayload;
+		if (!isFirstInteraction) {
+			chatPayload = await getLast24HrInteractionPerUserFromDB(aadObjectID);
+			//DEBUG_PATH: console.log("\n\n**MESSAGE_HANDLER.JS: This is NOT first interactiong using getLast24Hrs, meaning it will have a payload regardless, from first interaction...")
+		} else {
+			chatPayload = chatMessagesUser;
+			//DEBUG_PATH:  console.log("\n\n**MESSAGE_HANDLER.JS: This IS first interactiong using chatMessageUser as normal...")
+		}
+		// const chatResponse = await chatCompletion(chatPayload, pathConfig.personality, context.activity.channelId);
+		const assistantResponse = await handleTeamsMessage(context, chatPayload, isFirstInteraction, propertyAccessor, pathConfig); // chatPayload used instead of chatMessagesUser.
+
+		// Add the assistant's response to chatMessagesUser
+		chatMessagesUser.push({
+			role: "assistant",
+			content: assistantResponse
+		});
+		await context.sendActivity(MessageFactory.text(assistantResponse));
+
+		//DEBUG_PATH:  console.log("\n\n**MESSAGE_HANDLER.JS (handleMessageFromMSTeams) payload: ",{context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig});
+		console.log("\n\n**MESSAGE_HANDLER.JS: The chatPayload variable is: ", chatPayload);
+
+		return true;
+	}
+	return false;
+}
 async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts, botInvokedFlag, threadproperty, personality, pathConfig) {
     //debug 
     console.log("\n\n**MESSAGE_HANDLER.JS: In `handleMessageFromSlack`, checking if the message is from Slack. The context activity channel Id is: ", context.activity.channelId);
@@ -95,8 +131,6 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 
     if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts) || invokedViaBotThread)) {
         console.log("\n\n**MESSAGE_HANDLER.JS: All conditions in handleMessageFromSlack met, now about to process the Slack message...");
-		console.log("\n\n**MESSAGE_HANDLER.JS: All conditions in handleMessageFromSlack met, now about to process the Slack message.");
-
 
 		let chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
 
