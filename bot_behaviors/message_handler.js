@@ -61,6 +61,8 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
     //debug 
     console.log("\n\n**MESSAGE_HANDLER.JS: In `handleMessageFromSlack`, checking if the message is from Slack. The context activity channel Id is: ", context.activity.channelId);
     console.log("\n\n**MESSAGE_HANDLER.JS: IS the message from Slack? ", isFromSlack(context));
+    console.log("\n\n**MESSAGE_HANDLER.JS: Slack conversation info:", context.activity.conversation);
+    console.log("\n\n**MESSAGE_HANDLER.JS: Raw Slack data:", context.activity.channelData);
 
     const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event ?
         context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts : "";
