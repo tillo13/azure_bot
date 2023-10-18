@@ -95,23 +95,44 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 
     if (isFromSlack(context) && (botCalled || (botInThread && savedThread_ts === current_thread_ts) || invokedViaBotThread)) {
         console.log("\n\n**MESSAGE_HANDLER.JS: All conditions in handleMessageFromSlack met, now about to process the Slack message...");
+		console.log("\n\n**MESSAGE_HANDLER.JS: All conditions in handleMessageFromSlack met, now about to process the Slack message.");
 
-        //... rest of your handleMessageFromSlack function here
 
-        return true;
-    }
+		let chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
 
-    console.log("\n\n**MESSAGE_HANDLER.JS (handleMessageFromSlack) payload: ", {
-        context,
-        chatMessagesUser,
-        savedThread_ts,
-        botInvokedFlag,
-        threadproperty,
-        personality,
-        pathConfig
-    });
+		// Add this check to determine if it's a Slack message before adding to payload
+		if (context.activity.channelId === 'slack') {
+			if (chatResponse.requery && chatResponse.isActiveThread) {
+				const chatResponses = await chatCompletion(chatMessagesUser, personality, context.activity.channelId, result.isActiveThread);
+				chatMessagesUser.push({
+					role: "assistant",
+					content: chatResponses.assistantResponse
+				});
+			}
 
-    return false;
+			chatMessagesUser.push({
+				role: "assistant",
+				content: chatResponse.assistantResponse
+			});
+		}
+
+		await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, pathConfig);
+		console.log("\n\n**MESSAGE_HANDLER.JS: handleMessageFromSlack finished processing. Check if it properly handled the message or if it's falling through.");
+
+
+		return true;
+
+	}
+	console.log("\n\n**MESSAGE_HANDLER.JS (handleMessageFromSlack) payload: ", {
+		context,
+		chatMessagesUser,
+		savedThread_ts,
+		botInvokedFlag,
+		threadproperty,
+		personality,
+		pathConfig
+	});
+	return false;
 }
 
 async function handleDefault(context, chatMessagesUser, personality) {
