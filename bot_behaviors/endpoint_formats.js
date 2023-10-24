@@ -352,23 +352,29 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 					wrap: true
 				},
 				{
-					"type": "ColumnSet",
-					"columns": [
+					type: "ColumnSet",
+					columns: [
 						{
-							"type": "Column",
-							"width": "stretch",
-							"items": [
+							type: "Column",
+							width: "stretch",
+							items: [
 								{
-									"type": "TextBlock",
-									"text": "_This is a test_",
-									"wrap": true,
-									"horizontalAlignment": "right",
-									"isSubtle": true,
-									"separator": true
+									type: "TextBlock",
+									text: "________________________", // this creates a line
+									wrap: false,
+									horizontalAlignment: "center",
+									isSubtle: false,
+								},
+								{
+									type: "TextBlock",
+									text: "_This is a test_",
+									wrap: true,
+									horizontalAlignment: "right",
+									isSubtle: true
 								}
 							]
 						}
-					]    
+					]
 				}
 			]
 		};
@@ -380,7 +386,7 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 			content: adaptiveCardContent
 		};
 	},
-//////////help path END///////
+	//////////help path END///////
 //////////dalle path START///////
 
 dalle_precursor_DefaultResponse: function(prompt, numImages, imageSize) {
