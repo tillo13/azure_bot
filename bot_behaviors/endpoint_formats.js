@@ -358,17 +358,18 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 							type: "Column",
 							width: "stretch",
 							items: [
-								{
-									type: "TextBlock",
-									text: "________________________", // this creates a line
-									wrap: false,
-									horizontalAlignment: "center",
-									isSubtle: false,
-								},
+
+												// Simulate HR
+				{
+					type: "TextBlock",
+					text: "__",
+					separator: true
+				},
 								{
 									type: "TextBlock",
 									text: "_This is a test_",
 									wrap: true,
+									size: "small",
 									horizontalAlignment: "right",
 									isSubtle: true
 								}
