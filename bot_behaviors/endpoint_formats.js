@@ -292,8 +292,11 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 
 	help_msteamsResponse: function() {
 		const adaptiveCardContent = {
+			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
 			type: "AdaptiveCard",
-			body: [{
+			version: "1.4",
+			body: [
+				{
 					type: "TextBlock",
 					text: `**${helpMessage.title}**`,
 					wrap: true
@@ -345,14 +348,26 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 				},
 				{
 					type: "TextBlock",
-					text: `**8.**  Type **$jira** [description here] to create a ticket in ESS ticket queue for any assistance. to start over.`,
+					text: `**8.**  Type **$jira** [description here] to create a ticket in ESS ticket queue for any assistance.`,
 					wrap: true
-				} 
-			],
-			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-			version: "1.4",
+				},
+				// Simulate HR
+				{
+					type: "TextBlock",
+					text: "__",
+					separator: true
+				},
+	
+				// Footer Text
+				{
+					type: "TextBlock",
+					text: "This is a test",
+					size: "small",
+					wrap: true
+				}
+			]
 		};
-
+	
 		return {
 			type: "attachment",
 			contentType: "application/vnd.microsoft.card.adaptive",

@@ -1,24 +1,34 @@
+echo "Fetching the latest changes from GitHub..."
+git fetch origin
+
+# Check the status of the local and remote repositories
+UPSTREAM=${1:-'@{u}'}
+LOCAL=$(git rev-parse @)
+REMOTE=$(git rev-parse "$UPSTREAM")
+BASE=$(git merge-base @ "$UPSTREAM")
+
+# Decide what to do based on the status
+if [ $LOCAL = $REMOTE ]; then
+    echo "Your local repository is up-to-date with the remote repository. No need to sync."
+    exit 0
+elif [ $LOCAL = $BASE ]; then
+    echo "Your local repository is behind the remote repository. Proceeding to sync..."
+elif [ $REMOTE = $BASE ]; then
+    echo "Your local repository is ahead of the remote repository. You may want to push your changes."
+    exit 1
+else
+    echo "Your local repository has diverged from the remote repository. Proceeding to sync..."
+fi
+
 echo "This script will overwrite everything locally with the remote repository. Are you sure you want to continue? (y/n)"
 read confirmation
 
 if [[ $confirmation == "y" || $confirmation == "Y" ]]; then
-    # Echo out what we're doing
     echo "Preparing to sync your local repository with the remote..."
-
-    # Fetch the latest changes from the remote repository
-    echo "Fetching latest changes from GitHub..."
-    git fetch origin
-
-    # Display the latest commit that was fetched
-    echo "The latest commit fetched is:"
-    git log origin/main -1
-
-    # Attempt to merge the latest changes into your current workspace
-    echo "Attempting to merge latest changes into your workspace..."
+    
     git merge origin/main
 
-    # Check if the merge was successful
-    merge_exit_status=$?  # save the exit status of the git merge command
+    merge_exit_status=$?
     if [[ $merge_exit_status -ne 0 ]]; then
         echo "Merge failed due to conflicts."
         echo "Attempting to overwrite local changes with the remote repository..."
@@ -28,10 +38,7 @@ if [[ $confirmation == "y" || $confirmation == "Y" ]]; then
         echo "Merge successful."
     fi
 
-    # Print out that it's done
     echo "All done! Your workspace should now be updated with the latest changes from GitHub."
-
-    # Print out suggestion for next steps
     echo "Do your coding magic now! Remember to commit and push your changes when you're done."
 else
     echo "Script aborted."
