@@ -368,7 +368,7 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 				},
 								{
 									type: "TextBlock",
-									text: "_This is a test_",
+									text: "_v1.024.g35_",
 									wrap: true,
 									size: "small",
 									horizontalAlignment: "right",
