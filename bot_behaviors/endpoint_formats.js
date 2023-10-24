@@ -351,19 +351,24 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 					text: `**8.**  Type **$jira** [description here] to create a ticket in ESS ticket queue for any assistance.`,
 					wrap: true
 				},
-				// Simulate HR
 				{
-					type: "TextBlock",
-					text: "__",
-					separator: true
-				},
-	
-				// Footer Text
-				{
-					type: "TextBlock",
-					text: "This is a test",
-					size: "small",
-					wrap: true
+					"type": "ColumnSet",
+					"columns": [
+						{
+							"type": "Column",
+							"width": "stretch",
+							"items": [
+								{
+									"type": "TextBlock",
+									"text": "_This is a test_",
+									"wrap": true,
+									"horizontalAlignment": "right",
+									"isSubtle": true,
+									"separator": true
+								}
+							]
+						}
+					]    
 				}
 			]
 		};
