@@ -362,7 +362,7 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 												// Simulate HR
 				{
 					type: "TextBlock",
-					"text": "____",
+					"text": "- - - - - - - - - -",
 					separator: true
 				},
 								{
