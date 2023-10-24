@@ -359,10 +359,11 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 							width: "stretch",
 							items: [
 
-												// Simulate HR
+				// Simulate an <HR>
 				{
 					type: "TextBlock",
-					"text": "- - - - - - - - - -",
+					"text": "_____",
+					horizontalAlignment: "right",
 					separator: true
 				},
 								{
