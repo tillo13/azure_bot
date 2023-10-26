@@ -163,9 +163,14 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
 	const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
 
-    // Invoke the search_vector_similarity funciton from weaviate_utils
-    const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
-    console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(weaviateResponse.data.Get, null, 2));
+	// Invoke the search_vector_similarity function from weaviate_utils
+	const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
+	if(weaviateResponse?.data?.Get) {
+		console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(weaviateResponse.data.Get, null, 2));
+	}
+	else {
+		console.log("Could not communicate with Weaviate");
+	}
 
 	// Print out the user messages so far via chat messages
 	const userMessages = chatMessages.filter((msg) => msg.role === 'user');
