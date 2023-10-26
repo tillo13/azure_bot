@@ -167,29 +167,32 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
 	try {
 		if(weaviateResponse?.data?.Get) {
-			console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(weaviateResponse.data.Get, null, 2));
+
+			// get the class name
+			let className = Object.keys(weaviateResponse.data.Get)[0];
+
+			// wrap the object in array if it's an object
+			let responseData = Array.isArray(weaviateResponse.data.Get[className]) 
+				? weaviateResponse.data.Get[className] 
+				: [weaviateResponse.data.Get[className]];
+
+			// log the Similarity Response
+			console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(responseData, null, 2));
 			
-			weaviateResponse.data.Get.forEach((obj, i) => {
-				for(let className in obj) {
-	
-					// Debug print the class name
-					console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CLASS]: ${className}`);
-	
-					// Debug print the data chunk
-					console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [DATA_CHUNK]: ${obj[className].data_chunk}`);
-	
-					// Debug print the certainty
-					console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CERTAINTY]: ${obj[className]._additional.certainty}`);
-				}
+			responseData.forEach((obj, i) => {
+
+				// Debug print class name, data chunk, certainty
+				console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CLASS]: ${className}`);
+				console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [DATA_CHUNK]: ${obj.data_chunk}`);
+				console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CERTAINTY]: ${obj._additional.certainty}`);
 			});
 		}
 		else {
 			console.log("Could not communicate with Weaviate");
 		}
-	}
-	catch(e) {
+	}catch(e) {
 		console.log("Error in parsing the payload: ", e);
-	
+
 		// print the entire payload
 		console.log("Entire payload: ", weaviateResponse);
 	}
