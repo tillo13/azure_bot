@@ -126,7 +126,7 @@ server.listen(process.env.port || process.env.PORT || 3978, () => {
 });
 
 // EchoBot initialization
-// DEBUG console.log("\n\n*INDEX.JS: Initializing the EchoBot with User State...\n");
+// DEBUG console.log("\n\n*INDEX.JS: Initializing the EchoBot with User State..\n");
 const myBot = new EchoBot(userState);
 
 // Listen for incoming requests.
