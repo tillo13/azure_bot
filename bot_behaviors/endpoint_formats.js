@@ -20,6 +20,23 @@ const helpMessage = {
 	]
 };
 
+const footer_msteams = [
+	{ // Simulate an <HR> for a footer
+		type: "TextBlock",
+		text: "_____",
+		horizontalAlignment: "right",
+		separator: true
+	},
+	{
+		type: "TextBlock",
+		text: "_v1.024.g35_",
+		wrap: true,
+		size: "small",
+		horizontalAlignment: "right",
+		isSubtle: true
+	}
+];
+
 const high5Message ={
 	title: "You just high5'd someone!",
 	note:  "way to be nice!"
@@ -357,24 +374,7 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 						{
 							type: "Column",
 							width: "stretch",
-							items: [
-
-				// Simulate an <HR>
-				{
-					type: "TextBlock",
-					"text": "_____",
-					horizontalAlignment: "right",
-					separator: true
-				},
-								{
-									type: "TextBlock",
-									text: "_v1.024.g35_",
-									wrap: true,
-									size: "small",
-									horizontalAlignment: "right",
-									isSubtle: true
-								}
-							]
+							items: footer_msteams
 						}
 					]
 				}
