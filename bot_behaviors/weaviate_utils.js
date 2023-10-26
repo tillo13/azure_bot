@@ -21,31 +21,38 @@ const UNWANTED_TERM = "zzzzz";
 const MOVE_AWAY_FORCE = 0.0;
 
 async function search_vector_similarity(searchTerm) {
-    const payload = {
-        query: `
-        {
-            Get {
-                ${CLASS_NAME}(nearText: {
-                    concepts: ["${searchTerm}"],
-                    certainty: ${SIMILARITY_THRESHOLD},
-                    moveAwayFrom: {concepts: ["${UNWANTED_TERM}"], force: ${MOVE_AWAY_FORCE}}
-                }, limit: ${LIMIT}) {
-                    ${OBJECT_VALUE}
-                    _additional {certainty}
+    try {
+        const payload = {
+            query: `
+            {
+                Get {
+                    ${CLASS_NAME}(nearText: {
+                        concepts: ["${searchTerm}"],
+                        certainty: ${SIMILARITY_THRESHOLD},
+                        moveAwayFrom: {concepts: ["${UNWANTED_TERM}"], force: ${MOVE_AWAY_FORCE}}
+                    }, limit: ${LIMIT}) {
+                        ${OBJECT_VALUE}
+                        _additional {certainty}
+                    }
                 }
             }
+            `
+        };
+        const response = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(payload) });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        `
-    };
-    const response = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(payload) });
-    const data = await response.json();
-    console.log("Similarity Search:");
-    console.log(JSON.stringify(data, null, 4));
-    console.log();
+        const data = await response.json();
+        console.log("Similarity Search:");
+        console.log(JSON.stringify(data, null, 4));
+        console.log();
 
-    return data;
+        return data;
+    } catch(e) {
+        console.log(`There was a problem with the fetch operation: ${e.message}`);
+    }
 }
 
 // search_vector_similarity('some search term'); // Uncomment this line when testing standalone
 
-module.exports = search_vector_similarity; 
+module.exports = search_vector_similarity;

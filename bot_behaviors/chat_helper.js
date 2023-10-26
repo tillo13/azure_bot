@@ -165,7 +165,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
     // Invoke the search_vector_similarity funciton from weaviate_utils
     const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
-    console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", weaviateResponse);
+    console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(weaviateResponse.data.Get, null, 2));
 
 	// Print out the user messages so far via chat messages
 	const userMessages = chatMessages.filter((msg) => msg.role === 'user');
