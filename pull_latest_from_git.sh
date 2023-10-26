@@ -22,22 +22,22 @@ if [ $LOCAL = $REMOTE ]; then
     exit 0
 elif [ $LOCAL = $BASE ]; then
     echo "Your local repository is behind the remote repository. Proceeding to sync..."
-    printf "The following files will be updated:\n"
+    printf "\033[33mThe following files will be updated:\n\033[0m"
     git diff --name-only $LOCAL $REMOTE | while IFS= read -r file; do 
         printf "\033[33m$file\033[0m\n"
     done
-    printf "\nThis script will align your local repository with the remote repository, potentially overwriting local changes. Are you sure you want to continue? (y/n)\n"
+    printf "\033[33m\nThis script will align your local repository with the remote repository, potentially overwriting local changes. Are you sure you want to continue? (y/n)\n\033[0m"
     read confirmation
 elif [ $REMOTE = $BASE ]; then
     echo "Your local repository is ahead of the remote repository. You may want to push your changes."
     exit 1
 else
     echo "Your local repository has diverged from the remote repository. Proceeding to sync..."
-    printf "The following files will be updated:\n"
+    printf "\033[33mThe following files will be updated:\n\033[0m"
     git diff --name-only $LOCAL $REMOTE | while IFS= read -r file; do 
         printf "\033[33m$file\033[0m\n"
     done
-    printf "\nThis script will align your local repository with the remote repository, potentially overwriting local changes. Are you sure you want to continue? (y/n)\n"
+    printf "\033[33m\nThis script will align your local repository with the remote repository, potentially overwriting local changes. Are you sure you want to continue? (y/n)\n\033[0m"
     read confirmation
 fi
 
