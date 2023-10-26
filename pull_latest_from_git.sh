@@ -37,7 +37,7 @@ else
     while IFS= read -r file; do 
         echo -e "\e[33m$file\e[0m"
     done < <(git diff --name-only $LOCAL $REMOTE)
-    echo -e "\nThis script will align your local repository with the remote repository, potentially overwriting local changes. Are you sure you want to continue? (y/n)"
+    echo -e "\nThis script will align your local repository with the remote repository, overwriting local changes. Are you sure you want to continue? (y/n)"
     read confirmation
 fi
 
