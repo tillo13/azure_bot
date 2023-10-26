@@ -22,7 +22,10 @@ if [ $LOCAL = $REMOTE ]; then
     exit 0
 elif [ $LOCAL = $BASE ]; then
     echo "Your local repository is behind the remote repository. Proceeding to sync..."
-    echo -e "\e[33mThe following files will be updated:\n$(git diff --name-only $LOCAL $REMOTE)\e[0m" # Print file list in yellow
+    echo -e "The following files will be updated:"
+    while IFS= read -r file; do 
+        echo -e "\e[33m$file\e[0m"
+    done < <(git diff --name-only $LOCAL $REMOTE)
     echo -e "\nThis script will align your local repository with the remote repository, potentially overwriting local changes. Are you sure you want to continue? (y/n)"
     read confirmation
 elif [ $REMOTE = $BASE ]; then
@@ -30,7 +33,10 @@ elif [ $REMOTE = $BASE ]; then
     exit 1
 else
     echo "Your local repository has diverged from the remote repository. Proceeding to sync..."
-    echo -e "\e[33mThe following files will be updated:\n$(git diff --name-only $LOCAL $REMOTE)\e[0m" # Print file list in yellow
+    echo -e "The following files will be updated:"
+    while IFS= read -r file; do 
+        echo -e "\e[33m$file\e[0m"
+    done < <(git diff --name-only $LOCAL $REMOTE)
     echo -e "\nThis script will align your local repository with the remote repository, potentially overwriting local changes. Are you sure you want to continue? (y/n)"
     read confirmation
 fi
