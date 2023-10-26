@@ -3,10 +3,8 @@ uncommitted_files=$(git status --porcelain)
 if [[ `echo "$uncommitted_files" | grep -v 'pull_latest_from_git.sh'` ]]; then
     echo "Your working directory has uncommitted changes in files other than 'pull_latest_from_git.sh'. Please commit or stash your changes before proceeding."
     exit 1
-else
-    if [[ `echo "$uncommitted_files" | grep 'pull_latest_from_git.sh'` ]]; then
+elif [[ `echo "$uncommitted_files" | grep 'pull_latest_from_git.sh'` ]]; then
         echo "It seems you're making changes to 'pull_latest_from_git.sh'. Don't forget to commit and push these changes using your git.push.sh script when you're done."
-    fi
 fi
 
 echo "Fetching the latest changes from GitHub..."
@@ -24,15 +22,18 @@ if [ $LOCAL = $REMOTE ]; then
     exit 0
 elif [ $LOCAL = $BASE ]; then
     echo "Your local repository is behind the remote repository. Proceeding to sync..."
+    echo -e "\e[33mThe following files will be updated:\n$(git diff --name-only $LOCAL $REMOTE)\e[0m" # Print file list in yellow
+    echo -e "\nThis script will align your local repository with the remote repository, potentially overwriting local changes. Are you sure you want to continue? (y/n)"
+    read confirmation
 elif [ $REMOTE = $BASE ]; then
     echo "Your local repository is ahead of the remote repository. You may want to push your changes."
     exit 1
 else
     echo "Your local repository has diverged from the remote repository. Proceeding to sync..."
+    echo -e "\e[33mThe following files will be updated:\n$(git diff --name-only $LOCAL $REMOTE)\e[0m" # Print file list in yellow
+    echo -e "\nThis script will align your local repository with the remote repository, potentially overwriting local changes. Are you sure you want to continue? (y/n)"
+    read confirmation
 fi
-
-echo "This script will overwrite everything locally with the remote repository. Are you sure you want to continue? (y/n)"
-read confirmation
 
 if [[ $confirmation == "y" || $confirmation == "Y" ]]; then
     echo "Preparing to sync your local repository with the remote..."
