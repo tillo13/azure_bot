@@ -20,7 +20,7 @@ headers = {
 
 # Define global constants
 CLASS_NAME = weaviate_class_name
-SEARCH_TERM = 'when is the best time to use npath in teradata'
+SEARCH_TERM = 'who is hillary ashton'
 SIMILARITY_THRESHOLD = 0.7
 OBJECT_VALUE = weaviate_object_value
 LIMIT = 1
