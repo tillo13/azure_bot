@@ -42,7 +42,7 @@ Key components:
 
 **$reset** - Start a fresh conversation thread.
 
-**$jira [description]** - Create a Jira ticket. 
+**$idea [description]** - Create an idea/task via Jira ticket. 
 
 **$dalle [prompt] --size --num** - Generate AI images via DALL-E 2.0.  
 
@@ -55,7 +55,12 @@ Handles platform-specific needs:
 - **Webchat** - Hosted web embed
 
 
-## Future thoughts...
+## Future thoughts/tasks on deck...
 - Cleaner payload manipulation
 - Deeper vector database analysis
-- Other chat platforms
+- Other chat platforms via Azure Channels
+- RAG (Retrieval Augmented Generation) via Weaviate ingest
+- GPT4 replace/alignment.
+- Clean up endpoint_formats.js
+- Modularize codebase for better reuse.
+- Set footer showing cosine response if RAG hits.

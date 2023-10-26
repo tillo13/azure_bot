@@ -16,7 +16,7 @@ const helpMessage = {
 		"Type `$about` to know more about this application.",
 		"How about just recognizing an outstanding colleague with `$high5 [insert email/phone/@ here]' to give some fun kudos!",
 		"$train is a way to teach this bot to be smarter! (v1)",
-		"If things just are not working for you, try `$jira [type description here]' to create a ticket in ESS ticket queue for any assistance."
+		"If things just are not working for you, try `$idea [type description here]' to create a ticket in ESS ticket queue for any assistance."
 	]
 };
 
@@ -365,7 +365,7 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 				},
 				{
 					type: "TextBlock",
-					text: `**8.**  Type **$jira** [description here] to create a ticket in ESS ticket queue for any assistance.`,
+					text: `**8.**  Type **$idea** [description here] to create a ticket in ESS ticket queue for any assistance.`,
 					wrap: true
 				},
 				{

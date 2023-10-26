@@ -17,7 +17,7 @@ const https = require("https");
 
 const commands = new Proxy({
     '$dig': useShovel,
-    '$jira': createJiraTask,
+    '$idea': createJiraTask,
     '$reset': resetChatPayload,
     '$upgrade': teaseUpgrade,
     '$help': contactHelp,
@@ -181,15 +181,15 @@ async function aboutCommandHandler(context) {
 }
 
 async function createJiraTask(context) {
-    let description = context.activity.text.replace('$jira ', '');
+    let description = context.activity.text.replace('$idea ', '');
     const summary = 'Test from teams';
 
     // creating a cleaned description by removing the command
-    const cleanedDescription = description.replace('$jira ', '');
+    const cleanedDescription = description.replace('$idea ', '');
 
     if (!cleanedDescription || cleanedDescription.length < 10) {
-        console.log('\n******SPECIAL_COMMANDS: $jira command issued with insufficient description by:\n', context.activity.from.name);
-        const adviceMessage = "Usage: `$jira [description]`. The description must be longer than 10 characters.";
+        console.log('\n******SPECIAL_COMMANDS: $idea command issued with insufficient description by:\n', context.activity.from.name);
+        const adviceMessage = "Usage: `$idea [description]`. The description must be longer than 10 characters.";
         return sendMessageResponse(context, adviceMessage);
     }
     
