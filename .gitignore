@@ -1,6 +1,6 @@
 generated/
 node_modules/
-.env
+**/.env
 package-lock.json
 .DS_Store
 **/__pycache__/
@@ -9,3 +9,4 @@ package-lock.json
 #ignore any test data and underscores:
 **/test*
 **/_
+**/files_

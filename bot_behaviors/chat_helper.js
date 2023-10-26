@@ -160,6 +160,10 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
 	const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
 
+    // Invoke the search_vector_similarity funciton from weaviate_utils
+    const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
+    console.log("Weaviate Similarity Response: ", weaviateResponse);
+
 	// Print out the user messages so far via chat messages
 	const userMessages = chatMessages.filter((msg) => msg.role === 'user');
 	console.log('\n\n***CHAT_HELPER.JS -> Only USER messages so far via chatmessages:\n');
