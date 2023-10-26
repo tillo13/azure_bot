@@ -185,9 +185,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 				console.log("[DEBUG] === Start Of Response ===");
 	
 				// Debug print class name, data chunk, certainty
-				console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CLASS]: ${className}`);
-				console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [DATA_CHUNK]: ${obj.data_chunk}`);
-				console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CERTAINTY]: ${obj._additional.certainty}`);
+				console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CLASS]:\n${className}`);
+				console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [DATA_CHUNK]:\n${obj.data_chunk}`);
+				console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CERTAINTY]:\n${obj._additional.certainty}`);
 	
 				// log a separator for clarity
 				console.log("[DEBUG] === End Of Response ===\n");
