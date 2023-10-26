@@ -14,8 +14,8 @@ import json
 PDF_FILE_PATH = "./files_/pdf_file_name.pdf"
 
 #set these to zero to ingest everything in the pdf, or set them to the page numbers you want to ingest
-START_PAGE = 6
-END_PAGE = 22
+START_PAGE = 0
+END_PAGE = 0
 SQL_KEY_PHRASES = {"SELECT", "REPLACE", "UPDATE", "INSERT", "DELETE", "CREATE", "ALTER", "BEGIN", "CALL", "CASE", "COMMENT", "COMMIT", "DESCRIBE",
                    "DROP", "END", "EXECUTE", "EXPLAIN", "GRANT", "MERGE", "REVOKE", "ROLLBACK", "SAVEPOINT", "SET", "TRUNCATE", "COLLECT", "QUALIFY", "SAMPLE", "UPSERT"}
 global_class_name = "teradataDocs"

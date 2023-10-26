@@ -15,7 +15,7 @@ const headers = {
 const CLASS_NAME = weaviate_class_name;
 const SIMILARITY_THRESHOLD = 0.7;
 const OBJECT_VALUE = weaviate_object_value;
-const LIMIT = 1;
+const LIMIT = 3;
 
 const UNWANTED_TERM = "zzzzz";
 const MOVE_AWAY_FORCE = 0.0;
@@ -43,9 +43,9 @@ async function search_vector_similarity(searchTerm) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        console.log("Similarity Search:");
-        console.log(JSON.stringify(data, null, 4));
-        console.log();
+        //console.log("Similarity Search:");
+        //console.log(JSON.stringify(data, null, 4));
+        //console.log();
 
         return data;
     } catch(e) {

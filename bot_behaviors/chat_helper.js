@@ -165,11 +165,38 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 	// Invoke the search_vector_similarity function from weaviate_utils
 	const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
-	if(weaviateResponse?.data?.Get) {
-		console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(weaviateResponse.data.Get, null, 2));
+	try {
+		if(weaviateResponse?.data?.Get) {
+			console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(weaviateResponse.data.Get, null, 2));
+			
+			weaviateResponse.data.Get.forEach((obj, i) => {
+				for(let className in obj) {
+	
+					// Debug print the class name
+					console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CLASS]: ${className}`);
+	
+					// Debug print the data chunk
+					console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [DATA_CHUNK]: ${obj[className].data_chunk}`);
+	
+					// Debug print the certainty
+					console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CERTAINTY]: ${obj[className]._additional.certainty}`);
+				}
+			});
+		}
+		else {
+			console.log("Could not communicate with Weaviate");
+		}
 	}
-	else {
-		console.log("Could not communicate with Weaviate");
+	catch(e) {
+		console.log("Error in parsing the payload: ", e);
+	
+		// print the entire payload
+		console.log("Entire payload: ", weaviateResponse);
+	}
+	finally {
+		if(!weaviateResponse?.data?.Get) {
+			console.log("Couldn't parse anything from the Weaviate server");
+		}
 	}
 
 	// Print out the user messages so far via chat messages
