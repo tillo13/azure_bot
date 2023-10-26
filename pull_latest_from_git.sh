@@ -1,3 +1,14 @@
+# Check if the working directory is clean
+uncommitted_files=$(git status --porcelain)
+if [[ `echo "$uncommitted_files" | grep -v 'pull_latest_from_git.sh'` ]]; then
+    echo "Your working directory has uncommitted changes in files other than 'pull_latest_from_git.sh'. Please commit or stash your changes before proceeding."
+    exit 1
+else
+    if [[ `echo "$uncommitted_files" | grep 'pull_latest_from_git.sh'` ]]; then
+        echo "It seems you're making changes to 'pull_latest_from_git.sh'. Don't forget to commit and push these changes using your git.push.sh script when you're done."
+    fi
+fi
+
 echo "Fetching the latest changes from GitHub..."
 git fetch origin
 
