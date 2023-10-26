@@ -1,11 +1,5 @@
-const dotenv = require('dotenv');
 const path = require('path');
 const fetch = require('node-fetch');
-
-// Require the search_vector_similarity function from weaviate_utils.js
-const searchVectorSimilarity = require("./weaviate_utils");
-
-dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const base_url = process.env['2023oct25_WEAVIATE_URL'];
 const weaviate_class_name = process.env['2023oct25_WEAVIATE_CLASS_NAME'];
@@ -19,7 +13,6 @@ const headers = {
 }
 
 const CLASS_NAME = weaviate_class_name;
-const SEARCH_TERM = 'when is the best time to use npath in teradata';
 const SIMILARITY_THRESHOLD = 0.7;
 const OBJECT_VALUE = weaviate_object_value;
 const LIMIT = 1;
@@ -55,4 +48,4 @@ async function search_vector_similarity(searchTerm) {
 
 // search_vector_similarity('some search term'); // Uncomment this line when testing standalone
 
-module.exports = search_vector_similarity; // Export the function for use elsewhere
+module.exports = search_vector_similarity; 
