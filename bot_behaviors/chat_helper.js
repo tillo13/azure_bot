@@ -1,3 +1,6 @@
+const searchVectorSimilarity = require('./weaviate_utils');
+
+
 const {
 	chatHelperSaveDataToPostgres,
 } = require('../utilities/postgres_utils');
