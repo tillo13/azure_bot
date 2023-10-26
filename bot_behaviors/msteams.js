@@ -67,22 +67,23 @@ async function handleTeamsMessage(context, chatMessagesUser, isFirstInteraction,
             chatMessagesUser = chatResponse.chats;
 
             if (chatResponse.letMeCheckFlag) {
-                const checkMessage = "Just a moment, I'm collecting (checking chat history) my thoughts...";
-                let checkMessageActivity = MessageFactory.text(checkMessage);
+                console.log('\n*****MSTEAMS.JS [2023oct26 DEBUG]: checkmythoughts path invoked, no resubmitted');
+                // const checkMessage = "Just a moment, I'm collecting (checking chat history) my thoughts...";
+                // let checkMessageActivity = MessageFactory.text(checkMessage);
 
-                await context.sendActivity(checkMessageActivity);
+                // await context.sendActivity(checkMessageActivity);
 
-                chatMessagesUser.push({
-                    role: "assistant",
-                    content: checkMessage
-                });
+                // chatMessagesUser.push({
+                //     role: "assistant",
+                //     content: checkMessage
+                // });
 
-                const secondChatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, true);
+                // const secondChatResponse = await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId, true);
 
-                console.log('\n*****MSTEAMS.JS [DEBUG]: letmecheck result --> secondChatResponse data: ', secondChatResponse);
+                // console.log('\n*****MSTEAMS.JS [DEBUG]: letmecheck result --> secondChatResponse data: ', secondChatResponse);
 
-                assistantResponse = `${secondChatResponse.assistantResponse}`;
-                chatMessagesUser = secondChatResponse.chats;
+                // assistantResponse = `${secondChatResponse.assistantResponse}`;
+                // chatMessagesUser = secondChatResponse.chats;
             }
         }
 
