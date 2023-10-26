@@ -155,7 +155,7 @@ server.post('/api/messages', async (req, res) => {
 		botIngressSaveDataToPostgres(req.body, req.body.channelId);
 
 
-	// if id doesn't exist, set it to an empty string
+	// if id doesn't exist, set it to an empty string.
 	if (typeof msg_id === 'undefined') {
 		msg_id = '';
 	} else {
