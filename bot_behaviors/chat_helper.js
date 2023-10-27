@@ -56,14 +56,15 @@ async function initializeChat(chatTexts, roleMessage) {
     return { chatMessages, lastUserMessage };
 }
 
-async function interactWithOpenAI(deploymentId, newCleanChatMessages, validatedTokens) {
+async function interactWithOpenAI(newCleanChatMessages) {
 
+	console.log('\n\n***CHAT_HELPER.JS: [DEBUG] Calling interactWithOpenAI with deploymentId: ', deploymentId);
     const endpoint = process.env.OPENAI_API_BASE_URL;
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
-	const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
-	const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
-	if (!validatedTokens) return;
-    
+    const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
+    const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
+    if (!validatedTokens) return;
+
     let result;
     try {
         result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
@@ -94,7 +95,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	// const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
 	// if (!validatedTokens) return;
 
-	let result = await interactWithOpenAI(deploymentId, newCleanChatMessages, validatedTokens);
+    let result = await interactWithOpenAI(newCleanChatMessages);
 
 	// Invoke the search_vector_similarity function from weaviate_utils
 	const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
