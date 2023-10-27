@@ -101,6 +101,20 @@ function extractMessages(chatMessages) {
 	return {newCleanChatMessages, duplicatesRemoved, certainlyMessages};
 }
 
+function calculateCost(totalTokens) {
+    const turboCostPerToken = modelCosts['Language Models']['GPT-3.5 Turbo']['4K context']['Output'];
+    const gpt4CostPerToken = modelCosts['Language Models']['GPT-4']['8K context']['Output'];
+
+    let turboCost = (totalTokens / 1000) * turboCostPerToken;
+    let gpt4Cost = (totalTokens / 1000) * gpt4CostPerToken;
+
+    console.log('\n\n***CHAT_HELPER.JS: Total tokens used so far in this chat:', totalTokens);
+    console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', formatCost(turboCost));
+    console.log('\n\n***CHAT_HELPER.JS: if GPT-4, the cost is:', formatCost(gpt4Cost));
+
+    return { turboCost, gpt4Cost };
+}
+
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 	const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
 
@@ -167,24 +181,26 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 			console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI: ', newCleanChatMessages);
 
+			let { turboCost, gpt4Cost } = calculateCost(result.usage.totalTokens);
+
 			// This is where we're going to add the code for cost calculation
 			// Prices per token for GPT-3.5 Turbo and GPT-4
-			const turboCostPerToken = modelCosts['Language Models']['GPT-3.5 Turbo']['4K context']['Output'];
-			const gpt4CostPerToken = modelCosts['Language Models']['GPT-4']['8K context']['Output'];
+			// const turboCostPerToken = modelCosts['Language Models']['GPT-3.5 Turbo']['4K context']['Output'];
+			// const gpt4CostPerToken = modelCosts['Language Models']['GPT-4']['8K context']['Output'];
 
-			// Get total tokens used so far
-			let totalTokens = result.usage.totalTokens;
-
-
-			// Calculate costs thus far of the transaction
-			let turboCost = (totalTokens / 1000) * turboCostPerToken;
-			let gpt4Cost = (totalTokens / 1000) * gpt4CostPerToken;
+			// // Get total tokens used so far
+			// let totalTokens = result.usage.totalTokens;
 
 
+			// // Calculate costs thus far of the transaction
+			// let turboCost = (totalTokens / 1000) * turboCostPerToken;
+			// let gpt4Cost = (totalTokens / 1000) * gpt4CostPerToken;
 
-			console.log('\n\n***CHAT_HELPER.JS: Total tokens used so far in this chat:', totalTokens);
-			console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', formatCost(turboCost));
-			console.log('\n\n***CHAT_HELPER.JS: if GPT-4, the cost is:', formatCost(gpt4Cost));
+
+
+			// console.log('\n\n***CHAT_HELPER.JS: Total tokens used so far in this chat:', totalTokens);
+			// console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', formatCost(turboCost));
+			// console.log('\n\n***CHAT_HELPER.JS: if GPT-4, the cost is:', formatCost(gpt4Cost));
 
 			if (letMeCheckFlag) {
 				//debug
