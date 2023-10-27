@@ -42,11 +42,9 @@ async function initializeChat(chatTexts, roleMessage) {
             content: roleMessage
         });
     }
-
     const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
     const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
     const weaviateResponse = await initialSearchVectorSimilarity(lastUserMessage);
-
     const userMessages = chatMessages.filter((msg) => msg.role === 'user');
     console.log('\n\n***CHAT_HELPER.JS -> Only USER messages so far via chatmessages:\n');
     userMessages.forEach((msg, index) => {
@@ -58,16 +56,11 @@ async function initializeChat(chatTexts, roleMessage) {
 }
 
 async function interactWithOpenAI(newCleanChatMessages) {
-
     const endpoint = process.env.OPENAI_API_BASE_URL;
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
     const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
-
-	console.log('\n\n***CHAT_HELPER.JS: [DEBUG] Calling interactWithOpenAI with deploymentId: ', deploymentId);
-	
     const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
     if (!validatedTokens) return;
-
     let result;
     try {
         result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
@@ -77,7 +70,6 @@ async function interactWithOpenAI(newCleanChatMessages) {
         console.error("An error occurred while interacting with OpenAI API", error);
         throw error;
     }
-
     return result;
 }
 
@@ -108,6 +100,16 @@ function extractMessages(chatMessages) {
 	return {newCleanChatMessages, duplicatesRemoved, certainlyMessages};
 }
 
+function handleFrustration(frustrationCount) {
+    if (frustrationCount === 3) {
+        console.log("\n\n***CHAT_HELPER.JS: User has hit the Frustration Counter. Sending them a custom message...");
+        const responseMessage = "It appears we've let you down. :sad_panda:\nYou've hit our fancy(?) frustrationCounter max of 3. I'm sorry, please consider typing `$jira` [and your issue here] and we'll have someone take a look at what is causing said frustration!";
+        console.log("\n\n***CHAT_HELPER.JS: Sent the following message to the user:", responseMessage);
+        return responseMessage;
+    }
+    return null;
+}
+
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 	const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
 
@@ -120,60 +122,27 @@ const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
 	// Print frustration count after each user message is processed
 	console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT including latest response: ${frustrationCount}`);
 
-	if (frustrationCount === 3) {
-		console.log("\n\n***CHAT_HELPER.JS: User has hit the Frustration Counter. Sending them a custom message...");
-		const responseMessage = "It appears we've let you down.  :sad_panda:\nYou've hit our fancy(?) frustrationCounter max of 3.  I'm sorry, please consider typing `$jira` [and your issue here] and we'll have someone take a look at what is causing said frustration!";
-		console.log("\n\n***CHAT_HELPER.JS: Sent the following message to the user:", responseMessage);
-		return {
-			'assistantResponse': responseMessage
-		};
-	}
-	//const { newCleanChatMessages, duplicatesRemoved } = extractMessages(chatMessages);
-	//const { newCleanChatMessages, duplicatesRemoved, certainlyMessages } = extractMessages(chatMessages);
+	// if (frustrationCount === 3) {
+	// 	console.log("\n\n***CHAT_HELPER.JS: User has hit the Frustration Counter. Sending them a custom message...");
+	// 	const responseMessage = "It appears we've let you down.  :sad_panda:\nYou've hit our fancy(?) frustrationCounter max of 3.  I'm sorry, please consider typing `$jira` [and your issue here] and we'll have someone take a look at what is causing said frustration!";
+	// 	console.log("\n\n***CHAT_HELPER.JS: Sent the following message to the user:", responseMessage);
+	// 	return {
+	// 		'assistantResponse': responseMessage
+	// 	};
+	// }
+
+	let frustrationResponse = handleFrustration(frustrationCount);
+if (frustrationResponse) {
+    return {
+        'assistantResponse': frustrationResponse
+    };
+}
+
 	const {newCleanChatMessages, duplicatesRemoved} = extractMessages(chatMessages);
 
 	// //send this into the function to query openai
 	let result = await interactWithOpenAI(newCleanChatMessages);
 
-
-
-	// let cleanConversation = '';
-
-	// chatMessages.forEach((msg, index) => {
-	// 	const role = msg.role.toUpperCase();
-	// 	cleanConversation += `\n${index + 1}. ${role} : ${msg.content}\n`;
-	// });
-
-	// //DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS -> new Entire conversation so far via chatmessages:\n', cleanConversation);
-
-	// // Count cleaned messages first
-	// const oldChatMessages = JSON.stringify(chatMessages);
-
-	// // Separate out each kind of message
-	// let newCleanChatMessages = chatMessages.filter(item =>
-	// 	!item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
-
-
-	// // More efficient deduplication by converting to JSON (prevents issues with object references)
-	// let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
-
-	// // Remove duplicate messages
-	// newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
-
-	// // Fetch the certainlyMessages from the **newCleanChatMessages**
-	// const certainlyMessages = newCleanChatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far'));
-
-	// // How many duplicates were removed
-	// const duplicatesRemoved = oldChatMessages.length - newCleanChatMessages.length;
-
-	// if (duplicatesRemoved > 0) {
-	// 	console.log(`\n\n***CHAT_HELPER.JS: CLEANED CODE OF THIS MANY character DUPLICATES: ${duplicatesRemoved}`);
-
-	// // 	if (certainlyMessages.length > 0) {
-	// // 		// If there are any 'Certainly' messages, only keep the last one
-	// // 		newCleanChatMessages.push(certainlyMessages[certainlyMessages.length - 1]);
-	// // 	}
-	// }
 
 	// Start interacting with OpenAI
 	try {
