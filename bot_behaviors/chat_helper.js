@@ -1,5 +1,5 @@
 //2023oct27 similifying size of file
-const { validateOpenAITokens } = require('./chat_helper_utilities/chat_configs');
+const { validateOpenAITokens } = require('./chat_helper_utils/chat_configs');
 
 const searchVectorSimilarity = require('./weaviate_utils');
 
