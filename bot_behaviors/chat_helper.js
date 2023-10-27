@@ -1,6 +1,11 @@
 //2023oct27 similifying size of file
-const { validateOpenAITokens } = require('./chat_helper_utils/chat_configs');
-
+const {
+    validateOpenAITokens, 
+    shouldRequery, 
+    formatChatPayload, 
+    frustrationCounter, 
+    formatCost
+  } = require('./chat_helper_utilities/chat_configs');
 const searchVectorSimilarity = require('./weaviate_utils');
 
 
@@ -64,38 +69,38 @@ const bot_response_patterns = [
 let chatIdHistoryLog = []; // Global usage of array
 
 
-function shouldRequery(responseContent) {
-	const lowerCasedResponse = responseContent.toLowerCase();
-	//console.log('\n\n***CHAT_HELPER.JS: Running shouldRequery() with responseContent:', responseContent);
+// function shouldRequery(responseContent) {
+// 	const lowerCasedResponse = responseContent.toLowerCase();
+// 	//console.log('\n\n***CHAT_HELPER.JS: Running shouldRequery() with responseContent:', responseContent);
 
-	return bot_response_patterns.some(pattern =>
-		lowerCasedResponse.includes(pattern.toLowerCase())
-	);
-}
+// 	return bot_response_patterns.some(pattern =>
+// 		lowerCasedResponse.includes(pattern.toLowerCase())
+// 	);
+// }
 
-function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage) {
-	//make this a global --> const checkMessage = "Let me check our past conversations in this exact thread, one moment....";
-	const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
+// function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage) {
+// 	//make this a global --> const checkMessage = "Let me check our past conversations in this exact thread, one moment....";
+// 	const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
 
-	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Value of lastIndex variable: ', lastIndex); // This will show if we're even getting here...
+// 	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Value of lastIndex variable: ', lastIndex); // This will show if we're even getting here...
 
-	if (lastIndex > -1) {
-		//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
-		const newResponses = [{
-				role: 'assistant',
-				content: `I could not find a suitable response to your latest message of: ${lastUserMessage}. Please respond with your conversation history to this point and I will investigate.`
-			},
-			{
-				role: 'user',
-				content: `Certainly, here is what I have said so far. Here are your past conversations: ${cleanedFormattedMessages}. Based on this, can you answer this question: ${lastUserMessage}? If not, suggest a topic we have discussed already.`
-			}
-		];
-		//DEBUG_PATH: console.log('New responses: ', newResponses);
-		chatMessages.push(...newResponses);
-	}
+// 	if (lastIndex > -1) {
+// 		//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
+// 		const newResponses = [{
+// 				role: 'assistant',
+// 				content: `I could not find a suitable response to your latest message of: ${lastUserMessage}. Please respond with your conversation history to this point and I will investigate.`
+// 			},
+// 			{
+// 				role: 'user',
+// 				content: `Certainly, here is what I have said so far. Here are your past conversations: ${cleanedFormattedMessages}. Based on this, can you answer this question: ${lastUserMessage}? If not, suggest a topic we have discussed already.`
+// 			}
+// 		];
+// 		//DEBUG_PATH: console.log('New responses: ', newResponses);
+// 		chatMessages.push(...newResponses);
+// 	}
 
-	return chatMessages;
-}
+// 	return chatMessages;
+// }
 
 let chatHistory = [];
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
