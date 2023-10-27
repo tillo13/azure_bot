@@ -1,3 +1,6 @@
+//2023oct27 similifying size of file
+const { validateOpenAITokens } = require('./chat_helper_utilities/chat_configs');
+
 const searchVectorSimilarity = require('./weaviate_utils');
 
 
@@ -23,13 +26,13 @@ const MAX_OPENAI_TOKENS = 700;
 const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
 
 
-function validateOpenAITokens(tokens) {
-	if (tokens <= 0 || tokens > 4096) {
-		console.error('Invalid setting for MAX_OPENAI_TOKENS. It should be between 1 and 4096.');
-		return;
-	}
-	return tokens;
-}
+// function validateOpenAITokens(tokens) {
+// 	if (tokens <= 0 || tokens > 4096) {
+// 		console.error('Invalid setting for MAX_OPENAI_TOKENS. It should be between 1 and 4096.');
+// 		return;
+// 	}
+// 	return tokens;
+// }
 
 const bot_response_patterns = [
 	"as an artificial intelligence",
