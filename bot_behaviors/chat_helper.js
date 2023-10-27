@@ -132,6 +132,9 @@ const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
 	//const { newCleanChatMessages, duplicatesRemoved, certainlyMessages } = extractMessages(chatMessages);
 	const {newCleanChatMessages, duplicatesRemoved} = extractMessages(chatMessages);
 
+	// //send this into the function to query openai
+	let result = await interactWithOpenAI(newCleanChatMessages);
+
 
 
 	// let cleanConversation = '';
@@ -150,8 +153,6 @@ const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
 	// let newCleanChatMessages = chatMessages.filter(item =>
 	// 	!item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
 
-	// //send this into the function to query openai
-	// let result = await interactWithOpenAI(newCleanChatMessages);
 
 	// // More efficient deduplication by converting to JSON (prevents issues with object references)
 	// let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
