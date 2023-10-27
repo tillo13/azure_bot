@@ -6,7 +6,8 @@ const {
     frustrationCounter, 
     formatCost
   } = require('./chat_helper_utils/chat_configs');
-const searchVectorSimilarity = require('./weaviate_utils');
+
+const { initialSearchVectorSimilarity, handleSearchSimilarity } = require('./weaviate_utils');
 
 
 const {
@@ -44,7 +45,7 @@ async function initializeChat(chatTexts, roleMessage) {
 
     const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
     const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
-    const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
+    const weaviateResponse = await initialSearchVectorSimilarity(lastUserMessage);
 
     const userMessages = chatMessages.filter((msg) => msg.role === 'user');
     console.log('\n\n***CHAT_HELPER.JS -> Only USER messages so far via chatmessages:\n');
@@ -98,49 +99,52 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	// if (!validatedTokens) return;
 
 	// Invoke the search_vector_similarity function from weaviate_utils
-	const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
-	try {
-		if(weaviateResponse?.data?.Get) {
+
+
+const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
+	// const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
+	// try {
+	// 	if(weaviateResponse?.data?.Get) {
 	
-			// get the class name
-			let className = Object.keys(weaviateResponse.data.Get)[0];
+	// 		// get the class name
+	// 		let className = Object.keys(weaviateResponse.data.Get)[0];
 	
-			// wrap the object in array if it's an object
-			let responseData = Array.isArray(weaviateResponse.data.Get[className]) 
-				? weaviateResponse.data.Get[className] 
-				: [weaviateResponse.data.Get[className]];
+	// 		// wrap the object in array if it's an object
+	// 		let responseData = Array.isArray(weaviateResponse.data.Get[className]) 
+	// 			? weaviateResponse.data.Get[className] 
+	// 			: [weaviateResponse.data.Get[className]];
 	
-			// log the Similarity Response
-			//console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(responseData, null, 2));
+	// 		// log the Similarity Response
+	// 		//console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(responseData, null, 2));
 			
-			responseData.forEach((obj, i) => {
+	// 		responseData.forEach((obj, i) => {
 	
-				// log a separator for clarity
-				console.log("[DEBUG] === Start Of Response ===");
+	// 			// log a separator for clarity
+	// 			console.log("[DEBUG] === Start Of Response ===");
 	
-				// Debug print class name, data chunk, certainty
-				console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CLASS]:\n${className}`);
-				console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [DATA_CHUNK]:\n${obj.data_chunk}`);
-				console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CERTAINTY]:\n${obj._additional.certainty}`);
+	// 			// Debug print class name, data chunk, certainty
+	// 			console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CLASS]:\n${className}`);
+	// 			console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [DATA_CHUNK]:\n${obj.data_chunk}`);
+	// 			console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CERTAINTY]:\n${obj._additional.certainty}`);
 	
-				// log a separator for clarity
-				console.log("[DEBUG] === End Of Response ===\n");
-			});
-		}
-		else {
-			console.log("Could not communicate with Weaviate");
-		}
-	}catch(e) {
-		console.log("Error in parsing the payload: ", e);
+	// 			// log a separator for clarity
+	// 			console.log("[DEBUG] === End Of Response ===\n");
+	// 		});
+	// 	}
+	// 	else {
+	// 		console.log("Could not communicate with Weaviate");
+	// 	}
+	// }catch(e) {
+	// 	console.log("Error in parsing the payload: ", e);
 	
-		// print the entire payload
-		console.log("Entire payload: ", weaviateResponse);
-	}
-	finally {
-		if(!weaviateResponse?.data?.Get) {
-			console.log("Couldn't parse anything from the Weaviate server");
-		}
-	}
+	// 	// print the entire payload
+	// 	console.log("Entire payload: ", weaviateResponse);
+	// }
+	// finally {
+	// 	if(!weaviateResponse?.data?.Get) {
+	// 		console.log("Couldn't parse anything from the Weaviate server");
+	// 	}
+	// }
 	// Print frustration count after each user message is processed
 	console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT including latest response: ${frustrationCount}`);
 
