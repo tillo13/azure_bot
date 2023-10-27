@@ -95,8 +95,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	// const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
 	// if (!validatedTokens) return;
 
-    let result = await interactWithOpenAI(newCleanChatMessages);
-
 	// Invoke the search_vector_similarity function from weaviate_utils
 	const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
 	try {
@@ -168,6 +166,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	// Separate out each kind of message
 	let newCleanChatMessages = chatMessages.filter(item =>
 		!item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
+
+	//send this into the function to query openai
+	let result = await interactWithOpenAI(newCleanChatMessages);
 
 	// More efficient deduplication by converting to JSON (prevents issues with object references)
 	let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
