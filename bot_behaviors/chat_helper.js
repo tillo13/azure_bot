@@ -95,9 +95,17 @@ function extractMessages(chatMessages) {
 	   !item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
 	let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
 	newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
-	const certainlyMessages = newCleanChatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far')); // Add this line to the extractMessages function
+	const certainlyMessages = newCleanChatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far')); 
 	const duplicatesRemoved = oldChatMessages.length - newCleanChatMessages.length;
-	return {newCleanChatMessages, duplicatesRemoved, certainlyMessages}; // And add certainlyMessages here also for returning
+	if (duplicatesRemoved > 0) {
+		console.log(`\n\n***CHAT_HELPER.JS: CLEANED CODE OF THIS MANY character DUPLICATES: ${duplicatesRemoved}`);
+
+	if (certainlyMessages.length > 0) {
+		// If there are any 'Certainly' messages, only keep the last one
+		newCleanChatMessages.push(certainlyMessages[certainlyMessages.length - 1]);
+	}}
+
+	return {newCleanChatMessages, duplicatesRemoved}; //certianlyMessages removed from here
    }
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
@@ -155,14 +163,14 @@ const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
 	// // How many duplicates were removed
 	// const duplicatesRemoved = oldChatMessages.length - newCleanChatMessages.length;
 
-	if (duplicatesRemoved > 0) {
-		console.log(`\n\n***CHAT_HELPER.JS: CLEANED CODE OF THIS MANY character DUPLICATES: ${duplicatesRemoved}`);
+	// if (duplicatesRemoved > 0) {
+	// 	console.log(`\n\n***CHAT_HELPER.JS: CLEANED CODE OF THIS MANY character DUPLICATES: ${duplicatesRemoved}`);
 
-		if (certainlyMessages.length > 0) {
-			// If there are any 'Certainly' messages, only keep the last one
-			newCleanChatMessages.push(certainlyMessages[certainlyMessages.length - 1]);
-		}
-	}
+	// // 	if (certainlyMessages.length > 0) {
+	// // 		// If there are any 'Certainly' messages, only keep the last one
+	// // 		newCleanChatMessages.push(certainlyMessages[certainlyMessages.length - 1]);
+	// // 	}
+	// }
 
 	// Start interacting with OpenAI
 	try {
