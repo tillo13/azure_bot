@@ -16,7 +16,7 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 	//make this a global --> const checkMessage = "Let me check our past conversations in this exact thread, one moment....";
 	const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
 
-	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Value of lastIndex variable: ', lastIndex); // This will show if we're even getting here...
+	console.log('\n\n***CHAT_CONFIGS.JS: Value of lastIndex variable: ', lastIndex); // This will show if we're even getting here...
 
 	if (lastIndex > -1) {
 		//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
@@ -35,10 +35,37 @@ function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessa
 
 	return chatMessages;
 }
+//set these to be used by the shouldRequery function below
+const bot_response_patterns = [
+	"as an artificial intelligence",
+	"as a digital assistant",
+	"as a computer program",
+	"as a helpful assistant",
+	"as a virtual assistant",
+	"as a language model",
+	"access to personal information",
+	"access to previous conversations",
+	"shared in previous conversations",
+	"have access to past conversations",
+	"just a virtual assistant",
+	"as a text-based AI",
+	"as an AI system",
+	"being a digital entity",
+	"as an AI",
+	"as a machine learning model",
+	"as a AI assistant",
+	"as a machine learning assistant",
+	"access to the conversation",
+	"have access to personal data",
+	"not privy to that information",
+	"just a helpful assistant",
+	"just an ai"
+	// Include any more patterns...
+];
 
 function shouldRequery(responseContent) {
 	const lowerCasedResponse = responseContent.toLowerCase();
-	//console.log('\n\n***CHAT_HELPER.JS: Running shouldRequery() with responseContent:', responseContent);
+	//console.log('\n\n***CHAT_CONFIGS.JS: Running shouldRequery() with responseContent:', responseContent);
 
 	return bot_response_patterns.some(pattern =>
 		lowerCasedResponse.includes(pattern.toLowerCase())

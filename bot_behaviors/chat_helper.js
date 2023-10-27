@@ -29,6 +29,7 @@ const modelCosts = require('./openai_costs_2023sept7.json');
 
 const MAX_OPENAI_TOKENS = 700;
 const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
+let chatIdHistoryLog = []; // Global usage of array
 
 
 // function validateOpenAITokens(tokens) {
@@ -39,34 +40,34 @@ const checkMessage = "Let me check our past conversations in this exact thread, 
 // 	return tokens;
 // }
 
-const bot_response_patterns = [
-	"as an artificial intelligence",
-	"as a digital assistant",
-	"as a computer program",
-	"as a helpful assistant",
-	"as a virtual assistant",
-	"as a language model",
-	"access to personal information",
-	"access to previous conversations",
-	"shared in previous conversations",
-	"have access to past conversations",
-	"just a virtual assistant",
-	"as a text-based AI",
-	"as an AI system",
-	"being a digital entity",
-	"as an AI",
-	"as a machine learning model",
-	"as a AI assistant",
-	"as a machine learning assistant",
-	"access to the conversation",
-	"have access to personal data",
-	"not privy to that information",
-	"just a helpful assistant",
-	"just an ai"
-	// Include any more patterns...
-];
+// const bot_response_patterns = [
+// 	"as an artificial intelligence",
+// 	"as a digital assistant",
+// 	"as a computer program",
+// 	"as a helpful assistant",
+// 	"as a virtual assistant",
+// 	"as a language model",
+// 	"access to personal information",
+// 	"access to previous conversations",
+// 	"shared in previous conversations",
+// 	"have access to past conversations",
+// 	"just a virtual assistant",
+// 	"as a text-based AI",
+// 	"as an AI system",
+// 	"being a digital entity",
+// 	"as an AI",
+// 	"as a machine learning model",
+// 	"as a AI assistant",
+// 	"as a machine learning assistant",
+// 	"access to the conversation",
+// 	"have access to personal data",
+// 	"not privy to that information",
+// 	"just a helpful assistant",
+// 	"just an ai"
+// 	// Include any more patterns...
+// ];
 
-let chatIdHistoryLog = []; // Global usage of array
+
 
 
 // function shouldRequery(responseContent) {
