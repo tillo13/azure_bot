@@ -101,16 +101,6 @@ function extractMessages(chatMessages) {
 	return {newCleanChatMessages, duplicatesRemoved, certainlyMessages};
 }
 
-// function handleFrustration(frustrationCount) {
-//     if (frustrationCount === 3) {
-//         console.log("\n\n***CHAT_HELPER.JS: User has hit the Frustration Counter. Sending them a custom message...");
-//         const responseMessage = "It appears we've let you down. :sad_panda:\nYou've hit our fancy(?) frustrationCounter max of 3. I'm sorry, please consider typing `$jira` [and your issue here] and we'll have someone take a look at what is causing said frustration!";
-//         console.log("\n\n***CHAT_HELPER.JS: Sent the following message to the user:", responseMessage);
-//         return responseMessage;
-//     }
-//     return null;
-// }
-
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 	const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
 
