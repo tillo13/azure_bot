@@ -3,8 +3,8 @@ const {
     validateOpenAITokens, 
     shouldRequery, 
     formatChatPayload, 
-    frustrationCounter, 
-    formatCost
+    // frustrationCounter, 
+    // formatCost
   } = require('./chat_helper_utilities/chat_configs');
 const searchVectorSimilarity = require('./weaviate_utils');
 
