@@ -64,6 +64,7 @@ const bot_response_patterns = [
 
 const shouldRequery = (responseContent) => {
 	const lowerCasedResponse = responseContent.toLowerCase();
+    console.log('\n\n***CHAT_CONFIG.JS: Running shouldRequery() with responseContent:', responseContent);
 	return bot_response_patterns.some(pattern => lowerCasedResponse.includes(pattern));
 };
 

@@ -186,7 +186,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 				: [weaviateResponse.data.Get[className]];
 	
 			// log the Similarity Response
-			console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(responseData, null, 2));
+			//console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(responseData, null, 2));
 			
 			responseData.forEach((obj, i) => {
 	
@@ -395,9 +395,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 
 					try {
-						console.log('\n\n***CHAT_HELPER.JS_TRYPATH Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages);
+						//console.log('\n\n***CHAT_HELPER.JS_TRYPATH Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages);
 					
-						console.log("\n\n***CHAT_HELPER.JS: TRYPATH running chatIdHistoryLog: ", chatIdHistoryLog);
+						//console.log("\n\n***CHAT_HELPER.JS: TRYPATH running chatIdHistoryLog: ", chatIdHistoryLog);
 					
 						// Declare a variable to store a found AAD Object ID
 						let foundAadObjectId = null;
@@ -405,13 +405,13 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 						let aadObj = await getAADObjectIdFromDB(chatIdHistoryLog);
 						if (aadObj.length > 0) {
 							// a match was found in DB for one or more chatIDs in chatIdHistoryLog
-							console.log("\n\n***CHAT_HELPER.JS: TRYPATH found a match! This is in the database:  ", aadObj);
+							//console.log("\n\n***CHAT_HELPER.JS: TRYPATH found a match! This is in the database:  ", aadObj);
 					
 							// Store the found AAD Object ID
 							foundAadObjectId = aadObj[0].msteam_recipient_aad_object_id;
 						} else {
 							// no matches were found in DB for any chatIDs in chatIdHistoryLog
-							console.log("\n\n***CHAT_HELPER.JS: TRYPATH found no matches in database for provided chat IDs");
+							//console.log("\n\n***CHAT_HELPER.JS: TRYPATH found no matches in database for provided chat IDs");
 						}
 					
 						console.log("\n\n***CHAT_HELPER.JS_TRYPATH ->Result.id value (before secondary request to OpenAI):", result.id);
@@ -430,8 +430,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 							console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->AAD Object ID we will query:', AadObjectId);
 							if (AadObjectId.length > 0) {
 								let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
-								console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Swapping newCleanChatMessages for last24HrInteractionData...');
-								console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Last 24 Hr Interaction Data received from CHATGPT_UTILS.JS');
+								//console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Swapping newCleanChatMessages for last24HrInteractionData...');
+								//console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Last 24 Hr Interaction Data received from CHATGPT_UTILS.JS');
 								newCleanChatMessages = last24HrInteractionData;
 					
 								// Call the recreateGptPayloadViaDB function and store the result in rebuiltPayloadViaDB
@@ -439,20 +439,20 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 							}
 						} 
 						catch(err)  {
-							console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> Error fetching data from DB:', err);
+							//console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> Error fetching data from DB:', err);
 						}
 
 						result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
-						console.log("\n\n***CHAT_HELPER.JS_TRYPATH ->Result.id value (after secondary request to OpenAI):", result.id);
+						//console.log("\n\n***CHAT_HELPER.JS_TRYPATH ->Result.id value (after secondary request to OpenAI):", result.id);
 					
 						//console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
-						console.log('\n\n***CHAT_HELPER.JS_TRYPATH: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
+						//console.log('\n\n***CHAT_HELPER.JS_TRYPATH: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
 					
 						// Log the rebuiltPayloadViaDB
-						console.log('\n\n***CHAT_HELPER.JS_TRYPATHS: Most up to date payload via DB recreation: ', rebuiltPayloadViaDB);
+						//console.log('\n\n***CHAT_HELPER.JS_TRYPATHS: Most up to date payload via DB recreation: ', rebuiltPayloadViaDB);
 					
 					} catch (error) {
-						console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> An error occurred during communication with OpenAI: ', error);
+						//console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> An error occurred during communication with OpenAI: ', error);
 					}
 
 
