@@ -82,6 +82,26 @@ async function interactWithOpenAI(newCleanChatMessages) {
 }
 
 let chatHistory = [];
+
+
+function extractMessages(chatMessages) {
+	let cleanConversation = '';
+	chatMessages.forEach((msg, index) => {
+	   const role = msg.role.toUpperCase();
+	   cleanConversation += `\n${index + 1}. ${role} : ${msg.content}\n`;
+	});
+
+	console.log('\n\n***CHAT_HELPER.JS: [DEBUG] Clean Conversation:', cleanConversation); // print cleanConversation
+
+	const oldChatMessages = JSON.stringify(chatMessages);
+	let newCleanChatMessages = chatMessages.filter(item =>
+	   !item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
+	let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
+	newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
+	const duplicatesRemoved = oldChatMessages.length - newCleanChatMessages.length;
+	return {newCleanChatMessages, duplicatesRemoved};
+   }
+
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 	const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
 
@@ -89,62 +109,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
 	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
 
-	// const endpoint = process.env.OPENAI_API_BASE_URL;
-	// const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
-	// //debug
-	// //console.log("\n\n[DEBUG] OpenAIClient:", JSON.stringify(client));
-
-	// const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
-	// const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
-	// if (!validatedTokens) return;
-
-	// Invoke the search_vector_similarity function from weaviate_utils
-
-
 const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
-	// const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
-	// try {
-	// 	if(weaviateResponse?.data?.Get) {
-	
-	// 		// get the class name
-	// 		let className = Object.keys(weaviateResponse.data.Get)[0];
-	
-	// 		// wrap the object in array if it's an object
-	// 		let responseData = Array.isArray(weaviateResponse.data.Get[className]) 
-	// 			? weaviateResponse.data.Get[className] 
-	// 			: [weaviateResponse.data.Get[className]];
-	
-	// 		// log the Similarity Response
-	// 		//console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(responseData, null, 2));
-			
-	// 		responseData.forEach((obj, i) => {
-	
-	// 			// log a separator for clarity
-	// 			console.log("[DEBUG] === Start Of Response ===");
-	
-	// 			// Debug print class name, data chunk, certainty
-	// 			console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CLASS]:\n${className}`);
-	// 			console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [DATA_CHUNK]:\n${obj.data_chunk}`);
-	// 			console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CERTAINTY]:\n${obj._additional.certainty}`);
-	
-	// 			// log a separator for clarity
-	// 			console.log("[DEBUG] === End Of Response ===\n");
-	// 		});
-	// 	}
-	// 	else {
-	// 		console.log("Could not communicate with Weaviate");
-	// 	}
-	// }catch(e) {
-	// 	console.log("Error in parsing the payload: ", e);
-	
-	// 	// print the entire payload
-	// 	console.log("Entire payload: ", weaviateResponse);
-	// }
-	// finally {
-	// 	if(!weaviateResponse?.data?.Get) {
-	// 		console.log("Couldn't parse anything from the Weaviate server");
-	// 	}
-	// }
+
 	// Print frustration count after each user message is processed
 	console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT including latest response: ${frustrationCount}`);
 
@@ -156,37 +122,38 @@ const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
 			'assistantResponse': responseMessage
 		};
 	}
+	const { newCleanChatMessages, duplicatesRemoved } = extractMessages(chatMessages);
 
-	let cleanConversation = '';
+	// let cleanConversation = '';
 
-	chatMessages.forEach((msg, index) => {
-		const role = msg.role.toUpperCase();
-		cleanConversation += `\n${index + 1}. ${role} : ${msg.content}\n`;
-	});
+	// chatMessages.forEach((msg, index) => {
+	// 	const role = msg.role.toUpperCase();
+	// 	cleanConversation += `\n${index + 1}. ${role} : ${msg.content}\n`;
+	// });
 
-	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS -> new Entire conversation so far via chatmessages:\n', cleanConversation);
+	// //DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS -> new Entire conversation so far via chatmessages:\n', cleanConversation);
 
-	// Count cleaned messages first
-	const oldChatMessages = JSON.stringify(chatMessages);
+	// // Count cleaned messages first
+	// const oldChatMessages = JSON.stringify(chatMessages);
 
-	// Separate out each kind of message
-	let newCleanChatMessages = chatMessages.filter(item =>
-		!item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
+	// // Separate out each kind of message
+	// let newCleanChatMessages = chatMessages.filter(item =>
+	// 	!item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
 
-	//send this into the function to query openai
-	let result = await interactWithOpenAI(newCleanChatMessages);
+	// //send this into the function to query openai
+	// let result = await interactWithOpenAI(newCleanChatMessages);
 
-	// More efficient deduplication by converting to JSON (prevents issues with object references)
-	let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
+	// // More efficient deduplication by converting to JSON (prevents issues with object references)
+	// let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
 
-	// Remove duplicate messages
-	newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
+	// // Remove duplicate messages
+	// newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
 
-	// Fetch the certainlyMessages from the **newCleanChatMessages**
-	const certainlyMessages = newCleanChatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far'));
+	// // Fetch the certainlyMessages from the **newCleanChatMessages**
+	// const certainlyMessages = newCleanChatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far'));
 
-	// How many duplicates were removed
-	const duplicatesRemoved = oldChatMessages.length - newCleanChatMessages.length;
+	// // How many duplicates were removed
+	// const duplicatesRemoved = oldChatMessages.length - newCleanChatMessages.length;
 
 	if (duplicatesRemoved > 0) {
 		console.log(`\n\n***CHAT_HELPER.JS: CLEANED CODE OF THIS MANY character DUPLICATES: ${duplicatesRemoved}`);
