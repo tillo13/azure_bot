@@ -4,6 +4,7 @@ const {
     shouldRequery, 
     formatChatPayload, 
     frustrationCounter, 
+	handleFrustration,
     formatCost
   } = require('./chat_helper_utils/chat_configs');
 
@@ -100,43 +101,32 @@ function extractMessages(chatMessages) {
 	return {newCleanChatMessages, duplicatesRemoved, certainlyMessages};
 }
 
-function handleFrustration(frustrationCount) {
-    if (frustrationCount === 3) {
-        console.log("\n\n***CHAT_HELPER.JS: User has hit the Frustration Counter. Sending them a custom message...");
-        const responseMessage = "It appears we've let you down. :sad_panda:\nYou've hit our fancy(?) frustrationCounter max of 3. I'm sorry, please consider typing `$jira` [and your issue here] and we'll have someone take a look at what is causing said frustration!";
-        console.log("\n\n***CHAT_HELPER.JS: Sent the following message to the user:", responseMessage);
-        return responseMessage;
-    }
-    return null;
-}
+// function handleFrustration(frustrationCount) {
+//     if (frustrationCount === 3) {
+//         console.log("\n\n***CHAT_HELPER.JS: User has hit the Frustration Counter. Sending them a custom message...");
+//         const responseMessage = "It appears we've let you down. :sad_panda:\nYou've hit our fancy(?) frustrationCounter max of 3. I'm sorry, please consider typing `$jira` [and your issue here] and we'll have someone take a look at what is causing said frustration!";
+//         console.log("\n\n***CHAT_HELPER.JS: Sent the following message to the user:", responseMessage);
+//         return responseMessage;
+//     }
+//     return null;
+// }
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 	const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
 
 	let frustrationCount = 0;
-	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
-	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
 
-const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
+	const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
 
 	// Print frustration count after each user message is processed
 	console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT including latest response: ${frustrationCount}`);
 
-	// if (frustrationCount === 3) {
-	// 	console.log("\n\n***CHAT_HELPER.JS: User has hit the Frustration Counter. Sending them a custom message...");
-	// 	const responseMessage = "It appears we've let you down.  :sad_panda:\nYou've hit our fancy(?) frustrationCounter max of 3.  I'm sorry, please consider typing `$jira` [and your issue here] and we'll have someone take a look at what is causing said frustration!";
-	// 	console.log("\n\n***CHAT_HELPER.JS: Sent the following message to the user:", responseMessage);
-	// 	return {
-	// 		'assistantResponse': responseMessage
-	// 	};
-	// }
-
 	let frustrationResponse = handleFrustration(frustrationCount);
-if (frustrationResponse) {
-    return {
-        'assistantResponse': frustrationResponse
-    };
-}
+	if (frustrationResponse) {
+	    return {
+	        'assistantResponse': frustrationResponse
+	    };
+	}
 
 	const {newCleanChatMessages, duplicatesRemoved} = extractMessages(chatMessages);
 
