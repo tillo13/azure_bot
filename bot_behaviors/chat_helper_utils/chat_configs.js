@@ -121,7 +121,7 @@ function formatCost(cost) {
     let n = firstNonZeroIndex + 3;
 
     // Print n to console
-    console.log("\n\nCHAT_CONFIGS: Number of decimal places in formatCost:", n);
+    console.log("\n\nCHAT_CONFIGS.JS: Number of decimal places in formatCost:", n);
 
     // Return cost formatted to n decimal places
     return `$${cost.toFixed(n)}`;

@@ -32,121 +32,38 @@ const checkMessage = "Let me check our past conversations in this exact thread, 
 let chatIdHistoryLog = []; // Global usage of array
 
 
-// function validateOpenAITokens(tokens) {
-// 	if (tokens <= 0 || tokens > 4096) {
-// 		console.error('Invalid setting for MAX_OPENAI_TOKENS. It should be between 1 and 4096.');
-// 		return;
-// 	}
-// 	return tokens;
-// }
+async function initializeChat(chatTexts, roleMessage) {
 
-// const bot_response_patterns = [
-// 	"as an artificial intelligence",
-// 	"as a digital assistant",
-// 	"as a computer program",
-// 	"as a helpful assistant",
-// 	"as a virtual assistant",
-// 	"as a language model",
-// 	"access to personal information",
-// 	"access to previous conversations",
-// 	"shared in previous conversations",
-// 	"have access to past conversations",
-// 	"just a virtual assistant",
-// 	"as a text-based AI",
-// 	"as an AI system",
-// 	"being a digital entity",
-// 	"as an AI",
-// 	"as a machine learning model",
-// 	"as a AI assistant",
-// 	"as a machine learning assistant",
-// 	"access to the conversation",
-// 	"have access to personal data",
-// 	"not privy to that information",
-// 	"just a helpful assistant",
-// 	"just an ai"
-// 	// Include any more patterns...
-// ];
+    let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
 
+    if (!chatMessages.length || chatMessages[0].role !== "system") {
+        chatMessages.unshift({
+            role: "system",
+            content: roleMessage
+        });
+    }
 
+    const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
+    const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
 
+    const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
 
-// function shouldRequery(responseContent) {
-// 	const lowerCasedResponse = responseContent.toLowerCase();
-// 	//console.log('\n\n***CHAT_HELPER.JS: Running shouldRequery() with responseContent:', responseContent);
+    const userMessages = chatMessages.filter((msg) => msg.role === 'user');
+    console.log('\n\n***CHAT_HELPER.JS -> Only USER messages so far via chatmessages:\n');
+    userMessages.forEach((msg, index) => {
+        console.log(`\n${index + 1}. ${msg.content}\n`);
+        // Call frustrationCounter for each user message
+        frustrationCounter(msg.content);
+    });
+    return { chatMessages, lastUserMessage };
+}
 
-// 	return bot_response_patterns.some(pattern =>
-// 		lowerCasedResponse.includes(pattern.toLowerCase())
-// 	);
-// }
-
-// function formatChatPayload(chatMessages, cleanedFormattedMessages, lastUserMessage) {
-// 	//make this a global --> const checkMessage = "Let me check our past conversations in this exact thread, one moment....";
-// 	const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
-
-// 	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Value of lastIndex variable: ', lastIndex); // This will show if we're even getting here...
-
-// 	if (lastIndex > -1) {
-// 		//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
-// 		const newResponses = [{
-// 				role: 'assistant',
-// 				content: `I could not find a suitable response to your latest message of: ${lastUserMessage}. Please respond with your conversation history to this point and I will investigate.`
-// 			},
-// 			{
-// 				role: 'user',
-// 				content: `Certainly, here is what I have said so far. Here are your past conversations: ${cleanedFormattedMessages}. Based on this, can you answer this question: ${lastUserMessage}? If not, suggest a topic we have discussed already.`
-// 			}
-// 		];
-// 		//DEBUG_PATH: console.log('New responses: ', newResponses);
-// 		chatMessages.push(...newResponses);
-// 	}
-
-// 	return chatMessages;
-// }
 
 let chatHistory = [];
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
+	const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
 
-
-	// // Define the frustrationPrompts array
-	// const frustrationPrompts = [
-	// 	"you're not getting it",
-	// 	"you don't understand",
-	// 	"no",
-	// 	"not right",
-	// 	"incorrect",
-	// 	"wrong",
-	// 	"that's not correct",
-	// 	"try again",
-	// 	"you're not listening",
-	// 	"you're missing the point",
-	// 	"you're off the mark",
-	// 	"that's not right",
-	// 	"you're not making sense",
-	// 	"I didn't ask for this",
-	// 	"that doesn't help",
-	// 	"you're misunderstanding",
-	// 	"stop wasting my time",
-	// 	"you're clueless",
-	// 	"you're not helping",
-	// 	"this is frustrating"
-	// 	// Add more phrases as required...
-	// ];
-
-	// Frustration counter
 	let frustrationCount = 0;
-
-	// // Define the frustrationCounter function
-	// function frustrationCounter(userMessage) {
-	// 	const lowerCasedMessageWords = userMessage.toLowerCase().split(' ');
-
-	// 	for (let prompt of frustrationPrompts) {
-	// 		if (lowerCasedMessageWords.includes(prompt.toLowerCase())) {
-	// 			frustrationCount++;
-	// 			console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT prior to incoming message: ${frustrationCount}`);
-	// 			break;
-	// 		}
-	// 	}
-	// }
 
 	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
 	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
@@ -160,17 +77,17 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
 	if (!validatedTokens) return;
 
-	let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
+	// let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
 
-	if (!chatMessages.length || chatMessages[0].role !== "system") {
-		chatMessages.unshift({
-			role: "system",
-			content: roleMessage
-		});
-	}
+	// if (!chatMessages.length || chatMessages[0].role !== "system") {
+	// 	chatMessages.unshift({
+	// 		role: "system",
+	// 		content: roleMessage
+	// 	});
+	// }
 	// Fetch the last user message before calling `formatChatPayload`
-	const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
-	const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
+	// const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
+	// const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
 
 	// Invoke the search_vector_similarity function from weaviate_utils
 	const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
@@ -218,13 +135,13 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	}
 
 	// Print out the user messages so far via chat messages
-	const userMessages = chatMessages.filter((msg) => msg.role === 'user');
-	console.log('\n\n***CHAT_HELPER.JS -> Only USER messages so far via chatmessages:\n');
-	userMessages.forEach((msg, index) => {
-		console.log(`\n${index + 1}. ${msg.content}\n`);
-		// Call frustrationCounter for each user message
-		frustrationCounter(msg.content);
-	});
+	// const userMessages = chatMessages.filter((msg) => msg.role === 'user');
+	// console.log('\n\n***CHAT_HELPER.JS -> Only USER messages so far via chatmessages:\n');
+	// userMessages.forEach((msg, index) => {
+	// 	console.log(`\n${index + 1}. ${msg.content}\n`);
+	// 	// Call frustrationCounter for each user message
+	// 	frustrationCounter(msg.content);
+	// });
 
 	// Print frustration count after each user message is processed
 	console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT including latest response: ${frustrationCount}`);
@@ -331,23 +248,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			let turboCost = (totalTokens / 1000) * turboCostPerToken;
 			let gpt4Cost = (totalTokens / 1000) * gpt4CostPerToken;
 
-			// // Function to format cost
-			// function formatCost(cost) {
-			// 	// Convert cost to string
-			// 	let costStr = cost.toString();
 
-			// 	// Split costStr at decimal point
-			// 	let [_, frac] = costStr.split('.');
-
-			// 	// Find index of first non-zero digit in frac
-			// 	let firstNonZeroIndex = [...frac].findIndex(char => char !== '0');
-
-			// 	// Calculate n
-			// 	let n = firstNonZeroIndex + 3;
-
-			// 	// Return cost formatted to n decimal places
-			// 	return `$${cost.toFixed(n)}`;
-			// }
 
 			console.log('\n\n***CHAT_HELPER.JS: Total tokens used so far in this chat:', totalTokens);
 			console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', formatCost(turboCost));
@@ -388,10 +289,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 					if (JSON.stringify(newCleanChatMessages) !== oldChatMessages) {
 						//console.log('\n\n***CHAT_HELPER.JS: The newCleanChatMessages before and after running formatChatPayload() are different. The newCleanChatMessages after re-formatting is now: ', newCleanChatMessages);
 					}
-
-
-
-
 
 
 					try {
@@ -439,7 +336,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 							}
 						} 
 						catch(err)  {
-							//console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> Error fetching data from DB:', err);
+							console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> Error fetching data from DB:', err);
 						}
 
 						result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
@@ -452,15 +349,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 						//console.log('\n\n***CHAT_HELPER.JS_TRYPATHS: Most up to date payload via DB recreation: ', rebuiltPayloadViaDB);
 					
 					} catch (error) {
-						//console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> An error occurred during communication with OpenAI: ', error);
+						console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> An error occurred during communication with OpenAI: ', error);
 					}
-
-
-
-
-
-
-
 
 				}
 			}
