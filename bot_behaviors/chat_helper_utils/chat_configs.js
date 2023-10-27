@@ -68,9 +68,49 @@ const shouldRequery = (responseContent) => {
 	return bot_response_patterns.some(pattern => lowerCasedResponse.includes(pattern));
 };
 
+// Define the frustrationCounter function
+const frustrationPrompts = [
+    "you're not getting it",
+    "you don't understand",
+    "no",
+    "not right",
+    "incorrect",
+    "wrong",
+    "that's not correct",
+    "try again",
+    "you're not listening",
+    "you're missing the point",
+    "you're off the mark",
+    "that's not right",
+    "you're not making sense",
+    "I didn't ask for this",
+    "that doesn't help",
+    "you're misunderstanding",
+    "stop wasting my time",
+    "you're clueless",
+    "you're not helping",
+    "this is frustrating"
+    // Add more phrases as required...
+];
+
+function frustrationCounter(userMessage) {
+    let frustrationCount = 0; // Initialize the variable
+    const lowerCasedMessageWords = userMessage.toLowerCase().split(' ');
+
+    for (let prompt of frustrationPrompts) {
+        if (lowerCasedMessageWords.includes(prompt.toLowerCase())) {
+            frustrationCount++;
+            console.log(`\n\n***CHAT_CONFIGS.JS: FRUSTRATION COUNT prior to incoming message: ${frustrationCount}`);
+            break;
+        }
+    }
+    return frustrationCount;
+}
+
 module.exports = {
 	validateOpenAITokens,
 	shouldRequery,
-	formatChatPayload
+	formatChatPayload,
+    frustrationCounter,
 	//...other exports...
 };
