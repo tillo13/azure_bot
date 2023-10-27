@@ -105,8 +105,8 @@ function extractMessages(chatMessages) {
 		newCleanChatMessages.push(certainlyMessages[certainlyMessages.length - 1]);
 	}}
 
-	return {newCleanChatMessages, duplicatesRemoved}; //certianlyMessages removed from here
-   }
+	return {newCleanChatMessages, duplicatesRemoved, certainlyMessages};
+}
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 	const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
@@ -129,7 +129,9 @@ const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
 		};
 	}
 	//const { newCleanChatMessages, duplicatesRemoved } = extractMessages(chatMessages);
-	const { newCleanChatMessages, duplicatesRemoved, certainlyMessages } = extractMessages(chatMessages);
+	//const { newCleanChatMessages, duplicatesRemoved, certainlyMessages } = extractMessages(chatMessages);
+	const {newCleanChatMessages, duplicatesRemoved} = extractMessages(chatMessages);
+
 
 
 	// let cleanConversation = '';
