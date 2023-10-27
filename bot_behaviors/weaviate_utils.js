@@ -49,12 +49,12 @@ async function initialSearchVectorSimilarity(searchTerm) {
 
         return data;
     } catch(e) {
-        console.log(`There was a problem with the fetch operation: ${e.message}`);
+        console.log(`\n\n******WEAVIATE_UTILS.JS: There was a problem with the fetch operation: ${e.message}`);
     }
 }
 
 async function handleSearchSimilarity(lastUserMessage){
-    const weaviateResponse = await search_vector_similarity(lastUserMessage);
+    const weaviateResponse = await initialSearchVectorSimilarity(lastUserMessage);
     if (weaviateResponse?.data?.Get) {
         // get the class name
         let className = Object.keys(weaviateResponse.data.Get)[0];
@@ -65,24 +65,24 @@ async function handleSearchSimilarity(lastUserMessage){
             : [weaviateResponse.data.Get[className]];
         
         // log the Similarity Response
-        //console.log("\n\n[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response: ", JSON.stringify(responseData, null, 2));
+        //console.log("\n\n[DEBUG] ******WEAVIATE_UTILS.JS: Weaviate Similarity Response: ", JSON.stringify(responseData, null, 2));
 
         responseData.forEach((obj, i) => {
 
             // log a separator for clarity
-            console.log("[DEBUG] === Start Of Response ===");
+            console.log("\n\n[DEBUG]******WEAVIATE_UTILS.JS: === Start Of Response ===");
 
             // Debug print class name, data chunk, certainty
-            console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CLASS]:\n${className}`);
-            console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [DATA_CHUNK]:\n${obj.data_chunk}`);
-            console.log(`[DEBUG] ******CHAT_HELPER.JS: Weaviate Similarity Response [CERTAINTY]:\n${obj._additional.certainty}`);
+            console.log(`[\n\nDEBUG] ******WEAVIATE_UTILS.JS: Weaviate Similarity Response [CLASS]:\n${className}`);
+            console.log(`\n\n[DEBUG] ******WEAVIATE_UTILS.JS:: Weaviate Similarity Response [DATA_CHUNK]:\n${obj.data_chunk}`);
+            console.log(`\n\n[DEBUG] ******WEAVIATE_UTILS.JS:: Weaviate Similarity Response [CERTAINTY]:\n${obj._additional.certainty}`);
 
             // log a separator for clarity
-            console.log("[DEBUG] === End Of Response ===\n");
+            console.log("\n\n[DEBUG]******WEAVIATE_UTILS.JS: === End Of Response ===\n");
         });
         return {className: className, data: responseData};
     } else {
-        console.log("Could not communicate with Weaviate");
+        console.log("\n\n******WEAVIATE_UTILS.JS: Could not communicate with Weaviate");
         return null;
     }
 }
