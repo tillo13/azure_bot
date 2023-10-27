@@ -4,7 +4,7 @@ const {
     shouldRequery, 
     formatChatPayload, 
     frustrationCounter, 
-    // formatCost
+    formatCost
   } = require('./chat_helper_utils/chat_configs');
 const searchVectorSimilarity = require('./weaviate_utils');
 
@@ -331,23 +331,23 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			let turboCost = (totalTokens / 1000) * turboCostPerToken;
 			let gpt4Cost = (totalTokens / 1000) * gpt4CostPerToken;
 
-			// Function to format cost
-			function formatCost(cost) {
-				// Convert cost to string
-				let costStr = cost.toString();
+			// // Function to format cost
+			// function formatCost(cost) {
+			// 	// Convert cost to string
+			// 	let costStr = cost.toString();
 
-				// Split costStr at decimal point
-				let [_, frac] = costStr.split('.');
+			// 	// Split costStr at decimal point
+			// 	let [_, frac] = costStr.split('.');
 
-				// Find index of first non-zero digit in frac
-				let firstNonZeroIndex = [...frac].findIndex(char => char !== '0');
+			// 	// Find index of first non-zero digit in frac
+			// 	let firstNonZeroIndex = [...frac].findIndex(char => char !== '0');
 
-				// Calculate n
-				let n = firstNonZeroIndex + 3;
+			// 	// Calculate n
+			// 	let n = firstNonZeroIndex + 3;
 
-				// Return cost formatted to n decimal places
-				return `$${cost.toFixed(n)}`;
-			}
+			// 	// Return cost formatted to n decimal places
+			// 	return `$${cost.toFixed(n)}`;
+			// }
 
 			console.log('\n\n***CHAT_HELPER.JS: Total tokens used so far in this chat:', totalTokens);
 			console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', formatCost(turboCost));

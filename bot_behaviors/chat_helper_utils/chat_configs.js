@@ -1,7 +1,7 @@
 const MAX_TOKENS = 4096;
 
 const validateOpenAITokens = (tokens) => {
-    const isValid = tokens > 0 && tokens <= MAX_TOKENS;    
+    const isValid = tokens > 0 && tokens <= MAX_TOKENS;
     console.log(`\n\nCHAT_CONFIGS.JS: Token count: ${tokens}, is valid: ${isValid}`);
 
     if (!isValid) {
@@ -16,56 +16,55 @@ const formatChatPayload = (chatMessages, cleanedFormattedMessages, lastUserMessa
     const lastIndex = chatMessages.map(item => item.content).lastIndexOf(checkMessage);
     console.log('\n\n***CHAT_CONFIGS.JS: Value of lastIndex variable: ', lastIndex);
 
-	if (lastIndex > -1) {
-		const newResponses = buildNewResponses(lastUserMessage, cleanedFormattedMessages);
-		chatMessages.push(...newResponses);
-	}
-	return chatMessages;
+    if (lastIndex > -1) {
+        const newResponses = buildNewResponses(lastUserMessage, cleanedFormattedMessages);
+        chatMessages.push(...newResponses);
+    }
+    return chatMessages;
 };
 
 //isolating function for building response
-const buildNewResponses = (lastUserMessage, cleanedFormattedMessages) => [
-	{
-		role: 'assistant',
-		content: `I could not find a suitable response to your latest message of: ${lastUserMessage}. Please respond with your conversation history to this point and I will investigate.`
-	},
-	{
-		role: 'user',
-		content: `Certainly, here is what I have said so far. Here are your past conversations: ${cleanedFormattedMessages}. Based on this, can you answer this question: ${lastUserMessage}? If not, suggest a topic we have discussed already.`
-	}
+const buildNewResponses = (lastUserMessage, cleanedFormattedMessages) => [{
+        role: 'assistant',
+        content: `I could not find a suitable response to your latest message of: ${lastUserMessage}. Please respond with your conversation history to this point and I will investigate.`
+    },
+    {
+        role: 'user',
+        content: `Certainly, here is what I have said so far. Here are your past conversations: ${cleanedFormattedMessages}. Based on this, can you answer this question: ${lastUserMessage}? If not, suggest a topic we have discussed already.`
+    }
 ];
 
 const bot_response_patterns = [
-	"as an artificial intelligence",
-	"as a digital assistant",
-	"as a computer program",
-	"as a helpful assistant",
-	"as a virtual assistant",
-	"as a language model",
-	"access to personal information",
-	"access to previous conversations",
-	"shared in previous conversations",
-	"have access to past conversations",
-	"just a virtual assistant",
-	"as a text-based AI",
-	"as an AI system",
-	"being a digital entity",
-	"as an AI",
-	"as a machine learning model",
-	"as a AI assistant",
-	"as a machine learning assistant",
-	"access to the conversation",
-	"have access to personal data",
-	"not privy to that information",
-	"just a helpful assistant",
-	"just an ai"
-	// Include any more patterns...
+    "as an artificial intelligence",
+    "as a digital assistant",
+    "as a computer program",
+    "as a helpful assistant",
+    "as a virtual assistant",
+    "as a language model",
+    "access to personal information",
+    "access to previous conversations",
+    "shared in previous conversations",
+    "have access to past conversations",
+    "just a virtual assistant",
+    "as a text-based AI",
+    "as an AI system",
+    "being a digital entity",
+    "as an AI",
+    "as a machine learning model",
+    "as a AI assistant",
+    "as a machine learning assistant",
+    "access to the conversation",
+    "have access to personal data",
+    "not privy to that information",
+    "just a helpful assistant",
+    "just an ai"
+    // Include any more patterns...
 ].map(pattern => pattern.toLowerCase()); //convert all patterns to lower case once
 
 const shouldRequery = (responseContent) => {
-	const lowerCasedResponse = responseContent.toLowerCase();
+    const lowerCasedResponse = responseContent.toLowerCase();
     console.log('\n\n***CHAT_CONFIG.JS: Running shouldRequery() with responseContent:', responseContent);
-	return bot_response_patterns.some(pattern => lowerCasedResponse.includes(pattern));
+    return bot_response_patterns.some(pattern => lowerCasedResponse.includes(pattern));
 };
 
 // Define the frustrationCounter function
@@ -107,10 +106,32 @@ function frustrationCounter(userMessage) {
     return frustrationCount;
 }
 
+// Function to format cost
+function formatCost(cost) {
+    // Convert cost to string
+    let costStr = cost.toString();
+
+    // Split costStr at decimal point
+    let [_, frac] = costStr.split('.');
+
+    // Find index of first non-zero digit in frac
+    let firstNonZeroIndex = [...frac].findIndex(char => char !== '0');
+
+    // Calculate n
+    let n = firstNonZeroIndex + 3;
+
+    // Print n to console
+    console.log("\n\nCHAT_CONFIGS: Number of decimal places in formatCost:", n);
+
+    // Return cost formatted to n decimal places
+    return `$${cost.toFixed(n)}`;
+}
+
 module.exports = {
-	validateOpenAITokens,
-	shouldRequery,
-	formatChatPayload,
+    validateOpenAITokens,
+    shouldRequery,
+    formatChatPayload,
     frustrationCounter,
-	//...other exports...
+    formatCost,
+    //...other exports...
 };
