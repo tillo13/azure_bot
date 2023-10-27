@@ -33,7 +33,6 @@ let chatIdHistoryLog = []; // Global usage of array
 
 
 async function initializeChat(chatTexts, roleMessage) {
-
     let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
 
     if (!chatMessages.length || chatMessages[0].role !== "system") {
@@ -45,7 +44,6 @@ async function initializeChat(chatTexts, roleMessage) {
 
     const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
     const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
-
     const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
 
     const userMessages = chatMessages.filter((msg) => msg.role === 'user');
@@ -58,36 +56,45 @@ async function initializeChat(chatTexts, roleMessage) {
     return { chatMessages, lastUserMessage };
 }
 
+async function interactWithOpenAI(deploymentId, newCleanChatMessages, validatedTokens) {
+
+    const endpoint = process.env.OPENAI_API_BASE_URL;
+    const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
+	const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
+	const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
+	if (!validatedTokens) return;
+    
+    let result;
+    try {
+        result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
+            maxTokens: validatedTokens
+        });
+    } catch(error) {
+        console.error("An error occurred while interacting with OpenAI API", error);
+        throw error;
+    }
+
+    return result;
+}
 
 let chatHistory = [];
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 	const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
 
 	let frustrationCount = 0;
-
 	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Is the slack thread active?:', isActiveThread);
 	//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: The incoming payload is coming from: ', channelId);
 
-	const endpoint = process.env.OPENAI_API_BASE_URL;
-	const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
-	//debug
-	//console.log("\n\n[DEBUG] OpenAIClient:", JSON.stringify(client));
+	// const endpoint = process.env.OPENAI_API_BASE_URL;
+	// const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
+	// //debug
+	// //console.log("\n\n[DEBUG] OpenAIClient:", JSON.stringify(client));
 
-	const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
-	const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
-	if (!validatedTokens) return;
+	// const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
+	// const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
+	// if (!validatedTokens) return;
 
-	// let chatMessages = Array.isArray(chatTexts) ? chatTexts : [];
-
-	// if (!chatMessages.length || chatMessages[0].role !== "system") {
-	// 	chatMessages.unshift({
-	// 		role: "system",
-	// 		content: roleMessage
-	// 	});
-	// }
-	// Fetch the last user message before calling `formatChatPayload`
-	// const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
-	// const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
+	let result = await interactWithOpenAI(deploymentId, newCleanChatMessages, validatedTokens);
 
 	// Invoke the search_vector_similarity function from weaviate_utils
 	const weaviateResponse = await searchVectorSimilarity(lastUserMessage);
@@ -133,16 +140,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			console.log("Couldn't parse anything from the Weaviate server");
 		}
 	}
-
-	// Print out the user messages so far via chat messages
-	// const userMessages = chatMessages.filter((msg) => msg.role === 'user');
-	// console.log('\n\n***CHAT_HELPER.JS -> Only USER messages so far via chatmessages:\n');
-	// userMessages.forEach((msg, index) => {
-	// 	console.log(`\n${index + 1}. ${msg.content}\n`);
-	// 	// Call frustrationCounter for each user message
-	// 	frustrationCounter(msg.content);
-	// });
-
 	// Print frustration count after each user message is processed
 	console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT including latest response: ${frustrationCount}`);
 
@@ -198,9 +195,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		//this won't work because this IS the place it is created -> console.log("\n\n***CHAT_HELPER.JS ->Result.id value (right after newCLeanChatMessages):", result.id);
 
 
-		let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
-			maxTokens: validatedTokens
-		});
+		// let result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
+		// 	maxTokens: validatedTokens
+		// });
 		//DEBUG_PATH: console.log("\n\n[DEBUG] Result from OpenAI:", JSON.stringify(result));
 
 		// Add result to global chatcmplHistory array 2023oct17
