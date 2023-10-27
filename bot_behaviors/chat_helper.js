@@ -90,16 +90,14 @@ function extractMessages(chatMessages) {
 	   const role = msg.role.toUpperCase();
 	   cleanConversation += `\n${index + 1}. ${role} : ${msg.content}\n`;
 	});
-
-	console.log('\n\n***CHAT_HELPER.JS: [DEBUG] Clean Conversation:', cleanConversation); // print cleanConversation
-
 	const oldChatMessages = JSON.stringify(chatMessages);
 	let newCleanChatMessages = chatMessages.filter(item =>
 	   !item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
 	let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
 	newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
+	const certainlyMessages = newCleanChatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far')); // Add this line to the extractMessages function
 	const duplicatesRemoved = oldChatMessages.length - newCleanChatMessages.length;
-	return {newCleanChatMessages, duplicatesRemoved};
+	return {newCleanChatMessages, duplicatesRemoved, certainlyMessages}; // And add certainlyMessages here also for returning
    }
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
@@ -122,7 +120,9 @@ const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
 			'assistantResponse': responseMessage
 		};
 	}
-	const { newCleanChatMessages, duplicatesRemoved } = extractMessages(chatMessages);
+	//const { newCleanChatMessages, duplicatesRemoved } = extractMessages(chatMessages);
+	const { newCleanChatMessages, duplicatesRemoved, certainlyMessages } = extractMessages(chatMessages);
+
 
 	// let cleanConversation = '';
 
