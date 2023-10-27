@@ -5,7 +5,7 @@ const {
     formatChatPayload, 
     // frustrationCounter, 
     // formatCost
-  } = require('./chat_helper_utilities/chat_configs');
+  } = require('./chat_helper_utils/chat_configs');
 const searchVectorSimilarity = require('./weaviate_utils');
 
 
