@@ -1,3 +1,6 @@
+const modelCosts = require('../openai_costs_2023sept7.json'); //Add required import
+
+
 const MAX_TOKENS = 4096;
 
 const validateOpenAITokens = (tokens) => {
@@ -136,6 +139,21 @@ function handleFrustration(frustrationCount) {
     }
     return null;
 }
+
+function calculateCost(totalTokens) {
+    const turboCostPerToken = modelCosts['Language Models']['GPT-3.5 Turbo']['4K context']['Output'];
+    const gpt4CostPerToken = modelCosts['Language Models']['GPT-4']['8K context']['Output'];
+
+    let turboCost = (totalTokens / 1000) * turboCostPerToken;
+    let gpt4Cost = (totalTokens / 1000) * gpt4CostPerToken;
+
+    console.log('\n\n***CHAT_CONFIGS.JS: Total tokens used so far in this chat:', totalTokens);
+    console.log('\n\n***CHAT_CONFIGS.JS: If GPT-3.5 Turbo, the cost is:', formatCost(turboCost));
+    console.log('\n\n***CHAT_CONFIGS.JS: if GPT-4, the cost is:', formatCost(gpt4Cost));
+
+    return { turboCost, gpt4Cost };
+}
+
 module.exports = {
     validateOpenAITokens,
     shouldRequery,
@@ -143,5 +161,6 @@ module.exports = {
     frustrationCounter,
     handleFrustration,
     formatCost,
+    calculateCost
     //...other exports...
 };
