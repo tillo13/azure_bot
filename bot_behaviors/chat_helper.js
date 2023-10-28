@@ -104,13 +104,14 @@ function extractMessages(chatMessages, noChatManipulation = false) {
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
     const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
-
-	//initialize this variable to the chatMessages array to uses noChatManipulation = false
-	newCleanChatMessages = chatMessages;
     
-	let frustrationCount = 0;
+    // initialize this variable with a value of chatMessages
+    let newCleanChatMessages = chatMessages;
+    
+    let frustrationCount = 0;
 
-	const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
+    const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
+}
 
 	// Print frustration count after each user message is processed
 	console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT including latest response: ${frustrationCount}`);
@@ -122,7 +123,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	    };
 	}
 
-//this TRUE/FALSE passing tells the extract method to not clean or change the chat messages
+//this TRUE/FALSE passing tells the extract method to not clean or change the extractMessages array true == just ingest the array as is from openai
 	const {newCleanChatMessages, duplicatesRemoved} = extractMessages(chatMessages, true);
 
 
@@ -375,5 +376,5 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		console.error("\n\n***CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
 		throw error;
 	}
-}
+
 module.exports = chatCompletion;
