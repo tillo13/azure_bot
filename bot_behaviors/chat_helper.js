@@ -192,9 +192,12 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			// this seems to not be correct, try the below let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
 			//need it as an await let {newCleanChatMessages, rebuiltPayloadViaDB, result} = handleLetMeCheckFlagCondition(newCleanChatMessages, result, deploymentId, validatedTokens);
 			// need to pass all previous things in let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, deploymentId, validatedTokens);
-			let result = await interactWithOpenAI(newCleanChatMessages);
-			await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
+			//let result = await interactWithOpenAI(newCleanChatMessages);
+			//await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
 			//let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
+
+			result = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
+
 
 
 
@@ -420,9 +423,10 @@ async function handleLetMeCheckFlagCondition(newCleanChatMessages, result, valid
     }
 
     try {
-        result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
-            maxTokens: validatedTokens
-        });
+        //result = await client.getChatCompletions(deploymentId, newCleanChatMessages, {
+		//maxTokens: validatedTokens
+		result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+		return {newCleanChatMessages, rebuiltPayloadViaDB, result};
     } catch (error) {
         console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> An error occurred during communication with OpenAI: ', error);
     }
