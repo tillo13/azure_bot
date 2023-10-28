@@ -102,30 +102,11 @@ function extractMessages(chatMessages, noChatManipulation = false) {
     return {newCleanChatMessages, duplicatesRemoved, certainlyMessages};
 }
 
-
-function removeDuplicatesAndCertainlyMessages(chatMessages) {
-	let newCleanChatMessages = chatMessages.filter(item =>
-		!item.content.toLowerCase().startsWith('certainly, here is what I have said so far')
-	);
- 
-	let uniqueMessages = new Set(newCleanChatMessages.map(JSON.stringify));
-	newCleanChatMessages = Array.from(uniqueMessages).map(JSON.parse);
- 
-	const certainlyMessages = cleanChatMessages.filter(item => {
-		let content = item.content.toLowerCase();
-		return content.startsWith('certainly, here is what I have said so far');
-	});
- 
-	// If there are any 'Certainly' messages, only keep the last one
-	if (certainlyMessages.length > 0) {
-		newCleanChatMessages.push(certainlyMessages[certainlyMessages.length - 1]);
-	}
- 
-	return newCleanChatMessages;
- }
-
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
     const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
+
+	//initialize this variable to the chatMessages array to uses noChatManipulation = false
+	newCleanChatMessages = chatMessages;
     
 	let frustrationCount = 0;
 
