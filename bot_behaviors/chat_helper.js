@@ -332,8 +332,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 				  turboCost,
 				  gpt4Cost
 				} = calculateCost(result.usage.totalTokens);
+				console.log(`\n\n***CHAT_HELPER.JS: Calculation successful. Total Tokens: ${result.usage.totalTokens}`);
 			} else {
-				console.log('The expected result.usage.totalTokens information is not available.');
+				console.log('\n\n***CHAT_HELPER.JS: The expected result.usage.totalTokens information is not available.');
 			}
 
             //debug
