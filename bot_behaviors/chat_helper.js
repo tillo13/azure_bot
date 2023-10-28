@@ -79,6 +79,8 @@ let chatHistory = [];
 
 
 function extractMessages(chatMessages, noChatManipulation = false) {
+    console.log(`\n\n***CHAT_HELPER.JS: noChatManipulation is set to: ${noChatManipulation}. If true, the function will only return the input chatMessages array as is, without any manipulation or cleaning. If false, the function will perform manipulation and cleaning on the chatMessages array.`);
+
     if (noChatManipulation) {
         return { newCleanChatMessages: chatMessages, duplicatesRemoved: 0, certainlyMessages: [] };
     }
