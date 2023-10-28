@@ -27,8 +27,8 @@ async function initializeChat(chatTexts, roleMessage) {
     const lastUserMessageObj = chatMessages.filter((msg) => msg.role === 'user').pop();
     const lastUserMessage = lastUserMessageObj ? lastUserMessageObj.content : '';
     const weaviateResponse = await initialSearchVectorSimilarity(lastUserMessage);
-    const userMessages = chatMessages.filter((msg) => msg.role === 'user');
-    console.log('\n\n***CHAT_HELPER.JS -> Only USER messages so far via chatmessages:\n');
+    let userMessages = chatMessages.filter((msg) => msg.role === 'user');
+    console.log('\n\n***CHAT_HELPER.JS -> Only USER messages so far via chatmessages:\n');      
     userMessages.forEach((msg, index) => {
         console.log(`\n${index + 1}. ${msg.content}\n`);
         // Call frustrationCounter for each user message
