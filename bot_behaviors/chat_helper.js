@@ -400,12 +400,16 @@ async function saveChatToDB(result, lastUserMessage, isActiveThread, channelId, 
 }
 
 
-async function handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage) {
+async function handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, chatIdHistoryLog, lastUserMessage) {
+    
+    const endpoint = process.env.OPENAI_API_BASE_URL;
+    const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));  
+    const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
 
 	
     let rebuiltPayloadViaDB = [];
 
-    const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
+
 
     if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
         let newPayload = newCleanChatMessages.filter(item => !item.content.startsWith('Certainly'));
