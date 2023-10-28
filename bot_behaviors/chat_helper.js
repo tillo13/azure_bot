@@ -115,6 +115,38 @@ function calculateCost(totalTokens) {
     return { turboCost, gpt4Cost };
 }
 
+async function handleLetMeCheckFlag(state, clientId) {
+	const {newCleanChatMessages, letMeCheckFlag, clientId} = state;
+	
+	if (letMeCheckFlag) {
+		if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
+			let newPayload = newCleanChatMessages.filter(item => !item.content.startsWith('Certainly'));
+			let uniquePayload = new Set(newCleanChatMessages.map(JSON.stringify));
+			newCleanChatMessages = Array.from(uniquePayload).map(JSON.parse);
+
+			if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
+				const newResponses = [{role: 'assistant', content: `Let me check our past conversations in this exact thread, one moment...` }];
+				newCleanChatMessages.push(...newResponses);
+			}
+
+			let looped_through_newCleanChatMessages = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(',');
+			newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_newCleanChatMessages, lastUserMessage);
+			
+			chatHistory = newCleanChatMessages;
+
+			let rebuiltPayloadViaDB = [];
+			let AadObjectId = await getAADObjectIdFromDB(ClientId);
+			let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
+			newCleanChatMessages = last24HrInteractionData;
+			rebuiltPayloadViaDB = await recreateGptPayloadViaDB(AadObjectId[0].msteam_recipient_aad_object_id);
+			
+			state.newCleanChatMessages = newCleanChatMessages;
+			state.rebuiltPayloadViaDB = rebuiltPayloadViaDB;
+		}
+	}
+
+	return letMeCheckFlagContext;
+}
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 	const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
 
@@ -202,109 +234,114 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			// console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', formatCost(turboCost));
 			// console.log('\n\n***CHAT_HELPER.JS: if GPT-4, the cost is:', formatCost(gpt4Cost));
 
-			if (letMeCheckFlag) {
-				//debug
-				console.log("\n\n***CHAT_HELPER.JS ->Result.id value (within first letMeCheckFlag conditional):", result.id);
-				console.log('\n\n***CHAT_HELPER.JS: Entered the letMeCheckFlag "true" condition.');
-				if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
-					let newPayload = newCleanChatMessages.filter(item => !item.content.startsWith('Certainly'));
-					let uniquePayload = new Set(newCleanChatMessages.map(JSON.stringify));
-					newCleanChatMessages = Array.from(uniquePayload).map(JSON.parse);
+if (letMeCheckFlag) {
+	let state = {newCleanChatMessages, letMeCheckFlag, clientId}
+	handleLetMeCheckFlag(state, clientId);
+}
 
-					if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
-						//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
-						const newResponses = [{
-							role: 'assistant',
-							content: `Let me check our past conversations in this exact thread, one moment...`
-						}, ];
-						//DEBUG_PATH: console.log('New responses: ', newResponses);
-						newCleanChatMessages.push(...newResponses);
+		// 	if (letMeCheckFlag) {
+		// 		//debug
+		// 		console.log("\n\n***CHAT_HELPER.JS ->Result.id value (within first letMeCheckFlag conditional):", result.id);
+		// 		console.log('\n\n***CHAT_HELPER.JS: Entered the letMeCheckFlag "true" condition.');
+		// 		if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
+		// 			let newPayload = newCleanChatMessages.filter(item => !item.content.startsWith('Certainly'));
+		// 			let uniquePayload = new Set(newCleanChatMessages.map(JSON.stringify));
+		// 			newCleanChatMessages = Array.from(uniquePayload).map(JSON.parse);
 
-						console.log("\n\n***CHAT_HELPER.JS: 'Let me check our past conversations...' added to newCleanChatMessages since it's not present in previous message");
-					} else {
-						console.log("\n\n***CHAT_HELPER.JS: 'Let me check our past conversations...' detected in previous message, not adding it to newCleanChatMessages");
-					}
+		// 			if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
+		// 				//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
+		// 				const newResponses = [{
+		// 					role: 'assistant',
+		// 					content: `Let me check our past conversations in this exact thread, one moment...`
+		// 				}, ];
+		// 				//DEBUG_PATH: console.log('New responses: ', newResponses);
+		// 				newCleanChatMessages.push(...newResponses);
 
-					let looped_through_newCleanChatMessages = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(',');
-					newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_newCleanChatMessages, lastUserMessage);
-					console.log("\n\n***CHAT_HELPER.JS:[DEBUG] newCleanChatMessages after formatChatPayload():", JSON.stringify(newCleanChatMessages));
+		// 				console.log("\n\n***CHAT_HELPER.JS: 'Let me check our past conversations...' added to newCleanChatMessages since it's not present in previous message");
+		// 			} else {
+		// 				console.log("\n\n***CHAT_HELPER.JS: 'Let me check our past conversations...' detected in previous message, not adding it to newCleanChatMessages");
+		// 			}
 
-
-					chatHistory = newCleanChatMessages;
-
-					//console.log('\n\n***CHAT_HELPER.JS: After running formatChatPayload(), newCleanChatMessages is now: ', newCleanChatMessages); 
-
-					if (JSON.stringify(newCleanChatMessages) !== oldChatMessages) {
-						//console.log('\n\n***CHAT_HELPER.JS: The newCleanChatMessages before and after running formatChatPayload() are different. The newCleanChatMessages after re-formatting is now: ', newCleanChatMessages);
-					}
+		// 			let looped_through_newCleanChatMessages = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(',');
+		// 			newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_newCleanChatMessages, lastUserMessage);
+		// 			console.log("\n\n***CHAT_HELPER.JS:[DEBUG] newCleanChatMessages after formatChatPayload():", JSON.stringify(newCleanChatMessages));
 
 
-					try {
-						//console.log('\n\n***CHAT_HELPER.JS_TRYPATH Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages);
+		// 			chatHistory = newCleanChatMessages;
+
+		// 			//console.log('\n\n***CHAT_HELPER.JS: After running formatChatPayload(), newCleanChatMessages is now: ', newCleanChatMessages); 
+
+		// 			if (JSON.stringify(newCleanChatMessages) !== oldChatMessages) {
+		// 				//console.log('\n\n***CHAT_HELPER.JS: The newCleanChatMessages before and after running formatChatPayload() are different. The newCleanChatMessages after re-formatting is now: ', newCleanChatMessages);
+		// 			}
+
+
+		// 			try {
+		// 				//console.log('\n\n***CHAT_HELPER.JS_TRYPATH Most up to date payload before sending to OpenAI after restructure: ', newCleanChatMessages);
 					
-						//console.log("\n\n***CHAT_HELPER.JS: TRYPATH running chatIdHistoryLog: ", chatIdHistoryLog);
+		// 				//console.log("\n\n***CHAT_HELPER.JS: TRYPATH running chatIdHistoryLog: ", chatIdHistoryLog);
 					
-						// Declare a variable to store a found AAD Object ID
-						let foundAadObjectId = null;
+		// 				// Declare a variable to store a found AAD Object ID
+		// 				let foundAadObjectId = null;
 					
-						let aadObj = await getAADObjectIdFromDB(chatIdHistoryLog);
-						if (aadObj.length > 0) {
-							// a match was found in DB for one or more chatIDs in chatIdHistoryLog
-							//console.log("\n\n***CHAT_HELPER.JS: TRYPATH found a match! This is in the database:  ", aadObj);
+		// 				let aadObj = await getAADObjectIdFromDB(chatIdHistoryLog);
+		// 				if (aadObj.length > 0) {
+		// 					// a match was found in DB for one or more chatIDs in chatIdHistoryLog
+		// 					//console.log("\n\n***CHAT_HELPER.JS: TRYPATH found a match! This is in the database:  ", aadObj);
 					
-							// Store the found AAD Object ID
-							foundAadObjectId = aadObj[0].msteam_recipient_aad_object_id;
-						} else {
-							// no matches were found in DB for any chatIDs in chatIdHistoryLog
-							//console.log("\n\n***CHAT_HELPER.JS: TRYPATH found no matches in database for provided chat IDs");
-						}
+		// 					// Store the found AAD Object ID
+		// 					foundAadObjectId = aadObj[0].msteam_recipient_aad_object_id;
+		// 				} else {
+		// 					// no matches were found in DB for any chatIDs in chatIdHistoryLog
+		// 					//console.log("\n\n***CHAT_HELPER.JS: TRYPATH found no matches in database for provided chat IDs");
+		// 				}
 					
-						console.log("\n\n***CHAT_HELPER.JS_TRYPATH ->Result.id value (before secondary request to OpenAI):", result.id);
-						let rebuiltPayloadViaDB = [];
-						try {
-							let AadObjectId;
-							if (foundAadObjectId) {
-								AadObjectId = [{ msteam_recipient_aad_object_id: foundAadObjectId }];
-							} else {
-								AadObjectId = await getAADObjectIdFromDB(result.id);
-								if (AadObjectId.length === 0) {
-									AadObjectId = [{ msteam_recipient_aad_object_id: 'noChatIdFound' }]; // Fallback value
-								}
-							}
+		// 				console.log("\n\n***CHAT_HELPER.JS_TRYPATH ->Result.id value (before secondary request to OpenAI):", result.id);
+		// 				let rebuiltPayloadViaDB = [];
+		// 				try {
+		// 					let AadObjectId;
+		// 					if (foundAadObjectId) {
+		// 						AadObjectId = [{ msteam_recipient_aad_object_id: foundAadObjectId }];
+		// 					} else {
+		// 						AadObjectId = await getAADObjectIdFromDB(result.id);
+		// 						if (AadObjectId.length === 0) {
+		// 							AadObjectId = [{ msteam_recipient_aad_object_id: 'noChatIdFound' }]; // Fallback value
+		// 						}
+		// 					}
 					
-							console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->AAD Object ID we will query:', AadObjectId);
-							if (AadObjectId.length > 0) {
-								let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
-								//console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Swapping newCleanChatMessages for last24HrInteractionData...');
-								//console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Last 24 Hr Interaction Data received from CHATGPT_UTILS.JS');
-								newCleanChatMessages = last24HrInteractionData;
+		// 					console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->AAD Object ID we will query:', AadObjectId);
+		// 					if (AadObjectId.length > 0) {
+		// 						let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
+		// 						//console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Swapping newCleanChatMessages for last24HrInteractionData...');
+		// 						//console.log('\n\n***CHAT_HELPER.JS_TRYPATH ->Last 24 Hr Interaction Data received from CHATGPT_UTILS.JS');
+		// 						newCleanChatMessages = last24HrInteractionData;
 					
-								// Call the recreateGptPayloadViaDB function and store the result in rebuiltPayloadViaDB
-								rebuiltPayloadViaDB = await recreateGptPayloadViaDB(AadObjectId[0].msteam_recipient_aad_object_id);
-							}
-						} 
-						catch(err)  {
-							console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> Error fetching data from DB:', err);
-						}
+		// 						// Call the recreateGptPayloadViaDB function and store the result in rebuiltPayloadViaDB
+		// 						rebuiltPayloadViaDB = await recreateGptPayloadViaDB(AadObjectId[0].msteam_recipient_aad_object_id);
+		// 					}
+		// 				} 
+		// 				catch(err)  {
+		// 					console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> Error fetching data from DB:', err);
+		// 				}
 
-						result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
-						//console.log("\n\n***CHAT_HELPER.JS_TRYPATH ->Result.id value (after secondary request to OpenAI):", result.id);
+		// 				result = await client.getChatCompletions(deploymentId, newCleanChatMessages, { maxTokens: validatedTokens });
+		// 				//console.log("\n\n***CHAT_HELPER.JS_TRYPATH ->Result.id value (after secondary request to OpenAI):", result.id);
 					
-						//console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
-						//console.log('\n\n***CHAT_HELPER.JS_TRYPATH: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
+		// 				//console.log("\n\n***CHAT_HELPER.JS: The response from the secondary request to OpenAI is ", result);
+		// 				//console.log('\n\n***CHAT_HELPER.JS_TRYPATH: Most up to date payload after receiving back from OpenAI after restructure: ', newCleanChatMessages);
 					
-						// Log the rebuiltPayloadViaDB
-						//console.log('\n\n***CHAT_HELPER.JS_TRYPATHS: Most up to date payload via DB recreation: ', rebuiltPayloadViaDB);
+		// 				// Log the rebuiltPayloadViaDB
+		// 				//console.log('\n\n***CHAT_HELPER.JS_TRYPATHS: Most up to date payload via DB recreation: ', rebuiltPayloadViaDB);
 					
-					} catch (error) {
-						console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> An error occurred during communication with OpenAI: ', error);
-					}
+		// 			} catch (error) {
+		// 				console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> An error occurred during communication with OpenAI: ', error);
+		// 			}
 
-				}
-			}
-			console.log('\n\n***CHAT_HELPER.JS: Response from OpenAI API with id:\n', JSON.stringify(result.id));
-			console.log('\n\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
-		// console.log('\n\n***CHAT_HELPER.JS: Is the response from chatGPT including one of the [bot_response] patterns?', bot_response_patterns.some(pattern => result.choices[0].message.content.toLowerCase().includes(pattern.toLowerCase())));
+		// 		}
+		// 	}
+		// 	console.log('\n\n***CHAT_HELPER.JS: Response from OpenAI API with id:\n', JSON.stringify(result.id));
+		// 	console.log('\n\n***CHAT_HELPER.JS: letMeCheckFlag is: ', letMeCheckFlag);
+		// // console.log('\n\n***CHAT_HELPER.JS: Is the response from chatGPT including one of the [bot_response] patterns?', bot_response_patterns.some(pattern => result.choices[0].message.content.toLowerCase().includes(pattern.toLowerCase())));
 
 
 			try {
