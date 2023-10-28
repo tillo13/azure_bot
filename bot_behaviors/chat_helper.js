@@ -102,12 +102,11 @@ function extractMessages(chatMessages, noChatManipulation = false) {
     return {newCleanChatMessages, duplicatesRemoved, certainlyMessages};
 }
 
-async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
-	
+async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {  
     const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
-
-	//initialize this variable to the chatMessages array to uses noChatManipulation = false
-	newCleanChatMessages = chatMessages;
+    // Initialize newCleanChatMessages before use
+	let newCleanChatMessages = chatMessages;
+	
     
 	let frustrationCount = 0;
 
@@ -124,11 +123,16 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	}
 
 //this TRUE/FALSE passing tells the extract method to not clean or change the extractMessages array true == just ingest the array as is from openai
-	const {newCleanChatMessages, duplicatesRemoved} = extractMessages(chatMessages, true);
+	//const {newCleanChatMessages, duplicatesRemoved} = extractMessages(chatMessages, true);
+	//const { newCleanChatMessages: cleanChatMessages, duplicatesRemoved } =  extractMessages(chatMessages, true);
+	let { newCleanChatMessages: chatMessagesAfterExtraction, duplicatesRemoved } =  extractMessages(chatMessages, true);
+  
 
 
 	// //send this into the function to query openai
-	let result = await interactWithOpenAI(newCleanChatMessages);
+	//let result = await interactWithOpenAI(newCleanChatMessages);
+	let result = await interactWithOpenAI(chatMessagesAfterExtraction);
+
 
 
 	// Start interacting with OpenAI
@@ -167,7 +171,11 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			console.log("\n\n***CHAT_HELPER.JS ->Result.id value (after response and cost calculations):", result.id);
 
 			// Add the assistant response to newCleanChatMessages array
-			newCleanChatMessages.push({
+			// newCleanChatMessages.push({
+			// 	role: 'assistant',
+			// 	content: assistantResponse
+			// });
+			chatMessagesAfterExtraction.push({
 				role: 'assistant',
 				content: assistantResponse
 			});
@@ -326,7 +334,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 					let_me_check_flag: letMeCheckFlag,
 					requery: letMeCheckFlag,
 					total_tokens: result.usage.totalTokens,
-					payload_source: JSON.stringify(newCleanChatMessages),
+					//payload_source: JSON.stringify(newCleanChatMessages),
+					payload_source: JSON.stringify(chatMessagesAfterExtraction),
 					cleaned_duplicates_count: duplicatesRemoved,
 					total_tokens_in_chat: result.usage.totalTokens,
 					chat_gpt3_5turbo_cost_estimate: turboCost,
@@ -360,7 +369,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 				'assistantResponse': result.choices[0].message.content,
 				'requery': letMeCheckFlag,
 				'letMeCheckFlag': letMeCheckFlag,
-				'chats': newCleanChatMessages
+				//'chats': newCleanChatMessages
+				'chats': chatMessagesAfterExtraction
 			};
 		
 		} else {
@@ -369,7 +379,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 				'assistantResponse': "I'm sorry, I couldn't understand that. Could you please try again?",
 				'requery': false,
 				'letMeCheckFlag': false,
-				'chats': newCleanChatMessages
+				//'chats': newCleanChatMessages
+				'chats': chatMessagesAfterExtraction
 			};
 		}
 	} catch (error) {
