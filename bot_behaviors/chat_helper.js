@@ -89,7 +89,7 @@ function extractMessages(chatMessages, noChatManipulation = false) {
         cleanConversation += `\n${index + 1}. ${role} : ${msg.content}\n`;
     });
     const oldChatMessages = JSON.stringify(chatMessages);
-    let newCleanChatMessages = chatMessages.filter(item =>
+    newCleanChatMessages = chatMessages.filter(item =>
        !item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
     let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
     newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
@@ -103,15 +103,15 @@ function extractMessages(chatMessages, noChatManipulation = false) {
 }
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
+	
     const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
-    
-    // initialize this variable with a value of chatMessages
-    let newCleanChatMessages = chatMessages;
-    
-    let frustrationCount = 0;
 
-    const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
-}
+	//initialize this variable to the chatMessages array to uses noChatManipulation = false
+	newCleanChatMessages = chatMessages;
+    
+	let frustrationCount = 0;
+
+	const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
 
 	// Print frustration count after each user message is processed
 	console.log(`\n\n***CHAT_HELPER.JS: FRUSTRATION COUNT including latest response: ${frustrationCount}`);
@@ -376,5 +376,5 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		console.error("\n\n***CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
 		throw error;
 	}
-
+}
 module.exports = chatCompletion;
