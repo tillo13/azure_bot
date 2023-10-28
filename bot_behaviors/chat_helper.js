@@ -107,20 +107,6 @@ function extractMessages(chatMessages) {
 	return {newCleanChatMessages, duplicatesRemoved, certainlyMessages};
 }
 
-// function calculateCost(totalTokens) {
-//     const turboCostPerToken = modelCosts['Language Models']['GPT-3.5 Turbo']['4K context']['Output'];
-//     const gpt4CostPerToken = modelCosts['Language Models']['GPT-4']['8K context']['Output'];
-
-//     let turboCost = (totalTokens / 1000) * turboCostPerToken;
-//     let gpt4Cost = (totalTokens / 1000) * gpt4CostPerToken;
-
-//     console.log('\n\n***CHAT_HELPER.JS: Total tokens used so far in this chat:', totalTokens);
-//     console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', formatCost(turboCost));
-//     console.log('\n\n***CHAT_HELPER.JS: if GPT-4, the cost is:', formatCost(gpt4Cost));
-
-//     return { turboCost, gpt4Cost };
-// }
-
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
 	const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
 
@@ -186,27 +172,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			});
 
 			console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI: ', newCleanChatMessages);
-
-			//let { turboCost, gpt4Cost } = calculateCost(result.usage.totalTokens);
-
-			// This is where we're going to add the code for cost calculation
-			// Prices per token for GPT-3.5 Turbo and GPT-4
-			// const turboCostPerToken = modelCosts['Language Models']['GPT-3.5 Turbo']['4K context']['Output'];
-			// const gpt4CostPerToken = modelCosts['Language Models']['GPT-4']['8K context']['Output'];
-
-			// // Get total tokens used so far
-			// let totalTokens = result.usage.totalTokens;
-
-
-			// // Calculate costs thus far of the transaction
-			// let turboCost = (totalTokens / 1000) * turboCostPerToken;
-			// let gpt4Cost = (totalTokens / 1000) * gpt4CostPerToken;
-
-
-
-			// console.log('\n\n***CHAT_HELPER.JS: Total tokens used so far in this chat:', totalTokens);
-			// console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', formatCost(turboCost));
-			// console.log('\n\n***CHAT_HELPER.JS: if GPT-4, the cost is:', formatCost(gpt4Cost));
 
 			if (letMeCheckFlag) {
 				//debug
@@ -323,62 +288,68 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		let { turboCost, gpt4Cost } = calculateCost(result.usage.totalTokens);
 
 
-			try {
-				let chat_id;
-				// Attempt to access the result id
-				try {
-					chat_id = result.id;
-				} catch (e) {
-					// If an error occured, default to the current epoch time
-					chat_id = Date.now();
-				}
-				let dataToSave = {
-					chat_id: chat_id,
-					timestamp: new Date(),
-					user_message: lastUserMessage,
-					assistant_response: result.choices[0].message.content,
-					is_active_thread: isActiveThread,
-					incoming_channel_source: channelId,
-					frustration_count: frustrationCount,
-					let_me_check_flag: letMeCheckFlag,
-					requery: letMeCheckFlag,
-					total_tokens: result.usage.totalTokens,
-					payload_source: JSON.stringify(newCleanChatMessages),
-					cleaned_duplicates_count: duplicatesRemoved,
-					total_tokens_in_chat: result.usage.totalTokens,
-					chat_gpt3_5turbo_cost_estimate: turboCost,
-					chat_gpt4_cost_estimate: gpt4Cost,
-				};
-				await chatHelperSaveDataToPostgres(dataToSave);
-				console.log('\n\n***CHAT_HELPER.JS: chatHelperSaveDataToPostgres saved successfully to PostgreSQL!');
+			// try {
+			// 	let chat_id;
+			// 	// Attempt to access the result id
+			// 	try {
+			// 		chat_id = result.id;
+			// 	} catch (e) {
+			// 		// If an error occured, default to the current epoch time
+			// 		chat_id = Date.now();
+			// 	}
+			// 	let dataToSave = {
+			// 		chat_id: chat_id,
+			// 		timestamp: new Date(),
+			// 		user_message: lastUserMessage,
+			// 		assistant_response: result.choices[0].message.content,
+			// 		is_active_thread: isActiveThread,
+			// 		incoming_channel_source: channelId,
+			// 		frustration_count: frustrationCount,
+			// 		let_me_check_flag: letMeCheckFlag,
+			// 		requery: letMeCheckFlag,
+			// 		total_tokens: result.usage.totalTokens,
+			// 		payload_source: JSON.stringify(newCleanChatMessages),
+			// 		cleaned_duplicates_count: duplicatesRemoved,
+			// 		total_tokens_in_chat: result.usage.totalTokens,
+			// 		chat_gpt3_5turbo_cost_estimate: turboCost,
+			// 		chat_gpt4_cost_estimate: gpt4Cost,
+			// 	};
+			// 	await chatHelperSaveDataToPostgres(dataToSave);
+			// 	console.log('\n\n***CHAT_HELPER.JS: chatHelperSaveDataToPostgres saved successfully to PostgreSQL!');
 
-				///////2023oct16 114pm push to move to db instead of in thread: 
-				// Fetch and print conversation history from database
-				try {
-					let AadObjectId = await getAADObjectIdFromDB(result.id)
-					console.log('\n\n***CHAT_HELPER.JS ->AAD Object ID we will query:', AadObjectId);
+			// 	///////2023oct16 114pm push to move to db instead of in thread: 
+			// 	// Fetch and print conversation history from database
+			// 	try {
+			// 		let AadObjectId = await getAADObjectIdFromDB(result.id)
+			// 		console.log('\n\n***CHAT_HELPER.JS ->AAD Object ID we will query:', AadObjectId);
 
-					if (AadObjectId.length > 0) {
-						let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
-						console.log('\n\n***CHAT_HELPER.JS ->Last 24 Hr Interaction Data received from CHATGPT_UTILS.JS');
-					}
-				} catch (error) {
-					console.error('\n\n***CHAT_HELPER.JS -> Error fetching data from DB:', error);
-				}
+			// 		if (AadObjectId.length > 0) {
+			// 			let last24HrInteractionData = await getLast24HrInteractionPerUserFromDB(AadObjectId[0].msteam_recipient_aad_object_id);
+			// 			console.log('\n\n***CHAT_HELPER.JS ->Last 24 Hr Interaction Data received from CHATGPT_UTILS.JS');
+			// 		}
+			// 	} catch (error) {
+			// 		console.error('\n\n***CHAT_HELPER.JS -> Error fetching data from DB:', error);
+			// 	}
 
-			} catch (error) {
-				console.error('\n\n***CHAT_HELPER.JS: Failed to save chat data to PostgreSQL. Error:', error);
-			}
+			// } catch (error) {
+			// 	console.error('\n\n***CHAT_HELPER.JS: Failed to save chat data to PostgreSQL. Error:', error);
+			// }
 			//debug
 			//DEBUG_PATH: console.log("\n\n***CHAT_HELPER.JS ->Result.id value (before final return statement):", result.id);
 
 			// Send response back to anything listening
+			try {
+				const dataToSave = await saveChatToDB(result, lastUserMessage, isActiveThread, channelId, frustrationCount, letMeCheckFlag, newCleanChatMessages, duplicatesRemoved);
+			} catch (error) {
+				console.error('Error in saving chat data to the database: ', error);
+			}
 			return {
 				'assistantResponse': result.choices[0].message.content,
 				'requery': letMeCheckFlag,
 				'letMeCheckFlag': letMeCheckFlag,
 				'chats': newCleanChatMessages
 			};
+		
 		
 		} else {
 			console.log('\n\n***CHAT_HELPER.JS: No content in API response');
@@ -393,5 +364,41 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		console.error("\n\n***CHAT_HELPER.JS:An error occurred while interacting with OpenAI API", error);
 		throw error;
 	}
+}
+
+async function saveChatToDB(result, lastUserMessage, isActiveThread, channelId, frustrationCount, letMeCheckFlag, newCleanChatMessages, duplicatesRemoved) {
+    try {
+        let chat_id;
+        // Attempt to access the result id
+        try {
+            chat_id = result.id;
+        } catch (e) {
+            // If an error occured, default to the current epoch time
+            chat_id = Date.now();
+        }
+        let { turboCost, gpt4Cost } = calculateCost(result.usage.totalTokens);
+        let dataToSave = {
+            chat_id: chat_id,
+            timestamp: new Date(),
+            user_message: lastUserMessage,
+            assistant_response: result.choices[0].message.content,
+            is_active_thread: isActiveThread,
+            incoming_channel_source: channelId,
+            frustration_count: frustrationCount,
+            let_me_check_flag: letMeCheckFlag,
+            requery: letMeCheckFlag,
+            total_tokens: result.usage.totalTokens,
+            payload_source: JSON.stringify(newCleanChatMessages),
+            cleaned_duplicates_count: duplicatesRemoved,
+            total_tokens_in_chat: result.usage.totalTokens,
+            chat_gpt3_5turbo_cost_estimate: turboCost,
+            chat_gpt4_cost_estimate: gpt4Cost,
+        };
+        await chatHelperSaveDataToPostgres(dataToSave);
+        console.log('\n\n***CHAT_HELPER.JS: chatHelperSaveDataToPostgres saved successfully to PostgreSQL!');
+        return dataToSave;
+    } catch (error) {
+        console.error('\n\n***CHAT_HELPER.JS: Failed to save chat data to PostgreSQL. Error:', error);
+    }
 }
 module.exports = chatCompletion;
