@@ -145,6 +145,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
     } = extractMessages(chatMessages);
 
     // //send this into the function to query openai
+	let validatedTokens = MAX_OPENAI_TOKENS;
     let result = await interactWithOpenAI(newCleanChatMessages, validatedTokens);
 
 
