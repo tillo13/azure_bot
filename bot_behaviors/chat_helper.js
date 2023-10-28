@@ -192,14 +192,16 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
             console.log('\n\n***CHAT_HELPER.JS: Most up to date payload after receiving back from OpenAI: ', newCleanChatMessages);
 
-			// this seems to not be correct, try the below let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
+			// none of these work this seems to not be correct, try the below let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
 			//need it as an await let {newCleanChatMessages, rebuiltPayloadViaDB, result} = handleLetMeCheckFlagCondition(newCleanChatMessages, result, deploymentId, validatedTokens);
 			// need to pass all previous things in let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, deploymentId, validatedTokens);
 			//let result = await interactWithOpenAI(newCleanChatMessages);
 			//await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
 			//let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
 
-			result = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
+			//result = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
+			result = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, chatIdHistoryLog, lastUserMessage);
+
 			
 
 
@@ -401,6 +403,7 @@ async function saveChatToDB(result, lastUserMessage, isActiveThread, channelId, 
 
 
 async function handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, chatIdHistoryLog, lastUserMessage) {
+
     
     const endpoint = process.env.OPENAI_API_BASE_URL;
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));  
