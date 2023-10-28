@@ -1,4 +1,4 @@
-const modelCosts = require('../openai_costs_2023sept7.json'); //Add required import
+const modelCosts = require('./openai_costs_2023sept7.json'); 
 
 
 const MAX_TOKENS = 4096;
@@ -109,27 +109,6 @@ function frustrationCounter(userMessage) {
     return frustrationCount;
 }
 
-// Function to format cost
-function formatCost(cost) {
-    // Convert cost to string
-    let costStr = cost.toString();
-
-    // Split costStr at decimal point
-    let [_, frac] = costStr.split('.');
-
-    // Find index of first non-zero digit in frac
-    let firstNonZeroIndex = [...frac].findIndex(char => char !== '0');
-
-    // Calculate n
-    let n = firstNonZeroIndex + 3;
-
-    // Print n to console
-    console.log("\n\nCHAT_CONFIGS.JS: Number of decimal places in formatCost:", n);
-
-    // Return cost formatted to n decimal places
-    return `$${cost.toFixed(n)}`;
-}
-
 function handleFrustration(frustrationCount) {
     if (frustrationCount === 3) {
         console.log("\n\n***CHAT_CONFIGS.JS: User has hit the Frustration Counter. Sending them a custom message...");
@@ -152,6 +131,26 @@ function calculateCost(totalTokens) {
     console.log('\n\n***CHAT_CONFIGS.JS: if GPT-4, the cost is:', formatCost(gpt4Cost));
 
     return { turboCost, gpt4Cost };
+}
+// now format the cost it just calculated...
+function formatCost(cost) {
+    // Convert cost to string
+    let costStr = cost.toString();
+
+    // Split costStr at decimal point
+    let [_, frac] = costStr.split('.');
+
+    // Find index of first non-zero digit in frac
+    let firstNonZeroIndex = [...frac].findIndex(char => char !== '0');
+
+    // Calculate n
+    let n = firstNonZeroIndex + 3;
+
+    // Print n to console
+    console.log("\n\nCHAT_CONFIGS.JS: Number of decimal places in formatCost:", n);
+
+    // Return cost formatted to n decimal places
+    return `$${cost.toFixed(n)}`;
 }
 
 module.exports = {
