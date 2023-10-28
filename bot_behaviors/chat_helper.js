@@ -200,7 +200,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			//let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
 
 			//result = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
-			result = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, chatIdHistoryLog, lastUserMessage);
+			//result = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, chatIdHistoryLog, lastUserMessage);
 			({ result } = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, chatIdHistoryLog, lastUserMessage));
 
 
