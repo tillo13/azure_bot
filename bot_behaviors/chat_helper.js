@@ -78,47 +78,55 @@ async function interactWithOpenAI(newCleanChatMessages) {
 let chatHistory = [];
 
 
-function extractMessages(chatMessages) {
-	let cleanConversation = '';
-	chatMessages.forEach((msg, index) => {
-	   const role = msg.role.toUpperCase();
-	   cleanConversation += `\n${index + 1}. ${role} : ${msg.content}\n`;
-	});
-	const oldChatMessages = JSON.stringify(chatMessages);
-	let newCleanChatMessages = chatMessages.filter(item =>
-	   !item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
-	let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
-	newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
-	const certainlyMessages = newCleanChatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far')); 
-	const duplicatesRemoved = oldChatMessages.length - newCleanChatMessages.length;
-	if (duplicatesRemoved > 0) {
-		console.log(`\n\n***CHAT_HELPER.JS: CLEANED CODE OF THIS MANY character DUPLICATES: ${duplicatesRemoved}`);
+function extractMessages(chatMessages, noChatManipulation = false) {
+    if (noChatManipulation) {
+        return { newCleanChatMessages: chatMessages, duplicatesRemoved: 0, certainlyMessages: [] };
+    }
 
-	if (certainlyMessages.length > 0) {
-		// If there are any 'Certainly' messages, only keep the last one
-		newCleanChatMessages.push(certainlyMessages[certainlyMessages.length - 1]);
-	}}
+    let cleanConversation = '';
+    chatMessages.forEach((msg, index) => {
+        const role = msg.role.toUpperCase();
+        cleanConversation += `\n${index + 1}. ${role} : ${msg.content}\n`;
+    });
+    const oldChatMessages = JSON.stringify(chatMessages);
+    let newCleanChatMessages = chatMessages.filter(item =>
+       !item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
+    let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
+    newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
+    const certainlyMessages = newCleanChatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far')); 
+    const duplicatesRemoved = oldChatMessages.length - newCleanChatMessages.length;
+    if (duplicatesRemoved > 0) {
+        console.log(`\n\n***CHAT_HELPER.JS: CLEANED CODE OF THIS MANY character DUPLICATES: ${duplicatesRemoved}`);
+    }
 
-	return {newCleanChatMessages, duplicatesRemoved, certainlyMessages};
+    return {newCleanChatMessages, duplicatesRemoved, certainlyMessages};
 }
 
-// function calculateCost(totalTokens) {
-//     const turboCostPerToken = modelCosts['Language Models']['GPT-3.5 Turbo']['4K context']['Output'];
-//     const gpt4CostPerToken = modelCosts['Language Models']['GPT-4']['8K context']['Output'];
 
-//     let turboCost = (totalTokens / 1000) * turboCostPerToken;
-//     let gpt4Cost = (totalTokens / 1000) * gpt4CostPerToken;
-
-//     console.log('\n\n***CHAT_HELPER.JS: Total tokens used so far in this chat:', totalTokens);
-//     console.log('\n\n***CHAT_HELPER.JS: If GPT-3.5 Turbo, the cost is:', formatCost(turboCost));
-//     console.log('\n\n***CHAT_HELPER.JS: if GPT-4, the cost is:', formatCost(gpt4Cost));
-
-//     return { turboCost, gpt4Cost };
-// }
+function removeDuplicatesAndCertainlyMessages(chatMessages) {
+	let newCleanChatMessages = chatMessages.filter(item =>
+		!item.content.toLowerCase().startsWith('certainly, here is what I have said so far')
+	);
+ 
+	let uniqueMessages = new Set(newCleanChatMessages.map(JSON.stringify));
+	newCleanChatMessages = Array.from(uniqueMessages).map(JSON.parse);
+ 
+	const certainlyMessages = cleanChatMessages.filter(item => {
+		let content = item.content.toLowerCase();
+		return content.startsWith('certainly, here is what I have said so far');
+	});
+ 
+	// If there are any 'Certainly' messages, only keep the last one
+	if (certainlyMessages.length > 0) {
+		newCleanChatMessages.push(certainlyMessages[certainlyMessages.length - 1]);
+	}
+ 
+	return newCleanChatMessages;
+ }
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
-	const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
-
+    const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
+    
 	let frustrationCount = 0;
 
 	const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
@@ -133,7 +141,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	    };
 	}
 
-	const {newCleanChatMessages, duplicatesRemoved} = extractMessages(chatMessages);
+//this TRUE/FALSE passing tells the extract method to not clean or change the chat messages
+	const {newCleanChatMessages, duplicatesRemoved} = extractMessages(chatMessages, true);
+
 
 	// //send this into the function to query openai
 	let result = await interactWithOpenAI(newCleanChatMessages);
