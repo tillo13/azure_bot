@@ -201,6 +201,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 			//result = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
 			result = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, chatIdHistoryLog, lastUserMessage);
+			({ result } = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, chatIdHistoryLog, lastUserMessage));
+
 
 			
 
@@ -325,10 +327,14 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 
             //calculate cost
-            let {
-                turboCost,
-                gpt4Cost
-            } = calculateCost(result.usage.totalTokens);
+			if(result && result.usage && 'totalTokens' in result.usage) {
+				let {
+				  turboCost,
+				  gpt4Cost
+				} = calculateCost(result.usage.totalTokens);
+			} else {
+				console.log('The expected result.usage.totalTokens information is not available.');
+			}
 
             //debug
             //DEBUG_PATH: console.log("\n\n***CHAT_HELPER.JS ->Result.id value (before final return statement):", result.id);
