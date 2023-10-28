@@ -398,29 +398,16 @@ async function handleLetMeCheckFlagCondition(newCleanChatMessages, result, valid
 
     if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
         let newPayload = newCleanChatMessages.filter(item => !item.content.startsWith('Certainly'));
-        let uniquePayload = new Set(newCleanChatMessages.map(JSON.stringify));
+        newCleanChatMessages = Array.from(new Set(newPayload.map(JSON.stringify))).map(JSON.parse);
 
-        try {
-            newCleanChatMessages = Array.from(uniquePayload).map(JSON.parse);
-        } catch (err) {
-            console.error("\n\n***CHAT_HELPER.JS: Error parsing JSON in uniquePayload via letMeCheckFlag path, passing blank newCleanChatMessages array...", err);
-            newCleanChatMessages = [];
-        }
-
-        const newResponses = [{
-            role: 'assistant',
-            content: 'Let me check our past conversations in this exact thread, one moment...'
-        }];
-
+        const newResponses = [{ role: 'assistant', content: 'Let me check our past conversations in this exact thread, one moment...' }];
         newCleanChatMessages.push(...newResponses);
-
+         
         const looped_through_newCleanChatMessages = newCleanChatMessages.filter(msg => msg.role === 'user').map(item => item.content).join(',');
         newCleanChatMessages = formatChatPayload(newCleanChatMessages, looped_through_newCleanChatMessages, lastUserMessage);
 
-        let foundAadObjectId = null;
-
         try {
-            foundAadObjectId = await getAADObjectIdFromDB(chatIdHistoryLog);
+            const foundAadObjectId = await getAADObjectIdFromDB(chatIdHistoryLog);
 
             if(Array.isArray(foundAadObjectId) && foundAadObjectId.length > 0) {
                 rebuiltPayloadViaDB = await recreateGptPayloadViaDB(foundAadObjectId[0].msteam_recipient_aad_object_id);
@@ -437,6 +424,7 @@ async function handleLetMeCheckFlagCondition(newCleanChatMessages, result, valid
     } catch (error) {
         console.error('\n\n***CHAT_HELPER.JS_TRYPATH -> An error occurred during communication with OpenAI: ', error);
     }
+
     return {newCleanChatMessages, rebuiltPayloadViaDB, result};
 }
 
