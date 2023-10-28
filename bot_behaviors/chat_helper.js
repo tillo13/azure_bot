@@ -92,6 +92,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
 		let assistantResponse = result.choices[0].message.content;
 		chatMessagesAfterExtraction.push({ role: 'assistant', content: assistantResponse });
+
+        console.log("\n\n***CHAT_HELPER.JS: Assistant's response:", assistantResponse, "Requery needed:", letMeCheckFlag);
+        
 		if (letMeCheckFlag) {
 			let newMessages = [{ role: 'assistant', content: `Let me check our past conversations in this exact thread, one moment...` }, ];
 			newCleanChatMessages.push(...newMessages);
