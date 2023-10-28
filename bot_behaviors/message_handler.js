@@ -43,10 +43,11 @@ async function processMessage(context, chatMessagesUser, chatPayload, isFirstInt
 	console.log("\n\n**MESSAGE_HANDLER.JS: In `processMessage` function");
 	let botCalled = context.activity.text.includes('@bot') || context.activity.text.includes('@atbot');
 	let assistantResponse = botCalled ? 
-		await handleTeamsMessage(context, chatPayload, isFirstInteraction, propertyAccessor, pathConfig) :
-		await chatCompletion(chatMessagesUser, pathConfig.personality, context.activity.channelId);
-	chatMessagesUser.push({role: "assistant", content: assistantResponse });
+	  await handleTeamsMessage(context, {...chatPayload}, isFirstInteraction, propertyAccessor, pathConfig) :
+	  await chatCompletion([...chatMessagesUser], pathConfig.personality, context.activity.channelId);
+	chatMessagesUser.push({role: "assistant", content: {...assistantResponse} });
 	await context.sendActivity(MessageFactory.text(assistantResponse));
+  }
 }
 
 async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
