@@ -215,7 +215,13 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 				if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
 					let newPayload = newCleanChatMessages.filter(item => !item.content.startsWith('Certainly'));
 					let uniquePayload = new Set(newCleanChatMessages.map(JSON.stringify));
-					newCleanChatMessages = Array.from(uniquePayload).map(JSON.parse);
+					try {
+						newCleanChatMessages = Array.from(uniquePayload).map(JSON.parse);
+					} catch(err) {
+						console.error("\n\n***CHAT_HELPER.JS: Error parsing JSON in uniquePayload via letMeCheckFlag path, passing blank newCleanChatMessages array...", err);
+						// Set newCleanChatMessages to an empty array
+						newCleanChatMessages = [];
+					}
 
 					if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
 						//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
