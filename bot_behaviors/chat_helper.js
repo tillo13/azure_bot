@@ -62,13 +62,12 @@ async function initializeChat(chatTexts, roleMessage) {
     };
 }
 
-async function interactWithOpenAI(newCleanChatMessages) {
+async function interactWithOpenAI(newCleanChatMessages, validatedTokens) {
     const endpoint = process.env.OPENAI_API_BASE_URL;
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
     const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
-    const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
 
-	console.log('\n\n***CHAT_HELPER.JS -> [DEBUG] validatedTokens:', validatedTokens);
+    console.log('\n\n***CHAT_HELPER.JS -> [DEBUG] validatedTokens:', validatedTokens);
 
     if (!validatedTokens) return;
     let result;
@@ -146,7 +145,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
     } = extractMessages(chatMessages);
 
     // //send this into the function to query openai
-    let result = await interactWithOpenAI(newCleanChatMessages);
+    let result = await interactWithOpenAI(newCleanChatMessages, validatedTokens);
 
 
     // Start interacting with OpenAI
