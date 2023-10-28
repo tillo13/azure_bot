@@ -5,7 +5,7 @@ const {
     formatChatPayload, 
     frustrationCounter, 
 	handleFrustration,
-    formatCost,
+    //formatCost,
 	calculateCost
   } = require('./chat_helper_utils/chat_configs');
 
@@ -77,7 +77,6 @@ async function interactWithOpenAI(newCleanChatMessages) {
 
 let chatHistory = [];
 
-
 function extractMessages(chatMessages) {
 	let cleanConversation = '';
 	chatMessages.forEach((msg, index) => {
@@ -85,10 +84,16 @@ function extractMessages(chatMessages) {
 	   cleanConversation += `\n${index + 1}. ${role} : ${msg.content}\n`;
 	});
 	const oldChatMessages = JSON.stringify(chatMessages);
-	let newCleanChatMessages = chatMessages.filter(item =>
-	   !item.content.toLowerCase().startsWith('certainly, here is what I have said so far'));
-	let seenMessages = new Set(newCleanChatMessages.map(JSON.stringify));
-	newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
+	let chatMessagesFiltered = chatMessages.filter(item =>
+	   !item.content.toLowerCase().startsWith('certainly, here is what I have said so far')); // variable name changed
+	let seenMessages = new Set(chatMessagesFiltered.map(JSON.stringify));
+	let newCleanChatMessages; // variable declaration moved up here
+	try {
+		newCleanChatMessages = Array.from(seenMessages).map(JSON.parse);
+	} catch(err) {
+		console.error("An error occurred while parsing JSON: ", err); 
+		newCleanChatMessages = []; // default to an empty array in case of error
+	}
 	const certainlyMessages = newCleanChatMessages.filter(item => item.content.startsWith('Certainly, here is what I have said so far')); 
 	const duplicatesRemoved = oldChatMessages.length - newCleanChatMessages.length;
 	if (duplicatesRemoved > 0) {
