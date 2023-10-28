@@ -67,6 +67,9 @@ async function interactWithOpenAI(newCleanChatMessages) {
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(process.env.OPENAI_API_KEY));
     const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
     const validatedTokens = validateOpenAITokens(MAX_OPENAI_TOKENS);
+
+	console.log('\n\n***CHAT_HELPER.JS -> [DEBUG] validatedTokens:', validatedTokens);
+
     if (!validatedTokens) return;
     let result;
     try {
@@ -197,6 +200,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			//let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
 
 			result = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
+			
 
 
 
@@ -397,6 +401,8 @@ async function saveChatToDB(result, lastUserMessage, isActiveThread, channelId, 
 
 
 async function handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage) {
+
+	
     let rebuiltPayloadViaDB = [];
 
     const deploymentId = process.env.OPENAI_API_DEPLOYMENT;
