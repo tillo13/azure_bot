@@ -192,7 +192,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			// this seems to not be correct, try the below let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
 			//need it as an await let {newCleanChatMessages, rebuiltPayloadViaDB, result} = handleLetMeCheckFlagCondition(newCleanChatMessages, result, deploymentId, validatedTokens);
 			// need to pass all previous things in let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, deploymentId, validatedTokens);
-			let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
+			let result = await interactWithOpenAI(newCleanChatMessages);
+			await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
+			//let {newCleanChatMessages, rebuiltPayloadViaDB, result} = await handleLetMeCheckFlagCondition(newCleanChatMessages, result, validatedTokens, client, chatIdHistoryLog, lastUserMessage);
 
 
 
