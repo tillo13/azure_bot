@@ -4,6 +4,7 @@ const {
     formatChatPayload, 
     frustrationCounter, 
 	handleFrustration,
+    calculateCost,
 } = require('./chat_helper_utils/chat_configs');
 
 const { initialSearchVectorSimilarity, handleSearchSimilarity } = require('./weaviate_utils');
