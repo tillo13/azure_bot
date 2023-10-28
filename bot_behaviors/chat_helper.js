@@ -83,7 +83,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	let newCleanChatMessages = chatMessages;
 	let frustrationCount = 0;
 	const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
-	frustrationCounter(msg.content);
 	let frustrationResponse = handleFrustration(frustrationCount);
 	if (frustrationResponse) return { 'assistantResponse': frustrationResponse };
 	let { newCleanChatMessages: chatMessagesAfterExtraction, duplicatesRemoved } =  extractMessages(chatMessages, true);
