@@ -220,7 +220,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 				if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
 					let newPayload = newCleanChatMessages.filter(item => !item.content.startsWith('Certainly'));
 					let uniquePayload = new Set(newCleanChatMessages.map(JSON.stringify));
-					newCleanChatMessages = Array.from(uniquePayload).map(JSON.parse);
+					//const won't work here and we pass the true value in: newCleanChatMessages = Array.from(uniquePayload).map(JSON.parse);
+					let {newCleanChatMessages, duplicatesRemoved} = extractMessages(chatMessages, true);
+
 
 					if (newCleanChatMessages[newCleanChatMessages.length - 1].content !== checkMessage) {
 						//DEBUG_PATH: console.log('\n\n***CHAT_HELPER.JS: Adding new response to payload');
