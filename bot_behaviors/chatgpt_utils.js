@@ -32,6 +32,10 @@ async function getAADObjectIdFromDB(chatID) {
   }
 
   async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
+    if (!config.dbRecreationOfGptPayload) {
+        console.log("\n*******CHATGPT_UTILS.JS: getLast24HrInteractionPerUserFromDB func Skipping DB Recreation of GPT Payload as the global config is set to true.");
+        return;
+    }
     try {
         // fetch the last 24-hour interaction from the database
         const result = await fetchLast24HrInteractionPerUserFromDB(aadObjectID);
@@ -104,7 +108,7 @@ async function getAADObjectIdFromDB(chatID) {
 
 async function recreateGptPayloadViaDB(aadObjectID) {
     if (!config.dbRecreationOfGptPayload) {
-        console.log("\n*******CHATGPT_UTILS.JS: Skipping DB Recreation of GPT Payload as the global config is set to true.");
+        console.log("\n*******CHATGPT_UTILS.JS: recreateGptPayload func Skipping DB Recreation of GPT Payload as the global config is set to true.");
         return;
     }
     try {
