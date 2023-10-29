@@ -42,6 +42,12 @@ async function processMessage(context, chatMessagesUser, chatPayload, isFirstInt
 	let assistantResponse = botCalled ? 
 		await handleTeamsMessage(context, chatPayload, isFirstInteraction, propertyAccessor, pathConfig) :
 		await chatCompletion(chatPayload, pathConfig.personality, context.activity.channelId);
+	
+	if (typeof assistantResponse === 'object' && assistantResponse !== null) {
+		if(assistantResponse.assistantResponse) assistantResponse = assistantResponse.assistantResponse;
+		else assistantResponse = JSON.stringify(assistantResponse); 
+	}
+
 	chatMessagesUser.push({role: "assistant", content: assistantResponse });
 	await context.sendActivity(MessageFactory.text(assistantResponse));
 }
