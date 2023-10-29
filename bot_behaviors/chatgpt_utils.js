@@ -1,4 +1,4 @@
-const config = require('../utilities//global_configs.js');
+const global_configs = require('../utilities//global_configs.js');
 
 const {
     fetchAADObjectIdFromDB,
@@ -32,7 +32,7 @@ async function getAADObjectIdFromDB(chatID) {
   }
 
   async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
-    if (!config.dbRecreationOfGptPayload) {
+    if (!global_configs.dbRecreationOfGptPayload) {
         console.log("\n*******CHATGPT_UTILS.JS: getLast24HrInteractionPerUserFromDB func Skipping DB Recreation of GPT Payload as the global config is set to true.");
         return;
     }
@@ -107,7 +107,7 @@ async function getAADObjectIdFromDB(chatID) {
 }
 
 async function recreateGptPayloadViaDB(aadObjectID) {
-    if (!config.dbRecreationOfGptPayload) {
+    if (!global_configs.dbRecreationOfGptPayload) {
         console.log("\n*******CHATGPT_UTILS.JS: recreateGptPayload func Skipping DB Recreation of GPT Payload as the global config is set to true.");
         return;
     }
