@@ -60,49 +60,47 @@ async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstIntera
 }
 
 async function handleMessageFromSlack(context, chatMessagesUser, threadproperty, botInvokedFlag, personality, pathConfig) {
-  if (!isFromSlack(context)) return false;
+	if (!isFromSlack(context)) return false;
+  
+	let savedThread_ts = await threadproperty.get(context, "");
+	let current_thread_ts = await updateThreads(context, savedThread_ts, threadproperty);
+	let botInThread = await botInvokedFlag.get(context, false);
 
-  let savedThread_ts = await threadproperty.get(context, "");
-  let current_thread_ts = await updateThreads(context, savedThread_ts, threadproperty);
-  let botInThread = await botInvokedFlag.get(context, false);
-
-  if (shouldInvokeBot(context)) {
-    botInThread = true;
-    await botInvokedFlag.set(context, botInThread);
-    chatMessagesUser.push({role: "user", content: context.activity.text});
-  }
-
-  if (botInThread && savedThread_ts === current_thread_ts) {
-    const chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
-    chatMessagesUser.push({role: "assistant", content: chatResponse.assistantResponse});
-    await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, pathConfig);
-    return true;
-  }
-
-  return false;
+	if (context.activity.channelData?.SlackMessage?.event?.thread_ts) {
+	  const apiToken = context.activity.channelData?.ApiToken;
+	  const slack_channel_id = context.activity.channelData.SlackMessage.event.channel;
+	  const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts;
+	  
+	  const parentMessage = await retrieveSlackParentMessage(apiToken, slack_channel_id, thread_ts);
+	  const botId = await getBotId(apiToken);
+	  const invokedViaBotThread = parentMessage.text.toLowerCase().includes(botId.toLowerCase());
+	  console.log("\n\n**MESSAGE_HANDLER.JS: invokedViaBotThread: ", invokedViaBotThread);
+	}
+  
+	if (shouldInvokeBot(context)) {
+	  botInThread = true;
+	  await botInvokedFlag.set(context, botInThread);
+	  chatMessagesUser.push({role: "user", content: context.activity.text});
+	}
+  
+	if (botInThread && savedThread_ts === current_thread_ts) {
+	  const chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
+	  chatMessagesUser.push({role: "assistant", content: chatResponse.assistantResponse});
+	  await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, pathConfig);
+	  return true;
+	}
+  
+	return false;
 }
 
 async function handleDefault(context, chatMessagesUser, personality) {
-  if (!isFromSlack(context)) return false;
+	const chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
+	const response = generateResponse(context, chatResponse);
 
-  if (context.activity.channelData?.SlackMessage?.event?.thread_ts) {
-    const apiToken = context.activity.channelData?.ApiToken;
-    const slack_channel_id = context.activity.channelData.SlackMessage.event.channel;
-    const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts;
-    
-    const parentMessage = await retrieveSlackParentMessage(apiToken, slack_channel_id, thread_ts);
-    const botId = await getBotId(apiToken);
+	chatMessagesUser.push({ role: "assistant", content: chatResponse.assistantResponse });
+	await context.sendActivity(MessageFactory.text(response));
 
-    const invokedViaBotThread = parentMessage.text.toLowerCase().includes(botId.toLowerCase());
-    console.log("\n\n**MESSAGE_HANDLER.JS: invokedViaBotThread: ", invokedViaBotThread);
-  }
-
-  const chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
-  const response = generateResponse(context, chatResponse);
-
-  chatMessagesUser.push({role: "assistant", content: chatResponse.assistantResponse});
-  await context.sendActivity(MessageFactory.text(response));
-  return true;
+	return true;
 }
 
 module.exports = {
