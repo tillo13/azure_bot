@@ -47,9 +47,9 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 	console.log("\n\n**MESSAGE_HANDLER.JS: Incoming message is from Slack, processing...");
 
 	savedThread_ts = await threadproperty.get(context, "");
-	const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event
-		? context.activity.channelData.SlackMessage.event.thread_ts || context.activity.channelData.SlackMessage.event.ts
-		: "";
+	const current_thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts
+		|| context.activity.channelData?.SlackMessage?.event?.ts
+		|| "";
 
 	if (savedThread_ts !== current_thread_ts) {
 		chatMessagesUser = [];
@@ -87,9 +87,7 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 		}
 
 		await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, pathConfig);
-        // Send the response with the 'slack_router' prefix.
-        await context.sendActivity(MessageFactory.text(`slack_router: ${chatResponse.assistantResponse}`));
-        
+
 		return true;
 	}
 
