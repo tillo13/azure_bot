@@ -9,7 +9,7 @@ async function getAADObjectIdFromDB(chatID) {
 }
 
 async function handleMultipleChatIDs(chatIDs) {
-    console.log("\n*******CHATGPT_UTILS.JS: Found an array of chatIDs");
+    console.log("\n*******CHATGPT_UTILS.JS: Detected an array of chatIDs");
     for (const id of chatIDs) {
         const result = await handleSingleChatID(id);
         if (result.length > 0) return result;
@@ -19,23 +19,26 @@ async function handleMultipleChatIDs(chatIDs) {
 }
 
 async function handleSingleChatID(chatID) {
-    console.log("\n*******CHATGPT_UTILS.JS: Checking for a single chatID");
+    console.log("\n*******CHATGPT_UTILS.JS: Detected a single chatID");
     const result = await fetchAADObjectIdFromDB(chatID);
-    result.length > 0 ? console.log(`\n*******CHATGPT_UTILS.JS: Found a match in the database for chatID: ${chatID}`) : console.log("\n*******CHATGPT_UTILS.JS: No match found in the database for the given chatID");
+    logResults(result, chatID);
     return result;
 }
 
+function logResults(result, chatID) {
+    result.length > 0 ? console.log(`\n*******CHATGPT_UTILS.JS: Found a match in the database for chatID: ${chatID}`) : console.log("\n*******CHATGPT_UTILS.JS: No match found in the database for the given chatID");
+}
 
 async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
-    console.log("\n*******CHATGPT_UTILS.JS: getLast24HrInteractionPerUserFromDB func is running");
-
-    const result = await fetchLast24HrInteractionPerUserFromDB(aadObjectID);
-    if (result.length === 0) {
-        console.error("\n*******CHATGPT_UTILS.JS: No interactions found in last 24 hours for the user.");
-        return [];
+    let result = [];
+    if (!global_configs.dbRecreationOfGptPayload) {
+        console.log("\n*******CHATGPT_UTILS.JS: getLast24HrInteractionPerUserFromDB func Skipping DB Recreation of GPT Payload as the global config is set to false.");
+        result = await getLastUserInteraction(aadObjectID);
+    } else {
+        console.log("\n*******CHATGPT_UTILS.JS: getLast24HrInteractionPerUserFromDB func Continuing with DB Recreation of GPT Payload as the global config is set to true.");
+        result = await formatResults(await fetchLast24HrInteractionPerUserFromDB(aadObjectID));
     }
-
-    return global_configs.dbRecreationOfGptPayload ? formatResults(result) : getLastUserInteraction(result);
+    return result;
 }
 
 const formatResults = (result) => {
@@ -56,26 +59,22 @@ const formatResults = (result) => {
     return chatPayload;
 }
 
-const getLastUserInteraction = (result) => {
-    const lastInteraction = result[result.length - 1];
-    return [
-        { role: "system", content: "You are a polite, sophisticated, chatbot assistant that always checks historic conversations before using other resources to find answers." },
-        { role: "user", content: lastInteraction.user_invoke_message },
-        { role: "assistant", content: lastInteraction.bot_response_message },
-
-    ];
+const getLastUserInteraction = async(aadObjectID) => {
+    const result = await fetchLast24HrInteractionPerUserFromDB(aadObjectID);
+    return formatResults(result);
 }
 
+
 async function recreateGptPayloadViaDB(aadObjectID) {
-    console.log("\n*******CHATGPT_UTILS.JS: recreateGptPayloadViaDB func is running");
-
-    const result = await fetchLast24HrInteractionPerUserFromDB(aadObjectID);
-    if (result.length === 0) {
-        console.error("\n*******CHATGPT_UTILS.JS: No interactions found for the user in last 24 hours.");
-        return [];
+    let result = [];
+    if (!global_configs.dbRecreationOfGptPayload) {
+        console.log("\n*******CHATGPT_UTILS.JS: recreateGptPayloadViaDB func Skipping DB Recreation of GPT Payload as the global config is set to false.");
+        result = await getLastUserInteraction(aadObjectID);
+    } else {
+        console.log("\n*******CHATGPT_UTILS.JS: recreateGptPayloadViaDB func Continuing with DB Recreation of GPT Payload as the global config is set to true.");
+        result = await formatResults(await fetchLast24HrInteractionPerUserFromDB(aadObjectID));
     }
-
-    return formatResults(result);
+    return result;
 }
 
 module.exports = {
