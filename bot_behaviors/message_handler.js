@@ -23,6 +23,8 @@ const {
 
 async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstInteraction, propertyAccessor, pathConfig) {
 	if (!isFromMSTeams(context)) return false;
+	console.log("\n\n**MESSAGE_HANDLER.JS: Incoming message is from MSTeams, processing...");
+
 
 	const aadObjectID = context.activity.from.aadObjectId;
 	const chatPayload = !isFirstInteraction
@@ -42,6 +44,7 @@ async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstIntera
 
 async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts, botInvokedFlag, threadproperty, personality, pathConfig) {
 	if (!isFromSlack(context)) return false;
+	console.log("\n\n**MESSAGE_HANDLER.JS: Incoming message is from Slack, processing...");
 
 	savedThread_ts = await threadproperty.get(context, "");
 	const current_thread_ts = context.activity.channelData && context.activity.channelData.SlackMessage && context.activity.channelData.SlackMessage.event
@@ -95,6 +98,7 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 
 async function handleDefault(context, chatMessagesUser, personality) {
 	const chatResponse = await chatCompletion(chatMessagesUser, personality, context.activity.channelId);
+	console.log("\n\n**MESSAGE_HANDLER.JS: Incoming message is from Default, processing...");
 
 	chatMessagesUser.push({
 		role: "assistant",
