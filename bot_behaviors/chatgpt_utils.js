@@ -32,10 +32,6 @@ async function getAADObjectIdFromDB(chatID) {
   }
 
   async function getLast24HrInteractionPerUserFromDB(aadObjectID) {
-    if (!global_configs.dbRecreationOfGptPayload) {
-        console.log("\n*******CHATGPT_UTILS.JS: getLast24HrInteractionPerUserFromDB func Skipping DB Recreation of GPT Payload as the global config is set to true.");
-        return;
-    }
     try {
         // fetch the last 24-hour interaction from the database
         const result = await fetchLast24HrInteractionPerUserFromDB(aadObjectID);
@@ -106,10 +102,37 @@ async function getAADObjectIdFromDB(chatID) {
     }
 }
 
+async function getLastUserInteraction(aadObjectID) {
+    const result = await fetchLast24HrInteractionPerUserFromDB(aadObjectID);
+    if (result.length > 0){
+        const lastInteraction = result[result.length - 1];
+        const chatPayload = [
+            {
+                role: "system",
+                content: "You are a polite, sophisticated, chatbot assistant that always checks historic conversations before using other resources to find answers."
+            },
+            {
+                role: "user",
+                content: lastInteraction.user_invoke_message,
+            },
+            {
+                role: "assistant",
+                content: lastInteraction.bot_response_message,
+            }
+        ];
+        return chatPayload;
+    } else {
+        console.error("\n*******CHATGPT_UTILS.JS: getLastUserInteraction No interactions found for the user.");
+        return [];
+    }
+}
+
 async function recreateGptPayloadViaDB(aadObjectID) {
-    if (!global_configs.dbRecreationOfGptPayload) {
-        console.log("\n*******CHATGPT_UTILS.JS: recreateGptPayload func Skipping DB Recreation of GPT Payload as the global config is set to true.");
-        return;
+    if(!global_configs.dbRecreationOfGptPayload) {
+        console.log("\n*******CHATGPT_UTILS.JS: recreateGptPayload func Skipping DB Recreation of GPT Payload as the global config is set to false.");
+        return await getLastUserInteraction(aadObjectID);
+    } else { 
+        console.log("\n*******CHATGPT_UTILS.JS: recreateGptPayload func Continuing with DB Recreation of GPT Payload as the global config is set to true.");
     }
     try {
         console.log("\n*******CHATGPT_UTILS.JS: AAD Object ID for recreateGptPayloadViaDB: ", aadObjectID);
