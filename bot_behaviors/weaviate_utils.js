@@ -54,6 +54,8 @@ async function initialSearchVectorSimilarity(searchTerm) {
 }
 
 async function handleSearchSimilarity(lastUserMessage){
+    console.log(`\n\n******WEAVIATE_UTILS.JS: Message we will pass to Weaviate: ${lastUserMessage}`);
+    
     const weaviateResponse = await initialSearchVectorSimilarity(lastUserMessage);
     if (weaviateResponse?.data?.Get) {
         // get the class name
@@ -63,22 +65,10 @@ async function handleSearchSimilarity(lastUserMessage){
         let responseData = Array.isArray(weaviateResponse.data.Get[className]) 
             ? weaviateResponse.data.Get[className] 
             : [weaviateResponse.data.Get[className]];
-        
-        // log the Similarity Response
-        //console.log("\n\n[DEBUG] ******WEAVIATE_UTILS.JS: Weaviate Similarity Response: ", JSON.stringify(responseData, null, 2));
 
         responseData.forEach((obj, i) => {
-
-            // log a separator for clarity
-            console.log("\n\n[DEBUG]******WEAVIATE_UTILS.JS: === Start Of Response ===");
-
-            // Debug print class name, data chunk, certainty
-            console.log(`[\n\nDEBUG] ******WEAVIATE_UTILS.JS: Weaviate Similarity Response [CLASS]:\n${className}`);
-            console.log(`\n\n[DEBUG] ******WEAVIATE_UTILS.JS:: Weaviate Similarity Response [DATA_CHUNK]:\n${obj.data_chunk}`);
-            console.log(`\n\n[DEBUG] ******WEAVIATE_UTILS.JS:: Weaviate Similarity Response [CERTAINTY]:\n${obj._additional.certainty}`);
-
-            // log a separator for clarity
-            console.log("\n\n[DEBUG]******WEAVIATE_UTILS.JS: === End Of Response ===\n");
+            console.log(`\n\n******WEAVIATE_UTILS.JS: Weaviate similarity cosine #${i + 1} : ${obj._additional.certainty}`);
+            console.log(`\n\n******WEAVIATE_UTILS.JS: Weaviate response #${i + 1} : ${JSON.stringify(obj[OBJECT_VALUE])}`);
         });
         return {className: className, data: responseData};
     } else {
