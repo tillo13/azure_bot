@@ -134,7 +134,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		let assistantResponse = result.choices[0].message.content;
 
         //2023oct30 add in weaviate responses
-        //2023oct30 add in weaviate responses
         try {
             const weaviateInfo = formatWeaviateResponse(weaviateResponse);
 

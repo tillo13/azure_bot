@@ -89,6 +89,9 @@ async function handleSearchSimilarity(lastUserMessage){
 function formatWeaviateResponse(weaviateResponse) {
     let weaviateInfo = "";
 
+    // Initialize counter
+    let countAboveThreshold = 0;
+
     if(weaviateResponse && weaviateResponse.data.length > 0 && weaviateResponse.cosines.length > 0) {
         let hasValidResult = false;
         let tempInfo = "\n\nWeaviate Results:\n";
@@ -98,6 +101,9 @@ function formatWeaviateResponse(weaviateResponse) {
             if(weaviateResponse.cosines[index] >= COSINE_SIMILARITY_THRESHOLD) {
                 tempInfo += `Result ${index + 1}: ${JSON.stringify(weaviateResponse.data[index])}\n`;
                 tempInfo += `Cosine Similarity: ${weaviateResponse.cosines[index]}\n`;
+
+                // Increment the counter
+                countAboveThreshold++;
 
                 // Set flag that there's a valid result
                 hasValidResult = true;
@@ -111,6 +117,9 @@ function formatWeaviateResponse(weaviateResponse) {
             weaviateInfo = tempInfo;
         }
     }
+
+    console.log(`\n\nNumber of matches above threshold: ${countAboveThreshold}`);
+
     return weaviateInfo;
 }
 
