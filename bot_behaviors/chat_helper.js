@@ -161,10 +161,16 @@ function formatWeaviateResponse(weaviateResponse) {
     if(weaviateResponse && weaviateResponse.data.length > 0 && weaviateResponse.cosines.length > 0) {
         weaviateInfo = "\n\nWeaviate Results:\n";
         weaviateResponse.data.forEach((result, index) => {
-            weaviateInfo += `Result ${index + 1}: ${JSON.stringify(result)}\n`;
-            weaviateInfo += `Cosine Similarity: ${weaviateResponse.cosines[index]}\n`;
+            // Only show the results where the cosine similarity is above 0.90
+            if(weaviateResponse.cosines[index] >= 0.90) {
+                weaviateInfo += `Result ${index + 1}: ${JSON.stringify(result)}\n`;
+                weaviateInfo += `Cosine Similarity: ${weaviateResponse.cosines[index]}\n`;
+            } else {
+                console.log(`*** Result ${index + 1} has a cosine similarity of ${weaviateResponse.cosines[index]}, which is below the desired threshold. Not displaying it to the user.`);
+            }
         });
     }
     return weaviateInfo;
 }
+
 module.exports = chatCompletion;
