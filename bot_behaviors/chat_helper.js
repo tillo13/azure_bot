@@ -145,13 +145,20 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
                 });
 
                 // this does not work const countHighSimilarityResults = highSimilarityResults.length;
-                //try this count
-                const countHighSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= COSINE_SIMILARITY_THRESHOLD).length;
-
+                //try counting this way
+                let countHighSimilarityResults = 0;
+                try {
+                    if(Array.isArray(weaviateResponse.data) && weaviateResponse.data.every(item => item.hasOwnProperty('cosine'))) {
+                        countHighSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= COSINE_SIMILARITY_THRESHOLD).length;
+                    } else {
+                        console.log("\n\n***CHAT_HELPER.JS: The weaviateResponse.data is not an array or does not contain 'cosine' property on all items.");
+                    }
+                } catch (err) {
+                    console.log("\n\n***CHAT_HELPER.JS: Error occurred while counting high similarity results: ", err.message);
+                }
+                
                 console.log("\n\n***CHAT_HELPER.JS: Count of High Similarity Results: ", countHighSimilarityResults);
-
                 let gpt4Prompt;
-
                 if (countHighSimilarityResults > 0) {
                     gpt4Prompt = `The user asked the following question: ${lastUserMessage}. We found ${countHighSimilarityResults} matches in our vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that can answer it. ${informationContents} Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate. ${weaviateInfo}.`;
                 } else {
