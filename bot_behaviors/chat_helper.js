@@ -83,15 +83,31 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
     const { chatMessages, lastUserMessage } = await initializeChat(chatTexts, roleMessage);
 	let newCleanChatMessages = chatMessages;
 	let frustrationCount = 0;
-	const weaviateResponse = await handleSearchSimilarity(lastUserMessage);
+
+    //2023oct30 let's integrate weaviate in the response from the bot
+    let weaviateResponse = await handleSearchSimilarity(lastUserMessage);
+    
 	let frustrationResponse = handleFrustration(frustrationCount);
 	if (frustrationResponse) return { 'assistantResponse': frustrationResponse };
 	let { newCleanChatMessages: chatMessagesAfterExtraction, duplicatesRemoved } =  extractMessages(chatMessages, true);
 	let result = await interactWithOpenAI(chatMessagesAfterExtraction);
 	if (result && result.choices[0]?.message?.content) {
-		let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
-		let assistantResponse = result.choices[0].message.content;
-		chatMessagesAfterExtraction.push({ role: 'assistant', content: assistantResponse });
+		let letMeCheckFlag = shouldRequery(result.choices[0].message.content);   
+        let assistantResponse = result.choices[0].message.content;
+
+        //2023oct30 add in weaviate responses
+        try {
+            let weaviateInfo = formatWeaviateResponse(weaviateResponse);
+            let weaviateEnhancedAssistantResponse = result.choices[0].message.content + weaviateInfo;
+            chatMessagesAfterExtraction.push({ role: 'assistant', content: assistantResponse });
+            assistantResponse = weaviateEnhancedAssistantResponse;
+            console.log("\n\n***CHAT_HELPER.JS: Enhancing response to user with Weaviate...");
+        } catch (err) {
+            // In case of error, log it
+            console.log("\n\n***CHAT_HELPER.JS: Error occurred while enhancing with Weaviate: ", err);
+            assistantResponse = result.choices[0].message.content;
+            // But continue execution without adding Weaviate info...
+        }
 
         console.log("\n\n***CHAT_HELPER.JS: Assistant's response:", assistantResponse, "Requery needed:", letMeCheckFlag);
         
@@ -125,7 +141,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		await chatHelperSaveDataToPostgres(dataToSave);
 		console.log('\n\n***CHAT_HELPER.JS: chatHelperSaveDataToPostgres saved successfully to PostgreSQL!');
 		return {
-			'assistantResponse': result.choices[0].message.content,
+			'assistantResponse': assistantResponse,
 			'requery': letMeCheckFlag,
 			'letMeCheckFlag': letMeCheckFlag,
 			'chats': chatMessagesAfterExtraction
@@ -138,5 +154,17 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			'chats': chatMessagesAfterExtraction
 		};
 	}
+}
+
+function formatWeaviateResponse(weaviateResponse) {
+    let weaviateInfo = "";
+    if(weaviateResponse && weaviateResponse.data.length > 0 && weaviateResponse.cosines.length > 0) {
+        weaviateInfo = "\n\nWeaviate Results:\n";
+        weaviateResponse.data.forEach((result, index) => {
+            weaviateInfo += `Result ${index + 1}: ${JSON.stringify(result)}\n`;
+            weaviateInfo += `Cosine Similarity: ${weaviateResponse.cosines[index]}\n`;
+        });
+    }
+    return weaviateInfo;
 }
 module.exports = chatCompletion;

@@ -66,11 +66,17 @@ async function handleSearchSimilarity(lastUserMessage){
             ? weaviateResponse.data.Get[className] 
             : [weaviateResponse.data.Get[className]];
 
+        // Initialize array to hold cosines
+        let cosines = [];
+
         responseData.forEach((obj, i) => {
             console.log(`\n\n******WEAVIATE_UTILS.JS: Weaviate similarity cosine #${i + 1} : ${obj._additional.certainty}`);
             console.log(`\n\n******WEAVIATE_UTILS.JS: Weaviate response #${i + 1} : ${JSON.stringify(obj[OBJECT_VALUE])}`);
+
+            // Store cosine similarity
+            cosines.push(obj._additional.certainty);
         });
-        return {className: className, data: responseData};
+        return {className: className, data: responseData, cosines: cosines};
     } else {
         console.log("\n\n******WEAVIATE_UTILS.JS: Could not communicate with Weaviate");
         return null;
