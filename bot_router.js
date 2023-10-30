@@ -64,8 +64,8 @@ class EchoBot extends ActivityHandler {
         });
 
         let isFirstInteraction = await this.isFirstInteraction.get(context, true);
-		const handled = await handleMessageFromMSTeams(context, userMessages, isFirstInteraction, this.isFirstInteraction, PATH_CONFIGS['msteams'])
-        || await handleMessageFromSlack(context, userMessages, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality, PATH_CONFIGS['slack'])
+		const handled = await handleMessageFromMSTeams(context, userMessages, isFirstInteraction, this.isFirstInteraction, INGRESS_CONFIGS['msteams'])
+        || await handleMessageFromSlack(context, userMessages, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality, INGRESS_CONFIGS['slack'])
         || await handleDefault(context, userMessages, personality);
 
         if (handled) {
