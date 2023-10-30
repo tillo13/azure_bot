@@ -134,27 +134,27 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		let assistantResponse = result.choices[0].message.content;
 
         //2023oct30 add in weaviate responses
+        //2023oct30 add in weaviate responses
         try {
             const weaviateInfo = formatWeaviateResponse(weaviateResponse);
-        
+
             if (weaviateResponse && weaviateResponse.data && weaviateResponse.data.length > 0) {
-        
-                // Counting high similarity results here
-                let countHighSimilarityResults = 0;
+
+                // Filter and get high similarity results here
+                let highSimilarityResults = [];
                 if(Array.isArray(weaviateResponse.data) && weaviateResponse.data.every(item => item.hasOwnProperty('cosine'))) {
-                    countHighSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= COSINE_SIMILARITY_THRESHOLD).length;
+                    highSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= COSINE_SIMILARITY_THRESHOLD);
                 } else {
                     console.log("\n\n***CHAT_HELPER.JS: The weaviateResponse.data is not an array or does not contain 'cosine' property on all items.");
                 }
                 
-                //const highSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= COSINE_SIMILARITY_THRESHOLD);     
-                let highSimilarityResults = highSimilarityResults.length;  
+                let countHighSimilarityResults = highSimilarityResults.length;
                 let informationContents = '';
-        
+
                 highSimilarityResults.forEach(result => {
                     informationContents += ` Information: "${result.data_chunk}".`;
                 });
-        
+
                 console.log("\n\n***CHAT_HELPER.JS: Count of High Similarity Results: ", countHighSimilarityResults);
                 
                 let gpt4Prompt;
