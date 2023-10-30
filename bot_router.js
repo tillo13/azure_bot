@@ -4,7 +4,7 @@ const { ActivityHandler, MessageFactory } = require('botbuilder');
 const specialCommands = require('./bot_behaviors/special_commands');
 const { postMessageToSlack } = require('./bot_behaviors/slack_utils');
 
-const { PATH_CONFIGS } = require('./utilities/global_configs');
+const { INGRESS_CONFIGS } = require('./utilities/global_configs');
 
 const MEMBERS_ADDED = 'membersAddedProperty';
 const USER_MESSAGES = 'userMessagesProperty';
