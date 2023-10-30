@@ -133,7 +133,6 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
 		let assistantResponse = result.choices[0].message.content;
 
-		//2023oct30 add in weaviate responses
         //2023oct30 add in weaviate responses
         try {
             const weaviateInfo = formatWeaviateResponse(weaviateResponse);
@@ -145,7 +144,10 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
                     informationContents += ` Information: "${result.content}".`;
                 });
 
-                const countHighSimilarityResults = highSimilarityResults.length;
+                // this does not work const countHighSimilarityResults = highSimilarityResults.length;
+                //try this count
+                const countHighSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= COSINE_SIMILARITY_THRESHOLD).length;
+
                 console.log("\n\n***CHAT_HELPER.JS: Count of High Similarity Results: ", countHighSimilarityResults);
 
                 let gpt4Prompt;
