@@ -118,7 +118,7 @@ function formatWeaviateResponse(weaviateResponse) {
         }
     }
 
-    console.log(`\n\nNumber of matches above threshold: ${countAboveThreshold}`);
+    console.log(`\n\nNumber of matches above threshold via weaviate_utils.js: ${countAboveThreshold}`);
 
     return weaviateInfo, countAboveThreshold;
 }
