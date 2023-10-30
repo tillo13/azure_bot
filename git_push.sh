@@ -1,11 +1,17 @@
 #!/bin/bash
 
-# Checking if commit message is supplied
+# Checking if commit message is supplied and warn about additional arguments
 if [ -z "$1" ]
 then
     echo "No commit message provided, exiting."
     exit 1
+elif [ ! -z "$2" ]
+then
+    echo "Additional input found after the commit message, ignoring it."
 fi
+
+# Proceed only with the first argument
+commit_msg=$1
 
 echo "==== Current Working Branch ===="
 # Check the current working branch
@@ -26,7 +32,7 @@ git add .
 
 echo "==== Committing Changes ===="
 # Commit the changes
-commit_result=$(git commit -m "$1")
+commit_result=$(git commit -m "$commit_msg")
 if [[ $commit_result == *"nothing to commit"* ]]; then
     echo -e "\033[0;33mAlert! No changes detected in the files, nothing to commit or push.\033[0m"   # Yellow
     exit 1
@@ -78,8 +84,8 @@ echo "Latest commit hash: $latest_commit"
 # Print the current local time
 current_time=$(date)
 echo "Current local time: $current_time"
-echo "==== Time Since Last Save ===="
 
+echo "==== Time Since Last Save ===="
 current_time=$(date +%s)                # Current timestamp in seconds
 last_saved_time=$(git show -s --format=%ct HEAD)   # Timestamp of the last commit
 time_diff=$((current_time - last_saved_time))      # Difference in timestamps

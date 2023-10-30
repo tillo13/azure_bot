@@ -1,4 +1,4 @@
-//2023oct30 add in cosine similarity score 1:30pmpst testing post semicolon
+//2023oct30 add in cosine similarity score
 const {
 	validateOpenAITokens,
 	shouldRequery,
@@ -23,7 +23,7 @@ const {
 	OpenAIClient,
 	AzureKeyCredential
 } = require("@azure/openai");
-//moved to weaviate_utils.js>>const { COSINE_SIMILARITY_THRESHOLD } = require('../utilities/global_configs');
+const { COSINE_SIMILARITY_THRESHOLD } = require('../utilities/global_configs');
 
 const {
 	invokeOpenaiGpt4
@@ -134,34 +134,45 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		let assistantResponse = result.choices[0].message.content;
 
 		//2023oct30 add in weaviate responses
+        //2023oct30 add in weaviate responses
         try {
-            let weaviateInfo = formatWeaviateResponse(weaviateResponse);
-            let weaviateEnhancedAssistantResponse = result.choices[0].message.content + weaviateInfo;
-            chatMessagesAfterExtraction.push({
-                role: 'assistant',
-                content: assistantResponse
-            });
-            assistantResponse = weaviateEnhancedAssistantResponse;
-            console.log("\n\n***CHAT_HELPER.JS: Enhancing response to user with Weaviate...");
-    
-            let gpt4Prompt;
-            let gpt4Response;
-            
-            if (weaviateResponse && weaviateResponse.cosines && weaviateResponse.cosines.length > 0) {
-                gpt4Prompt = `The user asked the following question: ${lastUserMessage}, we found a cosine similarity match in our vector dataset of ${weaviateResponse.cosines[0]} that can answer it. Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate. ${weaviateInfo}.`;
+            const weaviateInfo = formatWeaviateResponse(weaviateResponse);
+
+            if (weaviateResponse && weaviateResponse.data && weaviateResponse.data.length > 0) {
+                const highSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= 0.90);
+                let informationContents = '';
+                highSimilarityResults.forEach(result => {
+                    informationContents += ` Information: "${result.content}".`;
+                });
+
+                const countHighSimilarityResults = highSimilarityResults.length;
+                let gpt4Prompt;
+
+                if (countHighSimilarityResults > 0) {
+                    gpt4Prompt = `The user asked the following question: ${lastUserMessage}. We found ${countHighSimilarityResults} matches in our vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that can answer it. ${informationContents} Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate. ${weaviateInfo}.`;
+                } else {
+                    console.log("\n\n***CHAT_HELPER.JS: No high cosine similarity score was found.");
+                    gpt4Prompt = `The user asked the following question: ${lastUserMessage}. Please provide a response using any knowledge you have, but do not hallucinate. ${weaviateInfo}.`;
+                }
+
+                // Now use 'gpt4Prompt' to invoke GPT4
+                const gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
+
+                if (gpt4Response) {
+                    console.log("\n\n***CHAT_HELPER.JS: Response from GPT4: ", gpt4Response);
+                    chatMessagesAfterExtraction.push({
+                        role: 'assistant',
+                        content: gpt4Response
+                    });
+                    assistantResponse = gpt4Response;
+                    console.log("\n\n***CHAT_HELPER.JS: Enhanced response to user with Weaviate and GPT4...");
+                } else {
+                    console.log("\n\n***CHAT_HELPER.JS: GPT4 Response is empty or not received");
+                }
             } else {
-                console.log("\n\n***CHAT_HELPER.JS: No cosine similarity score was found, this likely won't ever hit as even a low score is returned by Weaviate.");
-                gpt4Prompt = `The user asked the following question: ${lastUserMessage}. Please provide a response using any knowledge you have, but do not hallucinate. ${weaviateInfo}.`;
+                console.log("\n\n***CHAT_HELPER.JS: No cosine similarity score was found, this might be due to Weaviate not returning any matches.");
             }
-            // Now use 'gpt4Prompt' to invoke GPT4
-            gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
-            
-            if (gpt4Response) {
-                console.log("\n\n***CHAT_HELPER.JS: Response from GPT4: ", gpt4Response);
-            } else {
-                console.log("\n\n***CHAT_HELPER.JS: GPT4 Response is empty or not received");
-            }
-    
+
         } catch (err) {
             // In case of error, log it
             console.log("\n\n***CHAT_HELPER.JS: Error occurred while enhancing with Weaviate: ", err);
