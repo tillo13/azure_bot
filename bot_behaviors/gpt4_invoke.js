@@ -1,19 +1,20 @@
-const axios = require('axios').default;
+const axios = require('axios');
 
 const OPENAI_API_KEY = process.env['2023oct24_OPENAI_GPT4_API_KEY'];
 const OPENAI_API_BASE_URL = process.env['2023oct24_OPENAI_GPT4_API_BASE_URL'];
-const OPENAI_API_VERSION = process.env['2023oct24_OPENAI_GPT4_API_VERSION'];
 const OPENAI_GPT4_ENGINE = process.env['2023oct24_OPENAI_GPT4_32K_API_ENGINE_DEPLOYMENT'];
 
-async function invokeOpenaiGpt4(prompt) {
-    console.log(`Using the following OpenAI settings: ${OPENAI_API_KEY}, ${OPENAI_API_BASE_URL}, ${OPENAI_API_VERSION}, ${OPENAI_GPT4_ENGINE}.`);
+// Create an instance of axios with default settings
+const instance = axios.create({
+  baseURL: OPENAI_API_BASE_URL,
+  headers: {
+    'Authorization': `Bearer ${OPENAI_API_KEY}`,
+    'Content-Type': 'application/json'
+  }
+});
 
-    const config = {
-        headers: {
-            'Authorization': `Bearer ${OPENAI_API_KEY}`,
-            'Content-Type': 'application/json'
-        }
-    };
+async function invokeOpenaiGpt4(prompt) {
+    console.log(`Using the following OpenAI settings: ${OPENAI_API_KEY}, ${OPENAI_API_BASE_URL}, ${OPENAI_GPT4_ENGINE}.`);
 
     const body = {
         model: OPENAI_GPT4_ENGINE,
@@ -27,11 +28,11 @@ async function invokeOpenaiGpt4(prompt) {
         max_tokens: 800,
         temperature: 0.9
     };
-    
-    console.log(`Hitting OpenAI API with URL: ${OPENAI_API_BASE_URL}/v1/chat/completions and body:`, body);
+
+    console.log(`Hitting OpenAI API with URL: ${OPENAI_API_BASE_URL}/v1/engines/${OPENAI_GPT4_ENGINE}/completions and body:`, body);
     
     try {
-        const response = await axios.post(`${OPENAI_API_BASE_URL}/v1/chat/completions`, body, config);
+        const response = await instance.post(`/v1/engines/${OPENAI_GPT4_ENGINE}/completions`, body);
         console.log('OpenAI API Response: ', response.data);
         return response.data.choices[0].message.content;
     } catch (error) {
