@@ -137,7 +137,13 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 //2023oct30 add in weaviate responses
 try {
     // Obtain the formatted Weaviate information and count of high similarity matches
-    const { weaviateInfo, countAboveThreshold } = formatWeaviateResponse(weaviateResponse);
+    const { weaviateInfo = "", countAboveThreshold = 0 } = formatWeaviateResponse(weaviateResponse);
+
+    // Ensure countAboveThreshold is a number
+    countAboveThreshold = Number(countAboveThreshold);
+
+    // If weaviateInfo is undefined, set it to an empty string
+    weaviateInfo = weaviateInfo || "";
 
     // Continue only if there are matches above the similarity threshold
     if (countAboveThreshold > 0) {
