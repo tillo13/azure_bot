@@ -6,12 +6,12 @@ const OPENAI_API_VERSION = process.env['2023oct24_OPENAI_GPT4_API_VERSION'];
 const API_ENGINE_DEPLOYMENT = process.env['2023oct24_OPENAI_GPT4_API_ENGINE_DEPLOYMENT'];
 
 const axiosInstance = axios.create({
-  baseURL: OPENAI_API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${OPENAI_API_KEY}`
-  }
-});
+    baseURL: OPENAI_API_BASE_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': OPENAI_API_KEY
+    }
+  });
 
 const invokeOpenaiGpt4 = async (prompt) => {
     // Prepare payload
