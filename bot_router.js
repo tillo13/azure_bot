@@ -29,17 +29,18 @@ const USER_MESSAGES = 'userMessagesProperty';
 const THREAD_TS = 'thread_ts';
 
 class EchoBot extends ActivityHandler {
-  constructor(userState) {
-    super();
-    this.userState = userState;
-    this.botInvokedFlag = userState.createProperty('botInvokedFlag');
-    this.isFirstInteraction = userState.createProperty('isFirstInteraction');
-    this.userMessagesProperty = userState.createProperty(USER_MESSAGES);
-    this.membersAddedProperty = userState.createProperty(MEMBERS_ADDED);
-    this.onReactionsAdded(this.handleReactionForTeams.bind(this));
-    this.onMembersAdded(this.welcomeMembers.bind(this));
-    this.onMessage(this.processMessage.bind(this));
-  }
+	constructor(userState) {
+	  super();
+	  this.userState = userState;
+	  this.botInvokedFlag = userState.createProperty('botInvokedFlag');
+	  this.isFirstInteraction = userState.createProperty('isFirstInteraction');
+	  this.userMessagesProperty = userState.createProperty(USER_MESSAGES);
+	  this.membersAddedProperty = userState.createProperty(MEMBERS_ADDED);
+	  this.threadproperty = userState.createProperty(THREAD_TS); 
+	  this.onReactionsAdded(this.handleReactionForTeams.bind(this));
+	  this.onMembersAdded(this.welcomeMembers.bind(this));
+	  this.onMessage(this.processMessage.bind(this));
+	}
 
   async handleReactionForTeams(context) {
     if (context.activity.channelId === 'msteams') {
@@ -81,9 +82,9 @@ class EchoBot extends ActivityHandler {
         });
 
         let isFirstInteraction = await this.isFirstInteraction.get(context, true);
-        const handled = await handleMessageFromMSTeams(context, userMessages, isFirstInteraction, this.isFirstInteraction, PATH_CONFIGS['msteams'])
-            || await handleMessageFromSlack(context, userMessages, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality, PATH_CONFIGS['slack'])
-            || await handleDefault(context, userMessages, personality);
+		const handled = await handleMessageFromMSTeams(context, userMessages, isFirstInteraction, this.isFirstInteraction, PATH_CONFIGS['msteams'])
+        || await handleMessageFromSlack(context, userMessages, this.threadproperty, this.botInvokedFlag, this.threadproperty, personality, PATH_CONFIGS['slack'])
+        || await handleDefault(context, userMessages, personality);
 
         if (handled) {
           await this.userMessagesProperty.set(context, userMessages);
