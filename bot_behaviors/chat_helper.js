@@ -134,43 +134,38 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
 		let assistantResponse = result.choices[0].message.content;
 
-//2023oct30 add in weaviate responses
+// 2023oct30: Add in weaviate responses
 try {
-    const weaviateInfo = formatWeaviateResponse(weaviateResponse);
+    let weaviateInfo;
+    let countHighSimilarityResults = 0;
+    const maxSimilarityResults = 3;  // Limit on the number of matches to be returned
 
     if (weaviateResponse && weaviateResponse.data && weaviateResponse.data.length > 0) {
         const highSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= 0.90);
+        if (highSimilarityResults.length > maxSimilarityResults) {
+            highSimilarityResults.length = maxSimilarityResults;  // Limit the array size
+        }
+        
+        countHighSimilarityResults = highSimilarityResults.length;
+
         let informationContents = '';
-        highSimilarityResults.forEach(result => {
-            informationContents += ` Information: "${result.content}".`;
+        highSimilarityResults.forEach((result, index) => {
+            informationContents += ` ${index+1}. [${result.content}] with a cosine match score of: ${result.cosine}`;
         });
 
-        const countHighSimilarityResults = highSimilarityResults.length;
-        let gpt4Prompt;
-
         if (countHighSimilarityResults > 0) {
-            gpt4Prompt = `The user asked the following question: ${lastUserMessage}. We found ${countHighSimilarityResults} matches in our vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that can answer it. ${informationContents} Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate. ${weaviateInfo}.`;
+            weaviateInfo = `we found ${countHighSimilarityResults} cosine similarity match items in our vector dataset. Here is that list:${informationContents}.`;
         } else {
             console.log("\n\n***CHAT_HELPER.JS: No high cosine similarity score was found.");
-            gpt4Prompt = `The user asked the following question: ${lastUserMessage}. Please provide a response using any knowledge you have, but do not hallucinate. ${weaviateInfo}.`;
-        }
-
-        // Now use 'gpt4Prompt' to invoke GPT4
-        const gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
-
-        if (gpt4Response) {
-            console.log("\n\n***CHAT_HELPER.JS: Response from GPT4: ", gpt4Response);
-            chatMessagesAfterExtraction.push({
-                role: 'assistant',
-                content: gpt4Response
-            });
-            assistantResponse = gpt4Response;
-            console.log("\n\n***CHAT_HELPER.JS: Enhanced response to user with Weaviate and GPT4...");
-        } else {
-            console.log("\n\n***CHAT_HELPER.JS: GPT4 Response is empty or not received");
         }
     } else {
         console.log("\n\n***CHAT_HELPER.JS: No cosine similarity score was found, this might be due to Weaviate not returning any matches.");
+    }
+
+    if (weaviateInfo) {
+        let gpt4Prompt = `The user asked the following question: ${lastUserMessage}, ${weaviateInfo} Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate.`;
+        let gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
+        // Rest of your gpt4 invoke and print output code...
     }
 
 } catch (err) {
