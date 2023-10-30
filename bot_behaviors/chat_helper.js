@@ -10,6 +10,8 @@ const {
 const { initialSearchVectorSimilarity, handleSearchSimilarity } = require('./weaviate_utils');
 const { chatHelperSaveDataToPostgres, getAADObjectIdFromDB, getLast24HrInteractionPerUserFromDB, recreateGptPayloadViaDB } = require('../utilities/postgres_utils');
 const { OpenAIClient, AzureKeyCredential } = require("@azure/openai");
+const { COSINE_SIMILARITY_THRESHOLD } = require('../utilities/global_configs');
+
 
 const MAX_OPENAI_TOKENS = 700;
 const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
@@ -158,17 +160,28 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 
 function formatWeaviateResponse(weaviateResponse) {
     let weaviateInfo = "";
+
     if(weaviateResponse && weaviateResponse.data.length > 0 && weaviateResponse.cosines.length > 0) {
-        weaviateInfo = "\n\nWeaviate Results:\n";
-        weaviateResponse.data.forEach((result, index) => {
-            // Only show the results where the cosine similarity is above 0.90
-            if(weaviateResponse.cosines[index] >= 0.90) {
-                weaviateInfo += `Result ${index + 1}: ${JSON.stringify(result)}\n`;
-                weaviateInfo += `Cosine Similarity: ${weaviateResponse.cosines[index]}\n`;
+        let hasValidResult = false;
+        let tempInfo = "\n\nWeaviate Results:\n";
+
+        for(let index in weaviateResponse.data) {
+            
+            if(weaviateResponse.cosines[index] >= COSINE_SIMILARITY_THRESHOLD) {
+                tempInfo += `Result ${index + 1}: ${JSON.stringify(weaviateResponse.data[index])}\n`;
+                tempInfo += `Cosine Similarity: ${weaviateResponse.cosines[index]}\n`;
+
+                // Set flag that there's a valid result
+                hasValidResult = true;
             } else {
-                console.log(`*** Result ${index + 1} has a cosine similarity of ${weaviateResponse.cosines[index]}, which is below the desired threshold. Not displaying it to the user.`);
+                console.log(`\n\n***CHAT_HELPER.JS: Result ${index + 1} has a cosine similarity of ${weaviateResponse.cosines[index]}, which is below the desired threshold. Not displaying it to the user.`);
             }
-        });
+        }
+
+        // Only assign tempInfo to weaviateInfo if there's a valid result
+        if (hasValidResult) {
+            weaviateInfo = tempInfo;
+        }
     }
     return weaviateInfo;
 }
