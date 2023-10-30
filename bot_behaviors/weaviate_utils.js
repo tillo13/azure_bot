@@ -1,3 +1,6 @@
+const { COSINE_SIMILARITY_THRESHOLD } = require('../utilities/global_configs');
+
+
 const path = require('path');
 const fetch = require('node-fetch');
 
