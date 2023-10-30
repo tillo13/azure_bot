@@ -137,9 +137,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 //2023oct30 add in weaviate responses
 try {
     // Obtain the formatted Weaviate information and count of high similarity matches
-    let { weaviateInfo = "", countAboveThreshold = 0 } = formatWeaviateResponse(weaviateResponse);
+let { weaviateInfo = "", countAboveThreshold = 0 } = await formatWeaviateResponse(weaviateResponse);
 
-    console.log(`\n\nNumber of matches above threshold via chat_helper.js: ${countAboveThreshold}`);
+console.log(`\n\nNumber of matches above threshold via chat_helper.js: ${countAboveThreshold}`);
 
     // Ensure countAboveThreshold is a number
     countAboveThreshold = Number(countAboveThreshold);
