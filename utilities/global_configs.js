@@ -1,4 +1,5 @@
-//2023oct29 moving global things here that can be publicly used for github
+//2023oct30 add in cosine similarity score
+
 const BOT_PERSONALITY = "You are thorough, polite, helpful and courteous.";
 
 const INGRESS_CONFIGS = {
