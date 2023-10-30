@@ -177,7 +177,7 @@ console.log(`\n\nNumber of matches above threshold via chat_helper.js: ${countAb
                 role: 'assistant',
                 content: gpt4Response
             });
-            assistantResponse = gpt4Response;
+            //uncomment this to add the GPT4 to the actual payload: assistantResponse = gpt4Response;
             console.log("\n\n***CHAT_HELPER.JS: Enhanced response to user with GPT4...");
         } else {
             console.log("\n\n***CHAT_HELPER.JS: GPT4 Response is empty or not received");
