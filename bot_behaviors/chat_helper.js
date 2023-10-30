@@ -143,14 +143,13 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 			});
 			assistantResponse = weaviateEnhancedAssistantResponse;
 			console.log("\n\n***CHAT_HELPER.JS: Enhancing response to user with Weaviate...");
-			let gpt4Prompt = `The user asked the following question: ${lastUserMessage}, we found a cosine similarity match of ${weaviateResponse.meta.score} that can answer it. Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate. ${weaviateInfo}.`;
-
-			try {
-				let gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
-				console.log("\n\n***CHAT_HELPER.JS: GPT-4 response:", gpt4Response);
-			} catch (err) {
-				console.log("\n\n***CHAT_HELPER.JS: Error occurred while getting GPT-4 response: ", err);
-			}
+            let gpt4Prompt;
+            if (weaviateResponse && weaviateResponse.cosines && weaviateResponse.cosines.length > 0) {
+                gpt4Prompt = `The user asked the following question: ${lastUserMessage}, we found a cosine similarity match of ${weaviateResponse.cosines[0]} that can answer it. Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate. ${weaviateInfo}.`;
+            } else {
+                console.log("\n\n***CHAT_HELPER.JS: No cosine similarity score was found");
+                gpt4Prompt = `The user asked the following question: ${lastUserMessage}. Please provide a response using any knowledge you have, but do not hallucinate. ${weaviateInfo}.`;
+            }
 		} catch (err) {
 			// In case of error, log it
 			console.log("\n\n***CHAT_HELPER.JS: Error occurred while enhancing with Weaviate: ", err);
