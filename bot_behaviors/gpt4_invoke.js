@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
       'Content-Type': 'application/json',
       'api-key': OPENAI_API_KEY
     }
-  });
+});
 
 const invokeOpenaiGpt4 = async (prompt) => {
     // Prepare payload
@@ -29,7 +29,18 @@ const invokeOpenaiGpt4 = async (prompt) => {
 
     try {
         const response = await axiosInstance.post(endpoint, payload);
-        console.log('\n\n[DEBUG for gpt4_invoke.js]: OpenAI API Chat Response:', response.data);
+        console.log('\n\n[DEBUG for gpt4_invoke.js]: Full OpenAI API Response:', JSON.stringify(response.data, null, 2)); 
+        console.log('\n\n[DEBUG for gpt4_invoke.js]: Response ID:', response.data.id);
+        console.log('\n\n[DEBUG for gpt4_invoke.js]: Response Object:', response.data.object);
+        console.log('\n\n[DEBUG for gpt4_invoke.js]: Timestamp of Creation:', response.data.created);
+        console.log('\n\n[DEBUG for gpt4_invoke.js]: Model:', response.data.model);
+
+        for (let i = 0; i < response.data.choices.length; i++) {
+            console.log(`\n\n[DEBUG for gpt4_invoke.js]: Choice #${i}:`);
+            console.log('Content:', response.data.choices[i].message.content);
+            console.log('Finish Reason:', response.data.choices[i].finish_reason);
+        }
+
         return response.data.choices[0].message.content;
     } catch (error) {
         console.error('\n\n[DEBUG for gpt4_invoke.js]: Error', error.message);
