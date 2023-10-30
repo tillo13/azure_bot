@@ -29,16 +29,27 @@ const invokeOpenaiGpt4 = async (prompt) => {
 
     try {
         const response = await axiosInstance.post(endpoint, payload);
-        console.log('\n\n[DEBUG for gpt4_invoke.js]: Full OpenAI API Response:', JSON.stringify(response.data, null, 2)); 
-        console.log('\n\n[DEBUG for gpt4_invoke.js]: Response ID:', response.data.id);
-        console.log('\n\n[DEBUG for gpt4_invoke.js]: Response Object:', response.data.object);
-        console.log('\n\n[DEBUG for gpt4_invoke.js]: Timestamp of Creation:', response.data.created);
-        console.log('\n\n[DEBUG for gpt4_invoke.js]: Model:', response.data.model);
 
+        console.log('\n\nEndpoint:', `${axiosInstance.defaults.baseURL}${endpoint}`);
+        console.log('\nSending payload to OpenAI:\n', JSON.stringify(payload, null, 2));
+    
+        console.log('\nFull OpenAI API Response:\n', JSON.stringify(response.data, null, 2)); 
+        console.log('\nResponse ID:', response.data.id);
+        console.log('\nResponse Object:', response.data.object);
+        console.log('\nTimestamp of Creation:', response.data.created);
+        console.log('\nModel:', response.data.model);
+    
+        console.log('\nPrompt Tokens:', response.data.usage.prompt_tokens);
+        console.log('\nCompletion Tokens:', response.data.usage.completion_tokens);
+        console.log('\nTotal Tokens:', response.data.usage.total_tokens);
+    
+        console.log('\nPrompt Filter Results:\n', JSON.stringify(response.data.prompt_filter_results, null, 2));
+    
         for (let i = 0; i < response.data.choices.length; i++) {
-            console.log(`\n\n[DEBUG for gpt4_invoke.js]: Choice #${i}:`);
+            console.log(`\nChoice #${i + 1}:`);
             console.log('Content:', response.data.choices[i].message.content);
             console.log('Finish Reason:', response.data.choices[i].finish_reason);
+            console.log('Content Filter Results:\n', JSON.stringify(response.data.choices[i].content_filter_results, null, 2));
         }
 
         return response.data.choices[0].message.content;
