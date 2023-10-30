@@ -120,7 +120,7 @@ function formatWeaviateResponse(weaviateResponse) {
 
     console.log(`\n\nNumber of matches above threshold: ${countAboveThreshold}`);
 
-    return weaviateInfo;
+    return weaviateInfo, countAboveThreshold;
 }
 
 module.exports = {initialSearchVectorSimilarity, handleSearchSimilarity, formatWeaviateResponse}

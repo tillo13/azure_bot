@@ -13,6 +13,7 @@ const {
 	handleSearchSimilarity,
 	formatWeaviateResponse
 } = require('./weaviate_utils');
+
 const {
 	chatHelperSaveDataToPostgres,
 	getAADObjectIdFromDB,
@@ -133,60 +134,51 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
 		let assistantResponse = result.choices[0].message.content;
 
-        //2023oct30 add in weaviate responses
-        try {
-            const weaviateInfo = formatWeaviateResponse(weaviateResponse);
+//2023oct30 add in weaviate responses
+try {
+    // Obtain the formatted Weaviate information and count of high similarity matches
+    const { weaviateInfo, countAboveThreshold } = formatWeaviateResponse(weaviateResponse);
 
-            if (weaviateResponse && weaviateResponse.data && weaviateResponse.data.length > 0) {
+    // Continue only if there are matches above the similarity threshold
+    if (countAboveThreshold > 0) {
+        let gpt4Prompt = `The user asked the following question: ${lastUserMessage}. We found ${countAboveThreshold} matches in our vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that can answer it. Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate. ${weaviateInfo}.`;
 
-                // Filter and get high similarity results here
-                let highSimilarityResults = [];
-                if(Array.isArray(weaviateResponse.data) && weaviateResponse.data.every(item => item.hasOwnProperty('cosine'))) {
-                    highSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= COSINE_SIMILARITY_THRESHOLD);
-                } else {
-                    console.log("\n\n***CHAT_HELPER.JS: The weaviateResponse.data is not an array or does not contain 'cosine' property on all items.");
-                }
-                
-                let countHighSimilarityResults = highSimilarityResults.length;
-                let informationContents = '';
-
-                highSimilarityResults.forEach(result => {
-                    informationContents += ` Information: "${result.data_chunk}".`;
-                });
-
-                console.log("\n\n***CHAT_HELPER.JS: Count of High Similarity Results: ", countHighSimilarityResults);
-                
-                let gpt4Prompt;
-                if (countHighSimilarityResults > 0) {
-                    gpt4Prompt = `The user asked the following question: ${lastUserMessage}. We found ${countHighSimilarityResults} matches in our vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that can answer it. ${informationContents} Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate. ${weaviateInfo}.`;
-                } else {
-                    console.log("\n\n***CHAT_HELPER.JS: No high cosine similarity score was found.");
-                    gpt4Prompt = `The user asked the following question: ${lastUserMessage}. Please provide a response using any knowledge you have, but do not hallucinate. ${weaviateInfo}.`;
-                }
+        // Now use 'gpt4Prompt' to invoke GPT4
+        const gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
         
-                // Now use 'gpt4Prompt' to invoke GPT4
-                const gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
-        
-                if (gpt4Response) {
-                    console.log("\n\n***CHAT_HELPER.JS: Response from GPT4: ", gpt4Response);
-                    chatMessagesAfterExtraction.push({
-                        role: 'assistant',
-                        content: gpt4Response
-                    });
-                    assistantResponse = gpt4Response;
-                    console.log("\n\n***CHAT_HELPER.JS: Enhanced response to user with Weaviate and GPT4...");
-                } else {
-                    console.log("\n\n***CHAT_HELPER.JS: GPT4 Response is empty or not received");
-                }
-            } else {
-                console.log("\n\n***CHAT_HELPER.JS: No cosine similarity score was found, this might be due to Weaviate not returning any matches.");
-            }
-        
-        } catch (err) {
-            // In case of error, log it
-            console.log("\n\n***CHAT_HELPER.JS: Error occurred while enhancing with Weaviate: ", err);
-            // But continue execution without adding Weaviate info...
+        if (gpt4Response) {
+            console.log("\n\n***CHAT_HELPER.JS: Response from GPT4: ", gpt4Response);
+            chatMessagesAfterExtraction.push({
+                role: 'assistant',
+                content: gpt4Response
+            });
+            assistantResponse = gpt4Response;
+            console.log("\n\n***CHAT_HELPER.JS: Enhanced response to user with Weaviate and GPT4...");
+        } else {
+            console.log("\n\n***CHAT_HELPER.JS: GPT4 Response is empty or not received");
         }
+    } else {
+        console.log("\n\n***CHAT_HELPER.JS: No high cosine similarity score was found.");
+        let gpt4Prompt = `The user asked the following question: ${lastUserMessage}. Please provide a response using any knowledge you have, but do not hallucinate. ${weaviateInfo}.`;
+        // Now use 'gpt4Prompt' to invoke GPT4
+        const gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
+        if (gpt4Response) {
+            console.log("\n\n***CHAT_HELPER.JS: Response from GPT4: ", gpt4Response);
+            chatMessagesAfterExtraction.push({
+                role: 'assistant',
+                content: gpt4Response
+            });
+            assistantResponse = gpt4Response;
+            console.log("\n\n***CHAT_HELPER.JS: Enhanced response to user with GPT4...");
+        } else {
+            console.log("\n\n***CHAT_HELPER.JS: GPT4 Response is empty or not received");
+        }
+    }
+} catch (err) {
+    // In case of error, log it
+    console.log("\n\n***CHAT_HELPER.JS: Error occurred while enhancing with Weaviate: ", err);
+    // But continue execution without adding Weaviate info...
+}
 
 		console.log("\n\n***CHAT_HELPER.JS: gpt35 Assistant's response:", assistantResponse, "Requery needed:", letMeCheckFlag);
 
