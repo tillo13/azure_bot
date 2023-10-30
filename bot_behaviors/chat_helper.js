@@ -146,6 +146,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
                 });
 
                 const countHighSimilarityResults = highSimilarityResults.length;
+                console.log("\n\n***CHAT_HELPER.JS: Count of High Similarity Results: ", countHighSimilarityResults);
+
                 let gpt4Prompt;
 
                 if (countHighSimilarityResults > 0) {
