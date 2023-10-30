@@ -148,9 +148,9 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
             let gpt4Response;
             
             if (weaviateResponse && weaviateResponse.cosines && weaviateResponse.cosines.length > 0) {
-                gpt4Prompt = `The user asked the following question: ${lastUserMessage}, we found a cosine similarity match of ${weaviateResponse.cosines[0]} that can answer it. Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate. ${weaviateInfo}.`;
+                gpt4Prompt = `The user asked the following question: ${lastUserMessage}, we found a cosine similarity match in our vector dataset of ${weaviateResponse.cosines[0]} that can answer it. Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate. ${weaviateInfo}.`;
             } else {
-                console.log("\n\n***CHAT_HELPER.JS: No cosine similarity score was found");
+                console.log("\n\n***CHAT_HELPER.JS: No cosine similarity score was found, this likely won't ever hit as even a low score is returned by Weaviate.");
                 gpt4Prompt = `The user asked the following question: ${lastUserMessage}. Please provide a response using any knowledge you have, but do not hallucinate. ${weaviateInfo}.`;
             }
             // Now use 'gpt4Prompt' to invoke GPT4
