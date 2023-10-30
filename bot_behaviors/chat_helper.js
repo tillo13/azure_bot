@@ -136,28 +136,26 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
         //2023oct30 add in weaviate responses
         try {
             const weaviateInfo = formatWeaviateResponse(weaviateResponse);
-
+        
             if (weaviateResponse && weaviateResponse.data && weaviateResponse.data.length > 0) {
-                const highSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= 0.90);
-                let informationContents = '';
-                highSimilarityResults.forEach(result => {
-                    informationContents += ` Information: "${result.content}".`;
-                });
-
-                // this does not work const countHighSimilarityResults = highSimilarityResults.length;
-                //try counting this way
+        
+                // Counting high similarity results here
                 let countHighSimilarityResults = 0;
-                try {
-                    if(Array.isArray(weaviateResponse.data) && weaviateResponse.data.every(item => item.hasOwnProperty('cosine'))) {
-                        countHighSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= COSINE_SIMILARITY_THRESHOLD).length;
-                    } else {
-                        console.log("\n\n***CHAT_HELPER.JS: The weaviateResponse.data is not an array or does not contain 'cosine' property on all items.");
-                    }
-                } catch (err) {
-                    console.log("\n\n***CHAT_HELPER.JS: Error occurred while counting high similarity results: ", err.message);
+                if(Array.isArray(weaviateResponse.data) && weaviateResponse.data.every(item => item.hasOwnProperty('cosine'))) {
+                    countHighSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= COSINE_SIMILARITY_THRESHOLD).length;
+                } else {
+                    console.log("\n\n***CHAT_HELPER.JS: The weaviateResponse.data is not an array or does not contain 'cosine' property on all items.");
                 }
                 
+                const highSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= COSINE_SIMILARITY_THRESHOLD);       
+                let informationContents = '';
+        
+                highSimilarityResults.forEach(result => {
+                    informationContents += ` Information: "${result.data_chunk}".`;
+                });
+        
                 console.log("\n\n***CHAT_HELPER.JS: Count of High Similarity Results: ", countHighSimilarityResults);
+                
                 let gpt4Prompt;
                 if (countHighSimilarityResults > 0) {
                     gpt4Prompt = `The user asked the following question: ${lastUserMessage}. We found ${countHighSimilarityResults} matches in our vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that can answer it. ${informationContents} Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate. ${weaviateInfo}.`;
@@ -165,10 +163,10 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
                     console.log("\n\n***CHAT_HELPER.JS: No high cosine similarity score was found.");
                     gpt4Prompt = `The user asked the following question: ${lastUserMessage}. Please provide a response using any knowledge you have, but do not hallucinate. ${weaviateInfo}.`;
                 }
-
+        
                 // Now use 'gpt4Prompt' to invoke GPT4
                 const gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
-
+        
                 if (gpt4Response) {
                     console.log("\n\n***CHAT_HELPER.JS: Response from GPT4: ", gpt4Response);
                     chatMessagesAfterExtraction.push({
@@ -183,7 +181,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
             } else {
                 console.log("\n\n***CHAT_HELPER.JS: No cosine similarity score was found, this might be due to Weaviate not returning any matches.");
             }
-
+        
         } catch (err) {
             // In case of error, log it
             console.log("\n\n***CHAT_HELPER.JS: Error occurred while enhancing with Weaviate: ", err);
