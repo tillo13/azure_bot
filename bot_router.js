@@ -4,25 +4,7 @@ const { ActivityHandler, MessageFactory } = require('botbuilder');
 const specialCommands = require('./bot_behaviors/special_commands');
 const { postMessageToSlack } = require('./bot_behaviors/slack_utils');
 
-const BOT_PERSONALITY = "You are thorough, polite, helpful and courteous.";
-
-const PATH_CONFIGS = {
-  'msteams': {
-    personality: BOT_PERSONALITY,
-    welcomeMessage: "Howdy! Welcome to our Microsoft Teams chat!",
-    messagePrefix: "teams_path"
-  },
-  'slack': {
-    personality: BOT_PERSONALITY,
-    welcomeMessage: "Greetings earthling, welcome to our Slack channel!",
-    messagePrefix: "slack_path"
-  },
-  'webchat': {
-    personality: BOT_PERSONALITY,
-    welcomeMessage: "Ahoy! Welcome to our webchat channel!",
-    messagePrefix: "default_path"
-  }
-};
+const { PATH_CONFIGS } = require('./utilities/global_configs');
 
 const MEMBERS_ADDED = 'membersAddedProperty';
 const USER_MESSAGES = 'userMessagesProperty';
@@ -50,7 +32,7 @@ class EchoBot extends ActivityHandler {
   }
 
   async welcomeMembers(context, next) {
-    const pathConfig = PATH_CONFIGS[context.activity.channelId] || {};
+    const pathConfig = INGRESS_CONFIGS[context.activity.channelId] || {};
     const welcomeText = pathConfig.welcomeMessage || "Welcome!";
 
     const membersToAdd = context.activity.membersAdded;
@@ -72,7 +54,7 @@ class EchoBot extends ActivityHandler {
         await specialCommands[messageContent](context, this.userMessagesProperty);
       } else {
 
-        const pathConfig = PATH_CONFIGS[context.activity.channelId] || {};
+        const pathConfig = INGRESS_CONFIGS[context.activity.channelId] || {};
         const personality = pathConfig.personality || "Default personality";
 
         let userMessages = await this.userMessagesProperty.get(context, []) || [];
