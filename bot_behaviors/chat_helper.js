@@ -150,7 +150,7 @@ console.log(`\n\nNumber of matches above threshold via chat_helper.js: ${countAb
 
     // Continue only if there are matches above the similarity threshold
     if (countAboveThreshold > 0) {
-        let gpt4Prompt = `The user asked the following question: ${lastUserMessage}. We found ${countAboveThreshold} matches in our vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that can answer it. Please read this data, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more, but do not hallucinate. ${weaviateInfo}.`;
+        let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. We found ${countAboveThreshold} matches in our Teradata-specific vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that we deem suitable in a response. Please read this, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more about the subject, but do not hallucinate. ${weaviateInfo}.`;
 
         // Now use 'gpt4Prompt' to invoke GPT4
         const gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
@@ -168,7 +168,7 @@ console.log(`\n\nNumber of matches above threshold via chat_helper.js: ${countAb
         }
     } else {
         console.log("\n\n***CHAT_HELPER.JS: No high cosine similarity score was found.");
-        let gpt4Prompt = `The user asked the following question: ${lastUserMessage}. Please provide a response using any knowledge you have, but do not hallucinate. ${weaviateInfo}.`;
+        let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. Please provide a response using any knowledge you have, but do not hallucinate. ${weaviateInfo}.`;
         // Now use 'gpt4Prompt' to invoke GPT4
         const gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
         if (gpt4Response) {
