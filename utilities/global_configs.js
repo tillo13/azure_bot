@@ -10,7 +10,7 @@ const INGRESS_CONFIGS = {
   'slack': {
     personality: BOT_PERSONALITY,
     welcomeMessage: "Greetings earthling, welcome to our Slack channel!",
-    messagePrefix: "slack_path"
+    messagePrefix: "slack_path2"
   },
   'webchat': {
     personality: BOT_PERSONALITY,
