@@ -147,7 +147,8 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
                     console.log("\n\n***CHAT_HELPER.JS: The weaviateResponse.data is not an array or does not contain 'cosine' property on all items.");
                 }
                 
-                const highSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= COSINE_SIMILARITY_THRESHOLD);       
+                //const highSimilarityResults = weaviateResponse.data.filter(item => item.cosine >= COSINE_SIMILARITY_THRESHOLD);     
+                let highSimilarityResults = highSimilarityResults.length;  
                 let informationContents = '';
         
                 highSimilarityResults.forEach(result => {
