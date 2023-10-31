@@ -1,3 +1,7 @@
+//2023oct30 update prepended data in global_configs 
+
+const global_configs = require('../utilities/global_configs.js');
+
 const {
 	MessageFactory
 } = require('botbuilder');
@@ -38,7 +42,9 @@ async function handleMessageFromMSTeams(context, chatMessagesUser, isFirstIntera
 		content: assistantResponse
 	});
 
-	await context.sendActivity(MessageFactory.text(`msteams_router: ${assistantResponse}`));
+	//await context.sendActivity(MessageFactory.text(`msteams_router: ${assistantResponse}`));
+	await context.sendActivity(MessageFactory.text(`${global_configs.INGRESS_CONFIGS.msteams.messagePrefix} ${assistantResponse}`));
+
 	return true;
 }
 
@@ -86,7 +92,8 @@ async function handleMessageFromSlack(context, chatMessagesUser, savedThread_ts,
 			});
 		}
 
-		await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, pathConfig);
+		//await handleSlackMessage(context, chatResponse.assistantResponse, chatResponse.letMeCheckFlag, pathConfig);
+		await handleSlackMessage(context, `${global_configs.INGRESS_CONFIGS.slack.messagePrefix} ${chatResponse.assistantResponse}`, chatResponse.letMeCheckFlag, pathConfig);
 
 		return true;
 	}
@@ -103,7 +110,9 @@ async function handleDefault(context, chatMessagesUser, personality) {
 		content: chatResponse.assistantResponse
 	});
 
-	await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
+	//await context.sendActivity(MessageFactory.text(`default_router: ${chatResponse.assistantResponse}`));
+	await context.sendActivity(MessageFactory.text(`${global_configs.INGRESS_CONFIGS.webchat.messagePrefix} ${chatResponse.assistantResponse}`));
+
 	return true;
 }
 
