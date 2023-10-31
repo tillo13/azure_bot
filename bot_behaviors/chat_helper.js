@@ -123,7 +123,7 @@ function createChatFooter(weaviateResponse, usedGPT4) {
     let assistantResponse = "";
     let GPT_MODEL = usedGPT4 ? "GPT4+Weaviate" : "GPT-3.5t"; // Determine the GPT model based on the usedGPT4 flag 
 
-    assistantResponse += "\n---\ndevData: "; // Add separator and devData heading
+    assistantResponse += "\n- - -\ndevData: "; // Add separator and devData heading
 
     if (usedGPT4) {
 

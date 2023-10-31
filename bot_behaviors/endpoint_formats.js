@@ -33,7 +33,7 @@ const footer_msteams = [
 	},
 	{
 		type: "TextBlock",
-		text: "_v1.024.g35_",
+		text: "_v1.031.g35_",
 		wrap: true,
 		size: "small",
 		horizontalAlignment: "right",
@@ -334,7 +334,7 @@ high5_msteamsResponse: function(userMessage, recognizedUser) {
 				},
 				{
 					type: "TextBlock",
-					text: `**1.**  Ask basic questions, no keywords necessary!`,
+					text: `**1.**  Ask basic questions, no keywords necessary!  Try something like 'How do I do a table join in Teradata Database? to get started perhaps...'`,
 					wrap: true
 				},
 				{
