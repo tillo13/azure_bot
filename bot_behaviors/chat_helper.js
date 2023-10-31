@@ -255,4 +255,4 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	}
 }
 
-module.exports = chatCompletion;
+module.exports = { chatCompletion, createChatFooter };
