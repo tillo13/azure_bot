@@ -120,33 +120,32 @@ function extractMessages(chatMessages, noChatManipulation = false) {
 
 // Function to create the chat footer
 function createChatFooter(weaviateResponse, usedGPT4) {
-	let assistantResponse = "";
+    let assistantResponse = "";
+    let GPT_MODEL = usedGPT4 ? "GPT4" : "GPT-3.5-TURBO"; // Determine the GPT model based on the usedGPT4 flag 
 
-	// Add max cosine threshold to bot's response.
-	if (weaviateResponse && weaviateResponse.highestScore) {
-		assistantResponse += ` Max Cosine Similarity Threshold: ${COSINE_SIMILARITY_THRESHOLD}`;
-	}
-	if (usedGPT4) {
-		// Append extra statement about assistant's resources when GPT4 is used.
-		if (weaviateResponse && weaviateResponse.highestScore) {
-			assistantResponse += FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE + FOOTER_HIGHEST_MATCH_MESSAGE + weaviateResponse.highestScore;
-		} else {
-			// Just add a statement about using GPT-4 for the reply.
-			assistantResponse += FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE;
-		}
-	} else {
-		// Add the highest Weaviate score to the response in any case.
-		if (weaviateResponse && weaviateResponse.highestScore) {
-			assistantResponse += FOOTER_HIGHEST_MATCH_MESSAGE + weaviateResponse.highestScore;
-		} else {
-			assistantResponse += FOOTER_NO_MATCH_MESSAGE;
-		}
-	}
+    if (usedGPT4) {
 
-	assistantResponse += ` Max Cosine Similarity Threshold: ${COSINE_SIMILARITY_THRESHOLD}`; // Add the Max Cosine Similarity Threshold here, so it is added only once.
-	assistantResponse += FOOTER_GENERAL_POSTFIX; // Add the general postfix to all messages
+        // Append extra statement about assistant's resources when GPT4 is used.
+        if (weaviateResponse && weaviateResponse.highestScore) {
+            assistantResponse += FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE + FOOTER_HIGHEST_MATCH_MESSAGE + weaviateResponse.highestScore;
+        } else {
+            // Just add a statement about using GPT-4 for the reply.
+            assistantResponse += FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE;
+        }
+    } else {
+        // Add the highest Weaviate score to the response in any case.
+        if (weaviateResponse && weaviateResponse.highestScore) {
+            assistantResponse += FOOTER_HIGHEST_MATCH_MESSAGE + weaviateResponse.highestScore;
+        } else {
+            assistantResponse += FOOTER_NO_MATCH_MESSAGE;
+        }
+    }
+    
+    assistantResponse += ` | GPT Model: ${GPT_MODEL}`; // Add GPT Model to the response
+    assistantResponse += ` | Max Cosine Similarity Threshold: ${COSINE_SIMILARITY_THRESHOLD}`; // Add the Max Cosine Similarity Threshold here, so it is added only once.
+    assistantResponse += FOOTER_GENERAL_POSTFIX; // Add the general postfix to all messages
 
-	return assistantResponse;
+    return assistantResponse;
 }
 
 async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread) {
