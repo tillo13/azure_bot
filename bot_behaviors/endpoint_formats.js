@@ -609,7 +609,7 @@ dalle_precursor_msteamsResponse: function(prompt, numImages, imageSize) {
 	},
 
 	dalle_SlackResponse: function(channelId, prompt, numImages, imageSize, duration) {
-		const channelConfig = INGRESS_CONFIGS[channelId];
+		const channelConfig = global_configs.INGRESS_CONFIGS[channelId];
 		let slackMessage = {
 			"blocks": [
 				{
