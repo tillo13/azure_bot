@@ -168,7 +168,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		if (usedGPT4) {
 			// Append extra statement about assistant's resources when GPT4 is used.
 			if (weaviateResponse && weaviateResponse.highestScore) {
-				assistantResponse += ` |Response enhanced with RAG via Weaviate and provided by GPT-4. Highest cosine match: ${weaviateResponse.highestScore}|`;
+				assistantResponse += ` |Response enhanced with RAG via Weaviate and provided by GPT-4. Highest cosine match: ${weaviateResponse.highestScore}`;
 			} else {
 				// Just add a statement about using GPT-4 for the reply.
 				assistantResponse += ` |Response enhanced with RAG via Weaviate and provided by GPT-4.'|`;
@@ -176,7 +176,7 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		} else {
 			// Add the highest Weaviate score to the response in any case.
 			if (weaviateResponse && weaviateResponse.highestScore) {
-				assistantResponse += ` |Highest Weaviate cosine match (though it didn't reach the threshold): ${weaviateResponse.highestScore}|`;
+				assistantResponse += ` \n\n|Highest Weaviate match: ${weaviateResponse.highestScore}`;
 			} else {
 				assistantResponse += " |No Weaviate matches: ¯\_(ツ)_/¯, be more specific?|";
 			}
