@@ -119,7 +119,6 @@ function extractMessages(chatMessages, noChatManipulation = false) {
 }
 
 // Function to create the chat footer
-// Function to create the chat footer
 function createChatFooter(weaviateResponse, usedGPT4) {
     let assistantResponse = "";
     let GPT_MODEL = usedGPT4 ? "GPT4+Weaviate" : "GPT-3.5t"; // Determine the GPT model based on the usedGPT4 flag 
@@ -144,9 +143,8 @@ function createChatFooter(weaviateResponse, usedGPT4) {
         }
     }
 
-    assistantResponse += `| LLM: ${GPT_MODEL} `; // Add GPT Model to the response
-    assistantResponse += `| Powered by TeradataBot v${GLOBAL_APP_VERSION}`; // Add the app version, updated to be part of the TeradataBot line
-    assistantResponse += FOOTER_GENERAL_POSTFIX; // Add the general postfix to all messages
+    assistantResponse += `| LLM Model: ${GPT_MODEL} `; // Add GPT Model to the response
+	assistantResponse += ` | ${FOOTER_GENERAL_POSTFIX} v${GLOBAL_APP_VERSION}`; // Add the general postfix from configs and app version
 
     return assistantResponse;
 }
