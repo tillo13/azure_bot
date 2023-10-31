@@ -46,7 +46,7 @@ const INGRESS_CONFIGS = {
 };
 
 module.exports = {
-  DB_RECREATION_OF_GPT_PAYLOAD,
+  dbRecreationOfGptPayload: true,
   BOT_PERSONALITY,
   INGRESS_CONFIGS,
   COSINE_SIMILARITY_THRESHOLD,
