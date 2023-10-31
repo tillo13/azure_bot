@@ -12,13 +12,18 @@ const INGRESS_CONFIGS = {
     welcomeMessage: "Greetings earthling, welcome to our Slack channel!",
     messagePrefix: "",
     messagePostfix: "",
-    footer: {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "```                                                                            |Powered by SlackBot2|```"
-      }
-    },
+    footer: [
+      {
+        "type": "divider",
+      },
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "```|Powered by SlackBot2|```"
+        }
+      },
+    ]
   },
   'webchat': {
     personality: BOT_PERSONALITY,
