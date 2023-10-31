@@ -229,6 +229,7 @@ async function botIngressSaveDataToPostgres(data, channelId) {
 		}
 	} catch (err) {
 		console.error('\n*POSTGRES_UTILS.JS: Failed to save data to Postgres for botIngress path: ', err);
+		console.error('\n*POSTGRES_UTILS.JS: Payload:', payload);
 	}
 }
 
@@ -420,42 +421,6 @@ async function botRouterSaveDataToPostgres(data, channelId, filename_ingress) {
 	let parsed_textFormat = data.textFormat || null;
 	let parsed_localTimezone = data.localTimezone || null;
 
-	// console.log('\n*POSTGRES_UTILS.JS: [DEBUG]  aadObject2', parsed_aadObjectId2)
-	// console.log('\n*POSTGRES_UTILS.JS: [DEBUG] aaObject1',parsed_aadObjectId) 
-	
-// 	console.log('\n*POSTGRES_UTILS.JS: [DEBUG] Now see the parsed list of values',
-// 	{parsed_responded_ref_responded, 
-// 	parsed_turn_context_state_collection, 
-// 	parsed_bot_identity_claims_identity_authentication_type,
-// 	parsed_connector_client_with_credentials,
-// 	parsed_connector_client_http_client, 
-// 	parsed_user_token_client_app_id, 
-// 	parsed_connector_factory_app_id, 
-// 	parsed_connector_factory_validate_authority,
-// 	parsed_turn_locale, parsed_locale, 
-// 	parsed_type, parsed_id, parsed_timestamp,
-// 	parsed_serviceUrl, channelId, 
-// 	parsed_from_id, 
-// 	parsed_from_name, parsed_recipient_id, parsed_recipient_name, 
-// 	parsed_payload, parsed_filename_ingress, 
-// 	parsed_activity_raw_timestamp, parsed_activity_caller_id, parsed_stateHashJSON, 
-// 	parsed_isFirstInteraction,
-// 	parsed_is_group,
-// 	parsed_conversation_id, 
-// 	parsed_conversation_name, 
-// 	parsed_slack_state_hash_thread_timestamp,
-// 	parsed_bot_invoked_flag,
-// 	parsed_api_token,
-// 	parsed_conversation_conversationType,
-// 	parsed_conversation_tenantId,
-// 	parsed_msteams_conversation_id, 
-// 	parsed_aadObjectId, 
-// 	parsed_localTimestamp,
-// 	parsed_webchat_conversation_id,
-// 	parsed_textFormat,
-// 	parsed_localTimezone,
-// 	slackUrl }
-//   )	
 
 	result = await pool.query(query, [
 	  parsed_responded_ref_responded, 
