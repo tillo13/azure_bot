@@ -608,15 +608,15 @@ dalle_precursor_msteamsResponse: function(prompt, numImages, imageSize) {
 		};
 	},
 
-	dalle_SlackResponse: function(channelId, prompt, numImages, imageSize, duration) {
-		const channelConfig = global_configs.INGRESS_CONFIGS[channelId];
+	dalle_SlackResponse: function(prompt, numImages, imageSize, duration) {
+		let channelConfig = global_configs.INGRESS_CONFIGS['slack']; // Modify this line
 		let slackMessage = {
 			"blocks": [
 				{
 					"type": "section",
 					"text": {
-					"type": "mrkdwn",
-					"text": `${channelConfig.messagePrefix} *Your Image Request Summary:*\nPrompt: \`${prompt}\`\nNumber of Images: \`${numImages}\`\nImage Size: \`${imageSize}\`\nTime elapsed: \`${duration} seconds.\`` + channelConfig.messagePostfix
+						"type": "mrkdwn",
+						"text": `${channelConfig.messagePrefix} *Your Image Request Summary:*\nPrompt: \`${prompt}\`\nNumber of Images: \`${numImages}\`\nImage Size: \`${imageSize}\`\nTime elapsed: \`${duration} seconds.\`` + channelConfig.messagePostfix
 					}
 				},
 				{
