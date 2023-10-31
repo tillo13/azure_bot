@@ -1,5 +1,6 @@
 const { COSINE_SIMILARITY_THRESHOLD } = require('../utilities/global_configs');
 
+const { invokeOpenaiGpt4 } = require('./gpt4_invoke');
 
 const path = require('path');
 const fetch = require('node-fetch');
@@ -86,6 +87,38 @@ async function handleSearchSimilarity(lastUserMessage){
     }
 }
 
+async function enhanceResponseWithWeaviate(lastUserMessage, chatMessagesAfterExtraction, weaviateResponse) {
+	try {
+		// Obtain the formatted Weaviate information and count of high similarity matches
+		let {
+			weaviateInfo,
+			countAboveThreshold
+		} = await formatWeaviateResponse(weaviateResponse);
+		console.log(`\n\nNumber of matches above threshold via chat_helper.js: ${countAboveThreshold}`);
+		// Ensure countAboveThreshold is a number
+		countAboveThreshold = Number(countAboveThreshold);
+		// If weaviateInfo is undefined, set it to an empty string
+		weaviateInfo = weaviateInfo || "";
+
+		// Continue only if there are matches above the similarity threshold
+		if (countAboveThreshold > 0) {
+			let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. We found ${countAboveThreshold} matches in our Teradata-specific vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that we deem suitable in a response. Please read this, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more about the subject, but do not hallucinate. ${weaviateInfo}.`;
+			// Now use 'gpt4Prompt' to invoke GPT4
+			return await invokeOpenaiGpt4(gpt4Prompt);
+		} else {
+			console.log("\n\n***CHAT_HELPER.JS: No high cosine similarity score was found.");
+			let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. Please provide a thorough response using any knowledge you have, but do not hallucinate.`;
+			// Now use 'gpt4Prompt' to invoke GPT4
+			return await invokeOpenaiGpt4(gpt4Prompt);
+		}
+	} catch (err) {
+		// In case of error, log it
+		console.log("\n\n***CHAT_HELPER.JS: Error occurred while enhancing with Weaviate: ", err);
+		// Return null on failing to enhance the response
+		return null;
+	}
+}
+
 function formatWeaviateResponse(weaviateResponse) {
     let weaviateInfo = "";
 
@@ -123,4 +156,4 @@ function formatWeaviateResponse(weaviateResponse) {
     return {weaviateInfo: weaviateInfo, countAboveThreshold: countAboveThreshold};
 }
 
-module.exports = {initialSearchVectorSimilarity, handleSearchSimilarity, formatWeaviateResponse}
+module.exports = {initialSearchVectorSimilarity, handleSearchSimilarity, formatWeaviateResponse, enhanceResponseWithWeaviate}
