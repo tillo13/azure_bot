@@ -8,7 +8,7 @@ const BOT_PERSONALITY = "You are thorough, polite, helpful and courteous.";
 const MAX_OPENAI_TOKENS = 2048;
 
 //weaviate specific values
-const COSINE_SIMILARITY_THRESHOLD = 0.90;
+const COSINE_SIMILARITY_THRESHOLD = 0.89;
 const FOOTER_NO_MATCH_MESSAGE = " |No Weaviate matches: ¯\\_(ツ)_/¯, be more specific?|";
 const FOOTER_HIGHEST_MATCH_MESSAGE = " |Highest Weaviate match: ";
 const FOOTER_GENERAL_POSTFIX = "|Powered by TeradataBot|";
