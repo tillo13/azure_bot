@@ -1,5 +1,3 @@
-//2023oct30 add in cosine similarity score
-
 const BOT_PERSONALITY = "You are thorough, polite, helpful and courteous.";
 
 const INGRESS_CONFIGS = {
@@ -13,7 +11,14 @@ const INGRESS_CONFIGS = {
     personality: BOT_PERSONALITY,
     welcomeMessage: "Greetings earthling, welcome to our Slack channel!",
     messagePrefix: "",
-    messagePostfix: " |Powered by SlackBot|",
+    messagePostfix: "",
+    footer: {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "```                                                                            |Powered by SlackBot2|```"
+      }
+    },
   },
   'webchat': {
     personality: BOT_PERSONALITY,
@@ -23,12 +28,11 @@ const INGRESS_CONFIGS = {
   }
 };
 
-//set an overall value for what the threshold is for weaviate to return a result
-const COSINE_SIMILARITY_THRESHOLD = 0.90;  
+const COSINE_SIMILARITY_THRESHOLD = 0.90;
 
 module.exports = {
-    dbRecreationOfGptPayload: true,
-    BOT_PERSONALITY,
-    INGRESS_CONFIGS,
-    COSINE_SIMILARITY_THRESHOLD  
+  dbRecreationOfGptPayload: true,
+  BOT_PERSONALITY,
+  INGRESS_CONFIGS,
+  COSINE_SIMILARITY_THRESHOLD  
 };
