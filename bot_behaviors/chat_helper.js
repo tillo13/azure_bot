@@ -25,16 +25,21 @@ const {
 	OpenAIClient,
 	AzureKeyCredential
 } = require("@azure/openai");
+
 const {
-	COSINE_SIMILARITY_THRESHOLD
-} = require('../utilities/global_configs');
+	BOT_PERSONALITY,
+	MAX_OPENAI_TOKENS,
+	COSINE_SIMILARITY_THRESHOLD,
+	FOOTER_NO_MATCH_MESSAGE,
+	FOOTER_HIGHEST_MATCH_MESSAGE,
+	FOOTER_GENERAL_POSTFIX,
+	FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE
+  } = require('../utilities/global_configs');
 
 const {
 	invokeOpenaiGpt4
 } = require('./gpt4_invoke');
 
-
-const MAX_OPENAI_TOKENS = 700;
 const checkMessage = "Let me check our past conversations in this exact thread, one moment...";
 let chatIdHistoryLog = [];
 let chatHistory = [];
@@ -164,23 +169,30 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		}
 
 		console.log("\n\n***CHAT_HELPER.JS: gpt35 Assistant's response:", assistantResponse, "Requery needed:", letMeCheckFlag);
-		// Append extra statement about assistant's resources, based on usedGPT4 flag
+		// Add max cosine threashold to bot's response.
+		if (weaviateResponse && weaviateResponse.highestScore) {
+			assistantResponse += ` Max Cosine Similarity Threshold: ${COSINE_SIMILARITY_THRESHOLD}`;
+		}
 		if (usedGPT4) {
 			// Append extra statement about assistant's resources when GPT4 is used.
 			if (weaviateResponse && weaviateResponse.highestScore) {
-				assistantResponse += ` |Response enhanced with RAG via Weaviate and provided by GPT-4. Highest cosine match: ${weaviateResponse.highestScore}`;
+				assistantResponse += FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE + FOOTER_HIGHEST_MATCH_MESSAGE + weaviateResponse.highestScore;
 			} else {
 				// Just add a statement about using GPT-4 for the reply.
-				assistantResponse += ` |Response enhanced with RAG via Weaviate and provided by GPT-4.'|`;
+				assistantResponse += FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE;
 			}
 		} else {
 			// Add the highest Weaviate score to the response in any case.
 			if (weaviateResponse && weaviateResponse.highestScore) {
-				assistantResponse += ` \n\n|Highest Weaviate match: ${weaviateResponse.highestScore}`;
+				assistantResponse += FOOTER_HIGHEST_MATCH_MESSAGE + weaviateResponse.highestScore;
 			} else {
-				assistantResponse += " |No Weaviate matches: ¯\_(ツ)_/¯, be more specific?|";
+				assistantResponse += FOOTER_NO_MATCH_MESSAGE;
 			}
 		}
+		assistantResponse += ` Max Cosine Similarity Threshold: ${COSINE_SIMILARITY_THRESHOLD}`; // <<< Here
+		assistantResponse += FOOTER_GENERAL_POSTFIX;  // Add the general postfix to all messages
+
+		
 		if (letMeCheckFlag) {
 			let newMessages = [{
 				role: 'assistant',
