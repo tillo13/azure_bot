@@ -105,6 +105,9 @@ async function enhanceResponseWithWeaviate(lastUserMessage, chatMessagesAfterExt
 
 		// Continue only if there are matches above the similarity threshold
 		if (countAboveThreshold > 0) {
+
+        // Sends a message to the user letting them know a match was found  
+        await context.sendActivity('We found a match, please give me a moment to gather the information...');
 			let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. We found ${countAboveThreshold} matches in our Teradata-specific vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that we deem suitable in a response. Please read this, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more about the subject, but do not hallucinate. ${weaviateInfo}.`;
 			// Now use 'gpt4Prompt' to invoke GPT4
 			return await invokeOpenaiGpt4(gpt4Prompt);
