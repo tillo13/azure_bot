@@ -139,27 +139,23 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
 		let assistantResponse = result.choices[0].message.content;
 
-//2023oct30 add in weaviate responses
-try {
-    let gpt4ResponsePromise = enhanceResponseWithWeaviate(lastUserMessage, chatMessagesAfterExtraction, weaviateResponse);
-    
-    // Send a message to the user indicating we are processing their request
-    chatMessagesAfterExtraction.push({
-        role: 'assistant',
-        content: 'Please give us a moment. We have found a potential match in our knowledge base and are generating a comprehensive response...'
-    });
-
-    let gpt4Response = await gpt4ResponsePromise;
-    if (gpt4Response) {
-        console.log("\n\n***CHAT_HELPER.JS: Response from GPT4: ", gpt4Response);
-        chatMessagesAfterExtraction.push({
-            role: 'assistant',
-            content: gpt4Response
-        });
-    }
-} catch (err) {
-    // In case of error, log it
-    console.log("\n\n***CHAT_HELPER.JS: Error occurred while enhancing with Weaviate: ", err);
+		//2023oct30 add in weaviate responses
+		try {
+			let gpt4Response = await enhanceResponseWithWeaviate(lastUserMessage, chatMessagesAfterExtraction, weaviateResponse);
+			if (gpt4Response) {
+				console.log("\n\n***CHAT_HELPER.JS: Response from GPT4: ", gpt4Response);
+				chatMessagesAfterExtraction.push({
+					role: 'assistant',
+					content: gpt4Response
+				});
+				console.log("\n\n***CHAT_HELPER.JS: Enhanced response to user with Weaviate and GPT4...");
+                assistantResponse = gpt4Response;
+			} else {
+				console.log("\n\n***CHAT_HELPER.JS: GPT4 Response is empty or not received");
+			}
+		} catch (err) {
+			// In case of error, log it
+			console.log("\n\n***CHAT_HELPER.JS: Error occurred while enhancing with Weaviate: ", err);
 			// But continue execution without adding Weaviate info...
 		}
 
