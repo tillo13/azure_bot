@@ -80,7 +80,10 @@ async function handleSearchSimilarity(lastUserMessage){
             // Store cosine similarity
             cosines.push(obj._additional.certainty);
         });
-        return {className: className, data: responseData, cosines: cosines};
+        //return {className: className, data: responseData, cosines: cosines};
+        //add the highest cosine similarity score to the return object
+        return {className: className, data: responseData, cosines: cosines, highestScore: Math.max(...cosines)};
+
     } else {
         console.log("\n\n******WEAVIATE_UTILS.JS: Could not communicate with Weaviate");
         return null;
@@ -105,6 +108,7 @@ async function enhanceResponseWithWeaviate(lastUserMessage, chatMessagesAfterExt
 			let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. We found ${countAboveThreshold} matches in our Teradata-specific vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that we deem suitable in a response. Please read this, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more about the subject, but do not hallucinate. ${weaviateInfo}.`;
 			// Now use 'gpt4Prompt' to invoke GPT4
 			return await invokeOpenaiGpt4(gpt4Prompt);
+            assistantResponse = gpt4Prompt
 		} else {
 			console.log("\n\n***CHAT_HELPER.JS: No high cosine similarity score was found, therefore not enhancing with Weaviate nor GPT4 for speed/finance reasons.");
             //GPT3.5 is perfectly capable of responding for speed, if we want to use GPT4 in the future for non-cosine, uncomment these lines to invoke GPT4
