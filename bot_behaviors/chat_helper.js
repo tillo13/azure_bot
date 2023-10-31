@@ -27,7 +27,7 @@ const {
 } = require("@azure/openai");
 
 const {
-	BOT_PERSONALITY,
+	GLOBAL_APP_VERSION,
 	MAX_OPENAI_TOKENS,
 	COSINE_SIMILARITY_THRESHOLD,
 	FOOTER_NO_MATCH_MESSAGE,
@@ -121,13 +121,13 @@ function extractMessages(chatMessages, noChatManipulation = false) {
 // Function to create the chat footer
 function createChatFooter(weaviateResponse, usedGPT4) {
     let assistantResponse = "";
-    let GPT_MODEL = usedGPT4 ? "GPT4" : "GPT-3.5-TURBO"; // Determine the GPT model based on the usedGPT4 flag 
+    let GPT_MODEL = usedGPT4 ? "GPT4+Weaviate" : "GPT-3.5t"; // Determine the GPT model based on the usedGPT4 flag 
 
     if (usedGPT4) {
 
         // Append extra statement about assistant's resources when GPT4 is used.
         if (weaviateResponse && weaviateResponse.highestScore) {
-            assistantResponse += FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE + FOOTER_HIGHEST_MATCH_MESSAGE + weaviateResponse.highestScore;
+            assistantResponse += FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE + FOOTER_HIGHEST_MATCH_MESSAGE + Number(weaviateResponse.highestScore).toFixed(4);
         } else {
             // Just add a statement about using GPT-4 for the reply.
             assistantResponse += FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE;
@@ -135,14 +135,15 @@ function createChatFooter(weaviateResponse, usedGPT4) {
     } else {
         // Add the highest Weaviate score to the response in any case.
         if (weaviateResponse && weaviateResponse.highestScore) {
-            assistantResponse += FOOTER_HIGHEST_MATCH_MESSAGE + weaviateResponse.highestScore;
+            assistantResponse += FOOTER_HIGHEST_MATCH_MESSAGE + Number(weaviateResponse.highestScore).toFixed(4);
         } else {
             assistantResponse += FOOTER_NO_MATCH_MESSAGE;
         }
     }
-    
-    assistantResponse += ` | GPT Model: ${GPT_MODEL}`; // Add GPT Model to the response
+
+    assistantResponse += ` | LLM Model: ${GPT_MODEL}`; // Add GPT Model to the response
     assistantResponse += ` | Max Cosine Similarity Threshold: ${COSINE_SIMILARITY_THRESHOLD}`; // Add the Max Cosine Similarity Threshold here, so it is added only once.
+    assistantResponse += ` | App Version: ${GLOBAL_APP_VERSION}`; // Add the app version.
     assistantResponse += FOOTER_GENERAL_POSTFIX; // Add the general postfix to all messages
 
     return assistantResponse;
