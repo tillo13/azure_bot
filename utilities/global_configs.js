@@ -6,12 +6,14 @@ const INGRESS_CONFIGS = {
   'msteams': {
     personality: BOT_PERSONALITY,
     welcomeMessage: "Howdy! Welcome to our Microsoft Teams chat!",
-    messagePrefix: "msteams>>"
+    //debug messagePrefix: "msteams>>"
+    messagePrefix: ""
   },
   'slack': {
     personality: BOT_PERSONALITY,
     welcomeMessage: "Greetings earthling, welcome to our Slack channel!",
-    messagePrefix: "slack>>"
+    // I have this somewhere already, not sure where, but not in this file --when I find it turn this back on if we want: messagePrefix: "slack>>"
+    messagePrefix: ""
   },
   'webchat': {
     personality: BOT_PERSONALITY,
