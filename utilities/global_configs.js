@@ -11,7 +11,7 @@ const MAX_OPENAI_TOKENS = 2048;
 const COSINE_SIMILARITY_THRESHOLD = 0.89;
 const FOOTER_NO_MATCH_MESSAGE = " |No Weaviate matches: ¯\\_(ツ)_/¯, be more specific?|";
 const FOOTER_HIGHEST_MATCH_MESSAGE = " |Highest Weaviate match: ";
-const FOOTER_GENERAL_POSTFIX = "|Powered by TeradataBot";
+const FOOTER_GENERAL_POSTFIX = "|TeradataBot";
 const FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE = " |Response enhanced with RAG via Weaviate and provided by GPT-4.";
 
 //other config variables
