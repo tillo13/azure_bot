@@ -106,10 +106,10 @@ async function enhanceResponseWithWeaviate(lastUserMessage, chatMessagesAfterExt
 			// Now use 'gpt4Prompt' to invoke GPT4
 			return await invokeOpenaiGpt4(gpt4Prompt);
 		} else {
-			console.log("\n\n***CHAT_HELPER.JS: No high cosine similarity score was found.");
-			let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. Please provide a thorough response using any knowledge you have, but do not hallucinate.`;
-			// Now use 'gpt4Prompt' to invoke GPT4
-			return await invokeOpenaiGpt4(gpt4Prompt);
+			console.log("\n\n***CHAT_HELPER.JS: No high cosine similarity score was found, therefore not enhancing with Weaviate nor GPT4 for speed/finance reasons.");
+            //GPT3.5 is perfectly capable of responding for speed, if we want to use GPT4 in the future for non-cosine, uncomment these lines to invoke GPT4
+			//let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. Please provide a thorough response using any knowledge you have, but do not hallucinate.`;
+			//return await invokeOpenaiGpt4(gpt4Prompt);
 		}
 	} catch (err) {
 		// In case of error, log it
