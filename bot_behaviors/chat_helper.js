@@ -119,15 +119,18 @@ function extractMessages(chatMessages, noChatManipulation = false) {
 }
 
 // Function to create the chat footer
+// Function to create the chat footer
 function createChatFooter(weaviateResponse, usedGPT4) {
     let assistantResponse = "";
     let GPT_MODEL = usedGPT4 ? "GPT4+Weaviate" : "GPT-3.5t"; // Determine the GPT model based on the usedGPT4 flag 
+
+    assistantResponse += "\n---\ndevData: "; // Add separator and devData heading
 
     if (usedGPT4) {
 
         // Append extra statement about assistant's resources when GPT4 is used.
         if (weaviateResponse && weaviateResponse.highestScore) {
-            assistantResponse += FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE + FOOTER_HIGHEST_MATCH_MESSAGE + Number(weaviateResponse.highestScore).toFixed(4);
+            assistantResponse += `|Highest Weaviate match: ${Number(weaviateResponse.highestScore).toFixed(4)} (Threshold: ${COSINE_SIMILARITY_THRESHOLD}) `;
         } else {
             // Just add a statement about using GPT-4 for the reply.
             assistantResponse += FOOTER_GPT4_PLUS_WEAVIATE_MESSAGE;
@@ -135,15 +138,14 @@ function createChatFooter(weaviateResponse, usedGPT4) {
     } else {
         // Add the highest Weaviate score to the response in any case.
         if (weaviateResponse && weaviateResponse.highestScore) {
-            assistantResponse += FOOTER_HIGHEST_MATCH_MESSAGE + Number(weaviateResponse.highestScore).toFixed(4);
+            assistantResponse += `|Highest Weaviate match: ${Number(weaviateResponse.highestScore).toFixed(4)} (Threshold: ${COSINE_SIMILARITY_THRESHOLD}) `;
         } else {
             assistantResponse += FOOTER_NO_MATCH_MESSAGE;
         }
     }
 
-    assistantResponse += ` | LLM Model: ${GPT_MODEL}`; // Add GPT Model to the response
-    assistantResponse += ` | Max Cosine Similarity Threshold: ${COSINE_SIMILARITY_THRESHOLD}`; // Add the Max Cosine Similarity Threshold here, so it is added only once.
-    assistantResponse += ` | App Version: ${GLOBAL_APP_VERSION}`; // Add the app version.
+    assistantResponse += `| LLM: ${GPT_MODEL} `; // Add GPT Model to the response
+    assistantResponse += `| Powered by TeradataBot v${GLOBAL_APP_VERSION}`; // Add the app version, updated to be part of the TeradataBot line
     assistantResponse += FOOTER_GENERAL_POSTFIX; // Add the general postfix to all messages
 
     return assistantResponse;
