@@ -127,66 +127,29 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 	if (frustrationResponse) return {
 		'assistantResponse': frustrationResponse
 	};
+
 	let {
 		newCleanChatMessages: chatMessagesAfterExtraction,
 		duplicatesRemoved
 	} = extractMessages(chatMessages, true);
 	let result = await interactWithOpenAI(chatMessagesAfterExtraction);
+
 	if (result && result.choices[0]?.message?.content) {
 		let letMeCheckFlag = shouldRequery(result.choices[0].message.content);
 		let assistantResponse = result.choices[0].message.content;
 
 		//2023oct30 add in weaviate responses
 		try {
-			// Obtain the formatted Weaviate information and count of high similarity matches
-			let {
-				weaviateInfo,
-				countAboveThreshold
-			} = await formatWeaviateResponse(weaviateResponse);
-
-			console.log(`\n\nNumber of matches above threshold via chat_helper.js: ${countAboveThreshold}`);
-
-			// Ensure countAboveThreshold is a number
-			countAboveThreshold = Number(countAboveThreshold);
-
-
-			// If weaviateInfo is undefined, set it to an empty string
-			weaviateInfo = weaviateInfo || "";
-
-			// Continue only if there are matches above the similarity threshold
-			if (countAboveThreshold > 0) {
-				let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. We found ${countAboveThreshold} matches in our Teradata-specific vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that we deem suitable in a response. Please read this, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more about the subject, but do not hallucinate. ${weaviateInfo}.`;
-
-				// Now use 'gpt4Prompt' to invoke GPT4
-				const gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
-
-				if (gpt4Response) {
-					console.log("\n\n***CHAT_HELPER.JS: Response from GPT4: ", gpt4Response);
-					chatMessagesAfterExtraction.push({
-						role: 'assistant',
-						content: gpt4Response
-					});
-					//uncomment this to add the GPT4 to the actual payload: assistantResponse = gpt4Response;
-					console.log("\n\n***CHAT_HELPER.JS: Enhanced response to user with Weaviate and GPT4...");
-				} else {
-					console.log("\n\n***CHAT_HELPER.JS: GPT4 Response is empty or not received");
-				}
+			let gpt4Response = await enhanceResponseWithWeaviate(lastUserMessage, chatMessagesAfterExtraction, weaviateResponse);
+			if (gpt4Response) {
+				console.log("\n\n***CHAT_HELPER.JS: Response from GPT4: ", gpt4Response);
+				chatMessagesAfterExtraction.push({
+					role: 'assistant',
+					content: gpt4Response
+				});
+				console.log("\n\n***CHAT_HELPER.JS: Enhanced response to user with Weaviate and GPT4...");
 			} else {
-				console.log("\n\n***CHAT_HELPER.JS: No high cosine similarity score was found.");
-				let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. Please provide a thorough response using any knowledge you have, but do not hallucinate.`;
-				// Now use 'gpt4Prompt' to invoke GPT4
-				const gpt4Response = await invokeOpenaiGpt4(gpt4Prompt);
-				if (gpt4Response) {
-					console.log("\n\n***CHAT_HELPER.JS: Response from GPT4: ", gpt4Response);
-					chatMessagesAfterExtraction.push({
-						role: 'assistant',
-						content: gpt4Response
-					});
-					//uncomment this to add the GPT4 to the actual payload: assistantResponse = gpt4Response;
-					console.log("\n\n***CHAT_HELPER.JS: Enhanced response to user with GPT4...");
-				} else {
-					console.log("\n\n***CHAT_HELPER.JS: GPT4 Response is empty or not received");
-				}
+				console.log("\n\n***CHAT_HELPER.JS: GPT4 Response is empty or not received");
 			}
 		} catch (err) {
 			// In case of error, log it
@@ -246,4 +209,38 @@ async function chatCompletion(chatTexts, roleMessage, channelId, isActiveThread)
 		};
 	}
 }
+
+
+async function enhanceResponseWithWeaviate(lastUserMessage, chatMessagesAfterExtraction, weaviateResponse) {
+	try {
+		// Obtain the formatted Weaviate information and count of high similarity matches
+		let {
+			weaviateInfo,
+			countAboveThreshold
+		} = await formatWeaviateResponse(weaviateResponse);
+		console.log(`\n\nNumber of matches above threshold via chat_helper.js: ${countAboveThreshold}`);
+		// Ensure countAboveThreshold is a number
+		countAboveThreshold = Number(countAboveThreshold);
+		// If weaviateInfo is undefined, set it to an empty string
+		weaviateInfo = weaviateInfo || "";
+
+		// Continue only if there are matches above the similarity threshold
+		if (countAboveThreshold > 0) {
+			let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. We found ${countAboveThreshold} matches in our Teradata-specific vector dataset with cosine similarity of ${COSINE_SIMILARITY_THRESHOLD} or higher that we deem suitable in a response. Please read this, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more about the subject, but do not hallucinate. ${weaviateInfo}.`;
+			// Now use 'gpt4Prompt' to invoke GPT4
+			return await invokeOpenaiGpt4(gpt4Prompt);
+		} else {
+			console.log("\n\n***CHAT_HELPER.JS: No high cosine similarity score was found.");
+			let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. Please provide a thorough response using any knowledge you have, but do not hallucinate.`;
+			// Now use 'gpt4Prompt' to invoke GPT4
+			return await invokeOpenaiGpt4(gpt4Prompt);
+		}
+	} catch (err) {
+		// In case of error, log it
+		console.log("\n\n***CHAT_HELPER.JS: Error occurred while enhancing with Weaviate: ", err);
+		// Return null on failing to enhance the response
+		return null;
+	}
+}
+
 module.exports = chatCompletion;
