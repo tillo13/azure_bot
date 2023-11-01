@@ -49,7 +49,7 @@ const INGRESS_CONFIGS = {
 };
 
 module.exports = {
-  dbRecreationOfGptPayload: true,
+  dbRecreationOfGptPayload: false,
   BOT_PERSONALITY,
   INGRESS_CONFIGS,
   COSINE_SIMILARITY_THRESHOLD,
