@@ -144,7 +144,7 @@ function createChatFooter(weaviateResponse, usedGPT4) {
     }
 
     assistantResponse += `| LLM: ${GPT_MODEL} `; // Add GPT Model to the response
-	assistantResponse += ` | ${FOOTER_GENERAL_POSTFIX} v${GLOBAL_APP_VERSION}`; // Add the general postfix from configs and app version
+	assistantResponse += ` ${FOOTER_GENERAL_POSTFIX} v${GLOBAL_APP_VERSION}`; // Add the general postfix from configs and app version
 
     return assistantResponse;
 }
