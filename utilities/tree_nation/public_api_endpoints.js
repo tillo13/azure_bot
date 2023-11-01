@@ -1,4 +1,4 @@
-async function getProjectSummary() {
+async function getProjectsSummary() {
     const projects_url = 'https://tree-nation.com/api/projects';
 
     try {
@@ -8,13 +8,11 @@ async function getProjectSummary() {
         let activeProjects = projects.filter(project => project.status === 'active');
         let inactiveProjects = projects.filter(project => project.status === 'inactive');
 
-        let projectSummary = {
-            total: projects.length,
-            active: activeProjects.length,
-            inactive: inactiveProjects.length
-        };
+        let message = `Total Number of Projects: ${projects.length}\n` +
+                      `Total Number of Active Projects: ${activeProjects.length}\n` +
+                      `Total Number of Inactive Projects: ${inactiveProjects.length}`;
 
-        return projectSummary;
+        return message;
 
     } catch(error) {
         console.error(error);
@@ -22,5 +20,5 @@ async function getProjectSummary() {
     }
 }
 
-// Export 'getProjectSummary' function
-module.exports.getProjectSummary = getProjectSummary;
+// Export 'getProjectsSummary' function
+module.exports.getProjectsSummary = getProjectsSummary;
