@@ -61,3 +61,7 @@ summary.uniqueLocations = Array.from(locations);
       return 'An error occurred while fetching Tree Nation projects data.';
   }
 }
+
+module.exports = {
+    getTreeNationProjectsSummary,
+  }
