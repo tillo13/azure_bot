@@ -53,6 +53,7 @@ summary.averageTreeStock = totalStock / projects.length;
 summary.uniqueLocations = Array.from(locations);
 
     let result = summary.createSummary();
+    console.log(`\n\n**TREE-NATION-PUBLIC_API_ENDPOINTS: Total Number of Projects: ${projects.length}`);
   
     return result; 
 
@@ -62,6 +63,5 @@ summary.uniqueLocations = Array.from(locations);
   }
 }
 
-module.exports = {
-    getTreeNationProjectsSummary,
-  }
+// Export 'getTreeNationProjectsSummary' function
+module.exports.getTreeNationProjectsSummary = getTreeNationProjectsSummary;
