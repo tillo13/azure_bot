@@ -1,4 +1,6 @@
-async function getProjectsSummary() {
+const axios = require("axios");
+
+async function getTreeNationProjectsSummary() {
     const projects_url = 'https://tree-nation.com/api/projects';
 
     try {
@@ -8,17 +10,18 @@ async function getProjectsSummary() {
         let activeProjects = projects.filter(project => project.status === 'active');
         let inactiveProjects = projects.filter(project => project.status === 'inactive');
 
-        let message = `Total Number of Projects: ${projects.length}\n` +
+        let message = `Tree Nation Project Information:\n` +
+                      `Total Number of Projects: ${projects.length}\n` +
                       `Total Number of Active Projects: ${activeProjects.length}\n` +
-                      `Total Number of Inactive Projects: ${inactiveProjects.length}`;
+                      `Total Number of Inactive Projects: ${inactiveProjects.length}\n`;
 
         return message;
 
     } catch(error) {
         console.error(error);
-        return 'An error occurred while fetching projects data.';
+        return 'An error occurred while fetching Tree Nation projects data.';
     }
 }
 
-// Export 'getProjectsSummary' function
-module.exports.getProjectsSummary = getProjectsSummary;
+// Export 'getTreeNationProjectsSummary' function
+module.exports.getTreeNationProjectsSummary = getTreeNationProjectsSummary;
