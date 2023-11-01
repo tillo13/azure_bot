@@ -1,4 +1,7 @@
-//2023oct15 912am adding getqa from db
+//2023Nov1 2:14pm adding tree-nation data
+const { helloWorld } = require('../utilities/tree_nation/public_api_endpoints');
+
+
 const { getQAFromDatabase } = require('../utilities/postgres_utils');
 
 const formats = require('./endpoint_formats');
@@ -25,6 +28,7 @@ const commands = new Proxy({
 	'$about': aboutCommandHandler,
 	'$high5': highFiveCommand,
     '$train': peekTrainingData,
+	'$tree': treeCommandHandler,
 }, {
     get: function(target, property) {
         property = property.toLowerCase(); // Convert property to lower case here
@@ -41,6 +45,10 @@ const commands = new Proxy({
     }
 });
 
+async function treeCommandHandler(context) {
+    const message = helloWorld();
+    return sendMessageResponse(context, message);
+}
 
 async function peekTrainingData(context) {
     // Fetch random QA from the database
