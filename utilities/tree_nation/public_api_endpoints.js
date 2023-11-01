@@ -7,6 +7,8 @@ async function getTreeNationProjectsSummary() {
         let response = await axios.get(projects_url);
         let projects = response.data;
 
+        console.log(`\n\n**TREE-NATION-PUBLIC_API_ENDPOINTS: Total Number of Projects: ${projects.length}`);
+
         let activeProjects = projects.filter(project => project.status === 'active');
         let inactiveProjects = projects.filter(project => project.status === 'inactive');
 
