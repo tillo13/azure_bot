@@ -1,5 +1,5 @@
 //2023Nov1 2:14pm adding tree-nation data
-const { getProjectsSummary } = require('../utilities/tree_nation/public_api_endpoints');
+const { getTreeNationProjectsSummary } = require('../utilities/tree_nation/public_api_endpoints');
 
 const { getQAFromDatabase } = require('../utilities/postgres_utils');
 
