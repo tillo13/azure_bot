@@ -29,6 +29,7 @@ async function getTreeNationProjectsSummary() {
   try {
     let response = await axios.get(projects_url);
     let projects = response.data;
+    console.log(`\n\n**TREE-NATION-PUBLIC_API_ENDPOINTS: Total Number of Projects: ${projects.length}`);
 
     summary.totalProjects = projects.length;
 
@@ -38,23 +39,26 @@ async function getTreeNationProjectsSummary() {
     let inactiveProjects = projects.filter( project => project.status === 'inactive');
     summary.inactiveProjects = inactiveProjects.length;
 
-let totalCo2 = 0;
-let totalStock = 0;
-let locations = new Set();
+    let totalCo2 = 0;
+    let totalStock = 0;
+    let locations = new Set();
 
-for(let project of projects){
-    totalCo2 += project.co2_compensated_tons; // in case project.co2_compensated_tons is null better use (project.co2_compensated_tons || 0)
-    totalStock += project.stock; // in case project.stock is null better use (project.stock || 0)
-    locations.add(project.location);
-}
+    for(let project of projects){
+        try{
+            totalCo2 += project.co2_compensated_tons || 0; 
+            totalStock += project.stock || 0;
+            locations.add(project.location);
+        }catch (error) {
+            throw new Error(`Error processing project: ${project.id}, error detail: ${error.message}`);
+        }
+    }
 
-summary.averageCo2 = totalCo2 / projects.length;
-summary.averageTreeStock = totalStock / projects.length;
-summary.uniqueLocations = Array.from(locations);
+    summary.averageCo2 = totalCo2 / projects.length;
+    summary.averageTreeStock = totalStock / projects.length;
+    summary.uniqueLocations = Array.from(locations);
 
     let result = summary.createSummary();
-    console.log(`\n\n**TREE-NATION-PUBLIC_API_ENDPOINTS: Total Number of Projects: ${projects.length}`);
-  
+
     return result; 
 
   } catch (error) {
@@ -63,5 +67,17 @@ summary.uniqueLocations = Array.from(locations);
   }
 }
 
-// Export 'getTreeNationProjectsSummary' function
-module.exports.getTreeNationProjectsSummary = getTreeNationProjectsSummary;
+async function getData() {
+    try {
+        const summary = await getTreeNationProjectsSummary();
+        console.log(summary);
+    } catch (err) {
+        console.log('An error occurred during the data fetching or processing.', err);
+    }
+}
+
+getData();
+
+module.exports = {
+    getTreeNationProjectsSummary,
+};
