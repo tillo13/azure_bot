@@ -1,6 +1,5 @@
 //2023Nov1 2:14pm adding tree-nation data
-const { helloWorld } = require('../utilities/tree_nation/public_api_endpoints');
-
+const { getProjectsSummary } = require('../utilities/tree_nation/public_api_endpoints');
 
 const { getQAFromDatabase } = require('../utilities/postgres_utils');
 
@@ -46,7 +45,7 @@ const commands = new Proxy({
 });
 
 async function treeCommandHandler(context) {
-    const message = helloWorld();
+    const message = await getProjectsSummary();
     return sendMessageResponse(context, message);
 }
 
