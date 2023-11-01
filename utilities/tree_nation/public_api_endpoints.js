@@ -2,128 +2,93 @@ const axios = require('axios');
 
 class Summary {
 	constructor() {
-		this.totalProjects = 0;
-		this.activeProjects = 0;
-		this.inactiveProjects = 0;
-		this.averageCo2 = 0;
-		this.averageTreeStock = 0;
-		this.uniqueLocations = [];
-		this.totalForestsQueried = 0;
-		this.totalCo2Compensated = 0;
-		this.totalCo2CompensatedTrees = 0;
-		this.forestsQueried = [];
-		this.mostTreesForest = {
-			name: '',
-			count: 0
-		};
-		this.fewestTreesForest = {
-			name: '',
-			count: Infinity
-		};
-	}
-	updateMostAndFewestTreesForest(forest) {
-		if (forest.count > this.mostTreesForest.count) {
-			this.mostTreesForest = forest;
-		}
-		if (forest.count < this.fewestTreesForest.count) {
-			this.fewestTreesForest = forest;
+		this.data = {
+			totalProjects: 0,
+			activeProjects: 0,
+			inactiveProjects: 0,
+			averageCo2: 0,
+			averageTreeStock: 0,
+			uniqueLocations: [],
+			totalForestsQueried: 0,
+			totalCo2Compensated: 0,
+			mostTreesForest: {
+				name: '',
+				count: 0
+			},
+			fewestTreesForest: {
+				name: '',
+				count: Infinity
+			}
 		}
 	}
 
-	// final render of the objects
-	getMostTreesForest() {
-		return this.mostTreesForest.name + ' with ' + this.mostTreesForest.count + ' trees.';
+	updateForestSummary(forest) {
+		this.data.totalForestsQueried += 1;
+		this.data.totalCo2Compensated += forest.co2_compensated_tons_project;
+		this.updateMostAndFewestTreesForest(forest);
 	}
 
-	getFewestTreesForest() {
-		return this.fewestTreesForest.name + ' with ' + this.fewestTreesForest.count + ' trees.';
+	updateProjectSummary(project, totalCo2, totalStock, uniqueLocations) {
+		this.data.totalProjects += 1;
+		this.data.activeProjects += project.status === 'active' ? 1 : 0;
+		this.data.inactiveProjects += project.status === 'inactive' ? 1 : 0;
+		this.data.averageCo2 = totalCo2 / this.data.totalProjects;
+		this.data.averageTreeStock = totalStock / this.data.totalProjects;
+		this.data.uniqueLocations = Array.from(uniqueLocations);
 	}
-	createSummary() {
-		return {
-			totalProjects: this.totalProjects,
-			activeProjects: this.activeProjects,
-			inactiveProjects: this.inactiveProjects,
-			averageCo2: this.averageCo2,
-			averageTreeStock: this.averageTreeStock,
-			uniqueLocations: this.uniqueLocations,
-			totalForestsQueried: this.totalForestsQueried,
-			totalCo2Compensated: this.totalCo2Compensated,
-			totalCo2CompensatedTrees: this.totalCo2CompensatedTrees,
-			forestsQueried: this.forestsQueried,
-			mostTreesForest: this.mostTreesForest,
-			fewestTreesForest: this.fewestTreesForest,
-		};
+    
+    updateMostAndFewestTreesForest(forest) {
+		if (forest.count > this.data.mostTreesForest.count)
+			this.data.mostTreesForest = forest;
+
+		if (forest.count < this.data.fewestTreesForest.count)
+			this.data.fewestTreesForest = forest;
 	}
 }
 
+async function getProjectsData() {
+	const response = await axios.get('https://tree-nation.com/api/projects');
+	return response.data;
+}
+
+async function getForestData(url) {
+	const response = await axios.get(url);
+	return response.data;
+}
+
 async function getTreeNationProjectsSummary() {
-	const summary = new Summary();
-	const projects_url = 'https://tree-nation.com/api/projects';
-
 	try {
-		let response = await axios.get(projects_url);
-		let projects = response.data;
-		console.log(`\n\n**TREE-NATION-PUBLIC_API_ENDPOINTS: Total Number of Projects: ${projects.length}`);
-
-		summary.totalProjects = projects.length;
-
-		let activeProjects = projects.filter(project => project.status === 'active');
-		summary.activeProjects = activeProjects.length;
-
-		let inactiveProjects = projects.filter(project => project.status === 'inactive');
-		summary.inactiveProjects = inactiveProjects.length;
+		const summary = new Summary();
+		const projects = await getProjectsData();
 
 		let totalCo2 = 0;
 		let totalStock = 0;
-		let locations = new Set();
+		let uniqueLocations = new Set();
 
-		for (let project of projects) {
+		for (const project of projects) {
+			totalCo2 += project.co2_compensated_tons || 0;
+			totalStock += project.stock || 0;
+			uniqueLocations.add(project.location);
+
 			try {
-				// Get forest data
-				const forest_url = `https://tree-nation.com/api/forests/${project.id}`;
-				let forest_resp = await axios.get(forest_url);
-				let forest = forest_resp.data;
-
-				summary.updateMostAndFewestTreesForest({
-					name: forest.name,
-					count: forest.tree_count
+				const forestData = await getForestData(`https://tree-nation.com/api/forests/${project.id}`);
+				summary.updateForestSummary({ 
+					name: forestData.name, 
+					count: forestData.tree_count,
+					co2_compensated_tons_project : forestData.co2_compensated_tons_project || 0
 				});
-				summary.totalForestsQueried += 1;
-				summary.totalCo2Compensated += forest.co2_compensated_tons_project;
-				if (typeof project.co2_compensated_tons !== "undefined") {
-					totalCo2 += project.co2_compensated_tons;
-				}
-				if (typeof project.stock !== "undefined") {
-					totalStock += project.stock;
-				}
-				locations.add(project.location);
+
+				summary.updateProjectSummary(project, totalCo2, totalStock, uniqueLocations);
+
 			} catch (error) {
-				throw new Error(`Error processing project: ${project.id}, error detail: ${error.message}`);
+				console.log(`Error processing project: ${project.id}, error detail: ${error.message}`);
 			}
 		}
 
-		summary.averageCo2 = totalCo2 / projects.length;
-		summary.averageTreeStock = totalStock / projects.length;
-		summary.uniqueLocations = Array.from(locations);
-
-		let resultText = `
-        Total Projects: ${summary.totalProjects}
-        Active Projects: ${summary.activeProjects}
-        Inactive Projects: ${summary.inactiveProjects}
-        Average CO2: ${summary.averageCo2.toFixed(2)}
-        Average Tree Stock: ${summary.averageTreeStock.toFixed(2)}
-        Unique Locations: ${summary.uniqueLocations.join(', ')}
-        ForestIDs queried in ascending order: ${summary.totalForestsQueried}
-        Total CO2 compensated (in tons) across all queried project sites:  ${summary.totalCo2Compensated.toFixed(2)}
-        The forest(s) with the most trees: ${summary.getMostTreesForest()}
-        The forest(s) with the fewest trees: ${summary.getFewestTreesForest()}
-      `;
-
-		return resultText;
-
+		return summary.data;
 	} catch (error) {
 		console.error(error);
-		return 'An error occurred while fetching Tree Nation projects data.';
+		throw new Error('An error occurred while fetching Tree Nation projects data.');
 	}
 }
 
@@ -138,6 +103,4 @@ async function getData() {
 
 getData();
 
-module.exports = {
-	getTreeNationProjectsSummary,
-};
+module.exports = { getTreeNationProjectsSummary };
