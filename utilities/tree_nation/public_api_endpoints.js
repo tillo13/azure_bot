@@ -48,7 +48,7 @@ class Summary {
 
 async function getProjectsData() {
 	const response = await axios.get('https://tree-nation.com/api/projects');
-	return response.data;
+	return response.data;    
 }
 
 async function getForestData(url) {
@@ -60,6 +60,9 @@ async function getTreeNationProjectsSummary() {
 	try {
 		const summary = new Summary();
 		const projects = await getProjectsData();
+
+		// Console log for number of projects
+		console.log(`\n\n**TREE-NATION-PUBLIC_API_ENDPOINTS: Total Number of Projects: ${projects.length}`);
 
 		let totalCo2 = 0;
 		let totalStock = 0;
