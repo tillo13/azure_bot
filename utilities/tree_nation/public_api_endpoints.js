@@ -92,10 +92,26 @@ async function getTreeNationProjectsSummary() {
 	}
 }
 
+function makeResultText(summary) {
+	return `
+        Total Projects: ${summary.totalProjects}
+        Active Projects: ${summary.activeProjects}
+        Inactive Projects: ${summary.inactiveProjects}
+        Average CO2: ${summary.averageCo2.toFixed(2)}
+        Average Tree Stock: ${summary.averageTreeStock.toFixed(2)}
+        Unique Locations: ${summary.uniqueLocations.join(', ')}
+        ForestIDs queried in ascending order: ${summary.totalForestsQueried}
+        Total CO2 compensated (in tons) across all queried project sites:  ${summary.totalCo2Compensated.toFixed(2)}
+        The forest(s) with the most trees: ${summary.mostTressForest.name} with ${summary.mostTreesForest.count} trees
+        The forest(s) with the fewest trees: ${summary.fewestTressForest.name } with ${summary.fewestTreesForest.count} trees
+      `;
+}
+
 async function getData() {
 	try {
 		const summary = await getTreeNationProjectsSummary();
-		console.log(summary);
+		const resultText = makeResultText(summary);
+		console.log(resultText);
 	} catch (err) {
 		console.log('An error occurred during the data fetching or processing.', err);
 	}
