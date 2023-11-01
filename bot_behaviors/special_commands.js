@@ -45,7 +45,7 @@ const commands = new Proxy({
 });
 
 async function treeCommandHandler(context) {
-    const message = await getTreeNationProjectTotalNumber();
+    const message = await getProjectsSummary();
     return sendMessageResponse(context, message);
 }
 
