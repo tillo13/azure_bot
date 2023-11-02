@@ -49,24 +49,25 @@ async function fetchVectorsWithSimilarity(searchTerm) {
 }
 
 async function handleSearchSimilarity(lastUserMessage){
-    // Fetch initial vector similarity scores from Weaviate
-    const weaviateResponse = await fetchVectorsWithSimilarity(lastUserMessage);
+    console.log(`\n\n******WEAVIATE_UTILS.JS: Message we will pass to Weaviate: ${lastUserMessage}`);
+    
+    const weaviateResponse = await initialSearchVectorSimilarity(lastUserMessage);
     if (weaviateResponse?.data?.Get) {
         let className = Object.keys(weaviateResponse.data.Get)[0];
         let responseData = Array.isArray(weaviateResponse.data.Get[className]) 
             ? weaviateResponse.data.Get[className] 
             : [weaviateResponse.data.Get[className]];
-        let cosines = responseData.map(obj => obj._additional.certainty);
 
-        // If cosines is empty or all nulls, then highestScore should be 0
-        const filteredCosines = cosines.filter(Boolean);
-        let highestScore = filteredCosines.length > 0 ? Math.max(...filteredCosines) : 0;
+        let cosines = responseData.map((obj, i) => {
+            console.log(`\n\n******WEAVIATE_UTILS.JS: Weaviate similarity cosine #${i + 1} : ${obj._additional.certainty}`);
+            console.log(`\n\n******WEAVIATE_UTILS.JS: Weaviate response #${i + 1} : ${JSON.stringify(obj[OBJECT_VALUE])}`);
+            return obj._additional.certainty;
+        });
+        let highestScore = cosines.length > 0 ? Math.max.apply(Math, cosines) : 0;
 
-        return { className, data: responseData, cosines, highestScore: highestScore };
+        return { className, data: responseData, cosines, highestScore};
     } else {
         console.log("\n\n******WEAVIATE_UTILS.JS: Unable to communicate with Weaviate");
-
-        // If there is no response, return the highestScore as 0
         return { highestScore: 0 };
     }
 }
