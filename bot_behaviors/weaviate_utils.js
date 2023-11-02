@@ -9,7 +9,7 @@ const CONFIGS = {
     OBJECT_VALUE: process.env['2023oct25_WEAVIATE_CLASS_OBJ_VALUE'],
     AUTH_TOKEN: `Bearer ${process.env["2023oct21_WEAVIATE_API_KEY"]}`,
     AZURE_API_KEY: `${process.env["2023oct21_AZURE_OPENAI_API_KEY"]}`,
-    SIMILARITY_THRESHOLD: COSINE_SIMILARITY_THRESHOLD || 0.885,
+    COSINE_SIMILARITY_THRESHOLD,
     UNWANTED_TERM: "zzzzz",
     MOVE_AWAY_FORCE: 0.0,
     LIMIT: 3
@@ -48,7 +48,8 @@ async function fetchVectorsWithSimilarity(searchTerm) {
     });
 }
 
-async function handleSearchSimilarity(lastUserMessage) {
+async function handleSearchSimilarity(lastUserMessage){
+    // Fetch initial vector similarity scores from Weaviate
     const weaviateResponse = await fetchVectorsWithSimilarity(lastUserMessage);
     if (weaviateResponse?.data?.Get) {
         let className = Object.keys(weaviateResponse.data.Get)[0];
@@ -57,15 +58,16 @@ async function handleSearchSimilarity(lastUserMessage) {
             : [weaviateResponse.data.Get[className]];
         let cosines = responseData.map(obj => obj._additional.certainty);
 
-        // If there are no cosines, then highestScore should be 0
-        let highestScore = cosines.length > 0 ? Math.max(...cosines) : 0;
+        // If cosines is empty or all nulls, then highestScore should be 0
+        const filteredCosines = cosines.filter(Boolean);
+        let highestScore = filteredCosines.length > 0 ? Math.max(...filteredCosines) : 0;
 
-        return {className: className, data: responseData, cosines: cosines, highestScore: highestScore};
+        return { className, data: responseData, cosines, highestScore: highestScore };
     } else {
         console.log("\n\n******WEAVIATE_UTILS.JS: Unable to communicate with Weaviate");
 
         // If there is no response, return the highestScore as 0
-        return {highestScore: 0};
+        return { highestScore: 0 };
     }
 }
 
