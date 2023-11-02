@@ -168,7 +168,21 @@ async function getRandomObject() {
 
     for(let i = 0; i < MAX_RETRIES; i++){
         try {
-            // ... keep the original code until fetching totalObjects...
+            query = {
+                query: `{
+                    Aggregate {
+                        ${className} {
+                            meta {
+                                count
+                            }
+                        }
+                    }
+                }`
+            };
+    
+    const response = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(query) });
+    const result = await response.json();
+    const totalObjects = result['data']['Aggregate'][className][0]['meta']['count'];
 
             // If there are objects
             if (totalObjects > 0) {
@@ -216,7 +230,7 @@ async function getRandomObject() {
         }
     }
 
-    return message;  // Return the message
+    return message;  
 }
 
 getRandomObject();
