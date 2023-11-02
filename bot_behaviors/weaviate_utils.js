@@ -9,7 +9,7 @@ const CONFIGS = {
     OBJECT_VALUE: process.env['2023oct25_WEAVIATE_CLASS_OBJ_VALUE'],
     AUTH_TOKEN: `Bearer ${process.env["2023oct21_WEAVIATE_API_KEY"]}`,
     AZURE_API_KEY: `${process.env["2023oct21_AZURE_OPENAI_API_KEY"]}`,
-    SIMILARITY_THRESHOLD: COSINE_SIMILARITY_THRESHOLD || 0.7,
+    SIMILARITY_THRESHOLD: COSINE_SIMILARITY_THRESHOLD || 0.885,
     UNWANTED_TERM: "zzzzz",
     MOVE_AWAY_FORCE: 0.0,
     LIMIT: 3
@@ -48,8 +48,7 @@ async function fetchVectorsWithSimilarity(searchTerm) {
     });
 }
 
-// refactored handleSearchSimilarity function
-async function handleSearchSimilarity(lastUserMessage){
+async function handleSearchSimilarity(lastUserMessage) {
     const weaviateResponse = await fetchVectorsWithSimilarity(lastUserMessage);
     if (weaviateResponse?.data?.Get) {
         let className = Object.keys(weaviateResponse.data.Get)[0];
@@ -57,14 +56,15 @@ async function handleSearchSimilarity(lastUserMessage){
             ? weaviateResponse.data.Get[className] 
             : [weaviateResponse.data.Get[className]];
         let cosines = responseData.map(obj => obj._additional.certainty);
-        return {className: className, data: responseData, cosines: cosines, highestScore: Math.max(...cosines)};
+        // Only calculate highestScore if there are elements in cosines array
+        let highestScore = cosines.length > 0 ? Math.max(...cosines) : null;
+        return {className: className, data: responseData, cosines: cosines, highestScore: highestScore};
     } else {
         console.log("\n\nUnable to communicate with Weaviate");
         return null;
     }
 }
 
-// refactored enhanceResponseWithWeaviate function
 async function enhanceResponseWithWeaviate(lastUserMessage, chatMessagesAfterExtraction, weaviateResponse) {
     let {weaviateInfo, countAboveThreshold} = await formatWeaviateResponse(weaviateResponse);
     if (countAboveThreshold > 0) {
@@ -76,7 +76,6 @@ async function enhanceResponseWithWeaviate(lastUserMessage, chatMessagesAfterExt
     }
 }
 
-// refactored formatWeaviateResponse function
 function formatWeaviateResponse(weaviateResponse) {
     let weaviateInfo = weaviateResponse && weaviateResponse.data.length > 0 && weaviateResponse.cosines.some(cos => cos >= CONFIGS.SIMILARITY_THRESHOLD)
         ? weaviateResponse.data
@@ -87,7 +86,6 @@ function formatWeaviateResponse(weaviateResponse) {
     return {weaviateInfo: weaviateInfo, countAboveThreshold: (weaviateInfo.match(/Result/g) || []).length};
 }
 
-// refactored getRandomObject function
 async function getRandomObject() {
     const MAX_RETRIES = 3;
     for(let i = 0; i < MAX_RETRIES; i++){
