@@ -61,14 +61,14 @@ async function getTreeNationProjectsSummary() {
 		summary.averageTreeStock = totalStock / projects.length;
 		summary.uniqueLocations = Array.from(locations);
 
-		let resultText = `
-    Total Projects: ${result.totalProjects}
-    Active Projects: ${result.activeProjects}
-    Inactive Projects: ${result.inactiveProjects}
-    Average CO2: ${result.averageCo2.round(2)}
-    Average Tree Stock: ${result.averageTreeStock.round(2)}
-    Unique Locations: ${result.uniqueLocations.join(', ')}
-  `;
+        let resultText = `
+        Total Projects: ${summary.totalProjects}
+        Active Projects: ${summary.activeProjects}
+        Inactive Projects: ${summary.inactiveProjects}
+        Average CO2: ${summary.averageCo2.toFixed(2)}
+        Average Tree Stock: ${summary.averageTreeStock.toFixed(2)}
+        Unique Locations: ${summary.uniqueLocations.join(', ')}
+      `;
 
 		return resultText;
 
