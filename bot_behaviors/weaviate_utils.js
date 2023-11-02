@@ -169,7 +169,7 @@ async function getRandomObject() {
 
     for(let i = 0; i < MAX_RETRIES; i++){
         try {
-            query = {
+            let query = {
                 query: `{
                     Aggregate {
                         ${className} {
@@ -233,7 +233,5 @@ async function getRandomObject() {
 
     return message;  
 }
-
-getRandomObject();
 
 module.exports = {initialSearchVectorSimilarity, handleSearchSimilarity, formatWeaviateResponse, enhanceResponseWithWeaviate, getRandomObject}
