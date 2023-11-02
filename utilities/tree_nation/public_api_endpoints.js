@@ -62,6 +62,7 @@ async function getTreeNationProjectsSummary() {
 		summary.uniqueLocations = Array.from(locations);
 
         let resultText = `
+        Tree-Nation Public API Endpoints Summary: 
         Total Projects: ${summary.totalProjects}
         Active Projects: ${summary.activeProjects}
         Inactive Projects: ${summary.inactiveProjects}
