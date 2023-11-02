@@ -165,7 +165,7 @@ function formatWeaviateResponse(weaviateResponse) {
 
 async function getRandomObject() {
     const MAX_RETRIES = 3;
-    let message = "";  // message to be returned
+    let message = "";
 
     for(let i = 0; i < MAX_RETRIES; i++){
         try {
@@ -184,19 +184,16 @@ async function getRandomObject() {
             let response = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(query) });
             
             if (!response.ok) {
-                throw new Error(`HTTP error, unable to fetch! status: ${response.status}`);
+                console.error(`HTTP error, unable to fetch! status: ${response.status}`);
             }
 
             let result = await response.json();
 
-            // check if data exists and Aggregate exists within data
-            const totalObjects = result.data && result.data.Aggregate && result.data.Aggregate[className] 
-                && result.data.Aggregate[className][0] && result.data.Aggregate[className][0].meta 
-                && result.data.Aggregate[className][0].meta.count;
-
-            // If there are objects
+            const totalObjects = result && result.data && result.data.Aggregate &&
+                                 result.data.Aggregate[className] && result.data.Aggregate[className][0] &&
+                                 result.data.Aggregate[className][0].meta && result.data.Aggregate[className][0].meta.count;
+            
             if (totalObjects > 0) {
-
                 const randomOffset = Math.floor(Math.random() * totalObjects);
                 query = {
                     query: `{
@@ -205,46 +202,48 @@ async function getRandomObject() {
                                 _additional {
                                     id
                                 }
-                                ${OBJECT_VALUE}     // This line is necessary to fetch the object data as well
+                                ${OBJECT_VALUE}
                             }
                         }
                     }`
                 };
                 response = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(query) });
-                result = await response.json();
-                // check each property in the chain
-                const randomId = result.data && result.data['Get'][className] && result.data['Get'][className][0] 
-                && result.data['Get'][className][0]['_additional'] && result.data['Get'][className][0]['_additional']['id']; 
-                const randomObject = result.data && result.data['Get'][className] && result.data['Get'][className][0] 
-                && result.data['Get'][className][0][OBJECT_VALUE];
 
-                // if we successfully retrieved the randomId and the randomObject
+                if (!response.ok) {
+                    console.error(`HTTP error, unable to fetch! status: ${response.status}`);
+                }
+
+                result = await response.json();
+
+                const randomId = result && result.data && result.data.Get && 
+                                result.data.Get[className] && result.data.Get[className][0] && 
+                                result.data.Get[className][0]._additional && result.data.Get[className][0]._additional.id;
+
+                const randomObject = result && result.data && result.data.Get && 
+                                    result.data.Get[className] && result.data.Get[className][0] && 
+                                    result.data.Get[className][0][OBJECT_VALUE];
+
                 if(randomId && randomObject){
-                    // Present the fetched object in a nice way
                     message = `ID: ${randomId}\nObject: ${JSON.stringify(randomObject, null, 2)}`; 
                 } else {
                     throw new Error(`Failed to fetch data for id and object at offset: ${randomOffset}`);
                 }
             } else {
-                console.log(`No object found for the class: ${className}`);
+                console.error(`No object found for the class: ${className}`);
                 message = `No object found for the class: ${className}`;
             }
-            
-            // Exit loop if execution reach this point (no error thrown)
             break;
-            
         } catch (e) {
             console.error(`An error occurred: ${e.message}`);
             if(i === MAX_RETRIES - 1) {
-                console.log('Unable to get random object after maximum retries. Please try again later.');
+                console.error('Unable to get random object after maximum retries. Please try again later.');
                 message = 'Unable to get random object after maximum retries. Please try again later.';
             }
         }
     }
 
+    console.log(message);
     return message;  
 }
-
-module.exports = {initialSearchVectorSimilarity, handleSearchSimilarity, formatWeaviateResponse, enhanceResponseWithWeaviate, getRandomObject}
 
 module.exports = {initialSearchVectorSimilarity, handleSearchSimilarity, formatWeaviateResponse, enhanceResponseWithWeaviate, getRandomObject}
