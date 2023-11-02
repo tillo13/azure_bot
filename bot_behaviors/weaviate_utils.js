@@ -1,3 +1,6 @@
+//2023nov1 add in random_obj finder
+const fetch = require('node-fetch');
+
 const { COSINE_SIMILARITY_THRESHOLD } = require('../utilities/global_configs');
 
 const { invokeOpenaiGpt4 } = require('./gpt4_invoke');
@@ -160,4 +163,63 @@ function formatWeaviateResponse(weaviateResponse) {
     return {weaviateInfo: weaviateInfo, countAboveThreshold: countAboveThreshold};
 }
 
-module.exports = {initialSearchVectorSimilarity, handleSearchSimilarity, formatWeaviateResponse, enhanceResponseWithWeaviate}
+async function getRandomObject() {
+    const MAX_RETRIES = 3;
+    let message = "";  // message to be returned
+
+    for(let i = 0; i < MAX_RETRIES; i++){
+        try {
+            // ... keep the original code until fetching totalObjects...
+
+            // If there are objects
+            if (totalObjects > 0) {
+                const randomOffset = Math.floor(Math.random() * totalObjects);
+                query = {
+                    query: `{
+                        Get {
+                            ${className}(limit: 1, offset: ${randomOffset}) {
+                                _additional {
+                                    id
+                                }
+                            }
+                        }
+                    }`
+                };
+                response = await fetch(`${base_url}/v1/graphql`, {method: 'POST', headers: headers, body: JSON.stringify(query)});
+                result = await response.json();
+                const randomId = result['data']['Get'][className]['_additional']['id'];
+
+                response = await fetch(`${base_url}/v1/objects/${randomId}`, {headers: headers});
+
+                if(response.ok) {
+                    result = await response.json();
+                    console.log(JSON.stringify(result, null, 2));
+                    message = JSON.stringify(result, null, 2);  // Set message here
+                } else {
+                    console.log(`Failed to fetch object: ${response.statusText}`);
+                    message = "Failed to fetch the random object.";
+                }
+
+            } else {
+                console.log(`No object found for the class: ${className}`);
+                message = `No object found for the class: ${className}`;
+            }
+            
+            // Exit loop if execution reach this point (no error thrown)
+            break;
+            
+        } catch (e) {
+            console.error(`An error occurred: ${e.message}`);
+            if(i === MAX_RETRIES - 1) {
+                console.log('Unable to get random object after maximum retries. Please try again later.');
+                message = 'Unable to get random object after maximum retries. Please try again later.';
+            }
+        }
+    }
+
+    return message;  // Return the message
+}
+
+getRandomObject();
+
+module.exports = {initialSearchVectorSimilarity, handleSearchSimilarity, formatWeaviateResponse, enhanceResponseWithWeaviate, getRandomObject}

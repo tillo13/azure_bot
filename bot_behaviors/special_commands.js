@@ -3,6 +3,8 @@ const { getTreeNationProjectsSummary } = require('../utilities/tree_nation/publi
 
 const { getQAFromDatabase } = require('../utilities/postgres_utils');
 
+const { getRandomObject } = require('./weaviate_utils');
+
 const formats = require('./endpoint_formats');
 const chatCompletion = require('./chat_helper');
 const jira_utils = require('./jira_utils');
@@ -45,9 +47,10 @@ const commands = new Proxy({
     }
 });
 
+// ChunkCommandHandler
 async function chunkCommandHandler(context) {
-	const message = 'Hello, world!';
-	return sendMessageResponse(context, message);
+    let message = await getRandomObject();
+    await sendMessageResponse(context, message);
 }
 
 async function treeCommandHandler(context) {
