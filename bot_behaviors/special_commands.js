@@ -28,6 +28,7 @@ const commands = new Proxy({
 	'$high5': highFiveCommand,
     '$train': peekTrainingData,
 	'$tree': treeCommandHandler,
+	'$chunk': chunkCommandHandler,
 }, {
     get: function(target, property) {
         property = property.toLowerCase(); // Convert property to lower case here
@@ -43,6 +44,11 @@ const commands = new Proxy({
         }
     }
 });
+
+async function chunkCommandHandler(context) {
+	const message = 'Hello, world!';
+	return sendMessageResponse(context, message);
+}
 
 async function treeCommandHandler(context) {
     const message = await getTreeNationProjectsSummary();
