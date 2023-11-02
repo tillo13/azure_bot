@@ -88,8 +88,6 @@ async function getData() {
 	}
 }
 
-getData();
-
 module.exports = {
 	getTreeNationProjectsSummary,
 };
