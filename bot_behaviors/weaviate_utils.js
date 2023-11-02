@@ -181,9 +181,9 @@ async function getRandomObject() {
                 }`
             };
     
-    const response = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(query) });
-    const result = await response.json();
-    const totalObjects = result['data']['Aggregate'][className][0]['meta']['count'];
+            let response = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(query) });
+            let result = await response.json();
+            const totalObjects = result['data']['Aggregate'][className][0]['meta']['count'];
 
             // If there are objects
             if (totalObjects > 0) {
@@ -195,24 +195,18 @@ async function getRandomObject() {
                                 _additional {
                                     id
                                 }
+                                ${OBJECT_VALUE}     // This line is necessary to fetch the object data as well
                             }
                         }
                     }`
                 };
-                response = await fetch(`${base_url}/v1/graphql`, {method: 'POST', headers: headers, body: JSON.stringify(query)});
+                response = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(query) });
                 result = await response.json();
-                const randomId = result['data']['Get'][className]['_additional']['id'];
+                const randomId = result['data']['Get'][className][0]['_additional']['id'];
+                const randomObject = result['data']['Get'][className][0][OBJECT_VALUE];
 
-                response = await fetch(`${base_url}/v1/objects/${randomId}`, {headers: headers});
-
-                if(response.ok) {
-                    result = await response.json();
-                    console.log(JSON.stringify(result, null, 2));
-                    message = JSON.stringify(result, null, 2);  // Set message here
-                } else {
-                    console.log(`Failed to fetch object: ${response.statusText}`);
-                    message = "Failed to fetch the random object.";
-                }
+                // Present the fetched object in a nice way
+                message = `ID: ${randomId}\nObject: ${JSON.stringify(randomObject, null, 2)}`;  
 
             } else {
                 console.log(`No object found for the class: ${className}`);
