@@ -224,7 +224,7 @@ async function getRandomObject() {
                                     result.data.Get[className][0][OBJECT_VALUE];
 
                 if(randomId && randomObject){
-                    message = `ID: ${randomId}\nObject: ${JSON.stringify(randomObject, null, 2)}`; 
+                    message = `ID: ${randomId}\nObject: \n${JSON.stringify(randomObject, null, 2)}`; 
                 } else {
                     throw new Error(`Failed to fetch data for id and object at offset: ${randomOffset}`);
                 }
