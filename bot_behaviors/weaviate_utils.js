@@ -56,12 +56,16 @@ async function handleSearchSimilarity(lastUserMessage) {
             ? weaviateResponse.data.Get[className] 
             : [weaviateResponse.data.Get[className]];
         let cosines = responseData.map(obj => obj._additional.certainty);
-        // Only calculate highestScore if there are elements in cosines array
-        let highestScore = cosines.length > 0 ? Math.max(...cosines) : null;
+
+        // If there are no cosines, then highestScore should be 0
+        let highestScore = cosines.length > 0 ? Math.max(...cosines) : 0;
+
         return {className: className, data: responseData, cosines: cosines, highestScore: highestScore};
     } else {
-        console.log("\n\nUnable to communicate with Weaviate");
-        return null;
+        console.log("\n\n******WEAVIATE_UTILS.JS: Unable to communicate with Weaviate");
+
+        // If there is no response, return the highestScore as 0
+        return {highestScore: 0};
     }
 }
 
@@ -71,7 +75,7 @@ async function enhanceResponseWithWeaviate(lastUserMessage, chatMessagesAfterExt
         let gpt4Prompt = `A user provided this statement: ${lastUserMessage}. We found ${countAboveThreshold} matches in our Teradata-specific vector dataset with cosine similarity of ${CONFIGS.SIMILARITY_THRESHOLD} or higher that we deem suitable in a response. Please read this, and respond back cleanly to the user using this as your primary source of data, feel free to enhance it if you know more about the subject, but do not hallucinate. ${weaviateInfo}.`;
         return await invokeOpenaiGpt4(gpt4Prompt);
     } else {
-        console.log("\n\n***No high cosine similarity score was found, therefore not enhancing with Weaviate nor GPT4 for speed/finance reasons.");
+        console.log("\n\n******WEAVIATE_UTILS.JS: No high cosine similarity score was found, therefore not enhancing with Weaviate nor GPT4 for speed/finance reasons.");
         return null;
     }
 }
