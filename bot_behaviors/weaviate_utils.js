@@ -6,7 +6,6 @@ const { COSINE_SIMILARITY_THRESHOLD } = require('../utilities/global_configs');
 const { invokeOpenaiGpt4 } = require('./gpt4_invoke');
 
 const path = require('path');
-const fetch = require('node-fetch');
 
 const base_url = process.env['2023oct25_WEAVIATE_URL'];
 const weaviate_class_name = process.env['2023oct25_WEAVIATE_CLASS_NAME'];
