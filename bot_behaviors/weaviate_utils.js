@@ -1,6 +1,7 @@
 //2023nov1 add in random_obj finder
 const fetch = require('node-fetch');
 const { invokeOpenaiGpt4 } = require('./gpt4_invoke');
+const { COSINE_SIMILARITY_THRESHOLD } = require('../utilities/global_configs');
 
 const CONFIGS = {
     BASE_URL: process.env['2023oct25_WEAVIATE_URL'],
@@ -8,7 +9,7 @@ const CONFIGS = {
     OBJECT_VALUE: process.env['2023oct25_WEAVIATE_CLASS_OBJ_VALUE'],
     AUTH_TOKEN: `Bearer ${process.env["2023oct21_WEAVIATE_API_KEY"]}`,
     AZURE_API_KEY: `${process.env["2023oct21_AZURE_OPENAI_API_KEY"]}`,
-    SIMILARITY_THRESHOLD: 0.7,
+    SIMILARITY_THRESHOLD: COSINE_SIMILARITY_THRESHOLD || 0.7,
     UNWANTED_TERM: "zzzzz",
     MOVE_AWAY_FORCE: 0.0,
     LIMIT: 3
@@ -119,4 +120,10 @@ async function getRandomObject() {
     }
 }
 
-module.exports = {fetchVectorsWithSimilarity, handleSearchSimilarity, formatWeaviateResponse, enhanceResponseWithWeaviate, getRandomObject};
+module.exports = {
+    initialSearchVectorSimilarity: fetchVectorsWithSimilarity,
+    handleSearchSimilarity: handleSearchSimilarity,
+    formatWeaviateResponse: formatWeaviateResponse,
+    enhanceResponseWithWeaviate: enhanceResponseWithWeaviate,
+    getRandomObject: getRandomObject
+};
