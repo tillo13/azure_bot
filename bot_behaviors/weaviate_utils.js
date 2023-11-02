@@ -51,7 +51,7 @@ async function fetchVectorsWithSimilarity(searchTerm) {
 async function handleSearchSimilarity(lastUserMessage){
     console.log(`\n\n******WEAVIATE_UTILS.JS: Message we will pass to Weaviate: ${lastUserMessage}`);
     
-    const weaviateResponse = await initialSearchVectorSimilarity(lastUserMessage);
+    const weaviateResponse = await fetchVectorsWithSimilarity(lastUserMessage);
     if (weaviateResponse?.data?.Get) {
         let className = Object.keys(weaviateResponse.data.Get)[0];
         let responseData = Array.isArray(weaviateResponse.data.Get[className]) 
