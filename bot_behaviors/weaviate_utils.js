@@ -19,6 +19,7 @@ const headers = {
 }
 
 const CLASS_NAME = weaviate_class_name;
+const className = weaviate_class_name;
 const SIMILARITY_THRESHOLD = 0.7;
 const OBJECT_VALUE = weaviate_object_value;
 const LIMIT = 3;
