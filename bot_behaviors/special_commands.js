@@ -55,58 +55,33 @@ const commands = new Proxy({
 global.TREE_NATION_ENDPOINT = 'TEST'; // Change this to 'PROD' when we want to switch to planting actual trees
 
 async function plantTreeCommandHandler(context) {
-    // Example speciesId; you should replace this with actual species ID.
-    const speciesId = 3;  
-    // Example recipients array; define or get this based on the actual bot's user input or context.
-    const recipients = [
-        { name: "Recipient Name", email: "recipient@example.com" }
-    ];
+    // Example speciesId; replace this with actual species ID if needed
+    const speciesId = 3;
+    // Example recipients array; adjust based on actual bot's user input or context
+    const recipients = [{ name: "Recipient Name", email: "recipient@example.com" }];
     const quantity = 1;
-    const message = "Thank you for using our service to plant a tree!";
+    const message = "Thank you for using Tree-Nation to plant a tree!";
 
+    // Call plantTree function and wait for the response
     const plantResponse = await plantTree(global.TREE_NATION_ENDPOINT, recipients, speciesId, quantity, message);
 
-    // Log the console message
-    console.log(plantResponse.consoleMessage);
-
-    let messageToUser;
-
-    if (plantResponse.status === 'ok') {
-        // Add the environment information to the start of the message
-        const treeDetailsMessage = `Environment: ${global.TREE_NATION_ENDPOINT}\n` + plantResponse.userMessage;
-
-        // Switch on context.activity.channelId and call respective response function
-        switch (context.activity.channelId) {
-            case 'msteams':
-                messageToUser = formats.plant_msteamsResponse(plantResponse.trees, false, global.TREE_NATION_ENDPOINT);
-                break;
-            case 'slack':
-                messageToUser = formats.plant_SlackResponse(plantResponse.trees, false);
-                break;
-            case 'webchat':
-                messageToUser = formats.plant_WebchatResponse(plantResponse.trees, false);
-                break;
-            default:
-                messageToUser = treeDetailsMessage; // For text-based formats
-        }
+    // Check if the response status is 'ok' and that 'trees' data exists
+    if (plantResponse.status === 'ok' && Array.isArray(plantResponse.trees) && plantResponse.trees.length > 0) {
+        // Format a message with tree details and send it to the user
+        let messageToUser = formats.plant_msteamsResponse(plantResponse.trees, false, global.TREE_NATION_ENDPOINT);
+        await context.sendActivity(messageToUser);
     } else {
-        switch (context.activity.channelId) {
-            case 'msteams':
-                messageToUser = formats.plant_msteamsResponse([], true);
-                break;
-            case 'slack':
-                messageToUser = formats.plant_SlackResponse([], true);
-                break;
-            case 'webchat':
-                messageToUser = formats.plant_WebchatResponse([], true);
-                break;
-            default:
-                messageToUser = formats.plant_DefaultResponse([], true);
+        // An error occurred, or no tree details were found
+        let messageToUser;
+        if (plantResponse.trees && plantResponse.trees.length === 0) {
+            // We received an empty list of trees
+            messageToUser = "We received confirmation, but no details were provided for the planted trees.";
+        } else {
+            // Some other error occurred
+            messageToUser = plantResponse.userMessage || "An error occurred while attempting to plant a tree.";
         }
+        await context.sendActivity(messageToUser);
     }
-
-    // Send the user message
-    return sendMessageResponse(context, messageToUser);
 }
 
 

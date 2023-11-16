@@ -1,19 +1,17 @@
 //2023nov16 add tree nation defaults
 const plantMessage = {
-	title: "Tree Planting Confirmation",
+	title: "Tree-Nation Planting Confirmation",
 	successNote: "Thank you for taking a step towards a greener future!",
 	errorNote: "Uh oh, something went wrong while planting your tree. We apologize for any inconvenience.",
   };
   
   function formatTreeDetails(treeDetails) {
 	return treeDetails.map(tree => {
-	  return {
-		id: tree.id,
-		token: tree.token,
-		collect_url: tree.collect_url,
-		certificate_url: tree.certificate_url
-	  };
-	});
+	  return `Tree ID: ${tree.id}\n` +
+			 `Token: ${tree.token}\n` +
+			 `Collect URL: ${tree.collect_url}\n` +
+			 `Certificate URL: ${tree.certificate_url}`;
+	}).join('\n\n');
   }
 
 //2023oct31 add defaults for configs
@@ -74,12 +72,12 @@ function formatQA(questionAnswer) {
 }
 
 module.exports = {
+
 	plant_msteamsResponse: function(treeDetails, isError, environment) {
-	  const cardDetailsText = formatTreeDetails(treeDetails).map(detail => {
-		return `**Tree ID:** ${detail.id}\n` +
-			   `**Token:** [${detail.token}](${detail.collect_url})\n` +
-			   `**Certificate:** [View Certificate](${detail.certificate_url})`;
-	  }).join('\n\n');
+	  // Note: MS Teams Adaptive Cards do not support Markdown, so we're using standard text here
+	  let detailsText = formatTreeDetails(treeDetails);
+	  let text = isError ? plantMessage.errorNote :
+		`A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}\n${detailsText}`;
   
 	  const adaptiveCardContent = {
 		$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
@@ -95,7 +93,7 @@ module.exports = {
 		  },
 		  {
 			type: "TextBlock",
-			text: isError ? plantMessage.errorNote : `${plantMessage.successNote}\n\nEnvironment: ${environment}\n${cardDetailsText}`,
+			text: text,
 			wrap: true,
 		  }
 		]
@@ -108,39 +106,32 @@ module.exports = {
 		content: adaptiveCardContent
 	  };
 	},
-  
+	
 	plant_SlackResponse: function(treeDetails, isError, environment) {
-	  const slackDetailsText = formatTreeDetails(treeDetails).map(detail => {
-		return `*Tree ID:* ${detail.id}\n` +
-			   `*Token:* <${detail.collect_url}|${detail.token}>\n` +
-			   `*Certificate:* <${detail.certificate_url}|View Certificate>`;
-	  }).join('\n\n');
+	  let detailsText = formatTreeDetails(treeDetails);
+	  let text = isError ? plantMessage.errorNote :
+		`A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}\n${detailsText}`;
   
 	  return {
-		text: isError ? plantMessage.errorNote : `*${plantMessage.successNote}*\n\nEnvironment: ${environment}\n${slackDetailsText}`,
+		text: text,
 		mrkdwn: true
 	  };
 	},
-  
+	
 	plant_WebchatResponse: function(treeDetails, isError, environment) {
-	  const webchatDetailsText = formatTreeDetails(treeDetails).map(detail => {
-		return `**Tree ID:** ${detail.id}\n` +
-			   `**Token:** [${detail.token}](${detail.collect_url})\n` +
-			   `**Certificate:** [View Certificate](${detail.certificate_url})`;
-	  }).join('\n\n');
-  
-	  return webchatDetailsText;
+	  let detailsText = formatTreeDetails(treeDetails);
+	  let text = isError ? plantMessage.errorNote :
+		`A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}\n${detailsText}`;
+	  
+	  return text;
 	},
 	
 	plant_DefaultResponse: function(treeDetails, isError, environment) {
-	  const defaultMessageText = formatTreeDetails(treeDetails).map(detail => {
-		return `**Tree ID:** ${detail.id}\n` +
-			   `**Token:** ${detail.token}\n` +
-			   `**Collect URL:** ${detail.collect_url}\n` +
-			   `**Certificate URL:** ${detail.certificate_url}`;
-	  }).join('\n\n');
-  
-	  return `Environment: ${environment}\n${isError ? plantMessage.errorNote : plantMessage.successNote}\n${defaultMessageText}`;
+	  let detailsText = formatTreeDetails(treeDetails);
+	  let text = isError ? plantMessage.errorNote :
+		`A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}\n${detailsText}`;
+	  
+	  return text;
 	},
 
   // train path START
