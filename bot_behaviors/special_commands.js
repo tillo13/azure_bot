@@ -55,43 +55,40 @@ const commands = new Proxy({
 global.TREE_NATION_ENDPOINT = 'TEST'; // Change this to 'PROD' when we want to switch to planting actual trees
 
 async function plantTreeCommandHandler(context) {
-    // Example speciesId; you should replace this with actual species ID.
-    const speciesId = 3;  
-    // Example recipients array; define or get this based on the actual bot's user input or context.
-    const recipients = [
-        { name: "Recipient Name", email: "recipient@example.com" }
-    ];
+    const speciesId = 3; // Replace with actual species ID.
+    const recipients = [{ name: "Recipient Name", email: "recipient@example.com" }];
     const quantity = 1;
-    const message = "Thank you for using our service to plant a tree!";
-    // ...existing code...
-    const plantResponse = await plantTree(global.TREE_NATION_ENDPOINT, recipients, speciesId, quantity, message);
+    const thankYouMessage = "Thank you for using our service to plant a tree!";
+    const plantResponse = await plantTree(global.TREE_NATION_ENDPOINT, recipients, speciesId, quantity, thankYouMessage);
+    console.log(`Plant tree response:`, plantResponse);
 
-    let environment = global.TREE_NATION_ENDPOINT;
-    // Determine the platform and format the response accordingly...
+    let messageToUser;
     if (plantResponse.status === 'ok') {
-        // Pass the array of trees to the format functions
         const treesArray = plantResponse.data.trees; // Access the trees array
         const isError = false; // As we know the status is 'ok'
-
+        
         switch (context.activity.channelId) {
             case 'msteams':
-                messageToUser = formats.plant_msteamsResponse(treesArray, isError, environment);
+                // Plant tree response formatting for Microsoft Teams
+                messageToUser = formats.plant_msteamsResponse(treesArray, isError, global.TREE_NATION_ENDPOINT);
                 break;
             case 'slack':
-                messageToUser = formats.plant_SlackResponse(treesArray, isError, environment);
+                // Plant tree response formatting for Slack - we will handle thread_ts within the Slack format function
+                messageToUser = formats.plant_SlackResponse(treesArray, isError, global.TREE_NATION_ENDPOINT, context);
                 break;
             case 'webchat':
-                messageToUser = formats.plant_WebchatResponse(treesArray, isError, environment);
+                // Plant tree response formatting for Webchat
+                messageToUser = formats.plant_WebchatResponse(treesArray, isError, global.TREE_NATION_ENDPOINT);
                 break;
             default:
-                messageToUser = formats.plant_DefaultResponse(treesArray, isError, environment);
+                // Default plant tree response formatting for other platforms
+                messageToUser = formats.plant_DefaultResponse(treesArray, isError, global.TREE_NATION_ENDPOINT);
         }
     } else {
-        // Handle the error response uniformly across platforms...
         messageToUser = `An error occurred: ${plantResponse.userMessage}`;
     }
 
-    // Send the user message
+    // Send the message back to the user
     return sendMessageResponse(context, messageToUser);
 }
 
