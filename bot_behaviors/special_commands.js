@@ -1,4 +1,7 @@
-//2023Nov1 2:14pm adding tree-nation data
+//2023Nov16 2:14pm adding tree-nation data to actually plant
+const { plantTree } = require('../utilities/tree_nation/tree_nation_utils');
+
+//2023Nov1 2:14pm adding tree-nation data for testing public api
 const { getTreeNationProjectsSummary } = require('../utilities/tree_nation/public_api_endpoints');
 
 const { getQAFromDatabase } = require('../utilities/postgres_utils');
@@ -31,6 +34,7 @@ const commands = new Proxy({
     '$train': peekTrainingData,
 	'$tree': treeCommandHandler,
 	'$chunk': chunkCommandHandler,
+	'$plant': plantTreeCommandHandler,
 }, {
     get: function(target, property) {
         property = property.toLowerCase(); // Convert property to lower case here
@@ -46,6 +50,39 @@ const commands = new Proxy({
         }
     }
 });
+
+const { plantTree } = require('../utilities/tree_nation/tree_nation_utils');
+
+// Global variable to decide which environment to use
+global.TREE_NATION_ENDPOINT = 'TEST'; // Change this to 'PROD' when we want to switch to planting actual trees
+
+async function plantTreeCommandHandler(context) {
+    // Example speciesId; you should replace this with actual species ID.
+    const speciesId = 3;  
+    // Example recipients array; define or get this based on the actual bot's user input or context.
+    const recipients = [
+        { name: "Recipient Name", email: "recipient@example.com" }
+    ];
+    const quantity = 1;
+    const message = "Thank you for using our service to plant a tree!";
+
+    const response = await plantTree(global.TREE_NATION_ENDPOINT, recipients, speciesId, quantity, message);
+
+    let messageToUser = '';
+
+    if (response && response.status === 'ok') {
+        let treeMessages = response.trees.map(tree => 
+            `Tree ID: ${tree.id}, Certificate: ${tree.certificate_url}`
+        ).join('\n');
+        
+        messageToUser = `A tree has been planted successfully! Here are the details:\n${treeMessages}`;
+    } else {
+        messageToUser = `An error occurred while planting the tree: ${response.error}`;
+    }
+
+    return sendMessageResponse(context, messageToUser);
+}
+
 
 // ChunkCommandHandler
 async function chunkCommandHandler(context) {
