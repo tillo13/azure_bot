@@ -70,8 +70,29 @@ async function plantTreeCommandHandler(context) {
     console.log(plantResponse.consoleMessage);
 
     // Prepend the environment to the user message
-    let environment = global.TREE_NATION_ENDPOINT;
-    let messageToUser = `Environment: ${environment}\n${plantResponse.userMessage}`;
+	let environment = global.TREE_NATION_ENDPOINT;
+    // Check status before sending a formatted message
+    if (plantResponse.status === 'ok') {
+        const treeDetails = plantResponse.userMessage;
+        const isError = plantResponse.status !== 'ok';
+        // Determine the platform and format the response accordingly (using endpoint_formats.js)
+        switch (context.activity.channelId) {
+            case 'msteams':
+                messageToUser = formats.plant_msteamsResponse(treeDetails, isError, environment);
+                break;
+            case 'slack':
+                messageToUser = formats.plant_SlackResponse(treeDetails, isError, environment);
+                break;
+            case 'webchat':
+                messageToUser = formats.plant_WebchatResponse(treeDetails, isError, environment);
+                break;
+            default:
+                messageToUser = formats.plant_DefaultResponse(treeDetails, isError, environment);
+        }
+    } else {
+        // Handle an error response uniformly across platforms for now
+        messageToUser = `An error occurred: ${plantResponse.userMessage}`;
+    }
 
     // Send the user message
     return sendMessageResponse(context, messageToUser);
