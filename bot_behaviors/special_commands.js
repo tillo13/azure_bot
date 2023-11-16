@@ -55,49 +55,26 @@ const commands = new Proxy({
 global.TREE_NATION_ENDPOINT = 'TEST'; // Change this to 'PROD' when we want to switch to planting actual trees
 
 async function plantTreeCommandHandler(context) {
-    // Capture channel type
-    const channelId = context.activity.channelId;
-
-    // Your existing setup
-    const speciesId = 3; // example speciesId
-    const recipients = [{ name: "Recipient Name", email: "recipient@example.com" }]; // example recipients array
+    // Example speciesId; you should replace this with actual species ID.
+    const speciesId = 3;  
+    // Example recipients array; define or get this based on the actual bot's user input or context.
+    const recipients = [
+        { name: "Recipient Name", email: "recipient@example.com" }
+    ];
     const quantity = 1;
-    const message = "Thank you for using Tree-Nation to plant a tree!";
+    const message = "Thank you for using our service to plant a tree!";
 
-    // Call the plantTree function and wait for the response
     const plantResponse = await plantTree(global.TREE_NATION_ENDPOINT, recipients, speciesId, quantity, message);
 
-    // Define thread_ts only if the platform is Slack
-    let thread_ts;
-    if (channelId === 'slack') {
-        thread_ts = context.activity.channelData?.SlackMessage?.ts; // main message ts
-        if (context.activity.channelData?.SlackMessage?.event?.thread_ts) {
-            thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts; // if in thread, use this ts
-        }
-    }
+    // Log the console message
+    console.log(plantResponse.consoleMessage);
 
-    // Prepare the message to send
-    let messageToUser;
-    // Check if the response status is 'ok' and that 'trees' data exists
-    if (plantResponse.status === 'ok' && Array.isArray(plantResponse.trees) && plantResponse.trees.length > 0) {
-        // Format a message with tree details
-        messageToUser = formats.plant_msteamsResponse(plantResponse.trees, false, global.TREE_NATION_ENDPOINT);
-    } else {
-        // Handle case with no trees or other error
-        messageToUser = "We received confirmation, but no details were provided for the planted trees.";
-        if (plantResponse.status !== 'ok') {
-            messageToUser = plantResponse.userMessage || "An error occurred while attempting to plant a tree.";
-        }
-    }
+    // Prepend the environment to the user message
+    let environment = global.TREE_NATION_ENDPOINT;
+    let messageToUser = `Environment: ${environment}\n${plantResponse.userMessage}`;
 
-    // Send the message appropriately depending on the platform
-    if (channelId === 'slack' && thread_ts) {
-        // Send the message as a threaded message in Slack
-        await sendMessageWithThread(context, messageToUser, thread_ts);
-    } else {
-        // Send a normal message for other platforms
-        await context.sendActivity(messageToUser);
-    }
+    // Send the user message
+    return sendMessageResponse(context, messageToUser);
 }
 
 
@@ -540,16 +517,13 @@ function sendTypingIndicator(context) {
 async function sendMessageWithThread(context, message, thread_ts) {
 	const newActivity = MessageFactory.text(message);
 	newActivity.conversation = context.activity.conversation;
-	
-	if (context.activity.channelId === 'slack' && thread_ts) {
-	  newActivity.channelData = {
-		// Include more Slack-specific properties if needed
-		thread_ts: thread_ts
-	  };
+
+	if (context.activity.channelId === 'slack' && thread_ts && !newActivity.conversation.id.includes(thread_ts)) {
+		newActivity.conversation.id += ':' + thread_ts;
 	}
-	
+
 	await context.sendActivity(newActivity);
-  }
+}
 
 function getReplyActivity(context, thread_ts, imageUrl) {
 	const replyActivity = MessageFactory.attachment({

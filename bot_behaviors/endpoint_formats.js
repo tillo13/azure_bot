@@ -74,37 +74,55 @@ function formatQA(questionAnswer) {
 module.exports = {
 
 	plant_msteamsResponse: function(treeDetails, isError, environment) {
-	  // Note: MS Teams Adaptive Cards do not support Markdown, so we're using standard text here
-	  let detailsText = formatTreeDetails(treeDetails);
-	  let text = isError ? plantMessage.errorNote :
-		`A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}\n${detailsText}`;
-  
-	  const adaptiveCardContent = {
-		$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-		type: "AdaptiveCard",
-		version: "1.4",
-		body: [
-		  {
-			type: "TextBlock",
-			size: "Medium",
-			weight: "Bolder",
-			text: plantMessage.title,
-			wrap: true,
-		  },
-		  {
-			type: "TextBlock",
-			text: text,
-			wrap: true,
-		  }
-		]
-	  };
-  
-	  return {
-		type: "attachment",
-		contentType: "application/vnd.microsoft.card.adaptive",
-		contentUrl: null,
-		content: adaptiveCardContent
-	  };
+		let detailsList = formatTreeDetails(treeDetails).split('\n\n');
+		let contentBody = [
+			{
+				type: "TextBlock",
+				size: "Medium",
+				weight: "Bolder",
+				text: plantMessage.title,
+				wrap: true,
+			},
+			{
+				type: "TextBlock",
+				text: `A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}`,
+				wrap: true,
+			}
+		];
+	
+		for (let detail of detailsList) {
+			contentBody.push({
+				type: "TextBlock",
+				text: detail,
+				wrap: true,
+				spacing: "Padding",
+				separator: true
+			});
+		}
+	
+		if(isError) {
+			contentBody.push({
+				type: "TextBlock",
+				text: plantMessage.errorNote,
+				wrap: true,
+				weight: "Lighter",
+				color: "Attention"
+			});
+		}
+	
+		const adaptiveCardContent = {
+			$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+			type: "AdaptiveCard",
+			version: "1.4",
+			body: contentBody
+		};
+	
+		return {
+			type: "attachment",
+			contentType: "application/vnd.microsoft.card.adaptive",
+			contentUrl: null,
+			content: adaptiveCardContent
+		};
 	},
 	
 	plant_SlackResponse: function(treeDetails, isError, environment) {
