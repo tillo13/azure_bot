@@ -13,10 +13,9 @@ const config = {
     }
 };
 
-async function plantTree(environmentFlag, recipients, speciesId, quantity, message) {
-    // Choose the proper configuration based on the environment flag
-    const environment = config[environmentFlag];
 
+async function plantTree(environmentFlag, recipients, speciesId, quantity, message) {
+    const environment = config[environmentFlag];
     const apiUrl = `${environment.site}/api/plant`;
     const headers = {
         'Authorization': `Bearer ${environment.token}`,
@@ -33,18 +32,48 @@ async function plantTree(environmentFlag, recipients, speciesId, quantity, messa
 
     try {
         const response = await axios.post(apiUrl, payload, { headers: headers });
-        // Check the response.data for the API successful status and tree details
+        // Construct verbose details if the request is successful
         if (response.data.status === 'ok') {
-            console.log("Tree planting request successful.");
-            return response.data; // This would be the full JSON including the 'trees' array
+            return {
+                userMessage: createDetailResponse(response.data),
+                consoleMessage: createVerboseConsoleLog(response.data),
+                status: 'ok'
+            };
         } else {
-            console.error("Tree planting request failed with status:", response.data.status);
-            return response.data; // This includes the status and any message returned by the API
+            // Error occurred on the Tree-Nation API side
+            return {
+                userMessage: `An error occurred while planting the tree: ${response.data.message}`,
+                consoleMessage: `\n***TREE_NATION_UTILS.JS: Tree planting request failed with status: ${response.data.status}`,
+                status: 'error'
+            };
         }
     } catch (error) {
-        console.error("Error in tree_nation_utils:plantTree:", error);
-        return { status: 'error', error: error.response?.data || error.message };
+        // Error occurred while making HTTP request
+        return {
+            userMessage: `An error occurred while connecting to the Tree-Nation API: ${error.message}`,
+            consoleMessage: `\n***TREE_NATION_UTILS.JS: Error while making the plant tree HTTP request: ${error.message}`,
+            status: 'error'
+        };
     }
+}
+
+function createDetailResponse(apiResponse) {
+    let treeDetails = apiResponse.trees.map(tree => {
+        return `Tree ID: ${tree.id}\n` +
+               `Token: ${tree.token}\n` +
+               `Collect URL: ${tree.collect_url}\n` +
+               `Certificate URL: ${tree.certificate_url}\n`;
+    }).join('\n\n');
+
+    return `A tree has been planted successfully! Here are the details:\n\n${treeDetails}`;
+}
+
+function createVerboseConsoleLog(apiResponse) {
+    let treeDetails = apiResponse.trees.map(tree => {
+        return `Tree ID: ${tree.id}, Token: ${tree.token}, Collect URL: ${tree.collect_url}, Certificate URL: ${tree.certificate_url}`;
+    }).join('; ');
+
+    return `\n***TREE_NATION_UTILS.JS: **Tree Planting Request Successful**\nPayment ID: ${apiResponse.payment_id}\nStatus: ${apiResponse.status}\nTrees Details: ${treeDetails}`;
 }
 
 module.exports = {

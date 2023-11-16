@@ -64,20 +64,19 @@ async function plantTreeCommandHandler(context) {
     const quantity = 1;
     const message = "Thank you for using our service to plant a tree!";
 
-    const response = await plantTree(global.TREE_NATION_ENDPOINT, recipients, speciesId, quantity, message);
 
-    let messageToUser = '';
+    // ... your existing code for setting up the request ...
 
-    if (response && response.status === 'ok') {
-        let treeMessages = response.trees.map(tree => 
-            `Tree ID: ${tree.id}, Certificate: ${tree.certificate_url}`
-        ).join('\n');
-        
-        messageToUser = `A tree has been planted successfully! Here are the details:\n${treeMessages}`;
-    } else {
-        messageToUser = `An error occurred while planting the tree: ${response.error}`;
-    }
+    const plantResponse = await plantTree(global.TREE_NATION_ENDPOINT, recipients, speciesId, quantity, message);
 
+    // Log the console message
+    console.log(plantResponse.consoleMessage);
+
+    // Prepend the environment to the user message
+    let environment = global.TREE_NATION_ENDPOINT;
+    let messageToUser = `Environment: ${environment}\n${plantResponse.userMessage}`;
+
+    // Send the user message
     return sendMessageResponse(context, messageToUser);
 }
 
