@@ -13,7 +13,6 @@ const config = {
     }
 };
 
-
 async function plantTree(environmentFlag, recipients, speciesId, quantity, message) {
     const environment = config[environmentFlag];
     const apiUrl = `${environment.site}/api/plant`;
@@ -30,7 +29,9 @@ async function plantTree(environmentFlag, recipients, speciesId, quantity, messa
         message: message
     };
     try {
-        const response = await axios.post(apiUrl, payload, { headers: headers });
+        const response = await axios.post(apiUrl, payload, {
+            headers: headers
+        });
         if (response.data.status === 'ok') {
             return {
                 userMessage: createDetailResponse(response.data),
@@ -59,9 +60,9 @@ async function plantTree(environmentFlag, recipients, speciesId, quantity, messa
 function createDetailResponse(apiResponse) {
     let treeDetails = apiResponse.trees.map(tree => {
         return `Tree ID: ${tree.id}\n` +
-               `Token: ${tree.token}\n` +
-               `Collect URL: ${tree.collect_url}\n` +
-               `Certificate URL: ${tree.certificate_url}\n`;
+            `Token: ${tree.token}\n` +
+            `Collect URL: ${tree.collect_url}\n` +
+            `Certificate URL: ${tree.certificate_url}\n`;
     }).join('\n\n');
 
     return `A tree has been planted successfully! Here are the details:\n\n${treeDetails}`;
