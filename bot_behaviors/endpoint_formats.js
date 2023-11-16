@@ -96,7 +96,7 @@ module.exports = {
 			}
 		];
 	
-		// Create new TextBlock for each tree detail
+		// Create new TextBlock for each tree detail with clickable URLs
 		treeDetails.forEach(tree => {
 			contentBody.push({
 				type: "TextBlock",
@@ -112,19 +112,15 @@ module.exports = {
 			});
 			contentBody.push({
 				type: "TextBlock",
-				text: `Collect URL: ${tree.collect_url}`,
+				text: `[Collect URL](${tree.collect_url})`,
 				wrap: true,
-				spacing: "None",
-				color: 'Accent', // Optional: to make URL stand out
-				isSubtle: true // Optional: to make less prominent
+				spacing: "None"
 			});
 			contentBody.push({
 				type: "TextBlock",
-				text: `Certificate URL: ${tree.certificate_url}`,
+				text: `[Certificate URL](${tree.certificate_url})`,
 				wrap: true,
-				spacing: "None",
-				color: 'Accent', // Optional: to make URL stand out
-				isSubtle: true // Optional: to make less prominent
+				spacing: "None"
 			});
 			// Add a separator for visual distinction between tree details (except for the last tree)
 			if (tree !== treeDetails[treeDetails.length - 1]) {
@@ -132,7 +128,6 @@ module.exports = {
 					type: "TextBlock",
 					text: "---", // Placeholder text for horizontal line (separator)
 					horizontalAlignment: "Center",
-					color: 'Good', // Optional: color for the separator
 					spacing: "Padding",
 					separator: true
 				});
