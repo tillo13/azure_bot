@@ -375,17 +375,18 @@ async function sendMessageResponse(context, messageOrAttachment) {
 
 	try {
 		replyActivity.conversation = context.activity.conversation;
-
+	
 		if (context.activity.channelId === 'slack') {
-			const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
-				context.activity.channelData?.SlackMessage?.event?.ts;
-			if (!replyActivity.conversation.id.includes(thread_ts)) {
-				replyActivity.conversation.id += ':' + thread_ts;
-			}
+		  const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
+			context.activity.channelData?.SlackMessage?.event?.ts;
+		  if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
+			replyActivity.conversation.id += ':' + thread_ts;
+		  }
 		}
-	} catch (error) {
+	  } catch (error) {
 		console.error('\n******SPECIAL_COMMANDS: Error occurred while trying to reply in the thread:', error);
-	}
+	  }
+	
 	console.log('\n******SPECIAL_COMMANDS: Payload we will send on:\n', replyActivity);  
 	return await context.sendActivity(replyActivity);
 }
