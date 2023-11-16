@@ -135,14 +135,11 @@ module.exports = {
 			mrkdwn: true
 		};
 	
-		// Check and handle thread_ts for Slack threading
-		if (context && context.activity && context.activity.channelData) {
-			const thread_ts = context.activity.channelData.thread_ts || // This is where you get the thread_ts
-							  context.activity.channelData.SlackMessage?.event?.thread_ts ||
-							  context.activity.channelData.SlackMessage?.event?.ts;
-			if (thread_ts) {
-				response.thread_ts = thread_ts; // Attach thread_ts to the response object for threading
-			}
+		// Handle thread_ts for Slack threading
+		const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
+						  context.activity.channelData?.SlackMessage?.event?.ts;
+		if (thread_ts) {
+			response.thread_ts = thread_ts;  // Append thread_ts to the response object for threading
 		}
 	
 		return response;
