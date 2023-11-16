@@ -66,31 +66,28 @@ async function plantTreeCommandHandler(context) {
 
     const plantResponse = await plantTree(global.TREE_NATION_ENDPOINT, recipients, speciesId, quantity, message);
 
-    // Parse the response to fit the formatting functions
+    // Log the console message
+    console.log(plantResponse.consoleMessage);
+
     let messageToUser;
 
     if (plantResponse.status === 'ok') {
-        const treeDetails = plantResponse.consoleMessage.split('Trees Details:')[1].split(';').map(detail => {
-            const detailsParts = detail.split(',').map(d => d.trim());
-            return {
-                id: detailsParts[0].split(': ')[1],
-                token: detailsParts[1].split(': ')[1],
-                collect_url: detailsParts[2].split(': ')[1],
-                certificate_url: detailsParts[3].split(': ')[1]
-            };
-        });
+        // Add the environment information to the start of the message
+        const treeDetailsMessage = `Environment: ${global.TREE_NATION_ENDPOINT}\n` + plantResponse.userMessage;
+
+        // Switch on context.activity.channelId and call respective response function
         switch (context.activity.channelId) {
             case 'msteams':
-                messageToUser = formats.plant_msteamsResponse(treeDetails, false);
+                messageToUser = formats.plant_msteamsResponse(plantResponse.trees, false, global.TREE_NATION_ENDPOINT);
                 break;
             case 'slack':
-                messageToUser = formats.plant_SlackResponse(treeDetails, false);
+                messageToUser = formats.plant_SlackResponse(plantResponse.trees, false);
                 break;
             case 'webchat':
-                messageToUser = formats.plant_WebchatResponse(treeDetails, false);
+                messageToUser = formats.plant_WebchatResponse(plantResponse.trees, false);
                 break;
             default:
-                messageToUser = formats.plant_DefaultResponse(treeDetails, false);
+                messageToUser = treeDetailsMessage; // For text-based formats
         }
     } else {
         switch (context.activity.channelId) {

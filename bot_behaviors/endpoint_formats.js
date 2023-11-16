@@ -1,5 +1,4 @@
 //2023nov16 add tree nation defaults
-
 const plantMessage = {
 	title: "Tree Planting Confirmation",
 	successNote: "Thank you for taking a step towards a greener future!",
@@ -8,10 +7,13 @@ const plantMessage = {
   
   function formatTreeDetails(treeDetails) {
 	return treeDetails.map(tree => {
-	  return `**Tree ID:** ${tree.id}\n` +
-			 `**Token:** [${tree.token}](${tree.collect_url})\n` +
-			 `**Certificate:** [View Certificate](${tree.certificate_url})\n`;
-	}).join('\n');
+	  return {
+		id: tree.id,
+		token: tree.token,
+		collect_url: tree.collect_url,
+		certificate_url: tree.certificate_url
+	  };
+	});
   }
 
 //2023oct31 add defaults for configs
@@ -72,86 +74,74 @@ function formatQA(questionAnswer) {
 }
 
 module.exports = {
-
-	plant_msteamsResponse: function(treeDetails, isError) {
-		const adaptiveCardContent = {
-		  $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-		  type: "AdaptiveCard",
-		  version: "1.4",
-		  body: [
-			{
-			  type: "TextBlock",
-			  size: "Medium",
-			  weight: "Bolder",
-			  text: plantMessage.title,
-			  wrap: true,
-			},
-			{
-			  type: "TextBlock",
-			  text: isError ? plantMessage.errorNote : plantMessage.successNote,
-			  wrap: true,
-			},
-			{
-			  type: "TextBlock",
-			  text: formatTreeDetails(treeDetails),
-			  wrap: true,
-			}
-		  ]
-		};
-	  
-		return {
-		  type: "attachment",
-		  contentType: "application/vnd.microsoft.card.adaptive",
-		  contentUrl: null,
-		  content: adaptiveCardContent
-		};
-	  },
-	  
-	  plant_SlackResponse: function(treeDetails, isError) {
-		let messageText = `*${plantMessage.title}*\n${isError ? plantMessage.errorNote : plantMessage.successNote}\n`;
-		messageText += formatTreeDetails(treeDetails);
-		return messageText;
-	  },
-	  
-	  plant_WebchatResponse: function(treeDetails, isError) {
-		const adaptiveCardContent = {
-		  $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-		  type: "AdaptiveCard",
-		  version: "1.3",
-		  body: [
-			{
-			  type: "TextBlock",
-			  size: "Medium",
-			  weight: "Bolder",
-			  text: plantMessage.title,
-			  wrap: true,
-			},
-			{
-			  type: "TextBlock",
-			  text: isError ? plantMessage.errorNote : plantMessage.successNote,
-			  wrap: true,
-			},
-			{
-			  type: "TextBlock",
-			  text: formatTreeDetails(treeDetails),
-			  wrap: true,
-			}
-		  ]
-		};
-	  
-		return {
-		  type: "attachment",
-		  contentType: "application/vnd.microsoft.card.adaptive",
-		  contentUrl: null,
-		  content: adaptiveCardContent
-		};
-	  },
-	  
-	  plant_DefaultResponse: function(treeDetails, isError) {
-		let messageText = `**${plantMessage.title}**\n${isError ? plantMessage.errorNote : plantMessage.successNote}\n`;
-		messageText += formatTreeDetails(treeDetails);
-		return messageText;
-	  },
+	plant_msteamsResponse: function(treeDetails, isError, environment) {
+	  const cardDetailsText = formatTreeDetails(treeDetails).map(detail => {
+		return `**Tree ID:** ${detail.id}\n` +
+			   `**Token:** [${detail.token}](${detail.collect_url})\n` +
+			   `**Certificate:** [View Certificate](${detail.certificate_url})`;
+	  }).join('\n\n');
+  
+	  const adaptiveCardContent = {
+		$schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+		type: "AdaptiveCard",
+		version: "1.4",
+		body: [
+		  {
+			type: "TextBlock",
+			size: "Medium",
+			weight: "Bolder",
+			text: plantMessage.title,
+			wrap: true,
+		  },
+		  {
+			type: "TextBlock",
+			text: isError ? plantMessage.errorNote : `${plantMessage.successNote}\n\nEnvironment: ${environment}\n${cardDetailsText}`,
+			wrap: true,
+		  }
+		]
+	  };
+  
+	  return {
+		type: "attachment",
+		contentType: "application/vnd.microsoft.card.adaptive",
+		contentUrl: null,
+		content: adaptiveCardContent
+	  };
+	},
+  
+	plant_SlackResponse: function(treeDetails, isError, environment) {
+	  const slackDetailsText = formatTreeDetails(treeDetails).map(detail => {
+		return `*Tree ID:* ${detail.id}\n` +
+			   `*Token:* <${detail.collect_url}|${detail.token}>\n` +
+			   `*Certificate:* <${detail.certificate_url}|View Certificate>`;
+	  }).join('\n\n');
+  
+	  return {
+		text: isError ? plantMessage.errorNote : `*${plantMessage.successNote}*\n\nEnvironment: ${environment}\n${slackDetailsText}`,
+		mrkdwn: true
+	  };
+	},
+  
+	plant_WebchatResponse: function(treeDetails, isError, environment) {
+	  const webchatDetailsText = formatTreeDetails(treeDetails).map(detail => {
+		return `**Tree ID:** ${detail.id}\n` +
+			   `**Token:** [${detail.token}](${detail.collect_url})\n` +
+			   `**Certificate:** [View Certificate](${detail.certificate_url})`;
+	  }).join('\n\n');
+  
+	  return webchatDetailsText;
+	},
+	
+	plant_DefaultResponse: function(treeDetails, isError, environment) {
+	  const defaultMessageText = formatTreeDetails(treeDetails).map(detail => {
+		return `**Tree ID:** ${detail.id}\n` +
+			   `**Token:** ${detail.token}\n` +
+			   `**Collect URL:** ${detail.collect_url}\n` +
+			   `**Certificate URL:** ${detail.certificate_url}`;
+	  }).join('\n\n');
+  
+	  return `Environment: ${environment}\n${isError ? plantMessage.errorNote : plantMessage.successNote}\n${defaultMessageText}`;
+	},
 
   // train path START
   train_DefaultResponse: function(questionAndAnswer) {

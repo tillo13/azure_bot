@@ -59,10 +59,11 @@ async function plantTree(environmentFlag, recipients, speciesId, quantity, messa
 
 function createDetailResponse(apiResponse) {
     let treeDetails = apiResponse.trees.map(tree => {
-        return `**Tree ID:** ${tree.id}\n` +
-               `**Token:** [${tree.token}](${tree.collect_url})\n` +
-               `**Certificate:** [View Certificate](${tree.certificate_url})\n`;
-    }).join('\n');
+        return `Tree ID: ${tree.id}\n` +
+               `Token: ${tree.token}\n` +
+               `Collect URL: ${tree.collect_url}\n` +
+               `Certificate URL: ${tree.certificate_url}\n`;
+    }).join('\n\n');
 
     return `A tree has been planted successfully! Here are the details:\n\n${treeDetails}`;
 }
