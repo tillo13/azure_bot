@@ -64,17 +64,49 @@ async function plantTreeCommandHandler(context) {
     const quantity = 1;
     const message = "Thank you for using our service to plant a tree!";
 
-
-    // ... your existing code for setting up the request ...
-
     const plantResponse = await plantTree(global.TREE_NATION_ENDPOINT, recipients, speciesId, quantity, message);
 
-    // Log the console message
-    console.log(plantResponse.consoleMessage);
+    // Parse the response to fit the formatting functions
+    let messageToUser;
 
-    // Prepend the environment to the user message
-    let environment = global.TREE_NATION_ENDPOINT;
-    let messageToUser = `Environment: ${environment}\n${plantResponse.userMessage}`;
+    if (plantResponse.status === 'ok') {
+        const treeDetails = plantResponse.consoleMessage.split('Trees Details:')[1].split(';').map(detail => {
+            const detailsParts = detail.split(',').map(d => d.trim());
+            return {
+                id: detailsParts[0].split(': ')[1],
+                token: detailsParts[1].split(': ')[1],
+                collect_url: detailsParts[2].split(': ')[1],
+                certificate_url: detailsParts[3].split(': ')[1]
+            };
+        });
+        switch (context.activity.channelId) {
+            case 'msteams':
+                messageToUser = formats.plant_msteamsResponse(treeDetails, false);
+                break;
+            case 'slack':
+                messageToUser = formats.plant_SlackResponse(treeDetails, false);
+                break;
+            case 'webchat':
+                messageToUser = formats.plant_WebchatResponse(treeDetails, false);
+                break;
+            default:
+                messageToUser = formats.plant_DefaultResponse(treeDetails, false);
+        }
+    } else {
+        switch (context.activity.channelId) {
+            case 'msteams':
+                messageToUser = formats.plant_msteamsResponse([], true);
+                break;
+            case 'slack':
+                messageToUser = formats.plant_SlackResponse([], true);
+                break;
+            case 'webchat':
+                messageToUser = formats.plant_WebchatResponse([], true);
+                break;
+            default:
+                messageToUser = formats.plant_DefaultResponse([], true);
+        }
+    }
 
     // Send the user message
     return sendMessageResponse(context, messageToUser);

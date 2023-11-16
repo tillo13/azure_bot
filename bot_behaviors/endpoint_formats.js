@@ -1,3 +1,19 @@
+//2023nov16 add tree nation defaults
+
+const plantMessage = {
+	title: "Tree Planting Confirmation",
+	successNote: "Thank you for taking a step towards a greener future!",
+	errorNote: "Uh oh, something went wrong while planting your tree. We apologize for any inconvenience.",
+  };
+  
+  function formatTreeDetails(treeDetails) {
+	return treeDetails.map(tree => {
+	  return `**Tree ID:** ${tree.id}\n` +
+			 `**Token:** [${tree.token}](${tree.collect_url})\n` +
+			 `**Certificate:** [View Certificate](${tree.certificate_url})\n`;
+	}).join('\n');
+  }
+
 //2023oct31 add defaults for configs
 const global_configs = require('../utilities/global_configs.js');
 
@@ -56,6 +72,86 @@ function formatQA(questionAnswer) {
 }
 
 module.exports = {
+
+	plant_msteamsResponse: function(treeDetails, isError) {
+		const adaptiveCardContent = {
+		  $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+		  type: "AdaptiveCard",
+		  version: "1.4",
+		  body: [
+			{
+			  type: "TextBlock",
+			  size: "Medium",
+			  weight: "Bolder",
+			  text: plantMessage.title,
+			  wrap: true,
+			},
+			{
+			  type: "TextBlock",
+			  text: isError ? plantMessage.errorNote : plantMessage.successNote,
+			  wrap: true,
+			},
+			{
+			  type: "TextBlock",
+			  text: formatTreeDetails(treeDetails),
+			  wrap: true,
+			}
+		  ]
+		};
+	  
+		return {
+		  type: "attachment",
+		  contentType: "application/vnd.microsoft.card.adaptive",
+		  contentUrl: null,
+		  content: adaptiveCardContent
+		};
+	  },
+	  
+	  plant_SlackResponse: function(treeDetails, isError) {
+		let messageText = `*${plantMessage.title}*\n${isError ? plantMessage.errorNote : plantMessage.successNote}\n`;
+		messageText += formatTreeDetails(treeDetails);
+		return messageText;
+	  },
+	  
+	  plant_WebchatResponse: function(treeDetails, isError) {
+		const adaptiveCardContent = {
+		  $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+		  type: "AdaptiveCard",
+		  version: "1.3",
+		  body: [
+			{
+			  type: "TextBlock",
+			  size: "Medium",
+			  weight: "Bolder",
+			  text: plantMessage.title,
+			  wrap: true,
+			},
+			{
+			  type: "TextBlock",
+			  text: isError ? plantMessage.errorNote : plantMessage.successNote,
+			  wrap: true,
+			},
+			{
+			  type: "TextBlock",
+			  text: formatTreeDetails(treeDetails),
+			  wrap: true,
+			}
+		  ]
+		};
+	  
+		return {
+		  type: "attachment",
+		  contentType: "application/vnd.microsoft.card.adaptive",
+		  contentUrl: null,
+		  content: adaptiveCardContent
+		};
+	  },
+	  
+	  plant_DefaultResponse: function(treeDetails, isError) {
+		let messageText = `**${plantMessage.title}**\n${isError ? plantMessage.errorNote : plantMessage.successNote}\n`;
+		messageText += formatTreeDetails(treeDetails);
+		return messageText;
+	  },
 
   // train path START
   train_DefaultResponse: function(questionAndAnswer) {
@@ -635,4 +731,6 @@ dalle_precursor_msteamsResponse: function(prompt, numImages, imageSize) {
 		  
 		return slackMessage;
 	  },
+
+	  
 };
