@@ -117,12 +117,7 @@ module.exports = {
 			});
 			contentBody.push({
 				type: "TextBlock",
-				text: `**Tree-Nation Collection URL**: _${tree.collect_url}_`, // Let full URL be visible and clickable
-				wrap: true
-			});
-			contentBody.push({
-				type: "TextBlock",
-				text: `**Tree Nation Certificate PDF**: _${tree.certificate_url}_`, // Let full URL be visible and clickable
+				text: `**Tree-Nation values**: [Collect URL](${tree.collect_url}) | [Certificate PDF](${tree.certificate_url})`, // The links are clickable
 				wrap: true
 			});
 			// Add a separator for visual distinction between tree details (except for the last tree)
