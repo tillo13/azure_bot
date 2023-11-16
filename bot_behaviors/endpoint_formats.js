@@ -84,43 +84,46 @@ module.exports = {
 			},
 			{
 				type: "TextBlock",
-				text: `A tree has been planted successfully via Tree-Nation! Here are the details:`,
+				text: "A tree has been planted successfully via Tree-Nation! Here are the details:",
 				wrap: true
 			},
 			{
 				type: "TextBlock",
-				text: `Environment: ${environment}`,
-				wrap: true,
-				weight: 'Bolder', // Optional: to emphasize the environment
+				text: "---", // Placeholder text for horizontal line (separator)
+				horizontalAlignment: "Center",
+				spacing: "Padding",
 				separator: true
-			}
+			},
 		];
 	
-		// Create new TextBlock for each tree detail with clickable URLs
+		// Adding Environment block
+		contentBody.push({
+			type: "TextBlock",
+			text: `**Environment**: _${environment}_`, // Bold for label, Italic for value
+			wrap: true
+		});
+	
+		// Create new TextBlock for each tree detail with URLs displayed
 		treeDetails.forEach(tree => {
 			contentBody.push({
 				type: "TextBlock",
-				text: `Tree ID: ${tree.id}`,
-				wrap: true,
-				spacing: "None"
+				text: `**Tree ID**: _${tree.id}_`, // Bold for label, Italic for value
+				wrap: true
 			});
 			contentBody.push({
 				type: "TextBlock",
-				text: `Token: ${tree.token}`,
-				wrap: true,
-				spacing: "None"
+				text: `**Token**: _${tree.token}_`, // Bold for label, Italic for value
+				wrap: true
 			});
 			contentBody.push({
 				type: "TextBlock",
-				text: `[Collect URL](${tree.collect_url})`,
-				wrap: true,
-				spacing: "None"
+				text: `**Tree-Nation Collection URL**: _${tree.collect_url}_`, // Let full URL be visible and clickable
+				wrap: true
 			});
 			contentBody.push({
 				type: "TextBlock",
-				text: `[Certificate URL](${tree.certificate_url})`,
-				wrap: true,
-				spacing: "None"
+				text: `**Tree Nation Certificate PDF**: _${tree.certificate_url}_`, // Let full URL be visible and clickable
+				wrap: true
 			});
 			// Add a separator for visual distinction between tree details (except for the last tree)
 			if (tree !== treeDetails[treeDetails.length - 1]) {
