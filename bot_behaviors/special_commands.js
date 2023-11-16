@@ -359,34 +359,54 @@ async function contactHelp(context) {
 }
 
 async function sendMessageResponse(context, messageOrAttachment) {
-	let replyActivity;
+    let replyActivity;
 
-	if (typeof messageOrAttachment === 'string') {
-		replyActivity = MessageFactory.text(messageOrAttachment);
-	} else {
-		// Assume it's an attachment (AdaptiveCard, image etc.)
-		replyActivity = {
-			type: 'message',
-			attachments: [messageOrAttachment]
-		};
-	}
+    if (typeof messageOrAttachment === 'string') {
+        replyActivity = {
+            type: 'message',
+            text: messageOrAttachment
+        };
+    } else if (messageOrAttachment.mrkdwn) {
+        // Handle Slack-specific response
+        replyActivity = {
+            type: 'message',
+            text: messageOrAttachment.text,
+            mrkdwn: true 
+            // Note: If Slack requires additional formatting, make sure to check their message formatting guidelines.
+        };
 
-	try {
-		replyActivity.conversation = context.activity.conversation;
-	
-		if (context.activity.channelId === 'slack') {
-		  const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
-			context.activity.channelData?.SlackMessage?.event?.ts;
-		  if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
-			replyActivity.conversation.id += ':' + thread_ts;
-		  }
-		}
-	  } catch (error) {
-		console.error('\n******SPECIAL_COMMANDS: Error occurred while trying to reply in the thread:', error);
-	  }
-	
-	console.log('\n******SPECIAL_COMMANDS: Payload we will send on:\n', replyActivity);  
-	return await context.sendActivity(replyActivity);
+        // Moved from inside attachments array
+        const thread_ts = messageOrAttachment.thread_ts;
+        if (thread_ts) {
+            // Adjusting replyActivity for threading in Slack
+            replyActivity.channelData = {
+                thread_ts: thread_ts
+            };
+        }
+    } else {
+        // Assume it's an attachment (AdaptiveCard, image, etc.)
+        replyActivity = {
+            type: 'message',
+            attachments: [messageOrAttachment]
+        };
+    }
+
+    try {
+        replyActivity.conversation = context.activity.conversation;
+    
+        if (context.activity.channelId === 'slack') {
+            const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
+            context.activity.channelData?.SlackMessage?.event?.ts;
+            if (thread_ts && !replyActivity.conversation.id.includes(thread_ts)) {
+                replyActivity.conversation.id += ':' + thread_ts;
+            }
+        }
+    } catch (error) {
+        console.error('\n******SPECIAL_COMMANDS: Error occurred while trying to reply in the thread:', error);
+    }
+    
+    console.log('\n******SPECIAL_COMMANDS: Payload we will send on:\n', replyActivity);  
+    return await context.sendActivity(replyActivity);
 }
 //set prompt globally
 global.current_dalle_prompt = '';
