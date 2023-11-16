@@ -74,33 +74,72 @@ function formatQA(questionAnswer) {
 module.exports = {
 
 	plant_msteamsResponse: function(treeDetails, isError, environment) {
-		let detailsList = formatTreeDetails(treeDetails).split('\n\n');
 		let contentBody = [
 			{
 				type: "TextBlock",
 				size: "Medium",
 				weight: "Bolder",
 				text: plantMessage.title,
-				wrap: true,
+				wrap: true
 			},
 			{
 				type: "TextBlock",
-				text: `A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}`,
+				text: `A tree has been planted successfully via Tree-Nation! Here are the details:`,
+				wrap: true
+			},
+			{
+				type: "TextBlock",
+				text: `Environment: ${environment}`,
 				wrap: true,
+				weight: 'Bolder', // Optional: to emphasize the environment
+				separator: true
 			}
 		];
 	
-		for (let detail of detailsList) {
+		// Create new TextBlock for each tree detail
+		treeDetails.forEach(tree => {
 			contentBody.push({
 				type: "TextBlock",
-				text: detail,
+				text: `Tree ID: ${tree.id}`,
 				wrap: true,
-				spacing: "Padding",
-				separator: true
+				spacing: "None"
 			});
-		}
+			contentBody.push({
+				type: "TextBlock",
+				text: `Token: ${tree.token}`,
+				wrap: true,
+				spacing: "None"
+			});
+			contentBody.push({
+				type: "TextBlock",
+				text: `Collect URL: ${tree.collect_url}`,
+				wrap: true,
+				spacing: "None",
+				color: 'Accent', // Optional: to make URL stand out
+				isSubtle: true // Optional: to make less prominent
+			});
+			contentBody.push({
+				type: "TextBlock",
+				text: `Certificate URL: ${tree.certificate_url}`,
+				wrap: true,
+				spacing: "None",
+				color: 'Accent', // Optional: to make URL stand out
+				isSubtle: true // Optional: to make less prominent
+			});
+			// Add a separator for visual distinction between tree details (except for the last tree)
+			if (tree !== treeDetails[treeDetails.length - 1]) {
+				contentBody.push({
+					type: "TextBlock",
+					text: "---", // Placeholder text for horizontal line (separator)
+					horizontalAlignment: "Center",
+					color: 'Good', // Optional: color for the separator
+					spacing: "Padding",
+					separator: true
+				});
+			}
+		});
 	
-		if(isError) {
+		if (isError) {
 			contentBody.push({
 				type: "TextBlock",
 				text: plantMessage.errorNote,
