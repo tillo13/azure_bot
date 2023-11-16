@@ -51,8 +51,6 @@ const commands = new Proxy({
     }
 });
 
-const { plantTree } = require('../utilities/tree_nation/tree_nation_utils');
-
 // Global variable to decide which environment to use
 global.TREE_NATION_ENDPOINT = 'TEST'; // Change this to 'PROD' when we want to switch to planting actual trees
 
