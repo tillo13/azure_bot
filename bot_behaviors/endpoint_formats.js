@@ -125,28 +125,28 @@ module.exports = {
 		};
 	},
 	
-    plant_SlackResponse: function(treeDetails, isError, environment, context) {
-        let detailsText = formatTreeDetails(treeDetails);
-        let text = isError ? plantMessage.errorNote :
-            `A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}\n${detailsText}`;
-
-        let response = {
-            text: text,
-            mrkdwn: true
-        };
-
-        // Extract thread_ts for Slack threading from the context if provided
-        const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
-                          context.activity.channelData?.SlackMessage?.event?.ts;
-        
-        if (thread_ts) {
-            // Append thread_ts to the response if it exists for Slack threading
-            response.thread_ts = thread_ts;
-            console.log(`Slack response with thread_ts: ${thread_ts}`);
-        }
-
-        return response;
-    },
+	plant_SlackResponse: function(treeDetails, isError, environment, context) {
+		let detailsText = formatTreeDetails(treeDetails);
+		let text = isError ? plantMessage.errorNote :
+			`A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}\n${detailsText}`;
+	
+		let response = {
+			text: text,
+			mrkdwn: true
+		};
+	
+		// Check and handle thread_ts for Slack threading
+		if (context && context.activity && context.activity.channelData) {
+			const thread_ts = context.activity.channelData.thread_ts || // This is where you get the thread_ts
+							  context.activity.channelData.SlackMessage?.event?.thread_ts ||
+							  context.activity.channelData.SlackMessage?.event?.ts;
+			if (thread_ts) {
+				response.thread_ts = thread_ts; // Attach thread_ts to the response object for threading
+			}
+		}
+	
+		return response;
+	},
 	
 	plant_WebchatResponse: function(treeDetails, isError, environment) {
 	  let detailsText = formatTreeDetails(treeDetails);

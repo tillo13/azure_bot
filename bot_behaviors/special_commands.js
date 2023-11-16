@@ -75,6 +75,7 @@ async function plantTreeCommandHandler(context) {
             case 'slack':
                 // Plant tree response formatting for Slack - we will handle thread_ts within the Slack format function
                 messageToUser = formats.plant_SlackResponse(treesArray, isError, global.TREE_NATION_ENDPOINT, context);
+				
                 break;
             case 'webchat':
                 // Plant tree response formatting for Webchat
