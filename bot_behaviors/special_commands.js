@@ -63,34 +63,31 @@ async function plantTreeCommandHandler(context) {
     ];
     const quantity = 1;
     const message = "Thank you for using our service to plant a tree!";
-
+    // ...existing code...
     const plantResponse = await plantTree(global.TREE_NATION_ENDPOINT, recipients, speciesId, quantity, message);
 
-    // Log the console message
-    console.log(plantResponse.consoleMessage);
-
-    // Prepend the environment to the user message
-	let environment = global.TREE_NATION_ENDPOINT;
-    // Check status before sending a formatted message
+    let environment = global.TREE_NATION_ENDPOINT;
+    // Determine the platform and format the response accordingly...
     if (plantResponse.status === 'ok') {
-        const treeDetails = plantResponse.userMessage;
-        const isError = plantResponse.status !== 'ok';
-        // Determine the platform and format the response accordingly (using endpoint_formats.js)
+        // Pass the array of trees to the format functions
+        const treesArray = plantResponse.data.trees; // Access the trees array
+        const isError = false; // As we know the status is 'ok'
+
         switch (context.activity.channelId) {
             case 'msteams':
-                messageToUser = formats.plant_msteamsResponse(treeDetails, isError, environment);
+                messageToUser = formats.plant_msteamsResponse(treesArray, isError, environment);
                 break;
             case 'slack':
-                messageToUser = formats.plant_SlackResponse(treeDetails, isError, environment);
+                messageToUser = formats.plant_SlackResponse(treesArray, isError, environment);
                 break;
             case 'webchat':
-                messageToUser = formats.plant_WebchatResponse(treeDetails, isError, environment);
+                messageToUser = formats.plant_WebchatResponse(treesArray, isError, environment);
                 break;
             default:
-                messageToUser = formats.plant_DefaultResponse(treeDetails, isError, environment);
+                messageToUser = formats.plant_DefaultResponse(treesArray, isError, environment);
         }
     } else {
-        // Handle an error response uniformly across platforms for now
+        // Handle the error response uniformly across platforms...
         messageToUser = `An error occurred: ${plantResponse.userMessage}`;
     }
 

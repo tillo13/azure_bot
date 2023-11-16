@@ -29,15 +29,14 @@ async function plantTree(environmentFlag, recipients, speciesId, quantity, messa
         quantity: quantity,
         message: message
     };
-
     try {
         const response = await axios.post(apiUrl, payload, { headers: headers });
-        // Construct verbose details if the request is successful
         if (response.data.status === 'ok') {
             return {
                 userMessage: createDetailResponse(response.data),
                 consoleMessage: createVerboseConsoleLog(response.data),
-                status: 'ok'
+                status: 'ok',
+                data: response.data // This should contain the trees array in its structure
             };
         } else {
             // Error occurred on the Tree-Nation API side
