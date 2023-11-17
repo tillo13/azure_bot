@@ -16,9 +16,10 @@ const plantMessage = {
   
   function formatTreeDetails(treeDetails) {
     return treeDetails.map(tree => {
-        return `*Tree ID*: \`${tree.id}\`\n` +
-               `*Token*: \`${tree.token}\`\n` +
-               `*Collect URL*: <${tree.collect_url}|Collect>\n` +
+        // Using double newline characters to separate the sections.
+        return `*Tree ID*: \`${tree.id}\`\n\n` + 
+               `*Token*: \`${tree.token}\`\n\n` + 
+               `*Collect URL*: <${tree.collect_url}|Collect>\n\n` + 
                `*Certificate URL*: <${tree.certificate_url}|Certificate>`;
     }).join('\n\n');
 }
@@ -170,7 +171,8 @@ module.exports = {
 	plant_SlackResponse: function(treeDetails, isError, environment, context) {
 		let detailsText = formatTreeDetails(treeDetails);
 		let text = isError ? `:warning: *${plantMessage.errorNote}*` :
-			`:seedling: *Tree-Nation Planting Confirmation*\n${plantMessage.successNote}\n\n*Environment*: \`${environment}\`\n\n${detailsText}`;
+			`:seedling: *Tree-Nation Planting Confirmation*\n${plantMessage.successNote}\n\n` +
+			`*Environment*: \`${environment}\`\n\n${detailsText}`;
 		
 		let response = {
 			text: text,
