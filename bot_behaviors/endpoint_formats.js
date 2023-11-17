@@ -169,87 +169,74 @@ module.exports = {
 	
 	plant_SlackResponse: function(treeDetails, isError, environment, context) {
 		// Extract thread_ts for Slack threading if available from the context.
-		// This is necessary for the message to appear in the correct thread.
-		const thread_ts = context.activity.channelData?.SlackMessage?.ts;
+		const thread_ts = context.activity.channelData?.SlackMessage?.thread_ts || 
+						  context.activity.channelData?.SlackMessage?.ts;
 	
-		// Start constructing the Slack message blocks.
+		let responseText = isError ? `:x: *${plantMessage.title}* \n${plantMessage.errorNote}` 
+								   : `:seedling: *${plantMessage.title}* \n${plantMessage.successNote}`;
+	
 		let responseBlocks = [
 			{
 				"type": "section",
 				"text": {
 					"type": "mrkdwn",
-					"text": `*Tree-Nation Planting Confirmation*`
+					"text": responseText
 				}
 			},
 			{
 				"type": "divider"
-			},
-			{
-				"type": "context",
-				"elements": [
-					{
-						"type": "mrkdwn",
-						"text": `*Environment*: \`${environment}\``
-					}
-				]
 			}
 		];
 	
-		// Depending on whether an error occurred, add a success or error block.
-		let resultBlock = isError ? {
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": `:x: ${plantMessage.errorNote}`
-			}
-		} : {
-			"type": "section",
-			"text": {
-				"type": "mrkdwn",
-				"text": `:white_check_mark: ${plantMessage.successNote}`
-			}
-		};
-		responseBlocks.push(resultBlock);
-	
-		// If no error, add details for each tree.
 		if (!isError) {
-			treeDetails.forEach((tree, index) => {
-				let treeBlock = {
+			let environmentText = `*Environment*:\n\`${environment}\``;
+			let detailBlocks = treeDetails.map(tree => {
+				return {
 					"type": "section",
 					"fields": [
 						{
 							"type": "mrkdwn",
-							"text": `*Tree ID*: \`${tree.id}\``
+							"text": `*Tree ID*:\n\`${tree.id}\``
 						},
 						{
 							"type": "mrkdwn",
-							"text": `*Token*: \`${tree.token}\``
+							"text": `*Token*:\n\`${tree.token}\``
 						},
 						{
 							"type": "mrkdwn",
-							"text": `<${tree.collect_url}|Collect URL>\n<${tree.certificate_url}|Certificate URL>`
+							"text": `*Collect URL*:\n<${tree.collect_url}|Link>`
+						},
+						{
+							"type": "mrkdwn",
+							"text": `*Certificate URL*:\n<${tree.certificate_url}|Link>`
 						}
 					]
 				};
-				responseBlocks.push(treeBlock);
-				// Add a divider except after the last tree.
-				if (index < treeDetails.length - 1) {
-					responseBlocks.push({"type": "divider"});
+			});
+	
+			// Insert environment block before tree details
+			detailBlocks.unshift({
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": environmentText
 				}
 			});
+	
+			// Concatenate the environment and tree detail blocks
+			responseBlocks = responseBlocks.concat(detailBlocks);
 		}
 	
-		// Construct the final payload to be sent to Slack.
-		let slackPayload = {
+		let responsePayload = {
 			"blocks": responseBlocks
 		};
 	
-		// Include thread_ts if available for message threading on Slack.
+		// Include thread_ts for threading if available
 		if (thread_ts) {
-			slackPayload.thread_ts = thread_ts;
+			responsePayload.thread_ts = thread_ts;
 		}
 	
-		return slackPayload;
+		return responsePayload;
 	},
 	
 	plant_WebchatResponse: function(treeDetails, isError, environment) {
