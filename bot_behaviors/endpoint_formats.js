@@ -190,11 +190,68 @@ module.exports = {
 	},
 	
 	plant_WebchatResponse: function(treeDetails, isError, environment) {
-	  let detailsText = formatTreeDetails(treeDetails);
-	  let text = isError ? plantMessage.errorNote :
-		`A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}\n${detailsText}`;
-	  
-	  return text;
+		const adaptiveCard = {
+			"$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+			"type": "AdaptiveCard",
+			"version": "1.2",
+			"body": [
+				{
+					"type": "TextBlock",
+					"text": "Tree-Nation Planting Confirmation",
+					"weight": "Bolder",
+					"size": "Medium"
+				},
+				{
+					"type": "TextBlock",
+					"text": isError ? plantMessage.errorNote : plantMessage.successNote,
+					"separator": true
+				},
+				{
+					"type": "FactSet",
+					"facts": [
+						{
+							"title": "Environment:",
+							"value": environment
+						}
+					]
+				}
+			]
+		};
+	
+		if (!isError) {
+			treeDetails.forEach(tree => {
+				adaptiveCard.body.push({
+					"type": "FactSet",
+					"facts": [
+						{
+							"title": "Tree ID:",
+							"value": tree.id.toString()
+						},
+						{
+							"title": "Token:",
+							"value": tree.token
+						}
+					]
+				});
+				adaptiveCard.body.push({
+					"type": "ActionSet",
+					"actions": [
+						{
+							"type": "Action.OpenUrl",
+							"title": "Collect URL",
+							"url": tree.collect_url
+						},
+						{
+							"type": "Action.OpenUrl",
+							"title": "Certificate URL",
+							"url": tree.certificate_url
+						}
+					]
+				});
+			});
+		}
+	
+		return adaptiveCard;
 	},
 	
 	plant_DefaultResponse: function(treeDetails, isError, environment) {
