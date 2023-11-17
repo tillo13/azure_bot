@@ -127,7 +127,7 @@ module.exports = {
 			});
 			contentBody.push({
 				type: "TextBlock",
-				text: `**Tree-Nation URLs**: [Collect URL](${tree.collect_url}) | [Certificate PDF](${tree.certificate_url}) | [Profile](${companyProfileUrl})`, // The links are clickable
+				text: `**Output URLs**: [Comment](${tree.collect_url}) | [Certificate](${tree.certificate_url}) | [Profile](${companyProfileUrl})`, // The links are clickable
 				wrap: true
 			});
 			// Add a separator for visual distinction between tree details (except for the last tree)
