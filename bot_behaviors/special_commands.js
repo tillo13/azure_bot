@@ -56,7 +56,7 @@ global.TREE_NATION_ENDPOINT = 'TEST'; // Change this to 'PROD' when we want to s
 
 async function plantTreeCommandHandler(context) {
     const speciesId = 3; // Replace with actual species ID.
-	const recipients = [{ name: "Recipient Name", email: "recipient@example.com" }];
+    const recipients = [{ name: "test user", email: "test875349@test.com" }];
     const quantity = 1;
     const thankYouMessage = "Thank you for using Tree-Nation API to plant a tree!";
     const plantResponse = await plantTree(global.TREE_NATION_ENDPOINT, recipients, speciesId, quantity, thankYouMessage);
