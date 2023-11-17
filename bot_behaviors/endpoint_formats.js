@@ -168,23 +168,70 @@ module.exports = {
 	},
 	
 	plant_SlackResponse: function(treeDetails, isError, environment, context) {
-		let detailsText = formatTreeDetails(treeDetails);
-		let text = isError ? plantMessage.errorNote :
-			`A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}\n${detailsText}`;
-	
-		let response = {
-			text: text,
-			mrkdwn: true
-		};
-	
-		// Handle thread_ts for Slack threading
+		// Extract thread_ts for Slack threading if available from the context
 		const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
 						  context.activity.channelData?.SlackMessage?.event?.ts;
-		if (thread_ts) {
-			response.thread_ts = thread_ts;  // Append thread_ts to the response object for threading
+	
+		let responseBlocks = [
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": isError ? `:x: *${plantMessage.title}* \n${plantMessage.errorNote}` : `:seedling: *${plantMessage.title}* \n${plantMessage.successNote}`
+				}
+			},
+			{
+				"type": "divider"
+			},
+			{
+				"type": "section",
+				"fields": [
+					{
+						"type": "mrkdwn",
+						"text": `*Environment:*\n\`${environment}\``
+					}
+				]
+			}
+		];
+	
+		if (!isError) {
+			treeDetails.forEach(tree => {
+				responseBlocks = responseBlocks.concat([
+					{
+						"type": "section",
+						"fields": [
+							{
+								"type": "mrkdwn",
+								"text": `*Tree ID:*\n\`${tree.id}\``
+							},
+							{
+								"type": "mrkdwn",
+								"text": `*Token:*\n\`${tree.token}\``
+							},
+							{
+								"type": "mrkdwn",
+								"text": `*Collect URL:*\n<${tree.collect_url}|Link>`
+							},
+							{
+								"type": "mrkdwn",
+								"text": `*Certificate URL:*\n<${tree.certificate_url}|Link>`
+							}
+						]
+					},
+					{
+						"type": "divider"
+					}
+				]);
+			});
 		}
 	
-		return response;
+		let slackPayload = {
+			"text": isError ? `:x: ${plantMessage.errorNote}` : `:seedling: ${plantMessage.successNote}`,
+			"blocks": responseBlocks,
+			"thread_ts": thread_ts // Include thread_ts directly in the payload for threading
+		};
+	
+		return slackPayload;
 	},
 	
 	plant_WebchatResponse: function(treeDetails, isError, environment) {
