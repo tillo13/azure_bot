@@ -168,82 +168,23 @@ module.exports = {
 	},
 	
 	plant_SlackResponse: function(treeDetails, isError, environment, context) {
-		// Extract thread_ts for Slack threading if available from the context
-		const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
-						  context.activity.channelData?.SlackMessage?.event?.ts;
+		let detailsText = formatTreeDetails(treeDetails);
+		let text = isError ? plantMessage.errorNote :
+			`A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}\n${detailsText}`;
 	
-		let responseBlocks = [
-			{
-				"type": "section",
-				"text": {
-					"type": "mrkdwn",
-					"text": `:seedling: *Tree-Nation Planting Confirmation*`
-				}
-			},
-			{
-				"type": "divider"
-			},
-			{
-				"type": "section",
-				"fields": [
-					{
-						"type": "mrkdwn",
-						"text": `*Environment:*\n${environment}`
-					}
-				]
-			}
-		];
-	
-		if (isError) {
-			responseBlocks.push({
-				"type": "section",
-				"text": {
-					"type": "mrkdwn",
-					"text": `:warning: ${plantMessage.errorNote}`
-				}
-			});
-		} else {
-			responseBlocks.push({
-				"type": "section",
-				"text": {
-					"type": "mrkdwn",
-					"text": `:white_check_mark: ${plantMessage.successNote}`
-				}
-			});
-	
-			treeDetails.forEach(tree => {
-				responseBlocks.push({
-					"type": "section",
-					"fields": [
-						{
-							"type": "mrkdwn",
-							"text": `*Tree ID:*\n${tree.id}`
-						},
-						{
-							"type": "mrkdwn",
-							"text": `*Token:*\n${tree.token}`
-						},
-						{
-							"type": "mrkdwn",
-							"text": `*Details:*\n<${tree.collect_url}|Collect URL>\n<${tree.certificate_url}|Certificate URL>`
-						}
-					]
-				}, {
-					"type": "divider"
-				});
-			});
-		}
-	
-		let responsePayload = {
-			"blocks": responseBlocks
+		let response = {
+			text: text,
+			mrkdwn: true
 		};
 	
-		// Handle Slack threading by assigning the thread_ts if available
+		// Handle thread_ts for Slack threading
+		const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
+						  context.activity.channelData?.SlackMessage?.event?.ts;
 		if (thread_ts) {
-			responsePayload.thread_ts = thread_ts;
+			response.thread_ts = thread_ts;  // Append thread_ts to the response object for threading
 		}
 	
-		return responsePayload;
+		return response;
 	},
 	
 	plant_WebchatResponse: function(treeDetails, isError, environment) {
