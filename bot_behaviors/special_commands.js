@@ -55,7 +55,7 @@ const commands = new Proxy({
 global.TREE_NATION_ENDPOINT = 'TEST'; // Change this to 'PROD' when we want to switch to planting actual trees
 
 async function plantTreeCommandHandler(context) {
-    const speciesId = 3; // Replace with actual species ID.
+    const speciesId = 3; // Replace with any species ID.
     const recipients = [{ name: "test user", email: "test875349@test.com" }];
     const quantity = 1;
     const thankYouMessage = "Thank you for using Tree-Nation API to plant a tree!";
