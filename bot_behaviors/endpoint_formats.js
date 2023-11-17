@@ -1,4 +1,13 @@
 //2023nov16 add tree nation defaults
+
+const tree_env_config = {
+    TEST: {
+        companyProfilePage: process.env['2023nov16_TREE_NATION_TEST_COMPANY_PROFILE_PAGE']
+    },
+    PROD: {
+        companyProfilePage: process.env['2023nov16_TREE_NATION_PROD_COMPANY_PROFILE_PAGE']
+    }
+};
 const plantMessage = {
 	title: "Tree-Nation Planting Confirmation",
 	successNote: "Thank you for taking a step towards a greener future!",
@@ -74,6 +83,7 @@ function formatQA(questionAnswer) {
 module.exports = {
 
 	plant_msteamsResponse: function(treeDetails, isError, environment) {
+		const companyProfileUrl = config[environment].companyProfilePage;
 		let contentBody = [
 			{
 				type: "TextBlock",
@@ -117,7 +127,7 @@ module.exports = {
 			});
 			contentBody.push({
 				type: "TextBlock",
-				text: `**Tree-Nation values**: [Collect URL](${tree.collect_url}) | [Certificate PDF](${tree.certificate_url})`, // The links are clickable
+				text: `**Tree-Nation values**: [Collect URL](${tree.collect_url}) | [Certificate PDF](${tree.certificate_url}) | [Company Profile](${companyProfileUrl})`, // The links are clickable
 				wrap: true
 			});
 			// Add a separator for visual distinction between tree details (except for the last tree)
