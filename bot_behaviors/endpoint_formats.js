@@ -83,7 +83,7 @@ function formatQA(questionAnswer) {
 module.exports = {
 
 	plant_msteamsResponse: function(treeDetails, isError, environment) {
-		const companyProfileUrl = config[environment].companyProfilePage;
+		const companyProfileUrl = tree_env_config[environment].companyProfilePage;
 		let contentBody = [
 			{
 				type: "TextBlock",
@@ -127,7 +127,7 @@ module.exports = {
 			});
 			contentBody.push({
 				type: "TextBlock",
-				text: `**Tree-Nation values**: [Collect URL](${tree.collect_url}) | [Certificate PDF](${tree.certificate_url}) | [Company Profile](${companyProfileUrl})`, // The links are clickable
+				text: `**Tree-Nation URLs**: [Collect URL](${tree.collect_url}) | [Certificate PDF](${tree.certificate_url}) | [Profile](${companyProfileUrl})`, // The links are clickable
 				wrap: true
 			});
 			// Add a separator for visual distinction between tree details (except for the last tree)
