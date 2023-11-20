@@ -1,5 +1,5 @@
 //2023Nov16 2:14pm adding tree-nation data to actually plant
-const { plantTree, createDetailResponse } = require('../utilities/tree_nation/tree_nation_utils');
+const { plantTree } = require('../utilities/tree_nation/tree_nation_utils');
 
 //2023Nov1 2:14pm adding tree-nation data for testing public api
 const { getTreeNationProjectsSummary } = require('../utilities/tree_nation/public_api_endpoints');
@@ -65,17 +65,9 @@ async function plantTreeCommandHandler(context) {
 
     let messageToUser;
     if (plantResponse.status === 'ok') {
-        const treesArray = plantResponse.data.trees;
-        const projectId = plantResponse.projectId; // Get the projectId here from the plantResponse
+        const treesArray = plantResponse.data.trees; // Access the trees array
+        const isError = false; // As we know the status is 'ok'
         
-        let projectName = '';
-        if(global.TREE_NATION_ENDPOINT === 'TEST') {
-            // Assuming that plantTree returned projectId inside the data
-            projectName = projectId; // Here you could use the projectNames object if needed
-        }
-        
-        messageToUser = createDetailResponse(treesArray, projectName); // Now passing the projectName to the function
-                
         switch (context.activity.channelId) {
             case 'msteams':
                 // Plant tree response formatting for Microsoft Teams

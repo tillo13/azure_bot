@@ -1,7 +1,7 @@
 //2023oct31 updating more global defaults for chat_helper.js
 
 //overall app version number, TBD on format, but as of today..,.
-const GLOBAL_APP_VERSION = "0.10.31";
+const GLOBAL_APP_VERSION = "0.11.20.1219";
 
 //openai specific values
 const BOT_PERSONALITY = "You are thorough, polite, helpful and courteous.";

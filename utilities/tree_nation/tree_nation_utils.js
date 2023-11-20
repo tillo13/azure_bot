@@ -16,38 +16,6 @@ const config = {
     }
   };
   
-  async function getRandomAvailableSpecies(projectIds) {
-    const allAvailableSpecies = [];
-  
-    for (const projectId of projectIds) {
-      const apiUrl = `https://tree-nation.com/api/projects/${projectId}/species`;
-      try {
-        const response = await axios.get(apiUrl);
-        if (response.status === 200) {
-          const availableSpecies = response.data.filter(species => species.stock > 0);
-          allAvailableSpecies.push(...availableSpecies.map(species => ({
-            ...species, // Copy all the existing species properties
-            projectId // Add the projectId to each species
-          })));
-        } else {
-          throw new Error(`Could not retrieve species for project ID ${projectId}`);
-        }
-      } catch (error) {
-        console.error(error.message);
-        throw error;
-      }
-    }
-  
-    if (allAvailableSpecies.length === 0) {
-      throw new Error('No species with positive stock are available for planting.');
-    }
-  
-    // Randomly pick an available species
-    const randomIndex = Math.floor(Math.random() * allAvailableSpecies.length);
-    return allAvailableSpecies[randomIndex];
-  }
-  
-
   async function plantTree(environmentFlag, recipients, quantity, message, maxRetries = 3, retryDelayMs = 2000) {
     const environment = config[environmentFlag];
     const apiUrl = `${environment.site}/api/plant`;
@@ -73,14 +41,13 @@ const config = {
       try {
         const response = await axios.post(apiUrl, payload, { headers: headers });
         if (response.data.status === 'ok') {
-          // Success
-          return {
-            userMessage: createDetailResponse(response.data, species.projectId), // Pass the projectId here
-            consoleMessage: createVerboseConsoleLog(response.data),
-            status: 'ok',
-            data: response.data,
-            projectId: species.projectId // Include the projectId in the returned data
-          };
+            // Success
+            return {
+              userMessage: createDetailResponse(response.data),
+              consoleMessage: createVerboseConsoleLog(response.data),
+              status: 'ok',
+              data: response.data
+            };
         } else {
           // Handle non-success status here without retrying
           return {
@@ -104,28 +71,16 @@ const config = {
     }
   }
 
-  function createDetailResponse(apiResponse, projectId) {
+function createDetailResponse(apiResponse) {
     let treeDetails = apiResponse.trees.map(tree => {
-      return `Tree ID: ${tree.id}\n` +
-             `Token: ${tree.token}\n` +
-             `Collect URL: ${tree.collect_url}\n` +
-             `Certificate URL: ${tree.certificate_url}\n`;
+        return `Tree ID: ${tree.id}\n` +
+               `Token: ${tree.token}\n` +
+               `Collect URL: ${tree.collect_url}\n` +
+               `Certificate URL: ${tree.certificate_url}\n`;
     }).join('\n\n');
-    
-    // Define project names based on IDs for TEST environment
-    const projectNames = {
-      '3': 'La Pedregoza',
-      '41': 'Usambara Biodiversity Conservation'
-    };
-  
-    // Get the project name only if the environment is TEST
-    let projectName = '';
-    if(global.TREE_NATION_ENDPOINT === 'TEST') {
-      projectName = projectNames[projectId] || 'Unknown Project';
-    }
 
-    return `A tree has been planted successfully ${projectName ? 'in ' + projectName : ''} via Tree-Nation! Here are the details:\n\n${treeDetails}`;
-  }
+    return `A tree has been planted successfully! Here are the details:\n\n${treeDetails}`;
+}
 
 function createVerboseConsoleLog(apiResponse) {
     let treeDetails = apiResponse.trees.map(tree => {
@@ -151,7 +106,28 @@ async function getAvailableSpecies(projectId) {
     }
   }
   
+  async function getRandomAvailableSpecies(projectIds) {
+    try {
+      const allAvailableSpecies = [];
+  
+      for (const projectId of projectIds) {
+        const availableSpecies = await getAvailableSpecies(projectId);
+        allAvailableSpecies.push(...availableSpecies);
+      }
+  
+      if (allAvailableSpecies.length === 0) {
+        throw new Error('No species with positive stock are available for planting.');
+      }
+  
+      // Randomly pick an available species
+      const randomIndex = Math.floor(Math.random() * allAvailableSpecies.length);
+      return allAvailableSpecies[randomIndex];
+    } catch (error) {
+      console.error(error.message);
+      throw error;
+    }
+  }
+
 module.exports = {
-    plantTree, 
-    createDetailResponse
+    plantTree
 };
