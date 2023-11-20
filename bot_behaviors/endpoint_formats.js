@@ -2,10 +2,12 @@
 
 const tree_env_config = {
     TEST: {
-        companyProfilePage: process.env['2023nov16_TREE_NATION_TEST_COMPANY_PROFILE_PAGE']
+        companyProfilePage: process.env['2023nov16_TREE_NATION_TEST_COMPANY_PROFILE_PAGE'],
+		site: process.env['2023nov16_TREE_NATION_TEST_SITE']
     },
     PROD: {
-        companyProfilePage: process.env['2023nov16_TREE_NATION_PROD_COMPANY_PROFILE_PAGE']
+        companyProfilePage: process.env['2023nov16_TREE_NATION_PROD_COMPANY_PROFILE_PAGE'],
+		site: process.env['2023nov16_TREE_NATION_PROD_SITE'],
     }
 };
 const plantMessage = {
@@ -84,7 +86,8 @@ function formatQA(questionAnswer) {
 module.exports = {
 
 	plant_msteamsResponse: function(treeDetails, isError, environment) {
-		const companyProfileUrl = tree_env_config[environment].companyProfilePage;
+		const environmentConfig = tree_env_config[environment];
+		const companyProfileUrl = environmentConfig.companyProfilePage;
 		let contentBody = [
 			{
 				type: "TextBlock",
@@ -114,23 +117,24 @@ module.exports = {
 			wrap: true
 		});
 	
-		// Create new TextBlock for each tree detail with URLs displayed
-		treeDetails.forEach(tree => {
-			contentBody.push({
-				type: "TextBlock",
-				text: `**Tree ID**: _${tree.id}_`, // Bold for label, Italic for value
-				wrap: true
-			});
-			contentBody.push({
-				type: "TextBlock",
-				text: `**Token**: _${tree.token}_`, // Bold for label, Italic for value
-				wrap: true
-			});
-			contentBody.push({
-				type: "TextBlock",
-				text: `**Output URLs**: [Comment](${tree.collect_url}) | [Certificate](${tree.certificate_url}) | [Profile](${companyProfileUrl})`, // The links are clickable
-				wrap: true
-			});
+    // Create new TextBlock for each tree detail with URLs displayed
+    treeDetails.forEach(tree => {
+        contentBody.push({
+            type: "TextBlock",
+            text: `**Tree ID**: _${tree.id}_`, // Bold for label, Italic for value
+            wrap: true
+        });
+        contentBody.push({
+            type: "TextBlock",
+            text: `**Token**: _${tree.token}_`, // Bold for label, Italic for value
+            wrap: true
+        });
+        const viewTreeUrl = `${environmentConfig.site}/trees/view/${tree.id}`;
+        contentBody.push({
+            type: "TextBlock",
+            text: `**Output URLs**: [Tree View](${viewTreeUrl}) | [Certificate](${tree.certificate_url}) | [Profile](${companyProfileUrl})`,
+            wrap: true
+        });
 			// Add a separator for visual distinction between tree details (except for the last tree)
 			if (tree !== treeDetails[treeDetails.length - 1]) {
 				contentBody.push({
