@@ -2,27 +2,31 @@
 
 const tree_env_config = {
     TEST: {
+        site: process.env['2023nov16_TREE_NATION_TEST_SITE'],
         companyProfilePage: process.env['2023nov16_TREE_NATION_TEST_COMPANY_PROFILE_PAGE']
     },
     PROD: {
+        site: process.env['2023nov16_TREE_NATION_PROD_SITE'],
         companyProfilePage: process.env['2023nov16_TREE_NATION_PROD_COMPANY_PROFILE_PAGE']
     }
 };
-const plantMessage = {
-	title: "Tree-Nation Planting Confirmation",
-	successNote: "Thank you for taking a step towards a greener future!",
-	errorNote: "Uh oh, something went wrong while planting your tree. We apologize for any inconvenience.",
-  };
-  
-  function formatTreeDetails(treeDetails) {
-    return treeDetails.map(tree => {
-        // Using double newline characters to separate the sections.
-        return `*Tree ID*: \`${tree.id}\`\n\n` + 
-               `*Token*: \`${tree.token}\`\n\n` + 
-               `*Collect URL*: <${tree.collect_url}|Collect>\n\n` + 
-               `*Certificate URL*: <${tree.certificate_url}|Certificate>`;
-    }).join('\n\n');
+
+// You can create a helper function to build the URL
+function getTreeUrl(environment, treeId) {
+  const baseUrl = tree_env_config[environment].site;
+  return `${baseUrl}/trees/view/${treeId}`;
 }
+
+// Replace the hard-coded URL in formatTreeDetails with the helper function
+function formatTreeDetails(treeDetails, environment) {
+	return treeDetails.map(tree => {
+	  const commentUrl = getTreeUrl(environment, tree.id);
+	  return `*Tree ID*: \`${tree.id}\`\n\n` + 
+			 `*Token*: \`${tree.token}\`\n\n` + 
+			 `*Comment URL*: <${commentUrl}|Comment>\n\n` + 
+			 `*Certificate URL*: <${tree.certificate_url}|Certificate>`;
+	}).join('\n\n');
+  }
 
 //2023oct31 add defaults for configs
 const global_configs = require('../utilities/global_configs.js');
@@ -116,6 +120,7 @@ module.exports = {
 	
 		// Create new TextBlock for each tree detail with URLs displayed
 		treeDetails.forEach(tree => {
+			const commentUrl = getTreeUrl(environment, tree.id);
 			contentBody.push({
 				type: "TextBlock",
 				text: `**Tree ID**: _${tree.id}_`, // Bold for label, Italic for value
@@ -128,7 +133,8 @@ module.exports = {
 			});
 			contentBody.push({
 				type: "TextBlock",
-				text: `**Output URLs**: [Comment](${tree.collect_url}) | [Certificate](${tree.certificate_url}) | [Profile](${companyProfileUrl})`, // The links are clickable
+				text: `**Output URLs**: [Comment](${commentUrl}) | [Certificate](${tree.certificate_url}) | [Profile](${companyProfileUrl})`,
+
 				wrap: true
 			});
 			// Add a separator for visual distinction between tree details (except for the last tree)
@@ -169,25 +175,28 @@ module.exports = {
 	},
 	
 	plant_SlackResponse: function(treeDetails, isError, environment, context) {
-		let detailsText = formatTreeDetails(treeDetails);
-		let text = isError ? `:warning: *${plantMessage.errorNote}*` :
-			`:seedling: *Tree-Nation Planting Confirmation*\n${plantMessage.successNote}\n\n` +
+		let detailsText = formatTreeDetails(treeDetails, environment); // Pass the environment
+		let text = isError
+		  ? `:warning: *${plantMessage.errorNote}*`
+		  : `:seedling: *Tree-Nation Planting Confirmation*\n${plantMessage.successNote}\n\n` +
 			`*Environment*: \`${environment}\`\n\n${detailsText}`;
 		
 		let response = {
-			text: text,
-			mrkdwn: true
+		  text: text,
+		  mrkdwn: true,
 		};
 		
 		// Handle thread_ts for Slack threading
-		const thread_ts = context.activity.channelData?.SlackMessage?.event?.thread_ts ||
-						  context.activity.channelData?.SlackMessage?.event?.ts;
+		const thread_ts =
+		  context.activity.channelData?.SlackMessage?.event?.thread_ts ||
+		  context.activity.channelData?.SlackMessage?.event?.ts;
+		
 		if (thread_ts) {
-			response.thread_ts = thread_ts;  // Append thread_ts to the response object for threading
+		  response.thread_ts = thread_ts; // Append thread_ts to the response object for threading
 		}
 		
 		return response;
-	},
+	  },
 	
 	plant_WebchatResponse: function(treeDetails, isError, environment) {
 		const adaptiveCard = {
@@ -220,8 +229,9 @@ module.exports = {
 	
 		if (!isError) {
 			treeDetails.forEach(tree => {
-				adaptiveCard.body.push({
-					"type": "FactSet",
+			  const commentUrl = getTreeUrl(environment, tree.id);
+			  adaptiveCard.body.push({
+				"type": "FactSet",
 					"facts": [
 						{
 							"title": "Tree ID:",
@@ -236,16 +246,16 @@ module.exports = {
 				adaptiveCard.body.push({
 					"type": "ActionSet",
 					"actions": [
-						{
-							"type": "Action.OpenUrl",
-							"title": "Collect URL",
-							"url": tree.collect_url
-						},
-						{
-							"type": "Action.OpenUrl",
-							"title": "Certificate URL",
-							"url": tree.certificate_url
-						}
+					  {
+						"type": "Action.OpenUrl",
+						"title": "Comment URL",
+						"url": commentUrl
+					  },
+					  {
+						"type": "Action.OpenUrl",
+						"title": "Certificate URL",
+						"url": tree.certificate_url
+					  }
 					]
 				});
 			});
@@ -255,12 +265,13 @@ module.exports = {
 	},
 	
 	plant_DefaultResponse: function(treeDetails, isError, environment) {
-	  let detailsText = formatTreeDetails(treeDetails);
-	  let text = isError ? plantMessage.errorNote :
-		`A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}\n${detailsText}`;
-	  
-	  return text;
-	},
+		let detailsText = formatTreeDetails(treeDetails, environment); // Pass the environment
+		let text = isError
+		  ? plantMessage.errorNote
+		  : `A tree has been planted successfully via Tree-Nation! Here are the details:\n\nEnvironment: ${environment}\n${detailsText}`;
+		
+		return text;
+	  },
 
   // train path START
   train_DefaultResponse: function(questionAndAnswer) {
