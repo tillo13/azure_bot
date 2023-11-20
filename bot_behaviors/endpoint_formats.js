@@ -132,7 +132,7 @@ module.exports = {
         const viewTreeUrl = `${environmentConfig.site}/trees/view/${tree.id}`;
         contentBody.push({
             type: "TextBlock",
-            text: `**Output URLs**: [Tree View](${viewTreeUrl}) | [Certificate](${tree.certificate_url}) | [Profile](${companyProfileUrl})`,
+            text: `**Output URLs**: [Certificate](${tree.certificate_url}) | [Comments](${viewTreeUrl}) | [Profile](${companyProfileUrl})`,
             wrap: true
         });
 			// Add a separator for visual distinction between tree details (except for the last tree)
