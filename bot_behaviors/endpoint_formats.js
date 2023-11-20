@@ -28,6 +28,13 @@ function formatTreeDetails(treeDetails, environment) {
 	}).join('\n\n');
   }
 
+  // Add the plantMessage object definition at the top of endpoint_formats.js
+const plantMessage = {
+	title: "Tree-Nation Planting Confirmation",
+	successNote: "Thank you for taking a step towards a greener future!",
+	errorNote: "Uh oh, something went wrong while planting your tree. We apologize for any inconvenience.",
+  };
+
 //2023oct31 add defaults for configs
 const global_configs = require('../utilities/global_configs.js');
 
