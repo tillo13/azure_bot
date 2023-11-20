@@ -1,5 +1,5 @@
 //2023Nov16 2:14pm adding tree-nation data to actually plant
-const { plantTree } = require('../utilities/tree_nation/tree_nation_utils');
+const { plantTree, createDetailResponse } = require('../utilities/tree_nation/tree_nation_utils');
 
 //2023Nov1 2:14pm adding tree-nation data for testing public api
 const { getTreeNationProjectsSummary } = require('../utilities/tree_nation/public_api_endpoints');

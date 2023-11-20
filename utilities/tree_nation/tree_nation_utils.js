@@ -152,5 +152,6 @@ async function getAvailableSpecies(projectId) {
   }
   
 module.exports = {
-    plantTree
+    plantTree, 
+    createDetailResponse
 };
