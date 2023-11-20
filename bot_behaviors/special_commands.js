@@ -65,9 +65,17 @@ async function plantTreeCommandHandler(context) {
 
     let messageToUser;
     if (plantResponse.status === 'ok') {
-        const treesArray = plantResponse.data.trees; // Access the trees array
-        const isError = false; // As we know the status is 'ok'
+        const treesArray = plantResponse.data.trees;
+        const projectId = plantResponse.projectId; // Get the projectId here from the plantResponse
         
+        let projectName = '';
+        if(global.TREE_NATION_ENDPOINT === 'TEST') {
+            // Assuming that plantTree returned projectId inside the data
+            projectName = projectId; // Here you could use the projectNames object if needed
+        }
+        
+        messageToUser = createDetailResponse(treesArray, projectName); // Now passing the projectName to the function
+                
         switch (context.activity.channelId) {
             case 'msteams':
                 // Plant tree response formatting for Microsoft Teams
