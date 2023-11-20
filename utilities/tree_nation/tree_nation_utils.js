@@ -45,12 +45,14 @@ const config = {
     const environment = config[environmentFlag];
     const apiUrl = `${environment.site}/api/plant`;
     const headers = {
-      'Authorization': `Bearer ${environment.token}`,
-      'Content-Type': 'application/json'
+        'Authorization': `Bearer ${environment.token}`,
+        'Content-Type': 'application/json'
     };
   
     // Randomly select a valid species for planting
-    const projectIds = [3, 41]; // The projects we're interested in
+    // Determine the project IDs based on the environment
+    const projectIds = environmentFlag === 'TEST' ? [3, 41] : []; // Define your production project IDs here if any
+
     const species = await getRandomAvailableSpecies(projectIds);
     
     const payload = {
