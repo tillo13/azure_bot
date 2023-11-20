@@ -20,10 +20,10 @@ headers = {
 
 # Define global constants
 CLASS_NAME = weaviate_class_name
-SEARCH_TERM = '.'
+SEARCH_TERM = 'hi'
 SIMILARITY_THRESHOLD = 0.7
 OBJECT_VALUE = weaviate_object_value
-LIMIT = 1
+LIMIT = 12
 
 # move away forces are optional, but can be used to improve the search results. Setting  to zero nullifies it.
 UNWANTED_TERM = "zzzzz"
@@ -43,15 +43,24 @@ def search_vector_similarity():
                     moveAwayFrom: {{concepts: ["{UNWANTED_TERM}"], force: {MOVE_AWAY_FORCE}}}
                 }}, limit: {LIMIT}) {{
                     {OBJECT_VALUE}
-                    _additional {{certainty}}
+                    _additional {{
+                        id  # Fetch the unique identifier here.
+                        certainty
+                    }}
                 }}
             }}
         }}
         '''
     }
     response = requests.post(url, headers=headers, json=payload)
-    print("Similarity Search:")
-    print(json.dumps(response.json(), indent=4))
+
+    # Check if there's an error in the response.
+    if 'errors' in response.json():
+        print("Errors:")
+        print(json.dumps(response.json()["errors"], indent=4))
+    else:
+        print("Similarity Search:")
+        print(json.dumps(response.json(), indent=4))
     print()
 
 if __name__ == "__main__":
