@@ -124,8 +124,11 @@ async function plantTreeCommandHandler(context) {
 }
 
 function coin_flip() {
-	// 50/50 chance of returning true or false
-	return Math.random() >= 0.5;
+    // 50/50 chance of returning true or false
+    const result = Math.random() >= 0.5;
+    // Print the result to the console
+    console.log(`\n****SPECIAL_COMMANDS.JS: Coin flip result: ${result ? 'Heads, plant a tree!' : 'Tails, better luck next time!'}`);
+    return result;
 }
 
 
