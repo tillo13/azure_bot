@@ -105,16 +105,16 @@ async function plantTreeCommandHandler(context) {
 	} else {
 		// If the coin flip results in false, we select one of the playful messages at random
 		const playfulMessages = [
-			"The seeds of chance didn't sprout a tree this time! But don't leaf it to fate—try again!",
-			"Sorry, no roots took hold on this attempt. Shake off the soil and give it another go!",
-			"Mother Nature said, 'Not today, human!' But she believes in second chances. Try again!",
-			"Oof, you must've hit a rock. Clear the land and try your hand at planting once more!",
-			"The squirrels have conspired against us! Outwit them by trying to plant again!",
-			"You gave it a good trowel, but no tree this time. Dig deep, and try once again!",
-			"No new leaf to turn over just yet. Keep seeding those hopes and try again!",
-			"The soil is just not ready to embrace a new sapling. Nurture your patience and try again soon!",
-			"Maybe the timing wasn't just right. Rest your green thumb and try again shortly!",
-			"The forest whispers of your efforts and wills you to try once more. Dare to plant again?"
+			"The seeds of chance didn't sprout a tree to $plant this time! But don't leaf it to fate—try again!",
+			"Sorry, no roots took hold on this $plant attempt. Shake off the soil and give it another go!",
+			"Mother Nature said, 'Not today, human!' But she believes in second chances. Try $plant again!",
+			"Oof, you must've hit a rock. Clear the land and try your hand at $planting once more!",
+			"The squirrels have conspired against us! Outwit them by trying to $plant again!",
+			"You gave it a good trowel, but no tree via $plant this time. Dig deep, and try once again!",
+			"No new leaf to turn over just yet. Keep seeding those $plant hopes and try again!",
+			"The soil is just not ready to embrace a new sapling. Nurture your patience and try $plant again soon!",
+			"Maybe the timing wasn't just right. Rest your green thumb and try $plant again shortly!",
+			"The forest whispers of your efforts and wills you to try once more. Dare to $plant again?"
 		];
 		const messageToUser = playfulMessages[Math.floor(Math.random() * playfulMessages.length)];
 
