@@ -45,7 +45,7 @@ const blobName = process.env['2023oct7_AZURE_STORAGE_BLOB_NAME'];
 const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
 const pipeline = newPipeline(sharedKeyCredential);
 
-// Create blob service client using connection string
+// Create blob service client using connection string test comment
 const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, pipeline);
 
 // A function to append new user login info to Azure Blob storage
